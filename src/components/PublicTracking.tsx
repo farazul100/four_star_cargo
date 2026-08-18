@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Search, Package, Plane, CheckCircle2, Truck, ArrowLeft, Sun, Moon, Globe, Clock, ShieldCheck, MapPin } from 'lucide-react';
-import { Carton, Language } from '../types';
+import { Carton, FlyingProposal, Language } from '../types';
 import { useTranslation } from '../hooks/useTranslation';
 import { useTheme } from '../context/ThemeContext';
 import { Logo } from './Logo';
@@ -8,12 +8,14 @@ import { LiveCargoTrackingMap } from './LiveCargoTrackingMap';
 
 interface PublicTrackingProps {
   cartons: Carton[];
+  proposals?: FlyingProposal[];
   language: Language;
   onBackToPortal: () => void;
 }
 
 export const PublicTracking: React.FC<PublicTrackingProps> = ({
   cartons,
+  proposals,
   language,
   onBackToPortal,
 }) => {
@@ -153,7 +155,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
 
         {/* Live Satellite Air Cargo Route Tracking Map */}
         <div className="my-6">
-          <LiveCargoTrackingMap cartons={cartons} language={language} theme="dark" />
+          <LiveCargoTrackingMap cartons={cartons} proposals={proposals} language={language} theme="dark" />
         </div>
 
         {/* Tracking Results View */}

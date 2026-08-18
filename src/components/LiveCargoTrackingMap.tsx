@@ -103,24 +103,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
 
   const initialRoutes = React.useMemo(() => {
     if (activeProposals.length === 0) {
-      return [
-        {
-          id: 'guangzhou',
-          name: isBn ? 'চীন (গুয়াংজু হাব) 🇨🇳 ➔ বাংলাদেশ (ঢাকা)' : 'China (CAN 🇨🇳) ➔ Bangladesh (DAC 🇧🇩)',
-          originName: isBn ? 'গুয়াংজু হাব (চীন)' : 'Guangzhou Hub (China)',
-          originCode: 'CAN',
-          flightNo: 'BS-01',
-          airline: 'US-Bangla Air Cargo',
-          awb: '157-889120',
-          originCoords: { x: 680, y: 140 },
-          destCoords: { x: 380, y: 210 },
-          curveControl: { x: 530, y: 100 },
-          midAirRatio: 0.58,
-          weight: '923 kg',
-          cartonsCount: 14,
-          color: '#3B82F6',
-        },
-      ];
+      return [];
     }
 
     return activeProposals.map((p, idx) => {
@@ -419,6 +402,19 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
               stroke="#334155"
               strokeWidth="1"
             />
+
+            {/* Zero active flights empty state badge */}
+            {routes.length === 0 && (
+              <g className="animate-in fade-in duration-300">
+                <rect x="200" y="140" width="400" height="60" rx="12" fill="#0F172A" fillOpacity="0.85" stroke="#334155" strokeWidth="1" />
+                <text x="400" y="165" textAnchor="middle" fill="#94A3B8" fontSize="12" fontWeight="500">
+                  {isBn ? 'বর্তমানে কোনো ফ্লাইট প্রস্তাবনা উড্ডয়ন অবস্থায় নেই' : 'No Active Air Cargo Flights in Transit'}
+                </text>
+                <text x="400" y="185" textAnchor="middle" fill="#64748B" fontSize="10">
+                  {isBn ? 'ইনচার্জ প্রস্তাবনা তৈরি ও ডেসপ্যাচ করলে এখানে রিয়েল-টাইম উড্ডয়ন দেখা যাবে' : 'Live planes appear when Warehouse Incharge releases flight proposals'}
+                </text>
+              </g>
+            )}
 
             {/* Flight Path Curves & Airplane Markers */}
             {routes.map((r) => {
