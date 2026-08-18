@@ -1279,21 +1279,18 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
             </div>
 
             {/* NEW BOX: বাংলাদেশে থেকে সংশোধনি ওজন (BD Calibrated Weight) */}
-            <div className={`col-span-2 border rounded-none p-3 text-center bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300`}>
+            <div className={`col-span-2 border rounded-none p-3.5 text-center bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300`}>
               <p className="text-[11px] font-medium text-emerald-700 dark:text-emerald-400 flex items-center justify-center space-x-1.5">
                 <Scale className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span>{isBn ? 'বাংলাদেশে থেকে সংশোধনি ওজন (BD Calibrated Weight)' : 'BD Calibrated Weight'}</span>
+                <span>{isBn ? 'বাংলাদেশ ওয়্যারহাউজ থেকে নির্ধারিত চূড়ান্ত সংশোধনি ওজন' : 'BD Warehouse Official Weight'}</span>
               </p>
-              <div className="flex items-center justify-center space-x-3 mt-1">
-                <span className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
+              <div className="flex items-center justify-center space-x-3 mt-1.5">
+                <span className="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
                   {totalBdCalibratedWeight.toFixed(1)} kg
                 </span>
-                <span className="text-xs text-slate-500 dark:text-slate-400 font-mono font-medium">
-                  (চীন বুকিং মূল ওজন: {totalOriginBookedWeight.toFixed(1)} kg)
-                </span>
               </div>
-              <p className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80 font-normal mt-0.5">
-                {isBn ? 'বাংলাদেশ ওয়্যারহাউজ থেকে পরিমাপকৃত চূড়ান্ত সংশোধিত ওজন' : 'Calibrated official weight from BD Warehouse'}
+              <p className="text-[10px] text-emerald-600/90 dark:text-emerald-400/90 font-normal mt-1">
+                {isBn ? 'বাংলাদেশ ওয়্যারহাউজে মেপে পাওয়া নির্ধারিত চূড়ান্ত ওজন (এই ওজনের উপরই টাকার হিসাব সম্পন্ন হবে)' : 'Official BD calibrated weight used strictly for customer billing'}
               </p>
             </div>
           </div>
