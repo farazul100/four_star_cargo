@@ -74,7 +74,16 @@ export interface Carton {
   awb_number?: string;
   booked_by: string;
   created_at: string;
-  updated_at: string;
+  delivery_method?: 'pathao' | 'manual' | 'hand_delivery';
+  delivery_status?: 'pending' | 'sent_to_pathao' | 'delivered_manual';
+  pathao_consignment_id?: string;
+  pathao_tracking_code?: string;
+  payment_status?: 'paid' | 'unpaid';
+  cod_amount?: number;
+  recipient_name?: string;
+  recipient_phone?: string;
+  recipient_address?: string;
+  updated_at?: string;
   // UI joins
   current_warehouse_name?: string;
   destination_warehouse_name?: string;

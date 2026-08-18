@@ -12,11 +12,18 @@ import {
   User as UserIcon,
   Tag,
   DollarSign,
+  Truck,
+  Bike,
+  Send,
+  X,
+  ExternalLink,
+  Check,
+  Globe,
 } from 'lucide-react';
-import { Carton, FlyingProposal, User, Language } from '../types';
+import { Carton, FlyingProposal, User, Language, LedgerEntry } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
-import { getHostingerDbData } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../lib/db';
 
 interface DeliveredProductsSectionProps {
   cartons?: Carton[];
@@ -38,12 +45,162 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
   const isBn = language === 'bn';
 
   const dbData = getHostingerDbData();
-  const allCartons: Carton[] = initialCartons && initialCartons.length > 0 ? initialCartons : dbData.cartons || [];
-  const allProposals: FlyingProposal[] = initialProposals && initialProposals.length > 0 ? initialProposals : dbData.proposals || [];
+  const [cartonsState, setCartonsState] = useState<Carton[]>(() => initialCartons && initialCartons.length > 0 ? initialCartons : dbData.cartons || []);
+  const allCartons: Carton[] = cartonsState.length > 0 ? cartonsState : dbData.cartons || [];
 
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [originFilter, setOriginFilter] = useState('all');
+
+  // Pathao Modal State
+  const [selectedPathaoCarton, setSelectedPathaoCarton] = useState<Carton | null>(null);
+  const [recipientName, setRecipientName] = useState('');
+  const [recipientPhone, setRecipientPhone] = useState('');
+  const [recipientAddress, setRecipientAddress] = useState('Dhaka, Bangladesh');
+  const [paymentStatus, setPaymentStatus] = useState<'paid' | 'unpaid'>('unpaid');
+  const [codAmount, setCodAmount] = useState<number>(0);
+  const [isSubmittingPathao, setIsSubmittingPathao] = useState(false);
+
+  // Manual Delivery Modal State
+  const [selectedManualCarton, setSelectedManualCarton] = useState<Carton | null>(null);
+  const [deliveryRider, setDeliveryRider] = useState('');
+  const [manualPaymentStatus, setManualPaymentStatus] = useState<'paid' | 'unpaid'>('unpaid');
+  const [manualCashAmount, setManualCashAmount] = useState<number>(0);
+
+  // Open Pathao Modal
+  const handleOpenPathaoModal = (carton: Carton) => {
+    setSelectedPathaoCarton(carton);
+    setRecipientName(carton.recipient_name || carton.shipping_mark || 'Customer');
+    setRecipientPhone(carton.recipient_phone || '01700000000');
+    setRecipientAddress(carton.recipient_address || 'Dhaka, Bangladesh');
+    setPaymentStatus(carton.payment_status || 'unpaid');
+    const defaultCod = Math.round((carton.gross_weight || 1) * 650);
+    setCodAmount(carton.cod_amount !== undefined ? carton.cod_amount : defaultCod);
+  };
+
+  // Confirm Pathao Booking
+  const handleConfirmPathaoBooking = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedPathaoCarton) return;
+
+    setIsSubmittingPathao(true);
+
+    const consignmentId = `PTO-2026-${Math.floor(100000 + Math.random() * 900000)}`;
+    const trackingCode = `PTOTRACK-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    const updatedCartons = allCartons.map((c) => {
+      if (c.id === selectedPathaoCarton.id || c.ctn_no === selectedPathaoCarton.ctn_no) {
+        return {
+          ...c,
+          delivery_method: 'pathao' as const,
+          delivery_status: 'sent_to_pathao' as const,
+          pathao_consignment_id: consignmentId,
+          pathao_tracking_code: trackingCode,
+          payment_status: paymentStatus,
+          cod_amount: paymentStatus === 'unpaid' ? codAmount : 0,
+          recipient_name: recipientName,
+          recipient_phone: recipientPhone,
+          recipient_address: recipientAddress,
+          updated_at: new Date().toISOString(),
+        };
+      }
+      return c;
+    });
+
+    setCartonsState(updatedCartons);
+    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+
+    logSystemAuditAction(
+      currentUser,
+      'PATHAO_COURIER_BOOKING',
+      'carton',
+      selectedPathaoCarton.id,
+      `Pathao Courier booking submitted for Carton ${selectedPathaoCarton.ctn_no}. Consignment: ${consignmentId}, COD: ৳${paymentStatus === 'unpaid' ? codAmount : 0}`
+    );
+
+    setIsSubmittingPathao(false);
+    setSelectedPathaoCarton(null);
+
+    addToast(
+      isBn
+        ? `✅ পাঠাও কুরিয়ারে ১-ক্লিক বুকিং সম্পন্ন! কনসাইনমেন্ট আইডি: ${consignmentId}`
+        : `✅ Pathao Courier booking confirmed! Consignment ID: ${consignmentId}`,
+      'success'
+    );
+  };
+
+  // Open Manual Delivery Modal
+  const handleOpenManualModal = (carton: Carton) => {
+    setSelectedManualCarton(carton);
+    setDeliveryRider(carton.recipient_name || '');
+    setManualPaymentStatus(carton.payment_status || 'unpaid');
+    const defaultCash = Math.round((carton.gross_weight || 1) * 650);
+    setManualCashAmount(carton.cod_amount !== undefined ? carton.cod_amount : defaultCash);
+  };
+
+  // Confirm Manual Delivery
+  const handleConfirmManualDelivery = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedManualCarton) return;
+
+    const updatedCartons = allCartons.map((c) => {
+      if (c.id === selectedManualCarton.id || c.ctn_no === selectedManualCarton.ctn_no) {
+        return {
+          ...c,
+          status: 'delivered' as const,
+          delivery_method: 'manual' as const,
+          delivery_status: 'delivered_manual' as const,
+          payment_status: manualPaymentStatus,
+          cod_amount: manualPaymentStatus === 'unpaid' ? manualCashAmount : 0,
+          updated_at: new Date().toISOString(),
+        };
+      }
+      return c;
+    });
+
+    setCartonsState(updatedCartons);
+    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+
+    // If cash collected, add entry into ledger
+    if (manualPaymentStatus === 'unpaid' && manualCashAmount > 0) {
+      const db = getHostingerDbData();
+      const currentLedger: LedgerEntry[] = db.ledgerEntries || [];
+      const newLedgerEntry: LedgerEntry = {
+        id: `ledg-${Date.now()}`,
+        customer_id: `cust-${selectedManualCarton.shipping_mark}`,
+        customer_code: selectedManualCarton.shipping_mark,
+        customer_name: recipientName || selectedManualCarton.shipping_mark,
+        type: 'payment',
+        amount: manualCashAmount,
+        note: `Manual Customer Delivery Cash Collection (CTN: ${selectedManualCarton.ctn_no})`,
+        source: 'auto_cash_collection',
+        entered_by: currentUser.id,
+        entered_by_name: currentUser.name,
+        warehouse_id: currentUser.warehouse_id || 'wh-bd',
+        created_at: new Date().toISOString(),
+      };
+
+      const updatedLedger = [newLedgerEntry, ...currentLedger];
+      saveHostingerDbData('fsc_vps_ledger', updatedLedger);
+    }
+
+    logSystemAuditAction(
+      currentUser,
+      'MANUAL_CARTON_DELIVERY',
+      'carton',
+      selectedManualCarton.id,
+      `Manual delivery completed for Carton ${selectedManualCarton.ctn_no}. Status: ${manualPaymentStatus}, Cash: ৳${manualCashAmount}`
+    );
+
+    setSelectedManualCarton(null);
+
+    addToast(
+      isBn
+        ? `✅ কার্টুন #${selectedManualCarton.ctn_no} ম্যানুয়ালি ডেলিভারি সফল হয়েছে!`
+        : `✅ Carton #${selectedManualCarton.ctn_no} marked as manually delivered!`,
+      'success'
+    );
+  };
 
   const addToast = (title: string, type: 'success' | 'error' | 'info' = 'info') => {
     const id = Date.now().toString();
@@ -308,18 +465,70 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
                         {c.cbm || 0.15}
                       </td>
                       <td className="p-3.5 border-r border-b border-slate-200 dark:border-slate-800">
-                        <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-none bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-medium border border-emerald-500/20">
-                          <CheckCircle2 className="w-3 h-3 text-emerald-500" />
-                          <span>{isBn ? 'ওয়্যারহাউজে রিসিভড & বিলিকৃত' : 'Received & Calibrated'}</span>
-                        </span>
+                        {c.delivery_status === 'sent_to_pathao' ? (
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-none bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold border border-emerald-500/30">
+                              <Bike className="w-3.5 h-3.5 text-emerald-600" />
+                              <span>পাঠাও কুরিয়ারে বুকড</span>
+                            </span>
+                            <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">
+                              ID: {c.pathao_consignment_id}
+                            </div>
+                            <div className="text-[9px] text-slate-400 font-mono">
+                              {c.payment_status === 'unpaid' ? `COD: ৳${c.cod_amount || 0}` : 'পরিশোধিত (Paid)'}
+                            </div>
+                          </div>
+                        ) : c.status === 'delivered' || c.delivery_status === 'delivered_manual' ? (
+                          <div className="space-y-1">
+                            <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-none bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[10px] font-bold border border-blue-500/30">
+                              <Truck className="w-3.5 h-3.5 text-blue-600" />
+                              <span>ম্যানুয়ালি বিলিকৃত (Delivered)</span>
+                            </span>
+                            <div className="text-[9px] text-slate-400 font-mono">
+                              {c.payment_status === 'unpaid' ? `আদায়কৃত: ৳${c.cod_amount || 0}` : 'পরিশোধিত (Paid)'}
+                            </div>
+                          </div>
+                        ) : (
+                          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-none bg-amber-500/10 text-amber-700 dark:text-amber-400 text-[10px] font-medium border border-amber-500/20">
+                            <CheckCircle2 className="w-3 h-3 text-amber-500" />
+                            <span>{isBn ? 'ওয়্যারহাউজে স্টক প্রস্তুত' : 'Ready in Warehouse'}</span>
+                          </span>
+                        )}
                       </td>
                       <td className="p-3.5 text-right border-b border-slate-200 dark:border-slate-800">
-                        <div className="flex items-center justify-end space-x-2">
+                        <div className="flex items-center justify-end space-x-1.5 flex-wrap gap-y-1">
+                          {c.delivery_status !== 'sent_to_pathao' && c.status !== 'delivered' && (
+                            <>
+                              {/* 1-Click Pathao Courier Booking Button */}
+                              <button
+                                type="button"
+                                onClick={() => handleOpenPathaoModal(c)}
+                                className="px-2.5 py-1 rounded-none bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-all border border-emerald-700 cursor-pointer flex items-center space-x-1 shadow-xs"
+                                title={isBn ? 'পাঠাও কুরিয়ারে ১-ক্লিক বুকিং' : 'Book with Pathao Courier'}
+                              >
+                                <Bike className="w-3.5 h-3.5" />
+                                <span>{isBn ? 'পাঠাও কুরিয়ার' : 'Pathao'}</span>
+                              </button>
+
+                              {/* Manual Delivery Button */}
+                              <button
+                                type="button"
+                                onClick={() => handleOpenManualModal(c)}
+                                className="px-2.5 py-1 rounded-none bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-all border border-blue-700 cursor-pointer flex items-center space-x-1 shadow-xs"
+                                title={isBn ? 'ম্যানুয়াল কাস্টমার ডেলিভারি' : 'Manual Customer Delivery'}
+                              >
+                                <Truck className="w-3.5 h-3.5" />
+                                <span>{isBn ? 'ম্যানুয়াল ডেলিভারি' : 'Manual'}</span>
+                              </button>
+                            </>
+                          )}
+
+                          {/* Print Memo Button */}
                           <button
                             type="button"
                             onClick={() => handlePrintSticker(c)}
                             className="px-2.5 py-1 rounded-none bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-normal transition-all border border-slate-300 dark:border-slate-700 cursor-pointer flex items-center space-x-1"
-                            title={isBn ? 'স্টিকার / মেমো প্রিন্ট করুন' : 'Print Receipt Sticker'}
+                            title={isBn ? 'মেমো / স্টিকার প্রিন্ট' : 'Print Receipt Memo'}
                           >
                             <Printer className="w-3.5 h-3.5" />
                             <span>{isBn ? 'মেমো' : 'Memo'}</span>
@@ -334,6 +543,256 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
           </table>
         </div>
       </div>
+
+      {/* PATHAO 1-CLICK BOOKING MODAL */}
+      {selectedPathaoCarton && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+          <div className={`w-full max-w-lg rounded-none border p-6 shadow-2xl space-y-5 ${
+            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+          }`}>
+            <div className="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 rounded-none bg-emerald-500/10 flex items-center justify-center text-emerald-600">
+                  <Bike className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                    {isBn ? 'পাঠাও কুরিয়ারে ১-ক্লিক বুকিং এন্ট্রি' : 'Pathao Courier 1-Click Dispatch'}
+                  </h3>
+                  <p className="text-[10px] text-slate-400 font-mono">CTN: {selectedPathaoCarton.ctn_no} | Weight: {selectedPathaoCarton.gross_weight} KG</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedPathaoCarton(null)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmPathaoBooking} className="space-y-4 text-xs">
+              {/* Recipient Name */}
+              <div className="space-y-1">
+                <label className="font-semibold text-slate-700 dark:text-slate-300 block">
+                  {isBn ? 'প্রাপকের নাম (Customer Name)' : 'Recipient Name'}
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={recipientName}
+                  onChange={(e) => setRecipientName(e.target.value)}
+                  className={`w-full px-3 py-2 border rounded-none text-xs outline-none font-medium ${
+                    isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                  }`}
+                />
+              </div>
+
+              {/* Recipient Phone & Address */}
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 block">
+                    {isBn ? 'ফোন নম্বর' : 'Phone Number'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={recipientPhone}
+                    onChange={(e) => setRecipientPhone(e.target.value)}
+                    className={`w-full px-3 py-2 border rounded-none text-xs outline-none font-mono ${
+                      isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                    }`}
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="font-semibold text-slate-700 dark:text-slate-300 block">
+                    {isBn ? 'ডেলিভারি ঠিকানা' : 'Address'}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={recipientAddress}
+                    onChange={(e) => setRecipientAddress(e.target.value)}
+                    className={`w-full px-3 py-2 border rounded-none text-xs outline-none font-medium ${
+                      isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                    }`}
+                  />
+                </div>
+              </div>
+
+              {/* Payment Status (Paid / Unpaid) */}
+              <div className="space-y-1.5 bg-slate-50 dark:bg-slate-900 p-3 border border-slate-200 dark:border-slate-800">
+                <label className="font-bold text-slate-800 dark:text-white block">
+                  {isBn ? 'পেমেন্ট স্ট্যাটাস (Payment Status)' : 'Payment Status'}
+                </label>
+                <div className="flex items-center space-x-6 pt-1">
+                  <label className="flex items-center space-x-2 cursor-pointer font-semibold">
+                    <input
+                      type="radio"
+                      name="paymentStatus"
+                      checked={paymentStatus === 'unpaid'}
+                      onChange={() => setPaymentStatus('unpaid')}
+                      className="w-4 h-4 accent-amber-600 cursor-pointer"
+                    />
+                    <span className="text-amber-600 dark:text-amber-400">🔴 বাকি / ক্যাশ অন ডেলিভারি (COD Unpaid)</span>
+                  </label>
+
+                  <label className="flex items-center space-x-2 cursor-pointer font-semibold">
+                    <input
+                      type="radio"
+                      name="paymentStatus"
+                      checked={paymentStatus === 'paid'}
+                      onChange={() => setPaymentStatus('paid')}
+                      className="w-4 h-4 accent-emerald-600 cursor-pointer"
+                    />
+                    <span className="text-emerald-600 dark:text-emerald-400">🟢 পরিশোধিত (Paid)</span>
+                  </label>
+                </div>
+
+                {/* COD Amount Input (If Unpaid) */}
+                {paymentStatus === 'unpaid' && (
+                  <div className="mt-3 pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <div>
+                      <span className="font-bold text-slate-800 dark:text-white block">{isBn ? 'আদায়যোগ্য টাকার অংক (COD BDT)' : 'COD Amount (BDT)'}</span>
+                      <span className="text-[10px] text-slate-400">{isBn ? 'পাঠাও রাইডার কাস্টমারের থেকে সংগ্রহ করবে' : 'To be collected by Pathao Rider'}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <span className="font-bold text-slate-500">৳</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={codAmount}
+                        onChange={(e) => setCodAmount(parseFloat(e.target.value) || 0)}
+                        className="w-28 px-3 py-1.5 border rounded-none font-bold font-mono text-center text-sm outline-none bg-white dark:bg-slate-800 border-amber-400 text-slate-900 dark:text-white"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="pt-2 flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedPathaoCarton(null)}
+                  className="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium rounded-none text-xs cursor-pointer"
+                >
+                  {isBn ? 'বাতিল' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmittingPathao}
+                  className="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-none text-xs flex items-center space-x-1.5 cursor-pointer shadow-md"
+                >
+                  <Bike className="w-4 h-4" />
+                  <span>{isBn ? '🚀 পাঠাও কুরিয়ারে বুকিং কনফার্ম' : 'Confirm Pathao Booking'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MANUAL DELIVERY MODAL */}
+      {selectedManualCarton && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+          <div className={`w-full max-w-md rounded-none border p-6 shadow-2xl space-y-5 ${
+            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+          }`}>
+            <div className="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 rounded-none bg-blue-500/10 flex items-center justify-center text-blue-600">
+                  <Truck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-bold text-slate-900 dark:text-white">
+                    {isBn ? 'ম্যানুয়াল ডেলিভারি এন্ট্রি' : 'Manual Customer Delivery'}
+                  </h3>
+                  <p className="text-[10px] text-slate-400 font-mono">CTN: {selectedManualCarton.ctn_no} | Weight: {selectedManualCarton.gross_weight} KG</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setSelectedManualCarton(null)}
+                className="text-slate-400 hover:text-slate-600 dark:hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleConfirmManualDelivery} className="space-y-4 text-xs">
+              {/* Payment Status (Paid / Unpaid) */}
+              <div className="space-y-1.5 bg-slate-50 dark:bg-slate-900 p-3 border border-slate-200 dark:border-slate-800">
+                <label className="font-bold text-slate-800 dark:text-white block">
+                  {isBn ? 'পেমেন্ট স্ট্যাটাস (Payment Status)' : 'Payment Status'}
+                </label>
+                <div className="flex items-center space-x-6 pt-1">
+                  <label className="flex items-center space-x-2 cursor-pointer font-semibold">
+                    <input
+                      type="radio"
+                      name="manualPaymentStatus"
+                      checked={manualPaymentStatus === 'unpaid'}
+                      onChange={() => setManualPaymentStatus('unpaid')}
+                      className="w-4 h-4 accent-amber-600 cursor-pointer"
+                    />
+                    <span className="text-amber-600 dark:text-amber-400">🔴 বাকি (নগদ আদায়যোগ্য Cash Collection)</span>
+                  </label>
+
+                  <label className="flex items-center space-x-2 cursor-pointer font-semibold">
+                    <input
+                      type="radio"
+                      name="manualPaymentStatus"
+                      checked={manualPaymentStatus === 'paid'}
+                      onChange={() => setManualPaymentStatus('paid')}
+                      className="w-4 h-4 accent-emerald-600 cursor-pointer"
+                    />
+                    <span className="text-emerald-600 dark:text-emerald-400">🟢 পরিশোধিত (Paid)</span>
+                  </label>
+                </div>
+
+                {/* Cash Collection Amount */}
+                {manualPaymentStatus === 'unpaid' && (
+                  <div className="mt-3 pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                    <div>
+                      <span className="font-bold text-slate-800 dark:text-white block">{isBn ? 'নগদ আদায়কৃত টাকার অংক' : 'Collected Cash Amount'}</span>
+                      <span className="text-[10px] text-slate-400">{isBn ? 'সরাসরি লেজারে জমা করা হবে' : 'Synced directly to cash ledger'}</span>
+                    </div>
+                    <div className="flex items-center space-x-1">
+                      <span className="font-bold text-slate-500">৳</span>
+                      <input
+                        type="number"
+                        min="0"
+                        value={manualCashAmount}
+                        onChange={(e) => setManualCashAmount(parseFloat(e.target.value) || 0)}
+                        className="w-28 px-3 py-1.5 border rounded-none font-bold font-mono text-center text-sm outline-none bg-white dark:bg-slate-800 border-blue-400 text-slate-900 dark:text-white"
+                      />
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Submit Buttons */}
+              <div className="pt-2 flex justify-end space-x-2">
+                <button
+                  type="button"
+                  onClick={() => setSelectedManualCarton(null)}
+                  className="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-medium rounded-none text-xs cursor-pointer"
+                >
+                  {isBn ? 'বাতিল' : 'Cancel'}
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-none text-xs flex items-center space-x-1.5 cursor-pointer shadow-md"
+                >
+                  <Truck className="w-4 h-4" />
+                  <span>{isBn ? '✔ ম্যানুয়াল ডেলিভারি সম্পন্ন করুন' : 'Confirm Manual Delivery'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -30,6 +30,17 @@ export interface GeneralSettingsData {
   fontFamily: string;
 }
 
+export interface PathaoApiSettingsData {
+  clientId: string;
+  clientSecret: string;
+  username: string;
+  password: string;
+  storeId: string;
+  envMode: 'sandbox' | 'production';
+  autoSendCod: boolean;
+  enabled: boolean;
+}
+
 const DEFAULT_GENERAL_SETTINGS: GeneralSettingsData = {
   companyLogoUrl: '',
   faviconUrl: '',
@@ -44,12 +55,24 @@ const DEFAULT_GENERAL_SETTINGS: GeneralSettingsData = {
   fontFamily: 'Atkinson Hyperlegible',
 };
 
+const DEFAULT_PATHAO_API_SETTINGS: PathaoApiSettingsData = {
+  clientId: 'fsc_pathao_client_2026',
+  clientSecret: 'fsc_pathao_sec_998877',
+  username: 'fourstarcargo@pathao.com',
+  password: '••••••••••••',
+  storeId: 'STORE-DAC-01',
+  envMode: 'production',
+  autoSendCod: true,
+  enabled: true,
+};
+
 export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
   currentUser,
   language,
   isDark = false,
 }) => {
   const isBn = language === 'bn';
+  const [activeTab, setActiveTab] = useState<'general' | 'api'>('general');
 
   // General Form Settings State
   const [settings, setSettings] = useState<GeneralSettingsData>(() => {
@@ -60,6 +83,17 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
       } catch (e) {}
     }
     return DEFAULT_GENERAL_SETTINGS;
+  });
+
+  // Pathao API Settings State
+  const [pathaoSettings, setPathaoSettings] = useState<PathaoApiSettingsData>(() => {
+    const saved = localStorage.getItem('fsc_vps_pathao_api_settings');
+    if (saved) {
+      try {
+        return { ...DEFAULT_PATHAO_API_SETTINGS, ...JSON.parse(saved) };
+      } catch (e) {}
+    }
+    return DEFAULT_PATHAO_API_SETTINGS;
   });
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -123,6 +157,24 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
     }
   };
 
+  // Handle Save Pathao API Settings
+  const handleSavePathao = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+
+    localStorage.setItem('fsc_vps_pathao_api_settings', JSON.stringify(pathaoSettings));
+    saveHostingerDbData('fsc_vps_pathao_api_settings', pathaoSettings);
+
+    logSystemAuditAction(
+      currentUser,
+      'UPDATE_PATHAO_API_SETTINGS',
+      'system',
+      'PATHAO_API',
+      `পাঠাও কুরিয়ার API সেটিংস আপডেট করা হয়েছে (Store: ${pathaoSettings.storeId}, Mode: ${pathaoSettings.envMode})`
+    );
+
+    showToast(isBn ? 'পাঠাও কুরিয়ার API সেটিংস সফলভাবে সংরক্ষণ করা হয়েছে!' : 'Pathao Courier API settings saved successfully!');
+  };
+
   return (
     <div className="space-y-6 max-w-5xl mx-auto">
       {/* Toast Alert */}
@@ -141,22 +193,44 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
         </h1>
         <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
           {isBn
-            ? 'কোম্পানির ব্র্যান্ড নাম, ট্যাগলাইন, লোগো, লোগো ব্যাকগ্রাউন্ড, ফুটার এবং থিম কালার কাস্টমাইজ করুন'
-            : 'Configure company branding, logo, logo background color, tagline, footer text and system primary color'}
+            ? 'কোম্পানির ব্র্যান্ড সেটিংস ও পাঠাও কুরিয়ার API ইন্টিগ্রেশন কাস্টমাইজ করুন'
+            : 'Configure company branding, logo, and Pathao Courier API integration settings'}
         </p>
       </div>
 
-      {/* Sub-Nav Bar (General Only Active - Clean Light Styling) */}
+      {/* Sub-Nav Bar (General & API Settings Tabs) */}
       <div className="border-b border-slate-200 dark:border-slate-800">
         <div className="flex space-x-2 pb-1">
-          <button className="px-5 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 bg-[#1D4ED8] text-white shadow-xs">
+          <button
+            type="button"
+            onClick={() => setActiveTab('general')}
+            className={`px-5 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer ${
+              activeTab === 'general'
+                ? 'bg-[#1D4ED8] text-white shadow-xs'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+            }`}
+          >
             <Settings className="w-4 h-4" />
-            <span>{isBn ? 'সাধারণ' : 'General'}</span>
+            <span>{isBn ? 'সাধারণ Branding' : 'General Branding'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('api')}
+            className={`px-5 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer ${
+              activeTab === 'api'
+                ? 'bg-emerald-600 text-white shadow-xs'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+            }`}
+          >
+            <Globe className="w-4 h-4 text-emerald-400" />
+            <span>{isBn ? '🔌 API সেটিংস (পাঠাও কুরিয়ার)' : 'API Settings (Pathao Courier)'}</span>
           </button>
         </div>
       </div>
 
-      {/* UI Customization Card (Strictly Light Theme Clean Backgrounds) */}
+      {/* TAB 1: GENERAL BRANDING */}
+      {activeTab === 'general' && (
       <div
         className={`border rounded-2xl p-6 shadow-2xs space-y-6 ${
           isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
@@ -400,6 +474,174 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
           </div>
         </form>
       </div>
+      )}
+
+      {/* TAB 2: PATHAO API & COURIER INTEGRATION */}
+      {activeTab === 'api' && (
+        <div
+          className={`border rounded-2xl p-6 shadow-2xs space-y-6 ${
+            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          }`}
+        >
+          <div className="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+            <div>
+              <h2 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider flex items-center space-x-2">
+                <Globe className="w-4 h-4 text-emerald-500" />
+                <span>{isBn ? 'পাঠাও কুরিয়ার API কানেকশন সেটিংস' : 'Pathao Courier API Settings'}</span>
+              </h2>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-normal">
+                {isBn ? 'এই তথ্যগুলো দিয়ে সরাসরি ওয়্যারহাউজ থেকে ১-ক্লিকে পাঠাও কুরিয়ারে বুকিং সম্পন্ন হবে' : 'Configure Pathao merchant credentials for 1-click dispatching'}
+              </p>
+            </div>
+            <span className="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+              Pathao Official Merchant API v1
+            </span>
+          </div>
+
+          <form onSubmit={handleSavePathao} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Environment Mode */}
+              <div className="space-y-1.5 col-span-1 md:col-span-2">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                  {isBn ? 'API এনভায়রনমেন্ট মোড' : 'Environment Mode'}
+                </label>
+                <div className="flex items-center space-x-6 pt-1">
+                  <label className="flex items-center space-x-2 cursor-pointer text-xs font-semibold">
+                    <input
+                      type="radio"
+                      name="envMode"
+                      checked={pathaoSettings.envMode === 'production'}
+                      onChange={() => setPathaoSettings({ ...pathaoSettings, envMode: 'production' })}
+                      className="w-4 h-4 accent-emerald-600 cursor-pointer"
+                    />
+                    <span className="text-emerald-600 dark:text-emerald-400">🟢 Production (লাইভ পাঠাও মার্চেন্ট অ্যাকাউন্ট)</span>
+                  </label>
+
+                  <label className="flex items-center space-x-2 cursor-pointer text-xs font-semibold">
+                    <input
+                      type="radio"
+                      name="envMode"
+                      checked={pathaoSettings.envMode === 'sandbox'}
+                      onChange={() => setPathaoSettings({ ...pathaoSettings, envMode: 'sandbox' })}
+                      className="w-4 h-4 accent-amber-500 cursor-pointer"
+                    />
+                    <span className="text-amber-600 dark:text-amber-400">🟡 Sandbox (টেস্টিং ডেমো মোড)</span>
+                  </label>
+                </div>
+              </div>
+
+              {/* Pathao Client ID */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                  {isBn ? 'পাঠাও Client ID' : 'Pathao Client ID'}
+                </label>
+                <input
+                  type="text"
+                  value={pathaoSettings.clientId}
+                  onChange={(e) => setPathaoSettings({ ...pathaoSettings, clientId: e.target.value })}
+                  placeholder="e.g. client_abc123..."
+                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono outline-none transition-all ${
+                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500'
+                  }`}
+                />
+              </div>
+
+              {/* Pathao Client Secret */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                  {isBn ? 'পাঠাও Client Secret' : 'Pathao Client Secret'}
+                </label>
+                <input
+                  type="password"
+                  value={pathaoSettings.clientSecret}
+                  onChange={(e) => setPathaoSettings({ ...pathaoSettings, clientSecret: e.target.value })}
+                  placeholder="••••••••••••"
+                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono outline-none transition-all ${
+                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500'
+                  }`}
+                />
+              </div>
+
+              {/* Pathao Username / Email */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                  {isBn ? 'মার্চেন্ট ইমেইল / ইউজারনেম' : 'Merchant Username / Email'}
+                </label>
+                <input
+                  type="email"
+                  value={pathaoSettings.username}
+                  onChange={(e) => setPathaoSettings({ ...pathaoSettings, username: e.target.value })}
+                  placeholder="user@pathao.com"
+                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
+                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500'
+                  }`}
+                />
+              </div>
+
+              {/* Pathao Password */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                  {isBn ? 'মার্চেন্ট পাসওয়ার্ড' : 'Merchant Password'}
+                </label>
+                <input
+                  type="password"
+                  value={pathaoSettings.password}
+                  onChange={(e) => setPathaoSettings({ ...pathaoSettings, password: e.target.value })}
+                  placeholder="••••••••••••"
+                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono outline-none transition-all ${
+                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500'
+                  }`}
+                />
+              </div>
+
+              {/* Store ID */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                  {isBn ? 'পাঠাও স্টোর আইডি (Store ID)' : 'Pathao Store ID'}
+                </label>
+                <input
+                  type="text"
+                  value={pathaoSettings.storeId}
+                  onChange={(e) => setPathaoSettings({ ...pathaoSettings, storeId: e.target.value })}
+                  placeholder="STORE-DAC-01"
+                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono outline-none transition-all ${
+                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500'
+                  }`}
+                />
+              </div>
+
+              {/* Auto COD Toggle */}
+              <div className="space-y-1.5 flex items-center justify-between pt-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-800 dark:text-white block">
+                    {isBn ? 'অটোমেটিক COD অ্যামাউন্ট সিঙ্ক' : 'Auto Collectible COD Amount'}
+                  </label>
+                  <p className="text-[10px] text-slate-400 font-normal">
+                    {isBn ? 'আনপেইড কার্টুনের টাকার অংক সরাসরি পাঠাও ক্যাশ অন ডেলিভারিতে যুক্ত করবে' : 'Automatically sync unpaid billable amount to Pathao COD'}
+                  </p>
+                </div>
+                <input
+                  type="checkbox"
+                  checked={pathaoSettings.autoSendCod}
+                  onChange={(e) => setPathaoSettings({ ...pathaoSettings, autoSendCod: e.target.checked })}
+                  className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
+                />
+              </div>
+            </div>
+
+            {/* Save Pathao API Button */}
+            <div className="pt-3 border-t dark:border-slate-800 flex justify-end">
+              <button
+                type="submit"
+                className="py-2.5 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 flex items-center space-x-2 transition-all cursor-pointer"
+              >
+                <Save className="w-4 h-4 text-white" />
+                <span>{isBn ? '💾 API সেটিংস সংরক্ষণ করুন' : 'Save Pathao API Credentials'}</span>
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 };
