@@ -21,6 +21,7 @@ import {
   RotateCcw,
   X,
   Box,
+  Scale,
 } from 'lucide-react';
 import { FlyingProposal, Carton, Language, Theme, AuditLog } from '../types';
 import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '../lib/db';
@@ -458,7 +459,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
       {viewMode === 'active' && (
         <>
           {/* Active Proposals Summary KPI Cards */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1C1C1E] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs'}`}>
               <div className="flex items-center justify-between">
                 <span className={`text-xs font-normal ${isDark ? 'text-gray-400' : 'text-slate-600'}`}>{isBn ? 'অপেক্ষমান রিকোয়েস্ট' : 'Pending Requests'}</span>
@@ -501,6 +502,17 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
               </div>
               <p className="text-xl font-semibold font-mono mt-2 text-purple-600 dark:text-purple-400">{totalProposedWeight.toFixed(1)} kg</p>
               <p className={`text-[11px] mt-0.5 font-normal ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'সকল রিকোয়েস্টের ওজন' : 'Sum of proposal gross weight'}</p>
+            </div>
+
+            <div className={`p-4 rounded-none border bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300`}>
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-medium text-emerald-700 dark:text-emerald-400">{isBn ? 'বাংলাদেশে থেকে সংশোধনি ওজন' : 'BD Calibrated Wt'}</span>
+                <div className="text-emerald-600 dark:text-emerald-400">
+                  <Scale className="w-4 h-4" />
+                </div>
+              </div>
+              <p className="text-xl font-semibold font-mono mt-2 text-emerald-600 dark:text-emerald-400">{totalProposedWeight.toFixed(1)} kg</p>
+              <p className="text-[11px] mt-0.5 font-normal text-emerald-600/80 dark:text-emerald-400/80">{isBn ? 'বাংলাদেশ ওয়্যারহাউজ থেকে নির্ধারিত' : 'Calibrated BD weight'}</p>
             </div>
           </div>
 
@@ -666,7 +678,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-3.5 text-xs">
+                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 my-3.5 text-xs">
                       <div className={`p-2.5 rounded-none border ${isDark ? 'bg-[#121214] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                         <span className={`font-normal text-[11px] block ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{isBn ? 'মোট কার্টুন সংখ্যা:' : 'Total Cartons:'}</span>
                         <span className={`font-mono font-medium text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>{prop.items_count} {isBn ? 'টি কার্টুন' : 'cartons'}</span>
@@ -685,6 +697,11 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                       <div className={`p-2.5 rounded-none border ${isDark ? 'bg-[#121214] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                         <span className={`font-normal text-[11px] block ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{isBn ? 'রিকোয়েস্ট তারিখ:' : 'Request Date:'}</span>
                         <span className={`font-mono font-medium text-xs ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{prop.date}</span>
+                      </div>
+
+                      <div className="p-2.5 rounded-none border bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300">
+                        <span className="font-medium text-[11px] block text-emerald-700 dark:text-emerald-400">{isBn ? 'বাংলাদেশে থেকে সংশোধনি ওজন:' : 'BD Calibrated Wt:'}</span>
+                        <span className="font-mono font-bold text-sm text-emerald-600 dark:text-emerald-400">{prop.total_weight.toFixed(1)} kg</span>
                       </div>
                     </div>
 

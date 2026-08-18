@@ -47,6 +47,7 @@ import {
   Settings,
   CreditCard,
   Target,
+  Scale,
 } from 'lucide-react';
 import { Warehouse, User as UserType, Carton, AuditLog, Language, LedgerEntry, FlyingProposal, Theme } from '../types';
 import { ToastContainer, ToastMessage } from './Toast';
@@ -987,6 +988,9 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   const proposedCartons = cartons.filter((c) => c.status === 'proposed');
   const totalGrossWeight = cartons.reduce((acc, c) => acc + (c.gross_weight || 0), 0);
   const totalCbm = cartons.reduce((acc, c) => acc + (c.cbm || 0), 0);
+  const totalBdCalibratedWeight = cartons
+    .filter((c) => c.status === 'received' || c.status === 'delivered' || c.current_warehouse_id === 'wh-bd')
+    .reduce((acc, c) => acc + (c.gross_weight || 0), 0);
 
   const displayDeliveredRev = totalDeliveredRevenue;
   const avgValuePerKg = totalGrossWeight > 0 ? Math.round(displayDeliveredRev / totalGrossWeight) : 0;
@@ -1263,6 +1267,20 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
             }`}>
               <p className={`text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'হোল্ড কার্টুন' : 'Held Cartons'}</p>
               <p className="text-sm font-light text-[#22C55E] font-hind mt-0.5">0</p>
+            </div>
+
+            {/* NEW BOX: বাংলাদেশে থেকে সংশোধনি ওজন (BD Calibrated Weight) */}
+            <div className={`col-span-2 border rounded-none p-3 text-center bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300`}>
+              <p className="text-[11px] font-medium text-emerald-700 dark:text-emerald-400 flex items-center justify-center space-x-1.5">
+                <Scale className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                <span>{isBn ? 'বাংলাদেশে থেকে সংশোধনি ওজন (BD Calibrated Weight)' : 'BD Calibrated Weight'}</span>
+              </p>
+              <p className="text-lg font-bold font-mono mt-1 text-emerald-600 dark:text-emerald-400">
+                {totalBdCalibratedWeight.toFixed(1)} kg
+              </p>
+              <p className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80 font-normal mt-0.5">
+                {isBn ? 'বাংলাদেশ ওয়্যারহাউজ থেকে নির্ধারিত করা ওজন' : 'Calibrated official weight from BD Warehouse'}
+              </p>
             </div>
           </div>
         </div>
