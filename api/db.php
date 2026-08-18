@@ -14,11 +14,42 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-$dbDir = __DIR__ . '/../database';
-$dataFile = $dbDir . '/db.json';
+// Multi-location storage resolution for 100% write reliability on Hostinger
+$filePaths = [
+    __DIR__ . '/db.json',
+    __DIR__ . '/../database/db.json',
+    sys_get_temp_dir() . '/fsc_vps_db.json'
+];
 
-if (!file_exists($dbDir)) {
-    @mkdir($dbDir, 0777, true);
+function readCurrentServerDb($filePaths) {
+    foreach ($filePaths as $path) {
+        if (file_exists($path)) {
+            $raw = @file_get_contents($path);
+            if (!empty($raw)) {
+                $decoded = json_decode($raw, true);
+                if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                    return $decoded;
+                }
+            }
+        }
+    }
+    return null;
+}
+
+function writeServerDb($filePaths, $data) {
+    $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    $written = false;
+    foreach ($filePaths as $path) {
+        $dir = dirname($path);
+        if (!file_exists($dir)) {
+            @mkdir($dir, 0777, true);
+        }
+        $res = @file_put_contents($path, $json);
+        if ($res !== false) {
+            $written = true;
+        }
+    }
+    return $written;
 }
 
 // Helper to merge array of objects by ID or key
@@ -52,11 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($input)) {
         $decoded = json_decode($input, true);
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-            $existing = [];
-            if (file_exists($dataFile)) {
-                $rawExisting = @file_get_contents($dataFile);
-                $existing = json_decode($rawExisting, true) ?: [];
-            }
+            $existing = readCurrentServerDb($filePaths) ?: [];
             
             $finalDb = $existing;
             foreach ($decoded as $key => $val) {
@@ -67,7 +94,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            @file_put_contents($dataFile, json_encode($finalDb, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            writeServerDb($filePaths, $finalDb);
             echo json_encode(['status' => 'success', 'message' => 'Hostinger DB synchronized', 'proposals_count' => count($finalDb['fsc_vps_proposals'] ?? [])]);
             exit();
         }
@@ -75,12 +102,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 // 2. GET Request: Read latest database state from Hostinger disk
-if (file_exists($dataFile)) {
-    $content = @file_get_contents($dataFile);
-    if (!empty($content)) {
-        echo $content;
-        exit();
-    }
+$currentDb = readCurrentServerDb($filePaths);
+if ($currentDb && is_array($currentDb)) {
+    echo json_encode($currentDb, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    exit();
 }
 
 // Default fallback empty database
