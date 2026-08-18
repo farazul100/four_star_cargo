@@ -31,8 +31,8 @@ import {
 import { Customer, LedgerEntry, User, Language, ExpenseItem } from '../types';
 import { ToastContainer, ToastMessage } from './Toast';
 import { BudgetExpenseManager } from './BudgetExpenseManager';
-import { ShipmentDataTracker } from './ShipmentDataTracker';
-import { saveHostingerDbData } from '../lib/db';
+import { CargoSearchTracker } from './CargoSearchTracker';
+import { getHostingerDbData, saveHostingerDbData } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 
 interface AccountantDashboardProps {
@@ -426,7 +426,14 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
   // TAB: CARGO TRACKING SEARCH & LIVE MONITOR
   // --------------------------------------------------------------------------
   if (viewMode === 'cargo_search') {
-    return <ShipmentDataTracker language={language} />;
+    const dbData = getHostingerDbData();
+    return (
+      <CargoSearchTracker
+        cartons={dbData.cartons || []}
+        proposals={dbData.proposals || []}
+        language={language}
+      />
+    );
   }
 
   // --------------------------------------------------------------------------
