@@ -32,6 +32,7 @@ import { Customer, LedgerEntry, User, Language, ExpenseItem } from '../types';
 import { ToastContainer, ToastMessage } from './Toast';
 import { BudgetExpenseManager } from './BudgetExpenseManager';
 import { saveHostingerDbData } from '../lib/db';
+import { useTheme } from '../context/ThemeContext';
 
 interface AccountantDashboardProps {
   ledgerEntries: LedgerEntry[];
@@ -57,6 +58,8 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
   activeTab,
 }) => {
   const isBn = language === 'bn';
+  const { theme: contextTheme } = useTheme();
+  const isDark = contextTheme === 'dark';
 
   // Toast feedback
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -294,15 +297,17 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
         {/* Quick Action Navigation & Input Bar */}
-        <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className={`border rounded-none p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+        }`}>
           <div>
-            <span className="text-xs text-[#1FB6A8] font-mono uppercase font-light">
+            <span className={`text-xs font-mono uppercase font-light ${isDark ? 'text-[#1FB6A8]' : 'text-[#00897B]'}`}>
               👋 {isBn ? 'স্বাগত' : 'Welcome'}, {currentUser.name} ({isBn ? 'অ্যাকাউন্টস টিম' : 'Accounts Team'})
             </span>
-            <h2 className="text-xl font-bold text-white mt-0.5">
+            <h2 className={`text-xl font-bold mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               {isBn ? 'অ্যাকাউন্টস অ্যানালিটিক্স ও ফিনান্সিয়াল কন্ট্রোল প্যানেল' : 'Accounts Financial Control Panel'}
             </h2>
-            <p className="text-xs text-[#8FA3AD] font-light mt-1">
+            <p className={`text-xs font-light mt-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>
               {isBn
                 ? 'আয়, বকেয়া, খরচ সিঙ্ক এবং ম্যানুয়াল হিসাব ইনপুট করার প্রধান ড্যাশবোর্ড'
                 : 'Central financial analytics, manual voucher inputs & Super Admin live synchronization'}
@@ -312,7 +317,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => setShowAddExpenseModal(true)}
-              className="px-4 py-2 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white text-xs font-normal transition-all shadow-md flex items-center space-x-1.5 cursor-pointer"
+              className="px-4 py-2 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white text-xs font-normal transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span className="font-light">{isBn ? '➕ নতুন খরচ ভাউচার (Super Admin Sync)' : '➕ Add Expense Voucher'}</span>
@@ -320,7 +325,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
             <button
               onClick={() => setShowAddCustomerModal(true)}
-              className="px-4 py-2 rounded-none bg-[#1FB6A8] hover:bg-[#22A6B3] text-[#0F2D52] text-xs font-normal transition-all shadow-md flex items-center space-x-1.5 cursor-pointer"
+              className="px-4 py-2 rounded-none bg-[#0284C7] hover:bg-[#0369A1] text-white text-xs font-normal transition-all shadow-sm flex items-center space-x-1.5 cursor-pointer"
             >
               <Users className="w-4 h-4" />
               <span className="font-light">{isBn ? '👤 নতুন কাস্টমার এন্ট্রি' : '👤 Add Customer'}</span>
@@ -328,9 +333,11 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
             <button
               onClick={handleExportCSV}
-              className="px-3.5 py-2 rounded-none bg-[#0B1622] hover:bg-[#1E3247] text-[#8FA3AD] hover:text-white text-xs font-normal border border-[#1E3247] transition-all flex items-center space-x-1.5 cursor-pointer"
+              className={`px-3.5 py-2 rounded-none text-xs font-normal border transition-all flex items-center space-x-1.5 cursor-pointer ${
+                isDark ? 'bg-[#0B1622] hover:bg-[#1E3247] text-[#8FA3AD] hover:text-white border-[#1E3247]' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
+              }`}
             >
-              <Download className="w-4 h-4 text-[#1FB6A8]" />
+              <Download className="w-4 h-4 text-[#00897B]" />
               <span className="font-light">{isBn ? 'CSV অডিট ডাউনলোড' : 'CSV Export'}</span>
             </button>
           </div>
@@ -339,43 +346,49 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         {/* 4 Financial Analytics KPI Overview Cards (rounded-none, font-light) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Total Customer Dues */}
-          <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 space-y-2 card-hover-glow">
+          <div className={`border rounded-none p-5 space-y-2 ${
+            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+          }`}>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'সর্বমোট বকেয়া (Total Dues)' : 'Total Dues Outstanding'}</span>
-              <FileSpreadsheet className="w-4 h-4 text-[#1FB6A8]" />
+              <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'সর্বমোট বকেয়া (Total Dues)' : 'Total Dues Outstanding'}</span>
+              <FileSpreadsheet className="w-4 h-4 text-[#00897B]" />
             </div>
-            <div className="text-2xl font-bold text-[#1FB6A8] font-poppins">৳{totalCompanyDue.toLocaleString()}</div>
-            <div className="flex items-center justify-between text-[11px] text-[#8FA3AD] font-light pt-1 border-t border-[#1E3247]">
+            <div className={`text-2xl font-bold font-poppins ${isDark ? 'text-[#1FB6A8]' : 'text-[#007791]'}`}>৳{totalCompanyDue.toLocaleString()}</div>
+            <div className={`flex items-center justify-between text-[11px] font-light pt-1 border-t ${isDark ? 'text-[#8FA3AD] border-[#1E3247]' : 'text-slate-500 border-slate-100'}`}>
               <span>{customers.length} {isBn ? 'জন নিবন্ধিত কাস্টমার' : 'Registered Customers'}</span>
-              <span className="text-emerald-400 font-mono">ON-THE-FLY LIVE</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-mono">ON-THE-FLY LIVE</span>
             </div>
           </div>
 
           {/* Card 2: Total Cash Collected */}
-          <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 space-y-2 card-hover-glow">
+          <div className={`border rounded-none p-5 space-y-2 ${
+            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+          }`}>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'মোট আদায়কৃত ক্যাশ (Collected)' : 'Total Cash Collected'}</span>
-              <DollarSign className="w-4 h-4 text-emerald-400" />
+              <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'মোট আদায়কৃত ক্যাশ (Collected)' : 'Total Cash Collected'}</span>
+              <DollarSign className="w-4 h-4 text-emerald-500" />
             </div>
-            <div className="text-2xl font-bold text-emerald-400 font-poppins">৳{totalCollectedCash.toLocaleString()}</div>
-            <div className="flex items-center justify-between text-[11px] text-[#8FA3AD] font-light pt-1 border-t border-[#1E3247]">
+            <div className={`text-2xl font-bold font-poppins ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>৳{totalCollectedCash.toLocaleString()}</div>
+            <div className={`flex items-center justify-between text-[11px] font-light pt-1 border-t ${isDark ? 'text-[#8FA3AD] border-[#1E3247]' : 'text-slate-500 border-slate-100'}`}>
               <span>{isBn ? 'মোট ইনভয়েস বিল' : 'Total Billed'}: ৳{totalBilledAll.toLocaleString()}</span>
-              <span className="text-emerald-400 font-mono">{(totalBilledAll > 0 ? (totalCollectedCash / totalBilledAll * 100) : 0).toFixed(1)}%</span>
+              <span className="text-emerald-600 dark:text-emerald-400 font-mono">{(totalBilledAll > 0 ? (totalCollectedCash / totalBilledAll * 100) : 0).toFixed(1)}%</span>
             </div>
           </div>
 
           {/* Card 3: Operational Expenses Vouchers */}
-          <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 space-y-2 card-hover-glow">
+          <div className={`border rounded-none p-5 space-y-2 ${
+            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+          }`}>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'কোম্পানি খরচ (Super Admin Sync)' : 'Operational Expenses'}</span>
-              <Wallet className="w-4 h-4 text-amber-400" />
+              <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'কোম্পানি খরচ (Super Admin Sync)' : 'Operational Expenses'}</span>
+              <Wallet className="w-4 h-4 text-amber-500" />
             </div>
-            <div className="text-2xl font-bold text-amber-400 font-poppins">৳{totalExpenseAmount.toLocaleString()}</div>
-            <div className="flex items-center justify-between text-[11px] text-[#8FA3AD] font-light pt-1 border-t border-[#1E3247]">
+            <div className={`text-2xl font-bold font-poppins ${isDark ? 'text-amber-400' : 'text-amber-700'}`}>৳{totalExpenseAmount.toLocaleString()}</div>
+            <div className={`flex items-center justify-between text-[11px] font-light pt-1 border-t ${isDark ? 'text-[#8FA3AD] border-[#1E3247]' : 'text-slate-500 border-slate-100'}`}>
               <span>{(expenses || []).length} {isBn ? 'টি ভাউচার এন্ট্রি' : 'Vouchers Recorded'}</span>
               <button
                 onClick={() => setViewMode('expenses')}
-                className="text-[#1FB6A8] hover:underline font-light cursor-pointer"
+                className="text-[#00897B] hover:underline font-light cursor-pointer"
               >
                 {isBn ? 'ডিটেইলস →' : 'Details →'}
               </button>
@@ -383,17 +396,19 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
           </div>
 
           {/* Card 4: Net Cashflow */}
-          <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 space-y-2 card-hover-glow">
+          <div className={`border rounded-none p-5 space-y-2 ${
+            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+          }`}>
             <div className="flex items-center justify-between">
-              <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'নিট অপারেটিং ক্যাশফ্লো' : 'Net Operating Cashflow'}</span>
-              <TrendingUp className="w-4 h-4 text-blue-400" />
+              <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'নিট অপারেটিং ক্যাশফ্লো' : 'Net Operating Cashflow'}</span>
+              <TrendingUp className="w-4 h-4 text-blue-500" />
             </div>
-            <div className={`text-2xl font-bold font-poppins ${netCashflow >= 0 ? 'text-blue-400' : 'text-rose-400'}`}>
+            <div className={`text-2xl font-bold font-poppins ${netCashflow >= 0 ? (isDark ? 'text-blue-400' : 'text-blue-700') : 'text-rose-600'}`}>
               ৳{netCashflow.toLocaleString()}
             </div>
-            <div className="flex items-center justify-between text-[11px] text-[#8FA3AD] font-light pt-1 border-t border-[#1E3247]">
+            <div className={`flex items-center justify-between text-[11px] font-light pt-1 border-t ${isDark ? 'text-[#8FA3AD] border-[#1E3247]' : 'text-slate-500 border-slate-100'}`}>
               <span>{isBn ? 'আদায় বিয়োগ মোট খরচ' : 'Collected - Expenses'}</span>
-              <span className="text-blue-400 font-mono">BALANCED</span>
+              <span className="text-blue-600 dark:text-blue-400 font-mono">BALANCED</span>
             </div>
           </div>
         </div>
@@ -401,15 +416,17 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         {/* Financial Analytics & Category Breakdown Section */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left 2 Cols: Category Expenses Breakdown */}
-          <div className="lg:col-span-2 bg-[#11202F] border border-[#1E3247] rounded-none p-6 space-y-4 shadow-xl">
-            <div className="flex items-center justify-between border-b border-[#1E3247] pb-3">
-              <h3 className="text-sm font-bold text-white flex items-center space-x-2">
-                <BarChart3 className="w-4 h-4 text-[#1FB6A8]" />
+          <div className={`lg:col-span-2 border rounded-none p-6 space-y-4 shadow-sm ${
+            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+          }`}>
+            <div className={`flex items-center justify-between border-b pb-3 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
+              <h3 className="text-sm font-bold flex items-center space-x-2">
+                <BarChart3 className="w-4 h-4 text-[#00897B]" />
                 <span>{isBn ? 'কোম্পানি খরচ ক্যাটাগরি বিশ্লেষণ (Super Admin Sync Analytics)' : 'Company Expense Category Analytics'}</span>
               </h3>
               <button
                 onClick={() => setViewMode('expenses')}
-                className="text-xs text-[#1FB6A8] hover:underline font-light cursor-pointer"
+                className="text-xs text-[#00897B] hover:underline font-light cursor-pointer"
               >
                 {isBn ? 'খরচ প্যানেল ম্যানেজ করুন →' : 'Manage Expenses →'}
               </button>
@@ -417,84 +434,92 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
             <div className="space-y-3.5 text-xs font-light">
               <div>
-                <div className="flex justify-between text-[#8FA3AD] mb-1">
+                <div className={`flex justify-between mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
                   <span>✈️ {isBn ? 'চায়না বিমান ফ্রেইট ও কার্গো চার্জ (Flight Cargo Shipping)' : 'China Air Freight Cargo Shipping'}</span>
-                  <span className="text-white font-mono">৳850,000 (51.6%)</span>
+                  <span className={`font-mono font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>৳850,000 (51.6%)</span>
                 </div>
-                <div className="w-full bg-[#0B1622] h-2 rounded-none overflow-hidden">
-                  <div className="bg-[#1FB6A8] h-full" style={{ width: '51.6%' }} />
+                <div className={`w-full h-2 rounded-none overflow-hidden ${isDark ? 'bg-[#0B1622]' : 'bg-slate-100 border border-slate-200'}`}>
+                  <div className="bg-[#00897B] h-full" style={{ width: '51.6%' }} />
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between text-[#8FA3AD] mb-1">
+                <div className={`flex justify-between mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
                   <span>👥 {isBn ? 'ওয়্যারহাউজ ও স্টাফ বেতন (Staff Salary Disbursed)' : 'Warehouse Staff Salaries'}</span>
-                  <span className="text-white font-mono">৳320,000 (19.5%)</span>
+                  <span className={`font-mono font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>৳320,000 (19.5%)</span>
                 </div>
-                <div className="w-full bg-[#0B1622] h-2 rounded-none overflow-hidden">
-                  <div className="bg-blue-500 h-full" style={{ width: '19.5%' }} />
+                <div className={`w-full h-2 rounded-none overflow-hidden ${isDark ? 'bg-[#0B1622]' : 'bg-slate-100 border border-slate-200'}`}>
+                  <div className="bg-blue-600 h-full" style={{ width: '19.5%' }} />
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between text-[#8FA3AD] mb-1">
+                <div className={`flex justify-between mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
                   <span>🏢 {isBn ? 'তেজগাঁও হাবে মাসিক ভাড়া ও ইউটিলিটি (Warehouse Lease & Rent)' : 'Warehouse Lease & Rent'}</span>
-                  <span className="text-white font-mono">৳250,000 (15.2%)</span>
+                  <span className={`font-mono font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>৳250,000 (15.2%)</span>
                 </div>
-                <div className="w-full bg-[#0B1622] h-2 rounded-none overflow-hidden">
-                  <div className="bg-amber-500 h-full" style={{ width: '15.2%' }} />
+                <div className={`w-full h-2 rounded-none overflow-hidden ${isDark ? 'bg-[#0B1622]' : 'bg-slate-100 border border-slate-200'}`}>
+                  <div className="bg-amber-600 h-full" style={{ width: '15.2%' }} />
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between text-[#8FA3AD] mb-1">
+                <div className={`flex justify-between mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
                   <span>🛃 {isBn ? 'ঢাকা এয়ারপোর্ট কাস্টমস ক্লিয়ারেন্স ও ডিউটি ট্যাক্স (Customs Duty)' : 'Customs Clearance Duty & Tax'}</span>
-                  <span className="text-white font-mono">৳140,000 (8.5%)</span>
+                  <span className={`font-mono font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>৳140,000 (8.5%)</span>
                 </div>
-                <div className="w-full bg-[#0B1622] h-2 rounded-none overflow-hidden">
-                  <div className="bg-purple-500 h-full" style={{ width: '8.5%' }} />
+                <div className={`w-full h-2 rounded-none overflow-hidden ${isDark ? 'bg-[#0B1622]' : 'bg-slate-100 border border-slate-200'}`}>
+                  <div className="bg-purple-600 h-full" style={{ width: '8.5%' }} />
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between text-[#8FA3AD] mb-1">
+                <div className={`flex justify-between mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
                   <span>🚚 {isBn ? 'লোকাল ট্রাক ট্রানজিট ও প্যাকিং মেটেরিয়ালস (Local Transport & Packing)' : 'Local Transit & Transport'}</span>
-                  <span className="text-white font-mono">৳85,000 (5.2%)</span>
+                  <span className={`font-mono font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>৳85,000 (5.2%)</span>
                 </div>
-                <div className="w-full bg-[#0B1622] h-2 rounded-none overflow-hidden">
-                  <div className="bg-emerald-500 h-full" style={{ width: '5.2%' }} />
+                <div className={`w-full h-2 rounded-none overflow-hidden ${isDark ? 'bg-[#0B1622]' : 'bg-slate-100 border border-slate-200'}`}>
+                  <div className="bg-emerald-600 h-full" style={{ width: '5.2%' }} />
                 </div>
               </div>
             </div>
           </div>
 
           {/* Right 1 Col: Customer Payment Collection Progress & Direct Actions */}
-          <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-6 space-y-4 shadow-xl flex flex-col justify-between">
+          <div className={`border rounded-none p-6 space-y-4 shadow-sm flex flex-col justify-between ${
+            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+          }`}>
             <div>
-              <h3 className="text-sm font-bold text-white flex items-center space-x-2 border-b border-[#1E3247] pb-3">
-                <PieChart className="w-4 h-4 text-emerald-400" />
+              <h3 className={`text-sm font-bold flex items-center space-x-2 border-b pb-3 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
+                <PieChart className="w-4 h-4 text-emerald-500" />
                 <span>{isBn ? 'কাস্টমার পেমেন্ট রিকভারি স্টেটাস' : 'Payment Recovery Status'}</span>
               </h3>
 
               <div className="mt-4 space-y-4">
-                <div className="text-center p-4 bg-[#0B1622] border border-[#1E3247] rounded-none">
-                  <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'মোট আদায় অনুপাত (Recovery Rate)' : 'Total Recovery Ratio'}</span>
-                  <div className="text-3xl font-extrabold text-emerald-400 font-mono mt-1">
+                <div className={`text-center p-4 border rounded-none ${
+                  isDark ? 'bg-[#0B1622] border-[#1E3247]' : 'bg-slate-50 border-slate-200'
+                }`}>
+                  <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'মোট আদায় অনুপাত (Recovery Rate)' : 'Total Recovery Ratio'}</span>
+                  <div className="text-3xl font-extrabold text-emerald-600 dark:text-emerald-400 font-mono mt-1">
                     {(totalBilledAll > 0 ? (totalCollectedCash / totalBilledAll * 100) : 0).toFixed(1)}%
                   </div>
-                  <span className="text-[11px] text-[#8FA3AD] font-light mt-1 block">
+                  <span className={`text-[11px] font-light mt-1 block ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>
                     ৳{totalCollectedCash.toLocaleString()} {isBn ? 'আদায়কৃত / মোট' : 'paid of'} ৳{totalBilledAll.toLocaleString()}
                   </span>
                 </div>
 
                 <div className="space-y-2 text-xs font-light">
-                  <div className="flex justify-between items-center text-[#8FA3AD] p-2 bg-[#0B1622]/50 border border-[#1E3247]">
+                  <div className={`flex justify-between items-center p-2 border ${
+                    isDark ? 'bg-[#0B1622]/50 border-[#1E3247] text-[#8FA3AD]' : 'bg-slate-50 border-slate-200 text-slate-600'
+                  }`}>
                     <span>{isBn ? 'মোট নিবন্ধিত কাস্টমার' : 'Registered Clients'}:</span>
-                    <span className="text-white font-bold font-mono">{customers.length}</span>
+                    <span className={`font-bold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>{customers.length}</span>
                   </div>
-                  <div className="flex justify-between items-center text-[#8FA3AD] p-2 bg-[#0B1622]/50 border border-[#1E3247]">
+                  <div className={`flex justify-between items-center p-2 border ${
+                    isDark ? 'bg-[#0B1622]/50 border-[#1E3247] text-[#8FA3AD]' : 'bg-slate-50 border-slate-200 text-slate-600'
+                  }`}>
                     <span>{isBn ? 'বকেয়া যুক্ত কাস্টমার' : 'Clients with Dues'}:</span>
-                    <span className="text-amber-400 font-bold font-mono">
+                    <span className="text-amber-600 dark:text-amber-400 font-bold font-mono">
                       {customers.filter((c) => getCustomerStats(c.customer_code).currentDue > 0).length}
                     </span>
                   </div>
@@ -502,10 +527,10 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
               </div>
             </div>
 
-            <div className="pt-3 border-t border-[#1E3247] space-y-2">
+            <div className={`pt-3 border-t space-y-2 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
               <button
                 onClick={() => setViewMode('directory')}
-                className="w-full py-2 px-3 rounded-none bg-[#1FB6A8] hover:bg-[#22A6B3] text-[#0F2D52] text-xs font-normal shadow-md cursor-pointer text-center"
+                className="w-full py-2 px-3 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white text-xs font-normal shadow-sm cursor-pointer text-center"
               >
                 <span className="font-light">{isBn ? '📋 কাস্টমার লেজার ডিরেক্টরি খুলুন →' : 'Open Customer Ledger Directory →'}</span>
               </button>
@@ -514,18 +539,22 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         </div>
 
         {/* Recent Financial Audit Stream Table */}
-        <div className="bg-[#11202F] border border-[#1E3247] rounded-none overflow-hidden shadow-xl">
-          <div className="p-4 border-b border-[#1E3247] flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white flex items-center space-x-2">
-              <Clock className="w-4 h-4 text-[#1FB6A8]" />
+        <div className={`border rounded-none overflow-hidden shadow-sm ${
+          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+        }`}>
+          <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
+            <h3 className="text-sm font-bold flex items-center space-x-2">
+              <Clock className="w-4 h-4 text-[#00897B]" />
               <span>{isBn ? 'সাম্প্রতিক ফিনান্সিয়াল ট্রানজ্যাকশন ও ভাউচার স্ট্রীম' : 'Recent Financial Transactions & Vouchers Stream'}</span>
             </h3>
-            <span className="text-xs text-[#8FA3AD] font-mono font-light">{ledgerEntries.length} Ledger Records</span>
+            <span className={`text-xs font-mono font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{ledgerEntries.length} Ledger Records</span>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-[#EAF2F5]">
-              <thead className="bg-[#0B1622] text-[#8FA3AD] uppercase text-[10px] tracking-wider border-b border-[#1E3247] font-medium">
+            <table className="w-full text-left text-xs">
+              <thead className={`uppercase text-[10px] tracking-wider border-b font-medium ${
+                isDark ? 'bg-[#0B1622] text-[#8FA3AD] border-[#1E3247]' : 'bg-slate-100 text-slate-600 border-slate-200'
+              }`}>
                 <tr>
                   <th className="p-3.5">Date</th>
                   <th className="p-3.5">Customer / Ref</th>
@@ -535,25 +564,25 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                   <th className="p-3.5">Note</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1E3247]">
+              <tbody className={`divide-y ${isDark ? 'divide-[#1E3247]' : 'divide-slate-200'}`}>
                 {ledgerEntries.slice(0, 5).map((re) => (
-                  <tr key={re.id} className="hover:bg-[#1E3247]/40 transition-colors">
-                    <td className="p-3.5 font-mono text-[#8FA3AD]">{re.created_at.split('T')[0]}</td>
-                    <td className="p-3.5 font-mono text-[#1FB6A8] font-bold">{re.customer_code} ({re.customer_name})</td>
+                  <tr key={re.id} className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
+                    <td className={`p-3.5 font-mono ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{re.created_at.split('T')[0]}</td>
+                    <td className="p-3.5 font-mono font-bold text-[#00897B]">{re.customer_code} ({re.customer_name})</td>
                     <td className="p-3.5">
                       <span
                         className={`px-2.5 py-0.5 rounded-none text-[10px] font-normal uppercase ${
                           re.type === 'charge'
-                            ? 'bg-amber-500/20 text-amber-300'
-                            : 'bg-emerald-500/20 text-emerald-300'
+                            ? 'bg-amber-500/20 text-amber-600 dark:text-amber-300'
+                            : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300'
                         }`}
                       >
                         {re.type}
                       </span>
                     </td>
-                    <td className="p-3.5 font-bold font-mono text-white">৳{re.amount.toLocaleString()}</td>
-                    <td className="p-3.5 text-[#8FA3AD] font-light">{re.entered_by_name}</td>
-                    <td className="p-3.5 text-[#8FA3AD] font-light">{re.note}</td>
+                    <td className={`p-3.5 font-bold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>৳{re.amount.toLocaleString()}</td>
+                    <td className={`p-3.5 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{re.entered_by_name}</td>
+                    <td className={`p-3.5 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{re.note}</td>
                   </tr>
                 ))}
               </tbody>
@@ -566,33 +595,39 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
           <div className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
             <form
               onSubmit={handleSaveExpenseVoucher}
-              className="bg-[#11202F] border border-[#1FB6A8]/40 rounded-none p-6 max-w-md w-full space-y-4 shadow-2xl animate-in zoom-in-95"
+              className={`border rounded-none p-6 max-w-md w-full space-y-4 shadow-2xl animate-in zoom-in-95 ${
+                isDark ? 'bg-[#11202F] border-[#1FB6A8]/40 text-white' : 'bg-white border-slate-300 text-slate-900'
+              }`}
             >
-              <h3 className="text-base font-bold text-white flex items-center space-x-2">
-                <Wallet className="w-5 h-5 text-amber-400" />
+              <h3 className="text-base font-bold flex items-center space-x-2">
+                <Wallet className="w-5 h-5 text-amber-500" />
                 <span>{isBn ? 'নতুন খরচ ভাউচার ইনপুট (Super Admin Sync)' : 'Record New Expense Voucher'}</span>
               </h3>
 
               <div className="space-y-3 text-xs">
                 <div>
-                  <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'ভাউচার শিরোনাম / বিবরণ *' : 'Voucher Title *'}</label>
+                  <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'ভাউচার শিরোনাম / বিবরণ *' : 'Voucher Title *'}</label>
                   <input
                     type="text"
                     required
                     value={expTitle}
                     onChange={(e) => setExpTitle(e.target.value)}
                     placeholder="e.g. ঢাকা এয়ারপোর্ট কার্গো কাস্টমস ক্লিয়ারেন্স বিল"
-                    className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white outline-none focus:border-[#1FB6A8] font-light"
+                    className={`w-full border rounded-none p-2.5 outline-none font-light ${
+                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
+                    }`}
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'ক্যাটাগরি' : 'Category'}</label>
+                    <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'ক্যাটাগরি' : 'Category'}</label>
                     <select
                       value={expCategory}
                       onChange={(e) => setExpCategory(e.target.value as any)}
-                      className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white outline-none font-light"
+                      className={`w-full border rounded-none p-2.5 outline-none font-light ${
+                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-white border-slate-300 text-slate-900'
+                      }`}
                     >
                       <option value="shipping">✈️ Flight Cargo Shipping</option>
                       <option value="warehouse_rent">🏢 Warehouse Rent & Lease</option>
@@ -604,7 +639,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                   </div>
 
                   <div>
-                    <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'টাকার পরিমাণ (BDT ৳) *' : 'Amount (BDT ৳) *'}</label>
+                    <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'টাকার পরিমাণ (BDT ৳) *' : 'Amount (BDT ৳) *'}</label>
                     <input
                       type="number"
                       required
@@ -612,29 +647,35 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                       value={expAmount}
                       onChange={(e) => setExpAmount(e.target.value)}
                       placeholder="e.g. 85000"
-                      className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white font-mono outline-none focus:border-[#1FB6A8]"
+                      className={`w-full border rounded-none p-2.5 font-mono outline-none ${
+                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
+                      }`}
                     />
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'ভাউচার নাম্বার' : 'Voucher No'}</label>
+                  <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'ভাউচার নাম্বার' : 'Voucher No'}</label>
                   <input
                     type="text"
                     value={expVoucherNo}
                     onChange={(e) => setExpVoucherNo(e.target.value)}
-                    className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white font-mono outline-none"
+                    className={`w-full border rounded-none p-2.5 font-mono outline-none ${
+                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-white border-slate-300 text-slate-900'
+                    }`}
                   />
                 </div>
 
                 <div>
-                  <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'অতিরিক্ত নোট (Optional)' : 'Notes'}</label>
+                  <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'অতিরিক্ত নোট (Optional)' : 'Notes'}</label>
                   <input
                     type="text"
                     value={expNotes}
                     onChange={(e) => setExpNotes(e.target.value)}
                     placeholder="নোট বা ব্যাংক ট্রান্সফার নম্বর"
-                    className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white outline-none font-light"
+                    className={`w-full border rounded-none p-2.5 outline-none font-light ${
+                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-white border-slate-300 text-slate-900'
+                    }`}
                   />
                 </div>
               </div>
@@ -643,13 +684,15 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowAddExpenseModal(false)}
-                  className="px-4 py-2 rounded-none bg-[#0B1622] text-[#8FA3AD] text-xs font-normal hover:text-white cursor-pointer"
+                  className={`px-4 py-2 rounded-none text-xs font-normal hover:text-white cursor-pointer ${
+                    isDark ? 'bg-[#0B1622] text-[#8FA3AD]' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
                 >
                   <span className="font-light">{isBn ? 'বাতিল' : 'Cancel'}</span>
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-normal text-xs cursor-pointer"
+                  className="px-5 py-2 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-normal text-xs cursor-pointer shadow-sm"
                 >
                   <span className="font-light">{isBn ? 'সেভ করুন ও সুপার এডমিনে সিঙ্ক করুন' : 'Save & Sync Super Admin'}</span>
                 </button>
@@ -669,40 +712,46 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
       <div className="space-y-6">
         <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
-        <div className="flex items-center justify-between border-b border-[#1E3247] pb-4">
+        <div className={`flex items-center justify-between border-b pb-4 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
           <div>
-            <h2 className="text-xl font-bold text-white font-poppins flex items-center space-x-2">
-              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+            <h2 className={`text-xl font-bold font-poppins flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              <CheckCircle2 className="w-5 h-5 text-emerald-500" />
               <span>{isBn ? 'ওয়্যারহাউজ ডেলিভারি ও ক্যাশ কালেকশন সিঙ্ক অডিট' : 'Warehouse Delivery & Cash Collection Sync'}</span>
             </h2>
-            <p className="text-xs text-[#8FA3AD] font-light">
+            <p className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>
               {isBn ? 'কাউন্টার থেকে আদায়কৃত ক্যাশ কালেকশন যাচাই এবং লেজারে অটো-অডিট সিঙ্ক' : 'Audit counter cash collections synced automatically with customer ledger'}
             </p>
           </div>
 
           <button
             onClick={() => setViewMode('overview')}
-            className="flex items-center space-x-2 text-xs font-normal text-[#8FA3AD] hover:text-[#1FB6A8] transition-colors cursor-pointer"
+            className={`flex items-center space-x-2 text-xs font-normal transition-colors cursor-pointer ${
+              isDark ? 'text-[#8FA3AD] hover:text-[#1FB6A8]' : 'text-slate-600 hover:text-[#00897B]'
+            }`}
           >
             <ChevronLeft className="w-4 h-4" />
             <span className="font-light">{isBn ? 'ড্যাশবোর্ডে ফিরে যান' : 'Back to Overview'}</span>
           </button>
         </div>
 
-        <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-6 space-y-4 shadow-xl">
-          <div className="flex items-center justify-between border-b border-[#1E3247] pb-3">
-            <h3 className="text-sm font-bold text-white flex items-center space-x-2">
-              <DollarSign className="w-4 h-4 text-emerald-400" />
+        <div className={`border rounded-none p-6 space-y-4 shadow-sm ${
+          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+        }`}>
+          <div className={`flex items-center justify-between border-b pb-3 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
+            <h3 className="text-sm font-bold flex items-center space-x-2">
+              <DollarSign className="w-4 h-4 text-emerald-500" />
               <span>{isBn ? 'কাউন্টার রিসিভড ক্যাশ রেকর্ডস' : 'Verified Counter Cash Receipts'}</span>
             </h3>
-            <span className="text-xs text-emerald-400 font-mono font-light">
+            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-mono font-light">
               {ledgerEntries.filter((l) => l.source === 'auto_cash_collection' || l.type === 'payment').length} Verified Payments
             </span>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-[#EAF2F5]">
-              <thead className="bg-[#0B1622] text-[#8FA3AD] uppercase text-[10px] tracking-wider border-b border-[#1E3247] font-medium">
+            <table className="w-full text-left text-xs">
+              <thead className={`uppercase text-[10px] tracking-wider border-b font-medium ${
+                isDark ? 'bg-[#0B1622] text-[#8FA3AD] border-[#1E3247]' : 'bg-slate-100 text-slate-600 border-slate-200'
+              }`}>
                 <tr>
                   <th className="p-3.5">Date</th>
                   <th className="p-3.5">Customer Code</th>
@@ -712,18 +761,18 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                   <th className="p-3.5">Audit Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1E3247]">
+              <tbody className={`divide-y ${isDark ? 'divide-[#1E3247]' : 'divide-slate-200'}`}>
                 {ledgerEntries
                   .filter((l) => l.type === 'payment')
                   .map((pe) => (
-                    <tr key={pe.id} className="hover:bg-[#1E3247]/40 transition-colors">
-                      <td className="p-3.5 font-mono text-[#8FA3AD]">{pe.created_at.split('T')[0]}</td>
-                      <td className="p-3.5 font-mono text-[#1FB6A8] font-bold">{pe.customer_code}</td>
-                      <td className="p-3.5 font-medium text-white">{pe.customer_name}</td>
-                      <td className="p-3.5 font-bold font-mono text-emerald-400">৳{pe.amount.toLocaleString()}</td>
-                      <td className="p-3.5 text-[#8FA3AD] font-light">{pe.entered_by_name}</td>
+                    <tr key={pe.id} className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
+                      <td className={`p-3.5 font-mono ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{pe.created_at.split('T')[0]}</td>
+                      <td className="p-3.5 font-mono text-[#00897B] font-bold">{pe.customer_code}</td>
+                      <td className={`p-3.5 font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{pe.customer_name}</td>
+                      <td className="p-3.5 font-bold font-mono text-emerald-600 dark:text-emerald-400">৳{pe.amount.toLocaleString()}</td>
+                      <td className={`p-3.5 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{pe.entered_by_name}</td>
                       <td className="p-3.5">
-                        <span className="px-2.5 py-0.5 rounded-none text-[10px] font-normal uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                        <span className="px-2.5 py-0.5 rounded-none text-[10px] font-normal uppercase bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30">
                           ✓ SYNCED & AUDITED
                         </span>
                       </td>
@@ -743,16 +792,18 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
   if (viewMode === 'expenses') {
     return (
       <div className="space-y-4">
-        <div className="flex items-center justify-between border-b border-[#1E3247] pb-3">
+        <div className={`flex items-center justify-between border-b pb-3 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
           <button
             onClick={() => setViewMode('overview')}
-            className="flex items-center space-x-2 text-xs font-semibold text-[#8FA3AD] hover:text-[#1FB6A8] transition-colors cursor-pointer"
+            className={`flex items-center space-x-2 text-xs font-semibold transition-colors cursor-pointer ${
+              isDark ? 'text-[#8FA3AD] hover:text-[#1FB6A8]' : 'text-slate-600 hover:text-[#00897B]'
+            }`}
           >
             <ChevronLeft className="w-4 h-4" />
             <span>{isBn ? 'অ্যাকাউন্টস ড্যাশবোর্ডে ফিরে যান' : 'Back to Accounts Dashboard'}</span>
           </button>
         </div>
-        <BudgetExpenseManager language={language} theme="dark" />
+        <BudgetExpenseManager language={language} theme={contextTheme || 'light'} />
       </div>
     );
   }
@@ -772,20 +823,20 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
       <div className="space-y-6">
         <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#1E3247] pb-4">
+        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
           <div>
-            <h2 className="text-xl font-bold text-white font-poppins flex items-center space-x-2">
-              <FileSpreadsheet className="w-5 h-5 text-[#1FB6A8]" />
+            <h2 className={`text-xl font-bold font-poppins flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              <FileSpreadsheet className="w-5 h-5 text-[#00897B]" />
               <span>{isBn ? 'ফিন্যান্সিয়াল লেজার ও ফিল্টারড রিপোর্টস' : 'Financial Ledger Activity Reports'}</span>
             </h2>
-            <p className="text-xs text-[#8FA3AD]">
+            <p className={`text-xs ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>
               {isBn ? 'তারিখ ও কাস্টমার অনুযায়ী ফিল্টার করে স্টেটমেন্ট ডাউনলোড করুন' : 'Date-range filtered ledger activity with CSV export'}
             </p>
           </div>
 
           <button
             onClick={handleExportCSV}
-            className="flex items-center justify-center space-x-2 py-2.5 px-5 rounded-none bg-[#1FB6A8] hover:bg-[#22A6B3] text-[#0F2D52] font-normal text-xs transition-all shadow-md cursor-pointer"
+            className="flex items-center justify-center space-x-2 py-2.5 px-5 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-normal text-xs transition-all shadow-sm cursor-pointer"
           >
             <Download className="w-4 h-4" />
             <span className="font-light">{isBn ? 'CSV লেজার স্টেটমেন্ট ডাউনলোড' : 'Export CSV Report'}</span>
@@ -793,33 +844,41 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         </div>
 
         {/* Date Filter Bar */}
-        <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+        <div className={`border rounded-none p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs ${
+          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+        }`}>
           <div>
-            <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'শুরূতের তারিখ' : 'Start Date'}</label>
+            <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'শুরূতের তারিখ' : 'Start Date'}</label>
             <input
               type="date"
               value={reportStartDate}
               onChange={(e) => setReportStartDate(e.target.value)}
-              className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2 text-white font-mono outline-none"
+              className={`w-full border rounded-none p-2 font-mono outline-none ${
+                isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+              }`}
             />
           </div>
 
           <div>
-            <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'শেষের তারিখ' : 'End Date'}</label>
+            <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'শেষের তারিখ' : 'End Date'}</label>
             <input
               type="date"
               value={reportEndDate}
               onChange={(e) => setReportEndDate(e.target.value)}
-              className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2 text-white font-mono outline-none"
+              className={`w-full border rounded-none p-2 font-mono outline-none ${
+                isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+              }`}
             />
           </div>
 
           <div>
-            <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'কাস্টমার ফিল্টার' : 'Filter Customer'}</label>
+            <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'কাস্টমার ফিল্টার' : 'Filter Customer'}</label>
             <select
               value={reportCustFilter}
               onChange={(e) => setReportCustFilter(e.target.value)}
-              className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2 text-white outline-none font-light"
+              className={`w-full border rounded-none p-2 outline-none font-light ${
+                isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+              }`}
             >
               <option value="all">{isBn ? 'সকল কাস্টমার' : 'All Customers'}</option>
               {customers.map((c) => (
@@ -832,15 +891,19 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         </div>
 
         {/* Reports Table */}
-        <div className="bg-[#11202F] border border-[#1E3247] rounded-none overflow-hidden shadow-xl">
-          <div className="p-4 border-b border-[#1E3247] flex items-center justify-between">
-            <h3 className="text-sm font-bold text-white">{isBn ? 'ফিল্টারড ট্রানজ্যাকশন এন্ট্রি' : 'Filtered Transaction Entries'}</h3>
-            <span className="text-xs text-[#1FB6A8] font-mono">{reportEntries.length} Records</span>
+        <div className={`border rounded-none overflow-hidden shadow-sm ${
+          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+        }`}>
+          <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
+            <h3 className="text-sm font-bold">{isBn ? 'ফিল্টারড ট্রানজ্যাকশন এন্ট্রি' : 'Filtered Transaction Entries'}</h3>
+            <span className="text-xs text-[#00897B] font-mono">{reportEntries.length} Records</span>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-[#EAF2F5]">
-              <thead className="bg-[#0B1622] text-[#8FA3AD] uppercase text-[10px] tracking-wider border-b border-[#1E3247] font-medium">
+            <table className="w-full text-left text-xs">
+              <thead className={`uppercase text-[10px] tracking-wider border-b font-medium ${
+                isDark ? 'bg-[#0B1622] text-[#8FA3AD] border-[#1E3247]' : 'bg-slate-100 text-slate-600 border-slate-200'
+              }`}>
                 <tr>
                   <th className="p-3.5">Date</th>
                   <th className="p-3.5">Customer Code</th>
@@ -851,27 +914,27 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                   <th className="p-3.5">Note</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1E3247]">
+              <tbody className={`divide-y ${isDark ? 'divide-[#1E3247]' : 'divide-slate-200'}`}>
                 {reportEntries.map((re) => (
-                  <tr key={re.id} className="hover:bg-[#1E3247]/40 transition-colors">
-                    <td className="p-3.5 font-mono text-[#8FA3AD]">{re.created_at.split('T')[0]}</td>
-                    <td className="p-3.5 font-mono text-[#1FB6A8] font-bold">{re.customer_code}</td>
-                    <td className="p-3.5 font-medium text-white">{re.customer_name}</td>
+                  <tr key={re.id} className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
+                    <td className={`p-3.5 font-mono ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{re.created_at.split('T')[0]}</td>
+                    <td className="p-3.5 font-mono text-[#00897B] font-bold">{re.customer_code}</td>
+                    <td className={`p-3.5 font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{re.customer_name}</td>
                     <td className="p-3.5">
                       <span
                         className={`px-2.5 py-0.5 rounded-none text-[10px] font-normal uppercase ${
                           re.type === 'charge'
-                            ? 'bg-amber-500/20 text-amber-300'
-                            : 'bg-emerald-500/20 text-emerald-300'
+                            ? 'bg-amber-500/20 text-amber-600 dark:text-amber-300'
+                            : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300'
                         }`}
                       >
                         {re.type}
                       </span>
                     </td>
-                    <td className="p-3.5 font-bold font-mono text-white">৳{re.amount.toLocaleString()}</td>
-                    <td className="p-3.5 text-[#8FA3AD]">
+                    <td className={`p-3.5 font-bold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>৳{re.amount.toLocaleString()}</td>
+                    <td className={`p-3.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>
                       {re.source === 'auto_cash_collection' ? (
-                        <span className="text-emerald-400 font-normal flex items-center space-x-1">
+                        <span className="text-emerald-600 dark:text-emerald-400 font-normal flex items-center space-x-1">
                           <DollarSign className="w-3.5 h-3.5" />
                           <span>Auto Cash ({re.entered_by_name})</span>
                         </span>
@@ -879,7 +942,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                         <span>Manual ({re.entered_by_name})</span>
                       )}
                     </td>
-                    <td className="p-3.5 text-[#8FA3AD]">{re.note}</td>
+                    <td className={`p-3.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{re.note}</td>
                   </tr>
                 ))}
               </tbody>
@@ -901,10 +964,12 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
         {/* Back Header */}
-        <div className="flex items-center justify-between border-b border-[#1E3247] pb-4">
+        <div className={`flex items-center justify-between border-b pb-4 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
           <button
             onClick={() => setViewMode('directory')}
-            className="flex items-center space-x-2 text-xs font-normal text-[#8FA3AD] hover:text-[#1FB6A8] transition-colors cursor-pointer"
+            className={`flex items-center space-x-2 text-xs font-normal transition-colors cursor-pointer ${
+              isDark ? 'text-[#8FA3AD] hover:text-[#1FB6A8]' : 'text-slate-600 hover:text-[#00897B]'
+            }`}
           >
             <ChevronLeft className="w-4 h-4" />
             <span className="font-light">{isBn ? 'কাস্টমার তালিকায় ফিরে যান' : 'Back to Customer Directory'}</span>
@@ -912,7 +977,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
           <button
             onClick={() => setShowAddLedgerModal(true)}
-            className="flex items-center space-x-2 py-2 px-4 rounded-none bg-[#1FB6A8] hover:bg-[#22A6B3] text-[#0F2D52] font-normal text-xs shadow-md cursor-pointer"
+            className="flex items-center space-x-2 py-2 px-4 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-normal text-xs shadow-sm cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span className="font-light">{isBn ? 'ম্যানুয়াল লেজার এন্ট্রি করুন' : 'Add Manual Ledger Entry'}</span>
@@ -920,38 +985,46 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         </div>
 
         {/* Customer Balance Header Card */}
-        <div className="bg-gradient-to-r from-[#11202F] via-[#0F2D52] to-[#11202F] border border-[#1FB6A8]/30 rounded-none p-6 shadow-xl grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className={`border rounded-none p-6 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-6 ${
+          isDark
+            ? 'bg-gradient-to-r from-[#11202F] via-[#0F2D52] to-[#11202F] border-[#1FB6A8]/30 text-white'
+            : 'bg-white border-slate-200 text-slate-900'
+        }`}>
           <div>
-            <span className="text-xs text-[#8FA3AD] uppercase font-bold tracking-wider">{selectedCust.customer_code}</span>
-            <h2 className="text-xl font-bold text-white mt-1">{selectedCust.name}</h2>
-            <p className="text-xs text-[#8FA3AD] mt-1 font-light">{selectedCust.phone} | {selectedCust.address}</p>
+            <span className={`text-xs uppercase font-bold tracking-wider ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{selectedCust.customer_code}</span>
+            <h2 className={`text-xl font-bold mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>{selectedCust.name}</h2>
+            <p className={`text-xs mt-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{selectedCust.phone} | {selectedCust.address}</p>
           </div>
 
-          <div className="border-t sm:border-t-0 sm:border-l border-[#1E3247] pt-4 sm:pt-0 sm:pl-6 space-y-1">
-            <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'মোট চার্জ (Total Charges)' : 'Total Charges'}</span>
-            <div className="text-lg font-bold text-amber-400 font-mono">৳{stats.totalCharges.toLocaleString()}</div>
-            <span className="text-[11px] text-[#8FA3AD] block font-light">{isBn ? 'মোট পরিশোধ (Total Paid)' : 'Total Paid'}: ৳{stats.totalPayments.toLocaleString()}</span>
+          <div className={`border-t sm:border-t-0 sm:border-l pt-4 sm:pt-0 sm:pl-6 space-y-1 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
+            <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'মোট চার্জ (Total Charges)' : 'Total Charges'}</span>
+            <div className="text-lg font-bold text-amber-600 dark:text-amber-400 font-mono">৳{stats.totalCharges.toLocaleString()}</div>
+            <span className={`text-[11px] block font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'মোট পরিশোধ (Total Paid)' : 'Total Paid'}: ৳{stats.totalPayments.toLocaleString()}</span>
           </div>
 
-          <div className="border-t sm:border-t-0 sm:border-l border-[#1E3247] pt-4 sm:pt-0 sm:pl-6 space-y-1">
-            <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'বর্তমান নিট বকেয়া (Current Net Due)' : 'Current Net Outstanding Due'}</span>
-            <div className="text-2xl font-bold text-[#1FB6A8] font-mono">৳{stats.currentDue.toLocaleString()}</div>
-            <span className="text-[10px] text-emerald-400 font-normal bg-emerald-500/10 px-2 py-0.5 rounded-none inline-block">
+          <div className={`border-t sm:border-t-0 sm:border-l pt-4 sm:pt-0 sm:pl-6 space-y-1 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
+            <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'বর্তমান নিট বকেয়া (Current Net Due)' : 'Current Net Outstanding Due'}</span>
+            <div className="text-2xl font-bold text-[#00897B] dark:text-[#1FB6A8] font-mono">৳{stats.currentDue.toLocaleString()}</div>
+            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal bg-emerald-500/10 px-2 py-0.5 rounded-none inline-block">
               ON-THE-FLY COMPUTED (LIVE)
             </span>
           </div>
         </div>
 
         {/* Timeline Ledger Entries List */}
-        <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-6 space-y-4 shadow-xl">
-          <h3 className="text-sm font-bold text-white flex items-center space-x-2">
-            <FileText className="w-4 h-4 text-[#1FB6A8]" />
+        <div className={`border rounded-none p-6 space-y-4 shadow-sm ${
+          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+        }`}>
+          <h3 className="text-sm font-bold flex items-center space-x-2">
+            <FileText className="w-4 h-4 text-[#00897B]" />
             <span>{isBn ? 'লেজার লেনদেন ইতিহাস (Chronological Timeline)' : 'Chronological Transaction History'}</span>
           </h3>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-[#EAF2F5]">
-              <thead className="bg-[#0B1622] text-[#8FA3AD] uppercase text-[10px] tracking-wider border-b border-[#1E3247]">
+            <table className="w-full text-left text-xs">
+              <thead className={`uppercase text-[10px] tracking-wider border-b font-medium ${
+                isDark ? 'bg-[#0B1622] text-[#8FA3AD] border-[#1E3247]' : 'bg-slate-100 text-slate-600 border-slate-200'
+              }`}>
                 <tr>
                   <th className="p-3.5">Date</th>
                   <th className="p-3.5">Type</th>
@@ -960,16 +1033,16 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                   <th className="p-3.5">Note</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-[#1E3247]">
+              <tbody className={`divide-y ${isDark ? 'divide-[#1E3247]' : 'divide-slate-200'}`}>
                 {stats.entries.map((entry) => (
-                  <tr key={entry.id} className="hover:bg-[#1E3247]/40 transition-colors">
-                    <td className="p-3.5 font-mono text-[#8FA3AD]">{entry.created_at.split('T')[0]}</td>
+                  <tr key={entry.id} className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
+                    <td className={`p-3.5 font-mono ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{entry.created_at.split('T')[0]}</td>
                     <td className="p-3.5">
                       <span
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase flex items-center space-x-1 w-fit ${
+                        className={`px-2.5 py-0.5 rounded-none text-[10px] font-normal uppercase flex items-center space-x-1 w-fit ${
                           entry.type === 'charge'
-                            ? 'bg-amber-500/20 text-amber-300'
-                            : 'bg-emerald-500/20 text-emerald-300'
+                            ? 'bg-amber-500/20 text-amber-600 dark:text-amber-300'
+                            : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300'
                         }`}
                       >
                         {entry.type === 'charge' ? (
@@ -980,10 +1053,10 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                         <span>{entry.type}</span>
                       </span>
                     </td>
-                    <td className="p-3.5 font-bold font-mono text-white text-sm">৳{entry.amount.toLocaleString()}</td>
-                    <td className="p-3.5 text-[#8FA3AD]">
+                    <td className={`p-3.5 font-bold font-mono text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>৳{entry.amount.toLocaleString()}</td>
+                    <td className={`p-3.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>
                       {entry.source === 'auto_cash_collection' ? (
-                        <span className="text-emerald-400 font-semibold flex items-center space-x-1">
+                        <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center space-x-1">
                           <DollarSign className="w-3.5 h-3.5" />
                           <span>Auto-Cash ({entry.entered_by_name})</span>
                         </span>
@@ -991,7 +1064,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                         <span>Manual ({entry.entered_by_name})</span>
                       )}
                     </td>
-                    <td className="p-3.5 text-[#8FA3AD]">{entry.note}</td>
+                    <td className={`p-3.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{entry.note}</td>
                   </tr>
                 ))}
               </tbody>
@@ -1004,24 +1077,28 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
           <div className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
             <form
               onSubmit={handleSaveLedgerEntry}
-              className="bg-[#11202F] border border-[#1FB6A8]/40 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl animate-in zoom-in-95"
+              className={`border rounded-none p-6 max-w-md w-full space-y-4 shadow-2xl animate-in zoom-in-95 ${
+                isDark ? 'bg-[#11202F] border-[#1FB6A8]/40 text-white' : 'bg-white border-slate-300 text-slate-900'
+              }`}
             >
-              <h3 className="text-base font-bold text-white flex items-center space-x-2">
-                <Plus className="w-5 h-5 text-[#1FB6A8]" />
+              <h3 className="text-base font-bold flex items-center space-x-2">
+                <Plus className="w-5 h-5 text-[#00897B]" />
                 <span>{isBn ? 'ম্যানুয়াল লেজার এন্ট্রি ফরম' : 'Add Manual Ledger Entry'}</span>
               </h3>
 
               <div className="space-y-3 text-xs">
                 <div>
-                  <label className="text-[#8FA3AD] block mb-1">{isBn ? 'এন্ট্রি টাইপ (Type)' : 'Entry Type'}</label>
+                  <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'এন্ট্রি টাইপ (Type)' : 'Entry Type'}</label>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => setEntryType('charge')}
-                      className={`p-2.5 rounded-xl font-bold transition-all ${
+                      className={`p-2.5 rounded-none font-bold transition-all ${
                         entryType === 'charge'
-                          ? 'bg-amber-500 text-black shadow-md'
-                          : 'bg-[#0B1622] text-[#8FA3AD]'
+                          ? 'bg-amber-500 text-black shadow-sm'
+                          : isDark
+                          ? 'bg-[#0B1622] text-[#8FA3AD]'
+                          : 'bg-slate-100 text-slate-700'
                       }`}
                     >
                       CHARGE (বকেয়া চার্জ)
@@ -1030,10 +1107,12 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                     <button
                       type="button"
                       onClick={() => setEntryType('payment')}
-                      className={`p-2.5 rounded-xl font-bold transition-all ${
+                      className={`p-2.5 rounded-none font-bold transition-all ${
                         entryType === 'payment'
-                          ? 'bg-emerald-500 text-white shadow-md'
-                          : 'bg-[#0B1622] text-[#8FA3AD]'
+                          ? 'bg-emerald-600 text-white shadow-sm'
+                          : isDark
+                          ? 'bg-[#0B1622] text-[#8FA3AD]'
+                          : 'bg-slate-100 text-slate-700'
                       }`}
                     >
                       PAYMENT (পরিশোধ)
@@ -1042,26 +1121,30 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                 </div>
 
                 <div>
-                  <label className="text-[#8FA3AD] block mb-1">{isBn ? 'টাকার পরিমাণ (BDT ৳)' : 'Amount (BDT ৳)'}</label>
+                  <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'টাকার পরিমাণ (BDT ৳)' : 'Amount (BDT ৳)'}</label>
                   <input
                     type="number"
                     required
                     min="1"
                     value={entryAmount}
                     onChange={(e) => setEntryAmount(Number(e.target.value))}
-                    className="w-full bg-[#0B1622] border border-[#1E3247] rounded-xl p-2.5 text-white font-bold font-mono outline-none focus:border-[#1FB6A8]"
+                    className={`w-full border rounded-none p-2.5 font-bold font-mono outline-none ${
+                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
+                    }`}
                   />
                 </div>
 
                 <div>
-                  <label className="text-[#8FA3AD] block mb-1">{isBn ? 'নোট / বিবরণ' : 'Description Note'}</label>
+                  <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'নোট / বিবরণ' : 'Description Note'}</label>
                   <input
                     type="text"
                     required
                     value={entryNote}
                     onChange={(e) => setEntryNote(e.target.value)}
                     placeholder="e.g. ব্যাংক ট্রান্সফার রসিদ #9901"
-                    className="w-full bg-[#0B1622] border border-[#1E3247] rounded-xl p-2.5 text-white outline-none focus:border-[#1FB6A8]"
+                    className={`w-full border rounded-none p-2.5 outline-none font-light ${
+                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
+                    }`}
                   />
                 </div>
               </div>
@@ -1070,15 +1153,17 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowAddLedgerModal(false)}
-                  className="px-4 py-2 rounded-xl bg-[#0B1622] text-[#8FA3AD] text-xs font-semibold hover:text-white"
+                  className={`px-4 py-2 rounded-none text-xs font-normal hover:text-white cursor-pointer ${
+                    isDark ? 'bg-[#0B1622] text-[#8FA3AD]' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  }`}
                 >
-                  {isBn ? 'বাতিল' : 'Cancel'}
+                  <span className="font-light">{isBn ? 'বাতিল' : 'Cancel'}</span>
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-[#1FB6A8] text-[#0F2D52] font-bold text-xs hover:bg-[#22A6B3]"
+                  className="px-5 py-2 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-normal text-xs cursor-pointer shadow-sm"
                 >
-                  {isBn ? 'এন্ট্রি সেভ করুন' : 'Save Entry'}
+                  <span className="font-light">{isBn ? 'এন্ট্রি সেভ করুন' : 'Save Entry'}</span>
                 </button>
               </div>
             </form>
@@ -1097,37 +1182,45 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
       {/* Overview Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 space-y-2 card-hover-glow">
-          <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'সর্বমোট বকেয়া (Total Dues)' : 'Total Outstanding Dues'}</span>
-          <div className="text-2xl font-bold text-[#1FB6A8] font-poppins">৳{totalCompanyDue.toLocaleString()}</div>
-          <span className="text-[11px] text-[#8FA3AD] font-light">{customers.length} Registered Customers</span>
+        <div className={`border rounded-none p-5 space-y-2 ${
+          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+        }`}>
+          <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'সর্বমোট বকেয়া (Total Dues)' : 'Total Outstanding Dues'}</span>
+          <div className={`text-2xl font-bold font-poppins ${isDark ? 'text-[#1FB6A8]' : 'text-[#007791]'}`}>৳{totalCompanyDue.toLocaleString()}</div>
+          <span className={`text-[11px] font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{customers.length} Registered Customers</span>
         </div>
 
-        <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 space-y-2 card-hover-glow">
-          <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'কোম্পানি বাজেট ও খরচ' : 'Budget & Expense Vouchers'}</span>
+        <div className={`border rounded-none p-5 space-y-2 ${
+          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+        }`}>
+          <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'কোম্পানি বাজেট ও খরচ' : 'Budget & Expense Vouchers'}</span>
           <button
             onClick={() => setViewMode('expenses')}
-            className="w-full py-2 px-3 rounded-none bg-[#00897B]/20 hover:bg-[#00897B]/30 text-[#00897B] text-xs font-normal transition-all border border-[#00897B]/30 text-left flex items-center justify-between cursor-pointer"
+            className="w-full py-2 px-3 rounded-none bg-[#00897B]/10 hover:bg-[#00897B]/20 text-[#00897B] text-xs font-normal transition-all border border-[#00897B]/30 text-left flex items-center justify-between cursor-pointer"
           >
             <span className="font-light">{isBn ? 'খরচ ভাউচার এন্ট্রি →' : 'Manage Expenses & Budget →'}</span>
           </button>
         </div>
 
-        <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 space-y-2 card-hover-glow">
-          <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'রিপোর্ট মোড' : 'Quick Reports'}</span>
+        <div className={`border rounded-none p-5 space-y-2 ${
+          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+        }`}>
+          <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'রিপোর্ট মোড' : 'Quick Reports'}</span>
           <button
             onClick={() => setViewMode('reports')}
-            className="w-full py-2 px-3 rounded-none bg-[#1FB6A8]/20 hover:bg-[#1FB6A8]/30 text-[#1FB6A8] text-xs font-normal transition-all border border-[#1FB6A8]/30 text-left flex items-center justify-between cursor-pointer"
+            className="w-full py-2 px-3 rounded-none bg-[#0284C7]/10 hover:bg-[#0284C7]/20 text-[#0284C7] text-xs font-normal transition-all border border-[#0284C7]/30 text-left flex items-center justify-between cursor-pointer"
           >
             <span className="font-light">{isBn ? 'স্টেটমেন্ট ও রিপোর্টস দেখুন →' : 'View Financial Reports →'}</span>
           </button>
         </div>
 
-        <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 space-y-2 card-hover-glow flex flex-col justify-between">
-          <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'কাস্টমার অ্যাকশন' : 'Customer Directory Action'}</span>
+        <div className={`border rounded-none p-5 space-y-2 flex flex-col justify-between ${
+          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+        }`}>
+          <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'কাস্টমার অ্যাকশন' : 'Customer Directory Action'}</span>
           <button
             onClick={() => setShowAddCustomerModal(true)}
-            className="py-2 px-3 rounded-none bg-[#1FB6A8] hover:bg-[#22A6B3] text-[#0F2D52] font-normal text-xs transition-all shadow-md flex items-center justify-center space-x-1 cursor-pointer"
+            className="py-2 px-3 rounded-none bg-[#0284C7] hover:bg-[#0369A1] text-white font-normal text-xs transition-all shadow-sm flex items-center justify-center space-x-1 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span className="font-light">{isBn ? '+ নতুন কাস্টমার' : '+ Add Customer'}</span>
@@ -1136,25 +1229,31 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
       </div>
 
       {/* Search & Sort Controls Bar */}
-      <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className={`border rounded-none p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
+        isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+      }`}>
         <div className="relative flex-1 max-w-xs">
-          <Search className="w-4 h-4 text-[#8FA3AD] absolute left-3 top-2.5" />
+          <Search className={`w-4 h-4 absolute left-3 top-2.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-400'}`} />
           <input
             type="text"
             value={custSearch}
             onChange={(e) => setCustSearch(e.target.value)}
             placeholder={isBn ? 'কাস্টমার নাম, কোড বা ফোন খুঁজুন...' : 'Search name, code or phone...'}
-            className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none py-1.5 pl-9 pr-3 text-xs text-white placeholder-[#8FA3AD] outline-none font-light"
+            className={`w-full border rounded-none py-1.5 pl-9 pr-3 text-xs outline-none font-light ${
+              isDark ? 'bg-[#0B1622] border-[#1E3247] text-white placeholder-[#8FA3AD]' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
+            }`}
           />
         </div>
 
         <div className="flex items-center space-x-2 text-xs">
           <button
             onClick={() => setSortByDue(!sortByDue)}
-            className={`px-3 py-1.5 rounded-none border text-xs font-normal transition-all ${
+            className={`px-3 py-1.5 rounded-none border text-xs font-normal transition-all cursor-pointer ${
               sortByDue
-                ? 'bg-[#1FB6A8] text-[#0F2D52] border-[#1FB6A8]'
-                : 'bg-[#0B1622] text-[#8FA3AD] border-[#1E3247]'
+                ? 'bg-[#00897B] text-white border-[#00897B]'
+                : isDark
+                ? 'bg-[#0B1622] text-[#8FA3AD] border-[#1E3247]'
+                : 'bg-slate-100 text-slate-700 border-slate-300'
             }`}
           >
             <span className="font-light">{isBn ? 'সর্বোচ্চ বকেয়া অনুযায়ী সাজান' : 'Sort by Highest Due'}</span>
@@ -1163,10 +1262,14 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
       </div>
 
       {/* Customer Directory Table */}
-      <div className="bg-[#11202F] border border-[#1E3247] rounded-none overflow-hidden shadow-xl">
+      <div className={`border rounded-none overflow-hidden shadow-sm ${
+        isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+      }`}>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-[#EAF2F5]">
-            <thead className="bg-[#0B1622] text-[#8FA3AD] uppercase text-[10px] tracking-wider border-b border-[#1E3247] font-medium">
+          <table className="w-full text-left text-xs">
+            <thead className={`uppercase text-[10px] tracking-wider border-b font-medium ${
+              isDark ? 'bg-[#0B1622] text-[#8FA3AD] border-[#1E3247]' : 'bg-slate-100 text-slate-600 border-slate-200'
+            }`}>
               <tr>
                 <th className="p-3.5">Customer Code</th>
                 <th className="p-3.5">Customer Name</th>
@@ -1177,17 +1280,17 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                 <th className="p-3.5 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-[#1E3247]">
+            <tbody className={`divide-y ${isDark ? 'divide-[#1E3247]' : 'divide-slate-200'}`}>
               {paginatedCustomers.map((cust) => {
                 const stats = getCustomerStats(cust.customer_code);
                 return (
-                  <tr key={cust.id} className="hover:bg-[#1E3247]/40 transition-colors">
-                    <td className="p-3.5 font-bold font-mono text-[#1FB6A8]">{cust.customer_code}</td>
-                    <td className="p-3.5 font-medium text-white">{cust.name}</td>
-                    <td className="p-3.5 text-[#8FA3AD] font-mono">{cust.phone}</td>
-                    <td className="p-3.5 text-amber-400 font-mono">৳{stats.totalCharges.toLocaleString()}</td>
-                    <td className="p-3.5 text-emerald-400 font-mono">৳{stats.totalPayments.toLocaleString()}</td>
-                    <td className="p-3.5 font-bold text-white text-sm font-mono">
+                  <tr key={cust.id} className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
+                    <td className="p-3.5 font-bold font-mono text-[#00897B]">{cust.customer_code}</td>
+                    <td className={`p-3.5 font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{cust.name}</td>
+                    <td className={`p-3.5 font-mono ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{cust.phone}</td>
+                    <td className="p-3.5 text-amber-600 dark:text-amber-400 font-mono">৳{stats.totalCharges.toLocaleString()}</td>
+                    <td className="p-3.5 text-emerald-600 dark:text-emerald-400 font-mono">৳{stats.totalPayments.toLocaleString()}</td>
+                    <td className={`p-3.5 font-bold text-sm font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       ৳{stats.currentDue.toLocaleString()}
                     </td>
                     <td className="p-3.5 text-right">
@@ -1196,7 +1299,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                           setSelectedCustomerId(cust.id);
                           setViewMode('detail');
                         }}
-                        className="px-3.5 py-1.5 rounded-none bg-[#1FB6A8] hover:bg-[#22A6B3] text-[#0F2D52] font-normal text-xs transition-all shadow-md cursor-pointer"
+                        className="px-3.5 py-1.5 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-normal text-xs transition-all shadow-sm cursor-pointer"
                       >
                         <span className="font-light">{isBn ? 'লেজার বিবরণ দেখুন →' : 'View Ledger →'}</span>
                       </button>
@@ -1209,7 +1312,9 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         </div>
 
         {/* Pagination */}
-        <div className="p-4 border-t border-[#1E3247] flex items-center justify-between text-xs text-[#8FA3AD]">
+        <div className={`p-4 border-t flex items-center justify-between text-xs ${
+          isDark ? 'border-[#1E3247] text-[#8FA3AD]' : 'border-slate-200 text-slate-500'
+        }`}>
           <div className="font-light">
             Showing {paginatedCustomers.length} of {filteredCustomers.length} Customers
           </div>
@@ -1217,17 +1322,21 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
             <button
               disabled={custPage === 1}
               onClick={() => setCustPage(custPage - 1)}
-              className="p-1.5 rounded-none bg-[#0B1622] disabled:opacity-40 hover:text-white cursor-pointer"
+              className={`p-1.5 rounded-none disabled:opacity-40 cursor-pointer ${
+                isDark ? 'bg-[#0B1622] hover:text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+              }`}
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
-            <span className="font-mono text-white">
+            <span className={`font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
               {custPage} / {totalCustPages}
             </span>
             <button
               disabled={custPage >= totalCustPages}
               onClick={() => setCustPage(custPage + 1)}
-              className="p-1.5 rounded-none bg-[#0B1622] disabled:opacity-40 hover:text-white cursor-pointer"
+              className={`p-1.5 rounded-none disabled:opacity-40 cursor-pointer ${
+                isDark ? 'bg-[#0B1622] hover:text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+              }`}
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -1240,56 +1349,66 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         <div className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <form
             onSubmit={handleSaveNewCustomer}
-            className="bg-[#11202F] border border-[#1FB6A8]/40 rounded-none p-6 max-w-md w-full space-y-4 shadow-2xl animate-in zoom-in-95"
+            className={`border rounded-none p-6 max-w-md w-full space-y-4 shadow-2xl animate-in zoom-in-95 ${
+              isDark ? 'bg-[#11202F] border-[#1FB6A8]/40 text-white' : 'bg-white border-slate-300 text-slate-900'
+            }`}
           >
-            <h3 className="text-base font-bold text-white flex items-center space-x-2">
-              <Users className="w-5 h-5 text-[#1FB6A8]" />
+            <h3 className="text-base font-bold flex items-center space-x-2">
+              <Users className="w-5 h-5 text-[#00897B]" />
               <span>{isBn ? 'নতুন কাস্টমার তৈরি করুন' : 'Quick Add New Customer'}</span>
             </h3>
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'কাস্টমার কোড (Customer Code)' : 'Customer Code'}</label>
+                <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'কাস্টমার কোড (Customer Code)' : 'Customer Code'}</label>
                 <input
                   type="text"
                   required
                   value={newCustCode}
                   onChange={(e) => setNewCustCode(e.target.value)}
-                  className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white font-mono outline-none focus:border-[#1FB6A8]"
+                  className={`w-full border rounded-none p-2.5 font-mono outline-none ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
+                  }`}
                 />
               </div>
 
               <div>
-                <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'কাস্টমার নাম *' : 'Customer Name *'}</label>
+                <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'কাস্টমার নাম *' : 'Customer Name *'}</label>
                 <input
                   type="text"
                   required
                   value={newCustName}
                   onChange={(e) => setNewCustName(e.target.value)}
                   placeholder="e.g. গ্লোবাল ইলেকট্রনিক্স ট্রেডার্স"
-                  className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white outline-none focus:border-[#1FB6A8] font-light"
+                  className={`w-full border rounded-none p-2.5 outline-none font-light ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
+                  }`}
                 />
               </div>
 
               <div>
-                <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'মোবাইল নম্বর' : 'Phone Number'}</label>
+                <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'মোবাইল নম্বর' : 'Phone Number'}</label>
                 <input
                   type="text"
                   value={newCustPhone}
                   onChange={(e) => setNewCustPhone(e.target.value)}
                   placeholder="01700000000"
-                  className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white font-mono outline-none focus:border-[#1FB6A8]"
+                  className={`w-full border rounded-none p-2.5 font-mono outline-none ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
+                  }`}
                 />
               </div>
 
               <div>
-                <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'ঠিকানা' : 'Address'}</label>
+                <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'ঠিকানা' : 'Address'}</label>
                 <input
                   type="text"
                   value={newCustAddress}
                   onChange={(e) => setNewCustAddress(e.target.value)}
                   placeholder="Dhaka, Bangladesh"
-                  className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white outline-none focus:border-[#1FB6A8] font-light"
+                  className={`w-full border rounded-none p-2.5 outline-none font-light ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
+                  }`}
                 />
               </div>
             </div>
@@ -1298,13 +1417,15 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
               <button
                 type="button"
                 onClick={() => setShowAddCustomerModal(false)}
-                className="px-4 py-2 rounded-none bg-[#0B1622] text-[#8FA3AD] text-xs font-normal hover:text-white cursor-pointer"
+                className={`px-4 py-2 rounded-none text-xs font-normal hover:text-white cursor-pointer ${
+                  isDark ? 'bg-[#0B1622] text-[#8FA3AD]' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
               >
                 <span className="font-light">{isBn ? 'বাতিল' : 'Cancel'}</span>
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 rounded-none bg-[#1FB6A8] text-[#0F2D52] font-normal text-xs hover:bg-[#22A6B3] cursor-pointer"
+                className="px-5 py-2 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-normal text-xs cursor-pointer shadow-sm"
               >
                 <span className="font-light">{isBn ? 'কাস্টমার সেভ করুন' : 'Save Customer'}</span>
               </button>
