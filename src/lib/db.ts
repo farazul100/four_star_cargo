@@ -44,12 +44,14 @@ export const resetHostingerDbToDefault = () => {
 
 // Initialize Hostinger local persistence safely without wiping real data on refresh
 export const initHostingerDb = () => {
-  if (!localStorage.getItem(DB_KEYS.CARTONS)) {
-    localStorage.setItem(DB_KEYS.CARTONS, JSON.stringify([]));
+  const existingCartons = localStorage.getItem(DB_KEYS.CARTONS);
+  if (!existingCartons || existingCartons === '[]') {
+    localStorage.setItem(DB_KEYS.CARTONS, JSON.stringify(INITIAL_CARTONS));
   }
 
-  if (!localStorage.getItem(DB_KEYS.PROPOSALS)) {
-    localStorage.setItem(DB_KEYS.PROPOSALS, JSON.stringify([]));
+  const existingProposals = localStorage.getItem(DB_KEYS.PROPOSALS);
+  if (!existingProposals || existingProposals === '[]') {
+    localStorage.setItem(DB_KEYS.PROPOSALS, JSON.stringify(INITIAL_PROPOSALS));
   }
 
   if (!localStorage.getItem(DB_KEYS.CUSTOMERS)) {
