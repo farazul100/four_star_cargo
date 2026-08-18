@@ -257,41 +257,41 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
           <button
             onClick={handleExportCSV}
-            className="flex items-center justify-center space-x-2 py-2.5 px-5 rounded-xl bg-[#1FB6A8] hover:bg-[#22A6B3] text-[#0F2D52] font-bold text-xs transition-all shadow-md"
+            className="flex items-center justify-center space-x-2 py-2.5 px-5 rounded-none bg-[#1FB6A8] hover:bg-[#22A6B3] text-[#0F2D52] font-normal text-xs transition-all shadow-md cursor-pointer"
           >
             <Download className="w-4 h-4" />
-            <span>{isBn ? 'CSV লেজার স্টেটমেন্ট ডাউনলোড' : 'Export CSV Report'}</span>
+            <span className="font-light">{isBn ? 'CSV লেজার স্টেটমেন্ট ডাউনলোড' : 'Export CSV Report'}</span>
           </button>
         </div>
 
         {/* Date Filter Bar */}
-        <div className="bg-[#11202F] border border-[#1E3247] rounded-2xl p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+        <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
           <div>
-            <label className="text-[#8FA3AD] block mb-1">{isBn ? 'শুরূতের তারিখ' : 'Start Date'}</label>
+            <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'শুরূতের তারিখ' : 'Start Date'}</label>
             <input
               type="date"
               value={reportStartDate}
               onChange={(e) => setReportStartDate(e.target.value)}
-              className="w-full bg-[#0B1622] border border-[#1E3247] rounded-xl p-2 text-white font-mono outline-none"
+              className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2 text-white font-mono outline-none"
             />
           </div>
 
           <div>
-            <label className="text-[#8FA3AD] block mb-1">{isBn ? 'শেষের তারিখ' : 'End Date'}</label>
+            <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'শেষের তারিখ' : 'End Date'}</label>
             <input
               type="date"
               value={reportEndDate}
               onChange={(e) => setReportEndDate(e.target.value)}
-              className="w-full bg-[#0B1622] border border-[#1E3247] rounded-xl p-2 text-white font-mono outline-none"
+              className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2 text-white font-mono outline-none"
             />
           </div>
 
           <div>
-            <label className="text-[#8FA3AD] block mb-1">{isBn ? 'কাস্টমার ফিল্টার' : 'Filter Customer'}</label>
+            <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'কাস্টমার ফিল্টার' : 'Filter Customer'}</label>
             <select
               value={reportCustFilter}
               onChange={(e) => setReportCustFilter(e.target.value)}
-              className="w-full bg-[#0B1622] border border-[#1E3247] rounded-xl p-2 text-white outline-none"
+              className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2 text-white outline-none font-light"
             >
               <option value="all">{isBn ? 'সকল কাস্টমার' : 'All Customers'}</option>
               {customers.map((c) => (
@@ -304,7 +304,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         </div>
 
         {/* Reports Table */}
-        <div className="bg-[#11202F] border border-[#1E3247] rounded-3xl overflow-hidden shadow-xl">
+        <div className="bg-[#11202F] border border-[#1E3247] rounded-none overflow-hidden shadow-xl">
           <div className="p-4 border-b border-[#1E3247] flex items-center justify-between">
             <h3 className="text-sm font-bold text-white">{isBn ? 'ফিল্টারড ট্রানজ্যাকশন এন্ট্রি' : 'Filtered Transaction Entries'}</h3>
             <span className="text-xs text-[#1FB6A8] font-mono">{reportEntries.length} Records</span>
@@ -312,7 +312,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs text-[#EAF2F5]">
-              <thead className="bg-[#0B1622] text-[#8FA3AD] uppercase text-[10px] tracking-wider border-b border-[#1E3247]">
+              <thead className="bg-[#0B1622] text-[#8FA3AD] uppercase text-[10px] tracking-wider border-b border-[#1E3247] font-medium">
                 <tr>
                   <th className="p-3.5">Date</th>
                   <th className="p-3.5">Customer Code</th>
@@ -328,10 +328,10 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                   <tr key={re.id} className="hover:bg-[#1E3247]/40 transition-colors">
                     <td className="p-3.5 font-mono text-[#8FA3AD]">{re.created_at.split('T')[0]}</td>
                     <td className="p-3.5 font-mono text-[#1FB6A8] font-bold">{re.customer_code}</td>
-                    <td className="p-3.5 font-bold text-white">{re.customer_name}</td>
+                    <td className="p-3.5 font-medium text-white">{re.customer_name}</td>
                     <td className="p-3.5">
                       <span
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase ${
+                        className={`px-2.5 py-0.5 rounded-none text-[10px] font-normal uppercase ${
                           re.type === 'charge'
                             ? 'bg-amber-500/20 text-amber-300'
                             : 'bg-emerald-500/20 text-emerald-300'
@@ -343,7 +343,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                     <td className="p-3.5 font-bold font-mono text-white">৳{re.amount.toLocaleString()}</td>
                     <td className="p-3.5 text-[#8FA3AD]">
                       {re.source === 'auto_cash_collection' ? (
-                        <span className="text-emerald-400 font-semibold flex items-center space-x-1">
+                        <span className="text-emerald-400 font-normal flex items-center space-x-1">
                           <DollarSign className="w-3.5 h-3.5" />
                           <span>Auto Cash ({re.entered_by_name})</span>
                         </span>
@@ -376,46 +376,46 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         <div className="flex items-center justify-between border-b border-[#1E3247] pb-4">
           <button
             onClick={() => setViewMode('directory')}
-            className="flex items-center space-x-2 text-xs font-semibold text-[#8FA3AD] hover:text-[#1FB6A8] transition-colors"
+            className="flex items-center space-x-2 text-xs font-normal text-[#8FA3AD] hover:text-[#1FB6A8] transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
-            <span>{isBn ? 'কাস্টমার তালিকায় ফিরে যান' : 'Back to Customer Directory'}</span>
+            <span className="font-light">{isBn ? 'কাস্টমার তালিকায় ফিরে যান' : 'Back to Customer Directory'}</span>
           </button>
 
           <button
             onClick={() => setShowAddLedgerModal(true)}
-            className="flex items-center space-x-2 py-2 px-4 rounded-xl bg-[#1FB6A8] hover:bg-[#22A6B3] text-[#0F2D52] font-bold text-xs shadow-md"
+            className="flex items-center space-x-2 py-2 px-4 rounded-none bg-[#1FB6A8] hover:bg-[#22A6B3] text-[#0F2D52] font-normal text-xs shadow-md cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>{isBn ? 'ম্যানুয়াল লেজার এন্ট্রি করুন' : 'Add Manual Ledger Entry'}</span>
+            <span className="font-light">{isBn ? 'ম্যানুয়াল লেজার এন্ট্রি করুন' : 'Add Manual Ledger Entry'}</span>
           </button>
         </div>
 
         {/* Customer Balance Header Card */}
-        <div className="bg-gradient-to-r from-[#11202F] via-[#0F2D52] to-[#11202F] border border-[#1FB6A8]/30 rounded-3xl p-6 shadow-xl grid grid-cols-1 sm:grid-cols-3 gap-6">
+        <div className="bg-gradient-to-r from-[#11202F] via-[#0F2D52] to-[#11202F] border border-[#1FB6A8]/30 rounded-none p-6 shadow-xl grid grid-cols-1 sm:grid-cols-3 gap-6">
           <div>
             <span className="text-xs text-[#8FA3AD] uppercase font-bold tracking-wider">{selectedCust.customer_code}</span>
-            <h2 className="text-xl font-extrabold text-white mt-1">{selectedCust.name}</h2>
-            <p className="text-xs text-[#8FA3AD] mt-1">{selectedCust.phone} | {selectedCust.address}</p>
+            <h2 className="text-xl font-bold text-white mt-1">{selectedCust.name}</h2>
+            <p className="text-xs text-[#8FA3AD] mt-1 font-light">{selectedCust.phone} | {selectedCust.address}</p>
           </div>
 
           <div className="border-t sm:border-t-0 sm:border-l border-[#1E3247] pt-4 sm:pt-0 sm:pl-6 space-y-1">
-            <span className="text-xs text-[#8FA3AD]">{isBn ? 'মোট চার্জ (Total Charges)' : 'Total Charges'}</span>
+            <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'মোট চার্জ (Total Charges)' : 'Total Charges'}</span>
             <div className="text-lg font-bold text-amber-400 font-mono">৳{stats.totalCharges.toLocaleString()}</div>
-            <span className="text-[11px] text-[#8FA3AD] block">{isBn ? 'মোট পরিশোধ (Total Paid)' : 'Total Paid'}: ৳{stats.totalPayments.toLocaleString()}</span>
+            <span className="text-[11px] text-[#8FA3AD] block font-light">{isBn ? 'মোট পরিশোধ (Total Paid)' : 'Total Paid'}: ৳{stats.totalPayments.toLocaleString()}</span>
           </div>
 
           <div className="border-t sm:border-t-0 sm:border-l border-[#1E3247] pt-4 sm:pt-0 sm:pl-6 space-y-1">
-            <span className="text-xs text-[#8FA3AD]">{isBn ? 'বর্তমান নিট বকেয়া (Current Net Due)' : 'Current Net Outstanding Due'}</span>
-            <div className="text-2xl font-extrabold text-[#1FB6A8] font-mono">৳{stats.currentDue.toLocaleString()}</div>
-            <span className="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-0.5 rounded-full inline-block">
+            <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'বর্তমান নিট বকেয়া (Current Net Due)' : 'Current Net Outstanding Due'}</span>
+            <div className="text-2xl font-bold text-[#1FB6A8] font-mono">৳{stats.currentDue.toLocaleString()}</div>
+            <span className="text-[10px] text-emerald-400 font-normal bg-emerald-500/10 px-2 py-0.5 rounded-none inline-block">
               ON-THE-FLY COMPUTED (LIVE)
             </span>
           </div>
         </div>
 
         {/* Timeline Ledger Entries List */}
-        <div className="bg-[#11202F] border border-[#1E3247] rounded-3xl p-6 space-y-4 shadow-xl">
+        <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-6 space-y-4 shadow-xl">
           <h3 className="text-sm font-bold text-white flex items-center space-x-2">
             <FileText className="w-4 h-4 text-[#1FB6A8]" />
             <span>{isBn ? 'লেজার লেনদেন ইতিহাস (Chronological Timeline)' : 'Chronological Transaction History'}</span>
@@ -569,46 +569,46 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
       {/* Overview Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#11202F] border border-[#1E3247] rounded-2xl p-5 space-y-2 card-hover-glow">
-          <span className="text-xs text-[#8FA3AD]">{isBn ? 'সর্বমোট বকেয়া (Total Dues)' : 'Total Outstanding Dues'}</span>
-          <div className="text-2xl font-extrabold text-[#1FB6A8] font-poppins">৳{totalCompanyDue.toLocaleString()}</div>
-          <span className="text-[11px] text-[#8FA3AD]">{customers.length} Registered Customers</span>
+        <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 space-y-2 card-hover-glow">
+          <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'সর্বমোট বকেয়া (Total Dues)' : 'Total Outstanding Dues'}</span>
+          <div className="text-2xl font-bold text-[#1FB6A8] font-poppins">৳{totalCompanyDue.toLocaleString()}</div>
+          <span className="text-[11px] text-[#8FA3AD] font-light">{customers.length} Registered Customers</span>
         </div>
 
-        <div className="bg-[#11202F] border border-[#1E3247] rounded-2xl p-5 space-y-2 card-hover-glow">
-          <span className="text-xs text-[#8FA3AD]">{isBn ? 'কোম্পানি বাজেট ও খরচ' : 'Budget & Expense Vouchers'}</span>
+        <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 space-y-2 card-hover-glow">
+          <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'কোম্পানি বাজেট ও খরচ' : 'Budget & Expense Vouchers'}</span>
           <button
             onClick={() => setViewMode('expenses')}
-            className="w-full py-2 px-3 rounded-xl bg-[#00897B]/20 hover:bg-[#00897B]/30 text-[#00897B] text-xs font-bold transition-all border border-[#00897B]/30 text-left flex items-center justify-between cursor-pointer"
+            className="w-full py-2 px-3 rounded-none bg-[#00897B]/20 hover:bg-[#00897B]/30 text-[#00897B] text-xs font-normal transition-all border border-[#00897B]/30 text-left flex items-center justify-between cursor-pointer"
           >
-            <span>{isBn ? 'খরচ ভাউচার এন্ট্রি →' : 'Manage Expenses & Budget →'}</span>
+            <span className="font-light">{isBn ? 'খরচ ভাউচার এন্ট্রি →' : 'Manage Expenses & Budget →'}</span>
           </button>
         </div>
 
-        <div className="bg-[#11202F] border border-[#1E3247] rounded-2xl p-5 space-y-2 card-hover-glow">
-          <span className="text-xs text-[#8FA3AD]">{isBn ? 'রিপোর্ট মোড' : 'Quick Reports'}</span>
+        <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 space-y-2 card-hover-glow">
+          <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'রিপোর্ট মোড' : 'Quick Reports'}</span>
           <button
             onClick={() => setViewMode('reports')}
-            className="w-full py-2 px-3 rounded-xl bg-[#1FB6A8]/20 hover:bg-[#1FB6A8]/30 text-[#1FB6A8] text-xs font-bold transition-all border border-[#1FB6A8]/30 text-left flex items-center justify-between cursor-pointer"
+            className="w-full py-2 px-3 rounded-none bg-[#1FB6A8]/20 hover:bg-[#1FB6A8]/30 text-[#1FB6A8] text-xs font-normal transition-all border border-[#1FB6A8]/30 text-left flex items-center justify-between cursor-pointer"
           >
-            <span>{isBn ? 'স্টেটমেন্ট ও রিপোর্টস দেখুন →' : 'View Financial Reports →'}</span>
+            <span className="font-light">{isBn ? 'স্টেটমেন্ট ও রিপোর্টস দেখুন →' : 'View Financial Reports →'}</span>
           </button>
         </div>
 
-        <div className="bg-[#11202F] border border-[#1E3247] rounded-2xl p-5 space-y-2 card-hover-glow flex flex-col justify-between">
-          <span className="text-xs text-[#8FA3AD]">{isBn ? 'কাস্টমার অ্যাকশন' : 'Customer Directory Action'}</span>
+        <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 space-y-2 card-hover-glow flex flex-col justify-between">
+          <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'কাস্টমার অ্যাকশন' : 'Customer Directory Action'}</span>
           <button
             onClick={() => setShowAddCustomerModal(true)}
-            className="py-2 px-3 rounded-xl bg-[#1FB6A8] hover:bg-[#22A6B3] text-[#0F2D52] font-bold text-xs transition-all shadow-md flex items-center justify-center space-x-1 cursor-pointer"
+            className="py-2 px-3 rounded-none bg-[#1FB6A8] hover:bg-[#22A6B3] text-[#0F2D52] font-normal text-xs transition-all shadow-md flex items-center justify-center space-x-1 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
-            <span>{isBn ? 'নতুন কাস্টমার' : 'Add Customer'}</span>
+            <span className="font-light">{isBn ? '+ নতুন কাস্টমার' : '+ Add Customer'}</span>
           </button>
         </div>
       </div>
 
       {/* Search & Sort Controls Bar */}
-      <div className="bg-[#11202F] border border-[#1E3247] rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="relative flex-1 max-w-xs">
           <Search className="w-4 h-4 text-[#8FA3AD] absolute left-3 top-2.5" />
           <input
@@ -616,29 +616,29 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
             value={custSearch}
             onChange={(e) => setCustSearch(e.target.value)}
             placeholder={isBn ? 'কাস্টমার নাম, কোড বা ফোন খুঁজুন...' : 'Search name, code or phone...'}
-            className="w-full bg-[#0B1622] border border-[#1E3247] rounded-xl py-1.5 pl-9 pr-3 text-xs text-white placeholder-[#8FA3AD] outline-none"
+            className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none py-1.5 pl-9 pr-3 text-xs text-white placeholder-[#8FA3AD] outline-none font-light"
           />
         </div>
 
         <div className="flex items-center space-x-2 text-xs">
           <button
             onClick={() => setSortByDue(!sortByDue)}
-            className={`px-3 py-1.5 rounded-xl border text-xs font-semibold transition-all ${
+            className={`px-3 py-1.5 rounded-none border text-xs font-normal transition-all ${
               sortByDue
                 ? 'bg-[#1FB6A8] text-[#0F2D52] border-[#1FB6A8]'
                 : 'bg-[#0B1622] text-[#8FA3AD] border-[#1E3247]'
             }`}
           >
-            {isBn ? 'সর্বোচ্চ বকেয়া অনুযায়ী সাজান' : 'Sort by Highest Due'}
+            <span className="font-light">{isBn ? 'সর্বোচ্চ বকেয়া অনুযায়ী সাজান' : 'Sort by Highest Due'}</span>
           </button>
         </div>
       </div>
 
       {/* Customer Directory Table */}
-      <div className="bg-[#11202F] border border-[#1E3247] rounded-3xl overflow-hidden shadow-xl">
+      <div className="bg-[#11202F] border border-[#1E3247] rounded-none overflow-hidden shadow-xl">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs text-[#EAF2F5]">
-            <thead className="bg-[#0B1622] text-[#8FA3AD] uppercase text-[10px] tracking-wider border-b border-[#1E3247]">
+            <thead className="bg-[#0B1622] text-[#8FA3AD] uppercase text-[10px] tracking-wider border-b border-[#1E3247] font-medium">
               <tr>
                 <th className="p-3.5">Customer Code</th>
                 <th className="p-3.5">Customer Name</th>
@@ -655,11 +655,11 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                 return (
                   <tr key={cust.id} className="hover:bg-[#1E3247]/40 transition-colors">
                     <td className="p-3.5 font-bold font-mono text-[#1FB6A8]">{cust.customer_code}</td>
-                    <td className="p-3.5 font-bold text-white">{cust.name}</td>
+                    <td className="p-3.5 font-medium text-white">{cust.name}</td>
                     <td className="p-3.5 text-[#8FA3AD] font-mono">{cust.phone}</td>
                     <td className="p-3.5 text-amber-400 font-mono">৳{stats.totalCharges.toLocaleString()}</td>
                     <td className="p-3.5 text-emerald-400 font-mono">৳{stats.totalPayments.toLocaleString()}</td>
-                    <td className="p-3.5 font-extrabold text-white text-sm font-mono">
+                    <td className="p-3.5 font-bold text-white text-sm font-mono">
                       ৳{stats.currentDue.toLocaleString()}
                     </td>
                     <td className="p-3.5 text-right">
@@ -668,9 +668,9 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                           setSelectedCustomerId(cust.id);
                           setViewMode('detail');
                         }}
-                        className="px-3.5 py-1.5 rounded-xl bg-[#1FB6A8] hover:bg-[#22A6B3] text-[#0F2D52] font-bold text-xs transition-all shadow-md"
+                        className="px-3.5 py-1.5 rounded-none bg-[#1FB6A8] hover:bg-[#22A6B3] text-[#0F2D52] font-normal text-xs transition-all shadow-md cursor-pointer"
                       >
-                        {isBn ? 'লেজার বিবরণ দেখুন →' : 'View Ledger →'}
+                        <span className="font-light">{isBn ? 'লেজার বিবরণ দেখুন →' : 'View Ledger →'}</span>
                       </button>
                     </td>
                   </tr>
@@ -682,14 +682,14 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
         {/* Pagination */}
         <div className="p-4 border-t border-[#1E3247] flex items-center justify-between text-xs text-[#8FA3AD]">
-          <div>
+          <div className="font-light">
             Showing {paginatedCustomers.length} of {filteredCustomers.length} Customers
           </div>
           <div className="flex items-center space-x-2">
             <button
               disabled={custPage === 1}
               onClick={() => setCustPage(custPage - 1)}
-              className="p-1.5 rounded-lg bg-[#0B1622] disabled:opacity-40 hover:text-white"
+              className="p-1.5 rounded-none bg-[#0B1622] disabled:opacity-40 hover:text-white cursor-pointer"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
@@ -699,7 +699,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
             <button
               disabled={custPage >= totalCustPages}
               onClick={() => setCustPage(custPage + 1)}
-              className="p-1.5 rounded-lg bg-[#0B1622] disabled:opacity-40 hover:text-white"
+              className="p-1.5 rounded-none bg-[#0B1622] disabled:opacity-40 hover:text-white cursor-pointer"
             >
               <ChevronRight className="w-4 h-4" />
             </button>
@@ -712,7 +712,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         <div className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <form
             onSubmit={handleSaveNewCustomer}
-            className="bg-[#11202F] border border-[#1FB6A8]/40 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl animate-in zoom-in-95"
+            className="bg-[#11202F] border border-[#1FB6A8]/40 rounded-none p-6 max-w-md w-full space-y-4 shadow-2xl animate-in zoom-in-95"
           >
             <h3 className="text-base font-bold text-white flex items-center space-x-2">
               <Users className="w-5 h-5 text-[#1FB6A8]" />
@@ -721,47 +721,47 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
             <div className="space-y-3 text-xs">
               <div>
-                <label className="text-[#8FA3AD] block mb-1">{isBn ? 'কাস্টমার কোড (Customer Code)' : 'Customer Code'}</label>
+                <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'কাস্টমার কোড (Customer Code)' : 'Customer Code'}</label>
                 <input
                   type="text"
                   required
                   value={newCustCode}
                   onChange={(e) => setNewCustCode(e.target.value)}
-                  className="w-full bg-[#0B1622] border border-[#1E3247] rounded-xl p-2.5 text-white font-mono outline-none focus:border-[#1FB6A8]"
+                  className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white font-mono outline-none focus:border-[#1FB6A8]"
                 />
               </div>
 
               <div>
-                <label className="text-[#8FA3AD] block mb-1">{isBn ? 'কাস্টমার নাম *' : 'Customer Name *'}</label>
+                <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'কাস্টমার নাম *' : 'Customer Name *'}</label>
                 <input
                   type="text"
                   required
                   value={newCustName}
                   onChange={(e) => setNewCustName(e.target.value)}
                   placeholder="e.g. গ্লোবাল ইলেকট্রনিক্স ট্রেডার্স"
-                  className="w-full bg-[#0B1622] border border-[#1E3247] rounded-xl p-2.5 text-white outline-none focus:border-[#1FB6A8]"
+                  className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white outline-none focus:border-[#1FB6A8] font-light"
                 />
               </div>
 
               <div>
-                <label className="text-[#8FA3AD] block mb-1">{isBn ? 'মোবাইল নম্বর' : 'Phone Number'}</label>
+                <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'মোবাইল নম্বর' : 'Phone Number'}</label>
                 <input
                   type="text"
                   value={newCustPhone}
                   onChange={(e) => setNewCustPhone(e.target.value)}
                   placeholder="01700000000"
-                  className="w-full bg-[#0B1622] border border-[#1E3247] rounded-xl p-2.5 text-white font-mono outline-none focus:border-[#1FB6A8]"
+                  className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white font-mono outline-none focus:border-[#1FB6A8]"
                 />
               </div>
 
               <div>
-                <label className="text-[#8FA3AD] block mb-1">{isBn ? 'ঠিকানা' : 'Address'}</label>
+                <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'ঠিকানা' : 'Address'}</label>
                 <input
                   type="text"
                   value={newCustAddress}
                   onChange={(e) => setNewCustAddress(e.target.value)}
                   placeholder="Dhaka, Bangladesh"
-                  className="w-full bg-[#0B1622] border border-[#1E3247] rounded-xl p-2.5 text-white outline-none focus:border-[#1FB6A8]"
+                  className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white outline-none focus:border-[#1FB6A8] font-light"
                 />
               </div>
             </div>
@@ -770,15 +770,15 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
               <button
                 type="button"
                 onClick={() => setShowAddCustomerModal(false)}
-                className="px-4 py-2 rounded-xl bg-[#0B1622] text-[#8FA3AD] text-xs font-semibold hover:text-white"
+                className="px-4 py-2 rounded-none bg-[#0B1622] text-[#8FA3AD] text-xs font-normal hover:text-white cursor-pointer"
               >
-                {isBn ? 'বাতিল' : 'Cancel'}
+                <span className="font-light">{isBn ? 'বাতিল' : 'Cancel'}</span>
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 rounded-xl bg-[#1FB6A8] text-[#0F2D52] font-bold text-xs hover:bg-[#22A6B3]"
+                className="px-5 py-2 rounded-none bg-[#1FB6A8] text-[#0F2D52] font-normal text-xs hover:bg-[#22A6B3] cursor-pointer"
               >
-                {isBn ? 'কাস্টমার সেভ করুন' : 'Save Customer'}
+                <span className="font-light">{isBn ? 'কাস্টমার সেভ করুন' : 'Save Customer'}</span>
               </button>
             </div>
           </form>
