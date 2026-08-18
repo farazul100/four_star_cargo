@@ -398,6 +398,11 @@ export const saveHostingerDbData = (key: string, data: any) => {
 
   try {
     localStorage.setItem(key, JSON.stringify(data));
+    // If saving ledger, update both key variants for 100% backward and forward compatibility
+    if (key === DB_KEYS.LEDGER || key === 'fsc_vps_ledger_entries') {
+      localStorage.setItem('fsc_vps_ledger', JSON.stringify(data));
+      localStorage.setItem('fsc_vps_ledger_entries', JSON.stringify(data));
+    }
   } catch (e) {
     console.warn(`LocalStorage setItem warning for key "${key}":`, e);
   }

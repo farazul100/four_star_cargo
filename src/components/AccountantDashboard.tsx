@@ -266,7 +266,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
     const updatedLedger = [newEntry, ...ledgerEntries];
     setLedgerEntries(updatedLedger);
-    saveHostingerDbData('fsc_vps_ledger_entries', updatedLedger);
+    saveHostingerDbData('fsc_vps_ledger', updatedLedger);
 
     // Also sync customers state array & Hostinger DB fsc_vps_customers
     const newStats = computeCustomerBalanceFromLedger(cust.customer_code, updatedLedger);
@@ -301,7 +301,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
     const targetEntry = ledgerEntries.find((l) => l.id === entryId);
     const updatedLedger = ledgerEntries.filter((l) => l.id !== entryId);
     setLedgerEntries(updatedLedger);
-    saveHostingerDbData('fsc_vps_ledger_entries', updatedLedger);
+    saveHostingerDbData('fsc_vps_ledger', updatedLedger);
 
     if (targetEntry) {
       const newStats = computeCustomerBalanceFromLedger(targetEntry.customer_code, updatedLedger);
