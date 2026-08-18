@@ -50,13 +50,33 @@ const DEFAULT_GENERAL_SETTINGS: GeneralSettingsData = {
   fontFamily: 'Atkinson Hyperlegible',
 };
 
+export interface BudgetSettingsData {
+  airFreightRatePerKg: number;
+  customsDutyRatePerKg: number;
+  warehouseRentTarget: number;
+  staffSalaryTarget: number;
+  packingTransportTarget: number;
+  utilitiesTarget: number;
+  otherAdminTarget: number;
+}
+
+const DEFAULT_BUDGET_SETTINGS: BudgetSettingsData = {
+  airFreightRatePerKg: 850,
+  customsDutyRatePerKg: 140,
+  warehouseRentTarget: 250000,
+  staffSalaryTarget: 320000,
+  packingTransportTarget: 85000,
+  utilitiesTarget: 45000,
+  otherAdminTarget: 35000,
+};
+
 export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
   currentUser,
   language,
   isDark = false,
 }) => {
   const isBn = language === 'bn';
-  const [activeTab, setActiveTab] = useState<'general' | 'api'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'api' | 'budget_rates'>('general');
   const [isTestingPathao, setIsTestingPathao] = useState(false);
 
   // General Form Settings State
@@ -68,6 +88,17 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
       } catch (e) {}
     }
     return DEFAULT_GENERAL_SETTINGS;
+  });
+
+  // Budget & Rates Settings State
+  const [budgetSettings, setBudgetSettings] = useState<BudgetSettingsData>(() => {
+    const saved = localStorage.getItem('fsc_vps_budget_settings');
+    if (saved) {
+      try {
+        return { ...DEFAULT_BUDGET_SETTINGS, ...JSON.parse(saved) };
+      } catch (e) {}
+    }
+    return DEFAULT_BUDGET_SETTINGS;
   });
 
   // Pathao API Settings State (Defaults to Disconnected / Empty)
@@ -82,7 +113,7 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Handle Save Settings
+  // Handle Save General Settings
   const handleSave = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
@@ -104,6 +135,23 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
     );
 
     showToast(isBn ? 'সাধারণ সেটিংস সফলভাবে সংরক্ষণ করা হয়েছে!' : 'General settings saved successfully!');
+  };
+
+  // Handle Save Budget & Rates Settings
+  const handleSaveBudgetSettings = (e: React.FormEvent) => {
+    e.preventDefault();
+    localStorage.setItem('fsc_vps_budget_settings', JSON.stringify(budgetSettings));
+    saveHostingerDbData('fsc_vps_budget_settings', budgetSettings);
+
+    logSystemAuditAction(
+      currentUser,
+      'UPDATE_BUDGET_RATE_SETTINGS',
+      'system',
+      'BUDGET_SETTINGS',
+      `বাজেট ও ফ্রেইট রেট সেটিংস আপডেট করা হয়েছে (Freight: ৳${budgetSettings.airFreightRatePerKg}/kg, Customs: ৳${budgetSettings.customsDutyRatePerKg}/kg)`
+    );
+
+    showToast(isBn ? '💰 বাজেট ও ফ্রেইট রেট সেটিংস সফলভাবে আপডেট করা হয়েছে!' : '💰 Budget & Freight Rate settings saved successfully!');
   };
 
   // Logo Upload Handler
@@ -223,6 +271,19 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
           >
             <Globe className="w-4 h-4 text-emerald-400" />
             <span>{isBn ? '🔌 API সেটিংস (পাঠাও কুরিয়ার)' : 'API Settings (Pathao Courier)'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('budget_rates')}
+            className={`px-5 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer ${
+              activeTab === 'budget_rates'
+                ? 'bg-teal-600 text-white shadow-xs'
+                : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
+            }`}
+          >
+            <Building className="w-4 h-4 text-teal-300" />
+            <span>{isBn ? '💰 বাজেট ও ফ্রেইট রেট সেটিংস' : 'Budget & Rate Settings'}</span>
           </button>
         </div>
       </div>
@@ -648,6 +709,168 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                     ? (isBn ? '⏳ কানেকশন টেস্ট করা হচ্ছে...' : 'Testing Connection...')
                     : (isBn ? '⚡ টেস্ট কানেকশন & সেভ করুন' : 'Test Connection & Save')}
                 </span>
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* TAB 3: BUDGET & FREIGHT RATES SETTINGS */}
+      {activeTab === 'budget_rates' && (
+        <div
+          className={`border rounded-2xl p-6 shadow-2xs space-y-6 ${
+            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          }`}
+        >
+          <div className="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+            <div>
+              <h2 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">
+                {isBn ? 'সুপার এডমিন অফিশিয়াল বাজেট ও ফ্রেইট রেট সেটিংস' : 'Super Admin Official Budget & Freight Rate Settings'}
+              </h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-light">
+                {isBn
+                  ? 'এয়ার ফ্রেইট চার্জ রেট, কাস্টমস শুল্ক রেট ও খাতের স্ট্যান্ডার্ড লক্ষ্যমাত্রা সেট করুন যা বাজেটিং ড্যাশবোর্ডে প্রযোজ্য হবে'
+                  : 'Configure official per-KG shipping/customs rates & target monthly operational category budgets'}
+              </p>
+            </div>
+          </div>
+
+          <form onSubmit={handleSaveBudgetSettings} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Air Freight Rate per KG */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                  {isBn ? '✈️ এয়ার ফ্রেইট চার্জ রেট (৳ / কেজি)' : 'Air Freight Cargo Rate (৳ / KG)'}
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  value={budgetSettings.airFreightRatePerKg}
+                  onChange={(e) => setBudgetSettings({ ...budgetSettings, airFreightRatePerKg: Number(e.target.value) })}
+                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
+                    isDark ? 'bg-[#121214] border-slate-700 text-emerald-400 focus:border-teal-500' : 'bg-slate-50 border-slate-200 text-emerald-700 focus:border-teal-500'
+                  }`}
+                />
+                <p className="text-[11px] text-slate-400 font-light">
+                  {isBn ? 'ফ্লাইটে পাঠানো মোট কেজির উপর এই অফিশিয়াল রেট হিসাব করা হবে' : 'Official charter flight shipping rate per kg'}
+                </p>
+              </div>
+
+              {/* Customs Duty & Tax Rate per KG */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                  {isBn ? '🛃 কাস্টমস শুল্ক ও ট্যাক্স রেট (৳ / কেজি)' : 'Customs Duty & Clearance Rate (৳ / KG)'}
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  value={budgetSettings.customsDutyRatePerKg}
+                  onChange={(e) => setBudgetSettings({ ...budgetSettings, customsDutyRatePerKg: Number(e.target.value) })}
+                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
+                    isDark ? 'bg-[#121214] border-slate-700 text-emerald-400 focus:border-teal-500' : 'bg-slate-50 border-slate-200 text-emerald-700 focus:border-teal-500'
+                  }`}
+                />
+                <p className="text-[11px] text-slate-400 font-light">
+                  {isBn ? 'এয়ারপোর্ট কাস্টমস খালাসের প্রতি কেজি শুল্ক চার্জ' : 'Official airport customs clearance duty per kg'}
+                </p>
+              </div>
+
+              {/* Monthly Warehouse Rent Target */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                  {isBn ? '🏬 মাসিক ওয়্যারহাউজ ভাড়া ও লিজ বাজেট (৳)' : 'Monthly Warehouse Rent Target (৳)'}
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  value={budgetSettings.warehouseRentTarget}
+                  onChange={(e) => setBudgetSettings({ ...budgetSettings, warehouseRentTarget: Number(e.target.value) })}
+                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
+                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-teal-500'
+                  }`}
+                />
+              </div>
+
+              {/* Monthly Staff Salary Target */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                  {isBn ? '👷‍♂️ মাসিক স্টাফ বেতন ও ওভারটাইম বাজেট (৳)' : 'Monthly Staff Salary Target (৳)'}
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  value={budgetSettings.staffSalaryTarget}
+                  onChange={(e) => setBudgetSettings({ ...budgetSettings, staffSalaryTarget: Number(e.target.value) })}
+                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
+                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-teal-500'
+                  }`}
+                />
+              </div>
+
+              {/* Monthly Packing & Transport Target */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                  {isBn ? '📦 মাসিক প্যাকিং ও পরিবহন বরাদ্দ (৳)' : 'Monthly Packing & Transport Budget (৳)'}
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  value={budgetSettings.packingTransportTarget}
+                  onChange={(e) => setBudgetSettings({ ...budgetSettings, packingTransportTarget: Number(e.target.value) })}
+                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
+                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-teal-500'
+                  }`}
+                />
+              </div>
+
+              {/* Monthly Utilities Target */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                  {isBn ? '⚡ মাসিক ইউটিলিটি (বিদ্যুৎ/ইন্টারনেট) বরাদ্দ (৳)' : 'Monthly Utilities Budget (৳)'}
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  value={budgetSettings.utilitiesTarget}
+                  onChange={(e) => setBudgetSettings({ ...budgetSettings, utilitiesTarget: Number(e.target.value) })}
+                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
+                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-teal-500'
+                  }`}
+                />
+              </div>
+
+              {/* Monthly Other Admin Target */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                  {isBn ? '📄 মাসিক প্রশাসনিক ও অডিট বরাদ্দ (৳)' : 'Monthly Administrative Budget (৳)'}
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  value={budgetSettings.otherAdminTarget}
+                  onChange={(e) => setBudgetSettings({ ...budgetSettings, otherAdminTarget: Number(e.target.value) })}
+                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
+                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-teal-500'
+                  }`}
+                />
+              </div>
+            </div>
+
+            {/* Save Budget Settings Button */}
+            <div className="pt-3 border-t dark:border-slate-800 flex justify-end">
+              <button
+                type="submit"
+                className="py-2.5 px-6 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md shadow-teal-600/20 flex items-center space-x-2 transition-all cursor-pointer"
+              >
+                <Save className="w-4 h-4 text-white" />
+                <span>{isBn ? '💾 বাজেট ও ফ্রেইট রেট সেটিংস সংরক্ষণ করুন' : 'Save Budget & Rate Settings'}</span>
               </button>
             </div>
           </form>
