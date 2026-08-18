@@ -77,13 +77,113 @@ function smartMergeArrays($existing, $incoming) {
     return array_values($map);
 }
 
+// Seed initial production data if database is fresh/empty
+$seedDatabase = [
+    'fsc_vps_users' => [
+        [
+            'id' => 'usr-admin-master',
+            'name' => 'সুপার এডমিন (Super Admin)',
+            'email' => 'superadmin@cargo.com',
+            'password' => 'Cargo@2026',
+            'role' => 'super_admin',
+            'status' => 'active',
+            'created_at' => '2026-01-01T00:00:00Z'
+        ]
+    ],
+    'fsc_vps_warehouses' => [
+        [
+            'id' => 'wh-china',
+            'name' => 'চীন (গুয়াংজু হাব) CN',
+            'code' => 'CAN',
+            'country' => 'China',
+            'city' => 'Guangzhou',
+            'address' => 'Building A4, Baiyun Freight Center, Guangzhou',
+            'manager_name' => 'তানভীর আহমেদ (Tanvir Ahmed)',
+            'phone' => '+86 138 0013 8000',
+            'email' => 'china@fourstarcargo.com',
+            'is_final_destination' => false
+        ],
+        [
+            'id' => 'wh-bd',
+            'name' => 'বাংলাদেশ (ঢাকা সেন্ট্রাল হাব) BD',
+            'code' => 'DAC-01',
+            'country' => 'Bangladesh',
+            'city' => 'Dhaka',
+            'address' => 'House 12, Road 4, Sector 3, Uttara, Dhaka-1230',
+            'manager_name' => 'রফিকুল ইসলাম (Rafiqul Islam)',
+            'phone' => '+880 1819-445566',
+            'email' => 'bd@fourstarcargo.com',
+            'is_final_destination' => true
+        ]
+    ],
+    'fsc_vps_cartons' => [
+        [
+            'id' => 'ctn-seed-101',
+            'ctn_no' => 'CTN-US03-01',
+            'tracking_no' => 'FSC-2026-US03',
+            'sender' => 'Guangzhou Electronics Co.',
+            'receiver' => 'Rahim Enterprise Dhaka',
+            'origin_warehouse_id' => 'wh-china',
+            'current_warehouse_id' => 'wh-china',
+            'destination_warehouse_id' => 'wh-bd',
+            'status' => 'proposed',
+            'gross_weight' => 45.0,
+            'chargeable_weight' => 45.0,
+            'cbm' => 0.4,
+            'flight_number' => 'US-03',
+            'created_at' => date('c')
+        ],
+        [
+            'id' => 'ctn-seed-102',
+            'ctn_no' => 'CTN-US03-02',
+            'tracking_no' => 'FSC-2026-US03',
+            'sender' => 'Guangzhou Electronics Co.',
+            'receiver' => 'Rahim Enterprise Dhaka',
+            'origin_warehouse_id' => 'wh-china',
+            'current_warehouse_id' => 'wh-china',
+            'destination_warehouse_id' => 'wh-bd',
+            'status' => 'proposed',
+            'gross_weight' => 52.0,
+            'chargeable_weight' => 52.0,
+            'cbm' => 0.5,
+            'flight_number' => 'US-03',
+            'created_at' => date('c')
+        ]
+    ],
+    'fsc_vps_proposals' => [
+        [
+            'id' => 'prop-us03-master',
+            'flying_name' => 'US-03',
+            'flight_number' => 'US-03',
+            'warehouse_id' => 'wh-china',
+            'warehouse_name' => 'চীন (গুয়াংজু হাব) CN',
+            'destination_warehouse_id' => 'wh-bd',
+            'destination_warehouse_name' => 'বাংলাদেশ (ঢাকা সেন্ট্রাল হাব) BD',
+            'proposed_by' => 'usr-1',
+            'proposed_by_name' => 'তানভীর আহমেদ (China Incharge)',
+            'date' => date('Y-m-d'),
+            'status' => 'pending',
+            'carton_ids' => ['ctn-seed-101', 'ctn-seed-102'],
+            'items_count' => 6,
+            'total_weight' => 267.0,
+            'total_cbm' => 2.4,
+            'airline' => 'US-Bangla Air Cargo',
+            'notes' => 'ঢাকা সেন্ট্রাল হাবে জরুরী শিপমেন্ট পাঠাতে ফ্লাইং প্রোপোজাল সাবমিট করা হলো।'
+        ]
+    ],
+    'fsc_vps_customers' => [],
+    'fsc_vps_ledger' => [],
+    'fsc_vps_audit' => [],
+    'fsc_vps_expenses' => []
+];
+
 // 1. POST Request: Save updated database state to Hostinger disk
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = file_get_contents('php://input');
     if (!empty($input)) {
         $decoded = json_decode($input, true);
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-            $existing = readCurrentServerDb($filePaths) ?: [];
+            $existing = readCurrentServerDb($filePaths) ?: $seedDatabase;
             
             $finalDb = $existing;
             foreach ($decoded as $key => $val) {
@@ -103,30 +203,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // 2. GET Request: Read latest database state from Hostinger disk
 $currentDb = readCurrentServerDb($filePaths);
-if ($currentDb && is_array($currentDb)) {
-    echo json_encode($currentDb, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+if (!$currentDb || !is_array($currentDb) || empty($currentDb['fsc_vps_proposals'])) {
+    writeServerDb($filePaths, $seedDatabase);
+    echo json_encode($seedDatabase, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     exit();
 }
 
-// Default fallback empty database
-echo json_encode([
-    'fsc_vps_users' => [
-        [
-            'id' => 'usr-admin-master',
-            'name' => 'সুপার এডমিন (Super Admin)',
-            'email' => 'superadmin@cargo.com',
-            'password' => 'Cargo@2026',
-            'role' => 'super_admin',
-            'status' => 'active',
-            'created_at' => '2026-01-01T00:00:00Z'
-        ]
-    ],
-    'fsc_vps_warehouses' => [],
-    'fsc_vps_cartons' => [],
-    'fsc_vps_proposals' => [],
-    'fsc_vps_customers' => [],
-    'fsc_vps_ledger' => [],
-    'fsc_vps_audit' => [],
-    'fsc_vps_expenses' => []
-]);
+echo json_encode($currentDb, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 ?>
