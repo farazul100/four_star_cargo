@@ -479,6 +479,11 @@ export const fetchServerDbAndSync = async () => {
                       bd_calibrated_weight: finalBdWeight,
                       gross_weight: finalBdWeight || existing.gross_weight || item.gross_weight,
                     });
+                  } else if (existing && (key === DB_KEYS.CUSTOMERS || key === DB_KEYS.LEDGER || key === 'fsc_vps_ledger_entries')) {
+                    itemMap.set(k, {
+                      ...item,
+                      ...existing,
+                    });
                   } else {
                     itemMap.set(k, item);
                   }

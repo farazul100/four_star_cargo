@@ -4,7 +4,7 @@ import { DashboardLayout } from '../components/DashboardLayout';
 import { AccountantDashboard } from '../components/AccountantDashboard';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
-import { getHostingerDbData } from '../lib/db';
+import { getHostingerDbData, subscribeToDbUpdates } from '../lib/db';
 
 export const AccountsDashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -52,10 +52,18 @@ export const AccountsDashboardPage: React.FC = () => {
     }
   };
 
-  const dbData = getHostingerDbData();
-  const [ledgerEntries, setLedgerEntries] = useState(dbData.ledgerEntries);
-  const [customers, setCustomers] = useState(dbData.customers);
-  const [expenses, setExpenses] = useState(dbData.expenses);
+  const [ledgerEntries, setLedgerEntries] = useState(() => getHostingerDbData().ledgerEntries);
+  const [customers, setCustomers] = useState(() => getHostingerDbData().customers);
+  const [expenses, setExpenses] = useState(() => getHostingerDbData().expenses);
+
+  React.useEffect(() => {
+    return subscribeToDbUpdates(() => {
+      const freshDb = getHostingerDbData();
+      setLedgerEntries(freshDb.ledgerEntries);
+      setCustomers(freshDb.customers);
+      setExpenses(freshDb.expenses);
+    });
+  }, []);
 
   if (!user) return null;
 
