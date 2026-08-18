@@ -57,14 +57,14 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Handler: Mark Flight Received at Bangladesh Airport
+  // Handler: Mark Flight Received at Bangladesh Airport (By Operations Director)
   const handleMarkReceivedAtBdAirport = (proposalIds: string[], flightNo: string, cartonIds: string[]) => {
-    const isBdWarehouseStaff = currentUser?.role === 'warehouse_incharge' && currentUser?.warehouse_id === 'wh-bd';
+    const isBdWarehouseStaff = currentUser?.role === 'warehouse_incharge';
 
-    // 1. Update proposal status
+    // 1. Update proposal status to 'arrived_bd' so it unlocks for Warehouse Incharge
     const updatedProposals: FlyingProposal[] = proposals.map((p) => {
       if (proposalIds.includes(p.id) || (flightNo && (p.flight_number === flightNo || p.flying_name === flightNo))) {
-        return { ...p, status: 'received' as const };
+        return { ...p, status: isBdWarehouseStaff ? ('received' as const) : ('arrived_bd' as any) };
       }
       return p;
     });
@@ -94,13 +94,15 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       isBn
         ? isBdWarehouseStaff
           ? `✅ ফ্লাইট ${flightNo || ''} বাংলাদেশ ওয়্যারহাউজে সফলভাবে স্টক যুক্ত করা হয়েছে!`
-          : `✅ ফ্লাইট ${flightNo || ''} বাংলাদেশ এয়ারপোর্টে প্রাপ্ত মার্ক করা হয়েছে! (বাংলাদেশ ওয়্যারহাউজ রিসিভিং পেন্ডিং)`
+          : `✅ ফ্লাইট ${flightNo || ''} বাংলাদেশ এয়ারপোর্টে প্রাপ্ত মার্ক করা হয়েছে! (ওয়্যারহাউজে রিসিভিং ডাটা উন্মুক্ত করা হয়েছে)`
         : `✅ Flight ${flightNo || ''} marked as Arrived at BD Airport!`,
       'success'
     );
   };
 
   // Filtered proposals list
+  const isBdWarehouseStaff = currentUser?.role === 'warehouse_incharge';
+
   const filteredProposals = proposals.filter((p) => {
     const search = searchTerm.toLowerCase();
     const matchesSearch =
@@ -109,12 +111,18 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       (p.awb_number || '').toLowerCase().includes(search) ||
       (p.warehouse_name || '').toLowerCase().includes(search);
 
+    // CRITICAL REQUIREMENT: If user is Warehouse Incharge, ONLY show flights where Operations has clicked "arrived_bd" or "received"!
+    // If Operations has NOT clicked BD Airport Arrived yet (status is 'in_transit' or 'approved' or 'pending'), HIDE IT!
+    if (isBdWarehouseStaff && (p.status === 'in_transit' || p.status === 'approved' || p.status === 'pending')) {
+      return false;
+    }
+
     const matchesStatus =
       statusFilter === 'all'
         ? true
         : statusFilter === 'received'
-        ? p.status === 'received'
-        : p.status !== 'received';
+        ? (p.status === 'received' || p.status === ( 'arrived_bd' as any))
+        : p.status === 'in_transit';
 
     return matchesSearch && matchesStatus;
   });
