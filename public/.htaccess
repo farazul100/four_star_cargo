@@ -9,9 +9,9 @@ DirectoryIndex index.html index.php
   RewriteRule ^api/db/?$ api/db.php [L,QSA]
   RewriteRule ^api/db\.php$ api/db.php [L,QSA]
 
-  # 2. SPA Route Rewrite - Send all non-file/non-directory requests to index.html
+  # 2. SPA Route Rewrite - Send all non-file/non-directory requests to /index.html
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_URI} !^/api/
-  RewriteRule . index.html [L]
+  RewriteRule ^(.*)$ /index.html [L]
 </IfModule>

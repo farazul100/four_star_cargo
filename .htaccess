@@ -1,5 +1,5 @@
 # M/S FOUR STAR CARGO — HOSTINGER APACHE CONFIGURATION
-DirectoryIndex dist/index.html index.html index.php
+DirectoryIndex /dist/index.html index.html index.php
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
@@ -10,15 +10,15 @@ DirectoryIndex dist/index.html index.html index.php
   RewriteRule ^api/db\.php$ api/db.php [L,QSA]
 
   # 2. Serve static dist assets & files (assets/, images, etc.) natively
-  RewriteCond %{DOCUMENT_ROOT}/dist%{REQUEST_URI} -f
-  RewriteRule ^(.*)$ dist/$1 [L]
+  RewriteCond %{DOCUMENT_ROOT}/dist/$1 -f
+  RewriteRule ^(.*)$ /dist/$1 [L]
 
-  # 3. Direct Root Request (/) to dist/index.html
-  RewriteRule ^$ dist/index.html [L]
+  # 3. Direct Root Request (/) to /dist/index.html
+  RewriteRule ^$ /dist/index.html [L]
 
-  # 4. SPA Route Rewrite - Send all non-file/non-directory frontend routes directly to dist/index.html
+  # 4. SPA Route Rewrite - Send all non-file/non-directory frontend routes directly to /dist/index.html
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_URI} !^/api/
-  RewriteRule ^(.*)$ dist/index.html [L]
+  RewriteRule ^(.*)$ /dist/index.html [L]
 </IfModule>

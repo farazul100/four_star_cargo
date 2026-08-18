@@ -7,6 +7,7 @@
 $distIndex = __DIR__ . '/dist/index.html';
 if (file_exists($distIndex)) {
     $content = file_get_contents($distIndex);
+    header('HTTP/1.1 200 OK');
     header('Content-Type: text/html; charset=utf-8');
     header('Content-Length: ' . strlen($content));
     header('Cache-Control: no-cache, no-store, must-revalidate');
@@ -17,6 +18,7 @@ if (file_exists($distIndex)) {
 $rootIndex = __DIR__ . '/index.html';
 if (file_exists($rootIndex)) {
     $content = file_get_contents($rootIndex);
+    header('HTTP/1.1 200 OK');
     header('Content-Type: text/html; charset=utf-8');
     header('Content-Length: ' . strlen($content));
     header('Cache-Control: no-cache, no-store, must-revalidate');
