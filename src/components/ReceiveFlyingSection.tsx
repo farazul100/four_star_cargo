@@ -355,7 +355,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-800">
         <div>
           <h2 className="text-xl font-medium text-slate-900 dark:text-white flex items-center space-x-2.5">
-            <div className="p-2 rounded-xl bg-blue-600/10 text-blue-600 dark:text-blue-400">
+            <div className="p-2 rounded-none bg-blue-600/10 text-blue-600 dark:text-blue-400">
               <Truck className="w-5 h-5" />
             </div>
             <span>{isBn ? 'রিসিভ ফ্লাইং (ইনকামিং কার্গো বিমান তালিকা)' : 'Receive Flying (Inbound Flight Dispatches)'}</span>
@@ -369,7 +369,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       </div>
 
       {/* Filter & Search Toolbar */}
-      <div className={`p-4 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-3 ${
+      <div className={`p-4 rounded-none border flex flex-col md:flex-row md:items-center justify-between gap-3 ${
         isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'
       }`}>
         {/* Search */}
@@ -380,20 +380,20 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={isBn ? 'ফ্লাইং নাম, ফ্লাইট নং, AWB বা উৎস হাব দিয়ে খুঁজুন...' : 'Search by Flying Name, Flight No, AWB or Origin...'}
-            className={`w-full pl-10 pr-4 py-2 rounded-xl text-xs font-normal border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
+            className={`w-full pl-10 pr-4 py-2 rounded-none text-xs font-normal border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
               isDark ? 'bg-slate-900 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
             }`}
           />
         </div>
 
         {/* Status Filter Pills */}
-        <div className={`flex items-center p-1 rounded-xl border text-xs font-normal ${
+        <div className={`flex items-center p-1 rounded-none border text-xs font-normal ${
           isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-100 border-slate-300/80'
         }`}>
           <button
             type="button"
             onClick={() => setStatusFilter('all')}
-            className={`px-3 py-1.5 rounded-lg transition-all font-medium text-xs whitespace-nowrap cursor-pointer select-none ${
+            className={`px-3 py-1.5 rounded-none transition-all font-medium text-xs whitespace-nowrap cursor-pointer select-none ${
               statusFilter === 'all'
                 ? 'bg-blue-600 text-white shadow-2xs'
                 : isDark
@@ -406,7 +406,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
           <button
             type="button"
             onClick={() => setStatusFilter('in_transit')}
-            className={`px-3 py-1.5 rounded-lg transition-all font-medium text-xs whitespace-nowrap cursor-pointer select-none ${
+            className={`px-3 py-1.5 rounded-none transition-all font-medium text-xs whitespace-nowrap cursor-pointer select-none ${
               statusFilter === 'in_transit'
                 ? 'bg-blue-600 text-white shadow-2xs'
                 : isDark
@@ -419,7 +419,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
           <button
             type="button"
             onClick={() => setStatusFilter('received')}
-            className={`px-3 py-1.5 rounded-lg transition-all font-medium text-xs whitespace-nowrap cursor-pointer select-none ${
+            className={`px-3 py-1.5 rounded-none transition-all font-medium text-xs whitespace-nowrap cursor-pointer select-none ${
               statusFilter === 'received'
                 ? 'bg-emerald-600 text-white shadow-2xs'
                 : isDark
@@ -434,7 +434,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
       {/* Main Flights Table */}
       <div
-        className={`border rounded-2xl overflow-hidden shadow-2xs ${
+        className={`border rounded-none overflow-hidden shadow-2xs ${
           isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}
       >
@@ -509,7 +509,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                           <button
                             type="button"
                             onClick={() => handleOpenWeightCalibModal(gf.sampleProposal)}
-                            className="p-1 px-1.5 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 cursor-pointer transition-colors text-[10px] font-normal border border-blue-500/20"
+                            className="p-1 px-1.5 rounded-none bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 cursor-pointer transition-colors text-[10px] font-normal border border-blue-500/20"
                             title={isBn ? 'বাংলাদেশে মেপে পাওয়া ওজন টিউন/এডিট করুন' : 'Calibrate Official BD Weight'}
                           >
                             ⚖️ এডিট
@@ -518,12 +518,12 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                       </td>
                       <td className="p-3.5 border-r border-b border-slate-200 dark:border-slate-800">
                         {isReceived ? (
-                          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-medium border border-emerald-500/20">
+                          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-none bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-medium border border-emerald-500/20">
                             <span>🛬 বাংলাদেশ এয়ারপোর্টে প্রাপ্ত</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[10px] font-medium border border-blue-500/20">
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-ping"></span>
+                          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-none bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[10px] font-medium border border-blue-500/20">
+                            <span className="w-1.5 h-1.5 rounded-none bg-blue-500 animate-ping"></span>
                             <span>✈️ মিড-এিয়ার ফ্লাইটে চলমান</span>
                           </span>
                         )}
@@ -533,7 +533,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                           <button
                             type="button"
                             onClick={() => handleOpenWeightCalibModal(gf.sampleProposal)}
-                            className={`px-3 py-1.5 rounded-xl font-normal text-xs transition-all border cursor-pointer select-none ${
+                            className={`px-3 py-1.5 rounded-none font-normal text-xs transition-all border cursor-pointer select-none ${
                               isDark
                                 ? 'bg-slate-800 border-slate-700 text-slate-200 hover:bg-slate-700'
                                 : 'bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200 shadow-2xs'
@@ -544,7 +544,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
                           {isReceived ? (
                             <span
-                              className={`text-[11px] font-normal inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border ${
+                              className={`text-[11px] font-normal inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-none border ${
                                 isDark
                                   ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800/70'
                                   : 'bg-emerald-50 text-emerald-700 border-emerald-300 shadow-2xs'
@@ -557,7 +557,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                             <button
                               type="button"
                               onClick={() => setSelectedFlightForCartonReceive(gf)}
-                              className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all shadow-md flex items-center space-x-1.5 cursor-pointer select-none hover:scale-105 active:scale-95"
+                              className="px-3.5 py-2 rounded-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all shadow-md flex items-center space-x-1.5 cursor-pointer select-none hover:scale-105 active:scale-95"
                             >
                               <Package className="w-4 h-4" />
                               <span>{isBn ? '📦 কার্টুন লিস্ট ও রিসিভ করুন' : 'View Cartons & Receive'}</span>
@@ -578,13 +578,13 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       {selectedProposalForWeightCalib && (
         <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
           <div
-            className={`max-w-md w-full rounded-3xl p-6 shadow-2xl border space-y-5 animate-in fade-in zoom-in-95 duration-200 ${
+            className={`max-w-md w-full rounded-none p-6 shadow-2xl border space-y-5 animate-in fade-in zoom-in-95 duration-200 ${
               isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
             }`}
           >
             <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
               <div className="flex items-center space-x-2">
-                <div className="p-2 rounded-xl bg-blue-500/10 text-blue-500">
+                <div className="p-2 rounded-none bg-blue-500/10 text-blue-500">
                   <Truck className="w-5 h-5" />
                 </div>
                 <div>
@@ -599,14 +599,14 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedProposalForWeightCalib(null)}
-                className="p-1 rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+                className="p-1 rounded-none text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
               >
                 ✕
               </button>
             </div>
 
             <div className="space-y-4 text-xs font-normal">
-              <div className="p-3 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-300 leading-relaxed">
+              <div className="p-3 rounded-none bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-300 leading-relaxed">
                 💡 {isBn
                   ? 'নোট: বাংলাদেশে আসার পর প্রোডাক্টের যে ওজন পরিমাপ করা হবে, সেটিই চূড়ান্ত সত্য ওজন হিসেবে গণ্য হবে এবং গ্রাহকের বিলে হিসাব হবে।'
                   : 'Note: Official gross weight measured upon arrival in Bangladesh is the final billable weight.'}
@@ -621,7 +621,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                   step="0.1"
                   value={calibratedWeightInput}
                   onChange={(e) => setCalibratedWeightInput(Number(e.target.value))}
-                  className={`w-full px-4 py-2.5 rounded-xl text-sm font-mono border focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
+                  className={`w-full px-4 py-2.5 rounded-none text-sm font-mono border focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
                     isDark ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                   }`}
                 />
@@ -632,14 +632,14 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedProposalForWeightCalib(null)}
-                className="px-4 py-2 rounded-xl text-xs font-medium border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
+                className="px-4 py-2 rounded-none text-xs font-medium border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
               >
                 {isBn ? 'বাতিল' : 'Cancel'}
               </button>
               <button
                 type="button"
                 onClick={handleSaveBdWeightCalibration}
-                className="px-4 py-2 rounded-xl text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-all cursor-pointer"
+                className="px-4 py-2 rounded-none text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-all cursor-pointer"
               >
                 {isBn ? 'সেভ করুন ও ওজন আপডেট করুন' : 'Save BD Weight'}
               </button>
