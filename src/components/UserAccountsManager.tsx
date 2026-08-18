@@ -28,7 +28,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { User, UserRole, Warehouse, Language, Theme, AuditLog, Carton } from '../types';
-import { getHostingerDbData, saveHostingerDbData } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
 

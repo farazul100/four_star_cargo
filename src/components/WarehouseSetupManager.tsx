@@ -20,7 +20,7 @@ import {
   Check,
 } from 'lucide-react';
 import { Warehouse, User, Language, Theme, WarehouseInchargeStaff, AuditLog } from '../types';
-import { getHostingerDbData, saveHostingerDbData } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
 
