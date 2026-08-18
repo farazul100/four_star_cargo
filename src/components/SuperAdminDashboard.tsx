@@ -1172,40 +1172,28 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
           </h3>
 
           <div className="space-y-3 text-xs">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 rounded-full bg-[#22C55E]" />
-                <Building2 className="w-3.5 h-3.5 opacity-70" />
-                <span className={isDark ? 'text-gray-200' : 'text-slate-800 font-medium'}>Guangzhou Origin Hub (🇨🇳)</span>
+            {warehouses.map((w) => (
+              <div key={w.id} className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <span className={`w-2 h-2 rounded-full ${w.status === 'active' ? 'bg-[#22C55E]' : 'bg-gray-400'}`} />
+                  <Building2 className="w-3.5 h-3.5 opacity-70" />
+                  <span className={isDark ? 'text-gray-200' : 'text-slate-800 font-medium'}>
+                    {w.name} ({w.country})
+                  </span>
+                </div>
+                <span className={`font-mono font-bold text-[11px] ${w.status === 'active' ? 'text-[#22C55E]' : 'text-gray-400'}`}>
+                  {w.status === 'active' ? 'Active' : 'Inactive'}
+                </span>
               </div>
-              <span className="font-mono text-[#22C55E] font-bold text-[11px]">Active</span>
-            </div>
+            ))}
 
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between pt-2 border-t border-slate-200/50">
               <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 rounded-full bg-[#22C55E]" />
-                <Building2 className="w-3.5 h-3.5 opacity-70" />
-                <span className={isDark ? 'text-gray-200' : 'text-slate-800 font-medium'}>Yiwu Warehouse Hub (🇨🇳)</span>
-              </div>
-              <span className="font-mono text-[#22C55E] font-bold text-[11px]">Active</span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 rounded-full bg-[#22C55E]" />
-                <Building2 className="w-3.5 h-3.5 opacity-70" />
-                <span className={isDark ? 'text-gray-200' : 'text-slate-800 font-medium'}>Dhaka Central Hub (🇧🇩)</span>
-              </div>
-              <span className="font-mono text-[#22C55E] font-bold text-[11px]">Active</span>
-            </div>
-
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 rounded-full bg-[#22C55E]" />
+                <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
                 <Server className="w-3.5 h-3.5 opacity-70" />
                 <span className={isDark ? 'text-gray-200' : 'text-slate-800 font-medium'}>Hostinger VPS Database Sync</span>
               </div>
-              <span className="font-mono text-[#22C55E] font-bold text-[11px]">257ms</span>
+              <span className="font-mono text-[#22C55E] font-bold text-[11px]">257ms (Live)</span>
             </div>
           </div>
         </div>
