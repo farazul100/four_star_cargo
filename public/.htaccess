@@ -1,20 +1,17 @@
 # M/S FOUR STAR CARGO — HOSTINGER APACHE CONFIGURATION (DIST)
-DirectoryIndex index.html
+DirectoryIndex index.html index.php
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
-  # Stop Rule - Prevent internal rewrite loop
-  RewriteRule ^index\.html$ - [L]
-  RewriteRule ^api/ - [L]
-
   # API Route Rewrite for Hostinger Backend Persistence
   RewriteRule ^api/db/?$ api/db.php [L,QSA]
   RewriteRule ^api/db\.php$ api/db.php [L,QSA]
 
-  # SPA Route Rewrite - Send all non-file/non-directory requests to /index.html
+  # SPA Route Rewrite - Send all non-file/non-directory requests to index.html
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . /index.html [L]
+  RewriteCond %{REQUEST_URI} !^/api/
+  RewriteRule . index.html [L]
 </IfModule>

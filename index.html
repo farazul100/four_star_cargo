@@ -2,31 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <script type="text/javascript">
-      // Single Page Application SPA Redirect restore script for Hostinger Apache Server
-      (function(l) {
-        if (l.search[1] === '/' ) {
-          var decoded = l.search.slice(1).split('&').map(function(s) { 
-            return s.replace(/~and~/g, '&')
-          }).join('?');
-          window.history.replaceState(null, null,
-              l.pathname.slice(0, -1) + decoded + l.hash
-          );
-        }
-      }(window.location));
-    </script>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>M/S Four Star Cargo — কার্গো অপারেশনস ম্যানেজমেন্ট সিস্টেম</title>
-    <!-- Google Fonts: Hind Siliguri (Bangla), Poppins (English Headings), Inter (English Body) -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script type="module" crossorigin src="/assets/index-DXRPrNwn.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-dNS87ED1.css">
+    <title>M/S Four Star Cargo — কার্গো ট্র্যাকিং ও অপারেশনস সার্ভিস</title>
   </head>
-  <body class="bg-[#0B1622] text-[#EAF2F5] font-bangla antialiased selection:bg-[#1FB6A8]/30 selection:text-[#1FB6A8]">
+  <body>
     <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
-
