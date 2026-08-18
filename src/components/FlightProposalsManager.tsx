@@ -141,13 +141,17 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
     }
   };
 
-  // Active Proposals Filter (Pending list tab only shows pending proposals by default!)
+  // Active Proposals Filter (Pending list tab shows all pending & active proposals)
   const activeProposals = proposals.filter((p) => {
-    if (statusFilter === 'all') return p.status === 'pending';
+    if (statusFilter === 'all') return p.status === 'pending' || p.status === 'approved' || p.status === 'dispatched';
     return p.status === statusFilter;
   });
   const filteredActiveProposals = activeProposals.filter((prop) => {
-    if (warehouseFilter !== 'all' && prop.warehouse_id !== warehouseFilter) return false;
+    if (warehouseFilter !== 'all') {
+      const matchesWhId = prop.warehouse_id === warehouseFilter;
+      const matchesWhName = (prop.warehouse_name || '').toLowerCase().includes(warehouseFilter.toLowerCase());
+      if (!matchesWhId && !matchesWhName) return false;
+    }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       const matchId = prop.id.toLowerCase().includes(q);

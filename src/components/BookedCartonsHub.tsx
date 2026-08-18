@@ -91,13 +91,16 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
   // Base cartons accessible by current user (Restricted for Warehouse Incharge to CURRENT physical warehouse stock)
   const accessibleCartons = React.useMemo(() => {
-    if (isWarehouseIncharge && myWhId) {
+    if (isWarehouseIncharge) {
       return liveRealtimeCartons.filter(
-        (c) => c.current_warehouse_id === myWhId
+        (c) =>
+          c.current_warehouse_id === myWhId ||
+          c.current_warehouse_id === currentUser?.warehouse_id ||
+          c.booked_by === currentUser?.id
       );
     }
     return liveRealtimeCartons;
-  }, [liveRealtimeCartons, isWarehouseIncharge, myWhId]);
+  }, [liveRealtimeCartons, isWarehouseIncharge, myWhId, currentUser]);
 
   // Warehouses available in filter dropdown
   const accessibleWarehouses = React.useMemo(() => {

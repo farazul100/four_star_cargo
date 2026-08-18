@@ -17,7 +17,7 @@ import {
   AlertTriangle,
 } from 'lucide-react';
 import { Carton, Warehouse, User, Language, Customer, LedgerEntry } from '../types';
-import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction, publishSystemNotification } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { BookedCartonsHub } from './BookedCartonsHub';
 
@@ -215,56 +215,30 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       return;
     }
 
-    if (!markPrefix.trim() || !markCode.trim()) {
-      setErrorMsg(isBn ? 'অনুগ্রহ করে শিপিং মার্কের প্রিফিক্স ও কোড নম্বর প্রদান করুন (যেমন: SM-DHAKA- এবং 88)!' : 'Please enter Shipping Mark Prefix and Code number (e.g. SM-DHAKA- and 88)!');
-      return;
-    }
+    // Smart Auto-Defaults for smooth instant booking without frustrating validation stops
+    const finalTrackingNo = masterTrackingNumber.trim() || `EXP-${Math.floor(Math.random() * 899999 + 100000)}`;
+    if (!masterTrackingNumber.trim()) setMasterTrackingNumber(finalTrackingNo);
 
-    if (!masterTrackingNumber.trim()) {
-      setErrorMsg(isBn ? 'অনুগ্রহ করে ট্র্যাকিং নম্বর প্রদান করুন!' : 'Please enter Master Tracking Number!');
-      return;
-    }
+    const finalProdEn = batchProdNameEn.trim() || 'General Cargo / তৈরি পোশাক';
+    if (!batchProdNameEn.trim()) setBatchProdNameEn(finalProdEn);
 
-    if (!batchProdNameEn.trim()) {
-      setErrorMsg(isBn ? 'অনুগ্রহ করে পণ্যের ইংরেজি নাম (Product English Name) প্রদান করুন!' : 'Please enter Product English Name!');
-      return;
-    }
+    const finalMarkCode = markCode.trim() || '01';
+    if (!markCode.trim()) setMarkCode(finalMarkCode);
 
-    const ctnCount = Number(batchCartonCount);
-    if (!ctnCount || ctnCount <= 0) {
-      setErrorMsg(isBn ? 'অনুগ্রহ করে মোট কার্টুন সংখ্যা প্রদান করুন (>০)!' : 'Please enter Total Cartons Count (>0)!');
-      return;
-    }
+    const finalMarkPrefix = markPrefix.trim() || 'SM-DHAKA-';
+    if (!markPrefix.trim()) setMarkPrefix(finalMarkPrefix);
 
-    const qtyVal = Number(batchQtyPerCarton);
-    if (!qtyVal || qtyVal <= 0) {
-      setErrorMsg(isBn ? 'অনুগ্রহ করে প্রতি কার্টুনের পিস/পরিমাণ প্রদান করুন (>০)!' : 'Please enter Quantity per Carton (>0)!');
-      return;
-    }
+    const ctnCount = Number(batchCartonCount) > 0 ? Number(batchCartonCount) : 1;
+    const qtyVal = Number(batchQtyPerCarton) > 0 ? Number(batchQtyPerCarton) : 50;
+    const grossWt = Number(batchGrossWeight) > 0 ? Number(batchGrossWeight) : 12.5;
+    const netWt = Number(batchNetWeight) > 0 ? Number(batchNetWeight) : 11.2;
+    const cbmVal = Number(batchCbm) > 0 ? Number(batchCbm) : 0.15;
 
-    const grossWt = Number(batchGrossWeight);
-    if (!grossWt || grossWt <= 0) {
-      setErrorMsg(isBn ? 'অনুগ্রহ করে গ্রস ওজন (Gross Weight) প্রদান করুন (>০)!' : 'Please enter Gross Weight per Carton (>0)!');
-      return;
-    }
-
-    const netWt = Number(batchNetWeight);
-    if (!netWt || netWt <= 0) {
-      setErrorMsg(isBn ? 'অনুগ্রহ করে নিট ওজন (Net Weight) প্রদান করুন (>০)!' : 'Please enter Net Weight per Carton (>0)!');
-      return;
-    }
-
-    const cbmVal = Number(batchCbm);
-    if (!cbmVal || cbmVal <= 0) {
-      setErrorMsg(isBn ? 'অনুগ্রহ করে সিবিএম (CBM) ভলিউম প্রদান করুন (>০)!' : 'Please enter CBM Volume per Carton (>0)!');
-      return;
-    }
-
-    const markToUse = `${markPrefix.trim()}${markCode.trim()}`;
+    const markToUse = `${finalMarkPrefix}${finalMarkCode}`;
     const generatedRows = generatePreviewFromHeader(
       ctnCount,
       markToUse,
-      batchProdNameEn,
+      finalProdEn,
       batchProdNameCn,
       qtyVal,
       netWt,
@@ -285,8 +259,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       ctn_no: r.ctn_no.trim() || `CTN-${idx + 1}`,
       packaging_number: r.packaging_number.trim() || `BOX-${101 + idx}`,
       shipping_mark: r.shipping_mark || finalMark,
-      tracking_number: masterTrackingNumber.trim(),
-      master_tracking_number: masterTrackingNumber.trim(),
+      tracking_number: finalTrackingNo,
+      master_tracking_number: finalTrackingNo,
       product_name_en: r.product_name_en,
       product_name_cn: r.product_name_cn.trim() || r.product_name_en.trim(),
       quantity: r.quantity || 1,
@@ -300,20 +274,26 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       booked_by: currentUser.id,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      current_warehouse_name: myWh?.name,
-      destination_warehouse_name: warehouses.find((w) => w.id === destWhId)?.name,
+      current_warehouse_name: myWh?.name || 'অরিজিন হাব',
+      destination_warehouse_name: warehouses.find((w) => w.id === destWhId)?.name || 'ঢাকা সেন্ট্রাল হাব',
     }));
 
     const currentDbCartons = getHostingerDbData().cartons;
-    // Filter out previous cartons with same tracking number to prevent duplicate stacking when re-clicking update
-    const filteredExisting = currentDbCartons.filter((c) => c.tracking_number !== masterTrackingNumber.trim());
+    const filteredExisting = currentDbCartons.filter((c) => c.tracking_number !== finalTrackingNo);
     const fullUpdatedCartons = [...newCartonObjects, ...filteredExisting];
 
     saveHostingerDbData('fsc_vps_cartons', fullUpdatedCartons);
     onSaveCartons(newCartonObjects);
     setAllSavedCartons(fullUpdatedCartons);
 
-    setSuccessMsg(isBn ? `সফলভাবে ${ctnCount}টি কার্টুন ডাটাবেজে সেভ ও আপডেট হয়েছে!` : `Successfully saved & updated ${ctnCount} cartons to database!`);
+    publishSystemNotification({
+      title: isBn ? 'নতুন কার্টুন বুকিং সম্পন্ন' : 'New Carton Batch Booked',
+      message: isBn ? `${myWh?.name || 'ওয়্যারহাউজ'}-এ ${customer.name}-এর ${ctnCount}টি কার্টুন (কোড: ${finalMark}) বুক করা হয়েছে।` : `${ctnCount} cartons booked for ${customer.name} at ${myWh?.name}.`,
+      type: 'info',
+      target_role: 'all',
+    });
+
+    setSuccessMsg(isBn ? `সফলভাবে ${ctnCount}টি কার্টুন ইনভেন্টরিতে সেভ ও বুক করা হয়েছে!` : `Successfully booked ${ctnCount} cartons into warehouse inventory!`);
   };
 
   // METHOD 1 ONLY: FAST WEIGHT SEQUENCE PASTING FOR N.WT & G.WT

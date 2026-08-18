@@ -1317,9 +1317,15 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
   }
 
   // DEFAULT TAB: OWN WAREHOUSE INVENTORY PAGE (Strictly current physical warehouse stock)
-  const myCartons = cartons.filter(
-    (c) => c.current_warehouse_id === myWhId
-  );
+  const myCartons = cartons.filter((c) => {
+    if (!currentUser?.warehouse_id && currentUser?.role === 'super_admin') return true;
+    return (
+      c.current_warehouse_id === myWhId ||
+      c.current_warehouse_id === currentUser?.warehouse_id ||
+      c.booked_by === currentUser?.id ||
+      (myWh && c.current_warehouse_name === myWh.name)
+    );
+  });
 
   const filteredCartons = myCartons.filter((c) => {
     const matchesSearch =
