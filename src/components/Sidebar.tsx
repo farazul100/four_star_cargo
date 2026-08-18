@@ -164,7 +164,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               { id: 'cargo_search', label: isBn ? '🔍 কার্গো ট্র্যাকিং সার্চ' : '🔍 Cargo Tracking Search', icon: Search },
               { id: 'notifications', label: isBn ? 'নোটিফিকেশন' : 'Notifications', icon: Bell },
               { id: 'customer_ledger', label: isBn ? 'কাস্টমার লেজার' : 'Customer Ledger', icon: FileSpreadsheet },
+              { id: 'budget', label: isBn ? 'বাজেট ও খরচ (Super Admin)' : 'Budget & Expenses', icon: Wallet },
               { id: 'cash_collections', label: isBn ? 'ক্যাশ কালেকশন সিঙ্ক' : 'Cash Collection Sync', icon: CheckCircle2 },
+              { id: 'reports', label: isBn ? 'ফাইনান্সিয়াল রিপোর্টস' : 'Financial Reports', icon: FileSpreadsheet },
             ],
           },
         ];

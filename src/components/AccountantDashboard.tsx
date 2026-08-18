@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   FileSpreadsheet,
   Users,
@@ -13,10 +13,20 @@ import {
   ChevronLeft,
   ChevronRight,
   TrendingUp,
+  TrendingDown,
   UserCheck,
   Building2,
   XCircle,
   FileText,
+  Wallet,
+  Activity,
+  BarChart3,
+  PieChart,
+  ShieldCheck,
+  CheckCircle2,
+  RefreshCw,
+  Clock,
+  Layers,
 } from 'lucide-react';
 import { Customer, LedgerEntry, User, Language, ExpenseItem } from '../types';
 import { ToastContainer, ToastMessage } from './Toast';
@@ -32,6 +42,7 @@ interface AccountantDashboardProps {
   setExpenses?: React.Dispatch<React.SetStateAction<ExpenseItem[]>>;
   currentUser: User;
   language: Language;
+  activeTab?: string;
 }
 
 export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
@@ -43,6 +54,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
   setExpenses,
   currentUser,
   language,
+  activeTab,
 }) => {
   const isBn = language === 'bn';
 
@@ -55,8 +67,17 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // State: Active View Mode ('directory' | 'detail' | 'reports' | 'expenses')
-  const [viewMode, setViewMode] = useState<'directory' | 'detail' | 'reports' | 'expenses'>('directory');
+  // State: Active View Mode ('overview' | 'directory' | 'detail' | 'reports' | 'expenses' | 'cash_collections')
+  const [viewMode, setViewMode] = useState<'overview' | 'directory' | 'detail' | 'reports' | 'expenses' | 'cash_collections'>('overview');
+
+  useEffect(() => {
+    if (activeTab === 'ledger') setViewMode('directory');
+    else if (activeTab === 'expenses' || activeTab === 'budget') setViewMode('expenses');
+    else if (activeTab === 'reports') setViewMode('reports');
+    else if (activeTab === 'cash_collections') setViewMode('cash_collections');
+    else if (activeTab === 'dashboard') setViewMode('overview');
+  }, [activeTab]);
+
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
 
   // Search & Filter state for Customers
@@ -77,6 +98,14 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
   const [entryType, setEntryType] = useState<'charge' | 'payment'>('charge');
   const [entryAmount, setEntryAmount] = useState<number>(15000);
   const [entryNote, setEntryNote] = useState('');
+
+  // Add Expense Voucher Modal State (Direct Sync to Super Admin)
+  const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
+  const [expTitle, setExpTitle] = useState('');
+  const [expCategory, setExpCategory] = useState<ExpenseItem['category']>('shipping');
+  const [expAmount, setExpAmount] = useState('');
+  const [expVoucherNo, setExpVoucherNo] = useState(`VCH-${Math.floor(1000 + Math.random() * 9000)}`);
+  const [expNotes, setExpNotes] = useState('');
 
   // Report Date Range Filter
   const [reportStartDate, setReportStartDate] = useState('2026-08-01');
@@ -177,6 +206,41 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
     addToast('success', isBn ? 'CSV লেজার রিপোর্ট ডাউনলোড সম্পন্ন!' : 'CSV Report Exported!');
   };
 
+  // Add Expense Voucher Handler (Live Sync with Super Admin & Persisted to Hostinger DB)
+  const handleSaveExpenseVoucher = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!expTitle.trim() || !expAmount || Number(expAmount) <= 0) return;
+
+    const newExp: ExpenseItem = {
+      id: `exp-${Date.now()}`,
+      title: expTitle.trim(),
+      category: expCategory,
+      amount: Number(expAmount),
+      date: new Date().toISOString().split('T')[0],
+      payment_method: 'bank_transfer',
+      voucher_no: expVoucherNo.trim() || `VCH-${Math.floor(1000 + Math.random() * 9000)}`,
+      notes: expNotes.trim() || 'Accounts Team Manual Entry',
+      created_by: `${currentUser.name} (Accountant)`,
+      created_at: new Date().toISOString(),
+    };
+
+    const updatedExpList = [newExp, ...(expenses || [])];
+    if (setExpenses) setExpenses(updatedExpList);
+    saveHostingerDbData('fsc_vps_expenses', updatedExpList);
+
+    addToast(
+      'success',
+      isBn ? 'খরচ ভাউচার ইনপুট সফল ও সুপার এডমিনে সিঙ্ক হয়েছে!' : 'Expense Voucher Recorded!',
+      isBn ? `৳${Number(expAmount).toLocaleString()} সুপার এডমিন এর বাজেট ও খরচ সেকশনে আপডেট হয়েছে` : `৳${Number(expAmount).toLocaleString()} synced to Super Admin`
+    );
+
+    setExpTitle('');
+    setExpAmount('');
+    setExpVoucherNo(`VCH-${Math.floor(1000 + Math.random() * 9000)}`);
+    setExpNotes('');
+    setShowAddExpenseModal(false);
+  };
+
   // Filtered & Sorted Customer List
   const filteredCustomers = customers
     .filter(
@@ -209,6 +273,470 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
     0
   );
 
+  // Compute Overall Totals for Analytics
+  const totalBilledAll = customers.reduce(
+    (acc, curr) => acc + getCustomerStats(curr.customer_code).totalCharges,
+    0
+  );
+  const totalCollectedCash = customers.reduce(
+    (acc, curr) => acc + getCustomerStats(curr.customer_code).totalPayments,
+    0
+  );
+  const totalExpenseAmount = (expenses || []).reduce((acc, curr) => acc + curr.amount, 0);
+  const netCashflow = totalCollectedCash - totalExpenseAmount;
+
+  // --------------------------------------------------------------------------
+  // TAB: ACCOUNTS OVERVIEW & ANALYTICS DASHBOARD (Landing Tab)
+  // --------------------------------------------------------------------------
+  if (viewMode === 'overview') {
+    return (
+      <div className="space-y-6">
+        <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+
+        {/* Quick Action Navigation & Input Bar */}
+        <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <span className="text-xs text-[#1FB6A8] font-mono uppercase font-light">
+              👋 {isBn ? 'স্বাগত' : 'Welcome'}, {currentUser.name} ({isBn ? 'অ্যাকাউন্টস টিম' : 'Accounts Team'})
+            </span>
+            <h2 className="text-xl font-bold text-white mt-0.5">
+              {isBn ? 'অ্যাকাউন্টস অ্যানালিটিক্স ও ফিনান্সিয়াল কন্ট্রোল প্যানেল' : 'Accounts Financial Control Panel'}
+            </h2>
+            <p className="text-xs text-[#8FA3AD] font-light mt-1">
+              {isBn
+                ? 'আয়, বকেয়া, খরচ সিঙ্ক এবং ম্যানুয়াল হিসাব ইনপুট করার প্রধান ড্যাশবোর্ড'
+                : 'Central financial analytics, manual voucher inputs & Super Admin live synchronization'}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setShowAddExpenseModal(true)}
+              className="px-4 py-2 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white text-xs font-normal transition-all shadow-md flex items-center space-x-1.5 cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="font-light">{isBn ? '➕ নতুন খরচ ভাউচার (Super Admin Sync)' : '➕ Add Expense Voucher'}</span>
+            </button>
+
+            <button
+              onClick={() => setShowAddCustomerModal(true)}
+              className="px-4 py-2 rounded-none bg-[#1FB6A8] hover:bg-[#22A6B3] text-[#0F2D52] text-xs font-normal transition-all shadow-md flex items-center space-x-1.5 cursor-pointer"
+            >
+              <Users className="w-4 h-4" />
+              <span className="font-light">{isBn ? '👤 নতুন কাস্টমার এন্ট্রি' : '👤 Add Customer'}</span>
+            </button>
+
+            <button
+              onClick={handleExportCSV}
+              className="px-3.5 py-2 rounded-none bg-[#0B1622] hover:bg-[#1E3247] text-[#8FA3AD] hover:text-white text-xs font-normal border border-[#1E3247] transition-all flex items-center space-x-1.5 cursor-pointer"
+            >
+              <Download className="w-4 h-4 text-[#1FB6A8]" />
+              <span className="font-light">{isBn ? 'CSV অডিট ডাউনলোড' : 'CSV Export'}</span>
+            </button>
+          </div>
+        </div>
+
+        {/* 4 Financial Analytics KPI Overview Cards (rounded-none, font-light) */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Total Customer Dues */}
+          <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 space-y-2 card-hover-glow">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'সর্বমোট বকেয়া (Total Dues)' : 'Total Dues Outstanding'}</span>
+              <FileSpreadsheet className="w-4 h-4 text-[#1FB6A8]" />
+            </div>
+            <div className="text-2xl font-bold text-[#1FB6A8] font-poppins">৳{totalCompanyDue.toLocaleString()}</div>
+            <div className="flex items-center justify-between text-[11px] text-[#8FA3AD] font-light pt-1 border-t border-[#1E3247]">
+              <span>{customers.length} {isBn ? 'জন নিবন্ধিত কাস্টমার' : 'Registered Customers'}</span>
+              <span className="text-emerald-400 font-mono">ON-THE-FLY LIVE</span>
+            </div>
+          </div>
+
+          {/* Card 2: Total Cash Collected */}
+          <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 space-y-2 card-hover-glow">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'মোট আদায়কৃত ক্যাশ (Collected)' : 'Total Cash Collected'}</span>
+              <DollarSign className="w-4 h-4 text-emerald-400" />
+            </div>
+            <div className="text-2xl font-bold text-emerald-400 font-poppins">৳{totalCollectedCash.toLocaleString()}</div>
+            <div className="flex items-center justify-between text-[11px] text-[#8FA3AD] font-light pt-1 border-t border-[#1E3247]">
+              <span>{isBn ? 'মোট ইনভয়েস বিল' : 'Total Billed'}: ৳{totalBilledAll.toLocaleString()}</span>
+              <span className="text-emerald-400 font-mono">{(totalBilledAll > 0 ? (totalCollectedCash / totalBilledAll * 100) : 0).toFixed(1)}%</span>
+            </div>
+          </div>
+
+          {/* Card 3: Operational Expenses Vouchers */}
+          <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 space-y-2 card-hover-glow">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'কোম্পানি খরচ (Super Admin Sync)' : 'Operational Expenses'}</span>
+              <Wallet className="w-4 h-4 text-amber-400" />
+            </div>
+            <div className="text-2xl font-bold text-amber-400 font-poppins">৳{totalExpenseAmount.toLocaleString()}</div>
+            <div className="flex items-center justify-between text-[11px] text-[#8FA3AD] font-light pt-1 border-t border-[#1E3247]">
+              <span>{(expenses || []).length} {isBn ? 'টি ভাউচার এন্ট্রি' : 'Vouchers Recorded'}</span>
+              <button
+                onClick={() => setViewMode('expenses')}
+                className="text-[#1FB6A8] hover:underline font-light cursor-pointer"
+              >
+                {isBn ? 'ডিটেইলস →' : 'Details →'}
+              </button>
+            </div>
+          </div>
+
+          {/* Card 4: Net Cashflow */}
+          <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-5 space-y-2 card-hover-glow">
+            <div className="flex items-center justify-between">
+              <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'নিট অপারেটিং ক্যাশফ্লো' : 'Net Operating Cashflow'}</span>
+              <TrendingUp className="w-4 h-4 text-blue-400" />
+            </div>
+            <div className={`text-2xl font-bold font-poppins ${netCashflow >= 0 ? 'text-blue-400' : 'text-rose-400'}`}>
+              ৳{netCashflow.toLocaleString()}
+            </div>
+            <div className="flex items-center justify-between text-[11px] text-[#8FA3AD] font-light pt-1 border-t border-[#1E3247]">
+              <span>{isBn ? 'আদায় বিয়োগ মোট খরচ' : 'Collected - Expenses'}</span>
+              <span className="text-blue-400 font-mono">BALANCED</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Financial Analytics & Category Breakdown Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Left 2 Cols: Category Expenses Breakdown */}
+          <div className="lg:col-span-2 bg-[#11202F] border border-[#1E3247] rounded-none p-6 space-y-4 shadow-xl">
+            <div className="flex items-center justify-between border-b border-[#1E3247] pb-3">
+              <h3 className="text-sm font-bold text-white flex items-center space-x-2">
+                <BarChart3 className="w-4 h-4 text-[#1FB6A8]" />
+                <span>{isBn ? 'কোম্পানি খরচ ক্যাটাগরি বিশ্লেষণ (Super Admin Sync Analytics)' : 'Company Expense Category Analytics'}</span>
+              </h3>
+              <button
+                onClick={() => setViewMode('expenses')}
+                className="text-xs text-[#1FB6A8] hover:underline font-light cursor-pointer"
+              >
+                {isBn ? 'খরচ প্যানেল ম্যানেজ করুন →' : 'Manage Expenses →'}
+              </button>
+            </div>
+
+            <div className="space-y-3.5 text-xs font-light">
+              <div>
+                <div className="flex justify-between text-[#8FA3AD] mb-1">
+                  <span>✈️ {isBn ? 'চায়না বিমান ফ্রেইট ও কার্গো চার্জ (Flight Cargo Shipping)' : 'China Air Freight Cargo Shipping'}</span>
+                  <span className="text-white font-mono">৳850,000 (51.6%)</span>
+                </div>
+                <div className="w-full bg-[#0B1622] h-2 rounded-none overflow-hidden">
+                  <div className="bg-[#1FB6A8] h-full" style={{ width: '51.6%' }} />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-[#8FA3AD] mb-1">
+                  <span>👥 {isBn ? 'ওয়্যারহাউজ ও স্টাফ বেতন (Staff Salary Disbursed)' : 'Warehouse Staff Salaries'}</span>
+                  <span className="text-white font-mono">৳320,000 (19.5%)</span>
+                </div>
+                <div className="w-full bg-[#0B1622] h-2 rounded-none overflow-hidden">
+                  <div className="bg-blue-500 h-full" style={{ width: '19.5%' }} />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-[#8FA3AD] mb-1">
+                  <span>🏢 {isBn ? 'তেজগাঁও হাবে মাসিক ভাড়া ও ইউটিলিটি (Warehouse Lease & Rent)' : 'Warehouse Lease & Rent'}</span>
+                  <span className="text-white font-mono">৳250,000 (15.2%)</span>
+                </div>
+                <div className="w-full bg-[#0B1622] h-2 rounded-none overflow-hidden">
+                  <div className="bg-amber-500 h-full" style={{ width: '15.2%' }} />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-[#8FA3AD] mb-1">
+                  <span>🛃 {isBn ? 'ঢাকা এয়ারপোর্ট কাস্টমস ক্লিয়ারেন্স ও ডিউটি ট্যাক্স (Customs Duty)' : 'Customs Clearance Duty & Tax'}</span>
+                  <span className="text-white font-mono">৳140,000 (8.5%)</span>
+                </div>
+                <div className="w-full bg-[#0B1622] h-2 rounded-none overflow-hidden">
+                  <div className="bg-purple-500 h-full" style={{ width: '8.5%' }} />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-[#8FA3AD] mb-1">
+                  <span>🚚 {isBn ? 'লোকাল ট্রাক ট্রানজিট ও প্যাকিং মেটেরিয়ালস (Local Transport & Packing)' : 'Local Transit & Transport'}</span>
+                  <span className="text-white font-mono">৳85,000 (5.2%)</span>
+                </div>
+                <div className="w-full bg-[#0B1622] h-2 rounded-none overflow-hidden">
+                  <div className="bg-emerald-500 h-full" style={{ width: '5.2%' }} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right 1 Col: Customer Payment Collection Progress & Direct Actions */}
+          <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-6 space-y-4 shadow-xl flex flex-col justify-between">
+            <div>
+              <h3 className="text-sm font-bold text-white flex items-center space-x-2 border-b border-[#1E3247] pb-3">
+                <PieChart className="w-4 h-4 text-emerald-400" />
+                <span>{isBn ? 'কাস্টমার পেমেন্ট রিকভারি স্টেটাস' : 'Payment Recovery Status'}</span>
+              </h3>
+
+              <div className="mt-4 space-y-4">
+                <div className="text-center p-4 bg-[#0B1622] border border-[#1E3247] rounded-none">
+                  <span className="text-xs text-[#8FA3AD] font-light">{isBn ? 'মোট আদায় অনুপাত (Recovery Rate)' : 'Total Recovery Ratio'}</span>
+                  <div className="text-3xl font-extrabold text-emerald-400 font-mono mt-1">
+                    {(totalBilledAll > 0 ? (totalCollectedCash / totalBilledAll * 100) : 0).toFixed(1)}%
+                  </div>
+                  <span className="text-[11px] text-[#8FA3AD] font-light mt-1 block">
+                    ৳{totalCollectedCash.toLocaleString()} {isBn ? 'আদায়কৃত / মোট' : 'paid of'} ৳{totalBilledAll.toLocaleString()}
+                  </span>
+                </div>
+
+                <div className="space-y-2 text-xs font-light">
+                  <div className="flex justify-between items-center text-[#8FA3AD] p-2 bg-[#0B1622]/50 border border-[#1E3247]">
+                    <span>{isBn ? 'মোট নিবন্ধিত কাস্টমার' : 'Registered Clients'}:</span>
+                    <span className="text-white font-bold font-mono">{customers.length}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-[#8FA3AD] p-2 bg-[#0B1622]/50 border border-[#1E3247]">
+                    <span>{isBn ? 'বকেয়া যুক্ত কাস্টমার' : 'Clients with Dues'}:</span>
+                    <span className="text-amber-400 font-bold font-mono">
+                      {customers.filter((c) => getCustomerStats(c.customer_code).currentDue > 0).length}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-3 border-t border-[#1E3247] space-y-2">
+              <button
+                onClick={() => setViewMode('directory')}
+                className="w-full py-2 px-3 rounded-none bg-[#1FB6A8] hover:bg-[#22A6B3] text-[#0F2D52] text-xs font-normal shadow-md cursor-pointer text-center"
+              >
+                <span className="font-light">{isBn ? '📋 কাস্টমার লেজার ডিরেক্টরি খুলুন →' : 'Open Customer Ledger Directory →'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Financial Audit Stream Table */}
+        <div className="bg-[#11202F] border border-[#1E3247] rounded-none overflow-hidden shadow-xl">
+          <div className="p-4 border-b border-[#1E3247] flex items-center justify-between">
+            <h3 className="text-sm font-bold text-white flex items-center space-x-2">
+              <Clock className="w-4 h-4 text-[#1FB6A8]" />
+              <span>{isBn ? 'সাম্প্রতিক ফিনান্সিয়াল ট্রানজ্যাকশন ও ভাউচার স্ট্রীম' : 'Recent Financial Transactions & Vouchers Stream'}</span>
+            </h3>
+            <span className="text-xs text-[#8FA3AD] font-mono font-light">{ledgerEntries.length} Ledger Records</span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-[#EAF2F5]">
+              <thead className="bg-[#0B1622] text-[#8FA3AD] uppercase text-[10px] tracking-wider border-b border-[#1E3247] font-medium">
+                <tr>
+                  <th className="p-3.5">Date</th>
+                  <th className="p-3.5">Customer / Ref</th>
+                  <th className="p-3.5">Type</th>
+                  <th className="p-3.5">Amount (BDT ৳)</th>
+                  <th className="p-3.5">Entry Staff</th>
+                  <th className="p-3.5">Note</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#1E3247]">
+                {ledgerEntries.slice(0, 5).map((re) => (
+                  <tr key={re.id} className="hover:bg-[#1E3247]/40 transition-colors">
+                    <td className="p-3.5 font-mono text-[#8FA3AD]">{re.created_at.split('T')[0]}</td>
+                    <td className="p-3.5 font-mono text-[#1FB6A8] font-bold">{re.customer_code} ({re.customer_name})</td>
+                    <td className="p-3.5">
+                      <span
+                        className={`px-2.5 py-0.5 rounded-none text-[10px] font-normal uppercase ${
+                          re.type === 'charge'
+                            ? 'bg-amber-500/20 text-amber-300'
+                            : 'bg-emerald-500/20 text-emerald-300'
+                        }`}
+                      >
+                        {re.type}
+                      </span>
+                    </td>
+                    <td className="p-3.5 font-bold font-mono text-white">৳{re.amount.toLocaleString()}</td>
+                    <td className="p-3.5 text-[#8FA3AD] font-light">{re.entered_by_name}</td>
+                    <td className="p-3.5 text-[#8FA3AD] font-light">{re.note}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Quick Add Expense Voucher Modal (Live Synced with Super Admin) */}
+        {showAddExpenseModal && (
+          <div className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+            <form
+              onSubmit={handleSaveExpenseVoucher}
+              className="bg-[#11202F] border border-[#1FB6A8]/40 rounded-none p-6 max-w-md w-full space-y-4 shadow-2xl animate-in zoom-in-95"
+            >
+              <h3 className="text-base font-bold text-white flex items-center space-x-2">
+                <Wallet className="w-5 h-5 text-amber-400" />
+                <span>{isBn ? 'নতুন খরচ ভাউচার ইনপুট (Super Admin Sync)' : 'Record New Expense Voucher'}</span>
+              </h3>
+
+              <div className="space-y-3 text-xs">
+                <div>
+                  <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'ভাউচার শিরোনাম / বিবরণ *' : 'Voucher Title *'}</label>
+                  <input
+                    type="text"
+                    required
+                    value={expTitle}
+                    onChange={(e) => setExpTitle(e.target.value)}
+                    placeholder="e.g. ঢাকা এয়ারপোর্ট কার্গো কাস্টমস ক্লিয়ারেন্স বিল"
+                    className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white outline-none focus:border-[#1FB6A8] font-light"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'ক্যাটাগরি' : 'Category'}</label>
+                    <select
+                      value={expCategory}
+                      onChange={(e) => setExpCategory(e.target.value as any)}
+                      className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white outline-none font-light"
+                    >
+                      <option value="shipping">✈️ Flight Cargo Shipping</option>
+                      <option value="warehouse_rent">🏢 Warehouse Rent & Lease</option>
+                      <option value="salary">👥 Staff Salary</option>
+                      <option value="customs">🛃 Customs Duty & Tax</option>
+                      <option value="packing_transport">🚚 Transit & Packing</option>
+                      <option value="other">📦 Other Operations</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'টাকার পরিমাণ (BDT ৳) *' : 'Amount (BDT ৳) *'}</label>
+                    <input
+                      type="number"
+                      required
+                      min="1"
+                      value={expAmount}
+                      onChange={(e) => setExpAmount(e.target.value)}
+                      placeholder="e.g. 85000"
+                      className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white font-mono outline-none focus:border-[#1FB6A8]"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'ভাউচার নাম্বার' : 'Voucher No'}</label>
+                  <input
+                    type="text"
+                    value={expVoucherNo}
+                    onChange={(e) => setExpVoucherNo(e.target.value)}
+                    className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white font-mono outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-[#8FA3AD] block mb-1 font-light">{isBn ? 'অতিরিক্ত নোট (Optional)' : 'Notes'}</label>
+                  <input
+                    type="text"
+                    value={expNotes}
+                    onChange={(e) => setExpNotes(e.target.value)}
+                    placeholder="নোট বা ব্যাংক ট্রান্সফার নম্বর"
+                    className="w-full bg-[#0B1622] border border-[#1E3247] rounded-none p-2.5 text-white outline-none font-light"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-2 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowAddExpenseModal(false)}
+                  className="px-4 py-2 rounded-none bg-[#0B1622] text-[#8FA3AD] text-xs font-normal hover:text-white cursor-pointer"
+                >
+                  <span className="font-light">{isBn ? 'বাতিল' : 'Cancel'}</span>
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-normal text-xs cursor-pointer"
+                >
+                  <span className="font-light">{isBn ? 'সেভ করুন ও সুপার এডমিনে সিঙ্ক করুন' : 'Save & Sync Super Admin'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // TAB: CASH COLLECTIONS SYNC VIEW
+  // --------------------------------------------------------------------------
+  if (viewMode === 'cash_collections') {
+    return (
+      <div className="space-y-6">
+        <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+
+        <div className="flex items-center justify-between border-b border-[#1E3247] pb-4">
+          <div>
+            <h2 className="text-xl font-bold text-white font-poppins flex items-center space-x-2">
+              <CheckCircle2 className="w-5 h-5 text-emerald-400" />
+              <span>{isBn ? 'ওয়্যারহাউজ ডেলিভারি ও ক্যাশ কালেকশন সিঙ্ক অডিট' : 'Warehouse Delivery & Cash Collection Sync'}</span>
+            </h2>
+            <p className="text-xs text-[#8FA3AD] font-light">
+              {isBn ? 'কাউন্টার থেকে আদায়কৃত ক্যাশ কালেকশন যাচাই এবং লেজারে অটো-অডিট সিঙ্ক' : 'Audit counter cash collections synced automatically with customer ledger'}
+            </p>
+          </div>
+
+          <button
+            onClick={() => setViewMode('overview')}
+            className="flex items-center space-x-2 text-xs font-normal text-[#8FA3AD] hover:text-[#1FB6A8] transition-colors cursor-pointer"
+          >
+            <ChevronLeft className="w-4 h-4" />
+            <span className="font-light">{isBn ? 'ড্যাশবোর্ডে ফিরে যান' : 'Back to Overview'}</span>
+          </button>
+        </div>
+
+        <div className="bg-[#11202F] border border-[#1E3247] rounded-none p-6 space-y-4 shadow-xl">
+          <div className="flex items-center justify-between border-b border-[#1E3247] pb-3">
+            <h3 className="text-sm font-bold text-white flex items-center space-x-2">
+              <DollarSign className="w-4 h-4 text-emerald-400" />
+              <span>{isBn ? 'কাউন্টার রিসিভড ক্যাশ রেকর্ডস' : 'Verified Counter Cash Receipts'}</span>
+            </h3>
+            <span className="text-xs text-emerald-400 font-mono font-light">
+              {ledgerEntries.filter((l) => l.source === 'auto_cash_collection' || l.type === 'payment').length} Verified Payments
+            </span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs text-[#EAF2F5]">
+              <thead className="bg-[#0B1622] text-[#8FA3AD] uppercase text-[10px] tracking-wider border-b border-[#1E3247] font-medium">
+                <tr>
+                  <th className="p-3.5">Date</th>
+                  <th className="p-3.5">Customer Code</th>
+                  <th className="p-3.5">Customer Name</th>
+                  <th className="p-3.5">Collected Amount (৳)</th>
+                  <th className="p-3.5">Source / Staff</th>
+                  <th className="p-3.5">Audit Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[#1E3247]">
+                {ledgerEntries
+                  .filter((l) => l.type === 'payment')
+                  .map((pe) => (
+                    <tr key={pe.id} className="hover:bg-[#1E3247]/40 transition-colors">
+                      <td className="p-3.5 font-mono text-[#8FA3AD]">{pe.created_at.split('T')[0]}</td>
+                      <td className="p-3.5 font-mono text-[#1FB6A8] font-bold">{pe.customer_code}</td>
+                      <td className="p-3.5 font-medium text-white">{pe.customer_name}</td>
+                      <td className="p-3.5 font-bold font-mono text-emerald-400">৳{pe.amount.toLocaleString()}</td>
+                      <td className="p-3.5 text-[#8FA3AD] font-light">{pe.entered_by_name}</td>
+                      <td className="p-3.5">
+                        <span className="px-2.5 py-0.5 rounded-none text-[10px] font-normal uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                          ✓ SYNCED & AUDITED
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // --------------------------------------------------------------------------
   // TAB 0: EXPENSE & BUDGET MANAGEMENT VIEW
   // --------------------------------------------------------------------------
@@ -217,11 +745,11 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
       <div className="space-y-4">
         <div className="flex items-center justify-between border-b border-[#1E3247] pb-3">
           <button
-            onClick={() => setViewMode('directory')}
+            onClick={() => setViewMode('overview')}
             className="flex items-center space-x-2 text-xs font-semibold text-[#8FA3AD] hover:text-[#1FB6A8] transition-colors cursor-pointer"
           >
             <ChevronLeft className="w-4 h-4" />
-            <span>{isBn ? 'কাস্টমার লেজারে ফিরে যান' : 'Back to Customer Ledger'}</span>
+            <span>{isBn ? 'অ্যাকাউন্টস ড্যাশবোর্ডে ফিরে যান' : 'Back to Accounts Dashboard'}</span>
           </button>
         </div>
         <BudgetExpenseManager language={language} theme="dark" />

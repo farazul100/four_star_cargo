@@ -98,6 +98,9 @@ export function App() {
       <Route element={<ProtectedRoute allowedRole="accountant" loginPath="/accounts/login" />}>
         <Route path="/accounts/dashboard" element={<AccountsDashboardPage />} />
         <Route path="/accounts/ledger" element={<AccountsDashboardPage />} />
+        <Route path="/accounts/budget" element={<AccountsDashboardPage />} />
+        <Route path="/accounts/reports" element={<AccountsDashboardPage />} />
+        <Route path="/accounts/cash-collections" element={<AccountsDashboardPage />} />
         <Route path="/accounts/notifications" element={<AccountsDashboardPage />} />
         <Route path="/accounts/*" element={<AccountsDashboardPage />} />
       </Route>
