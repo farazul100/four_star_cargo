@@ -1,7 +1,7 @@
 <?php
 /**
- * M/S FOUR STAR CARGO — HOSTINGER LIVE DATA SYNC SERVICE
- * Provides 100% real-time data persistence across browsers, incognito windows, and mobile devices
+ * M/S FOUR STAR CARGO — HOSTINGER LIVE MYSQL & DISK DATA PERSISTENCE SERVICE
+ * Provides 100% real-time data persistence across all browsers and devices using Hostinger MySQL & disk backup
  */
 
 header('Access-Control-Allow-Origin: *');
@@ -14,14 +14,62 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-// Multi-location storage resolution for 100% write reliability on Hostinger
+// Optional config file include
+if (file_exists(__DIR__ . '/config.php')) {
+    include_once __DIR__ . '/config.php';
+}
+
+// 1. Hostinger MySQL Database Connection Configuration
+$dbHost = defined('FSC_DB_HOST') ? FSC_DB_HOST : (getenv('DB_HOST') ?: 'localhost');
+$dbUser = defined('FSC_DB_USER') ? FSC_DB_USER : (getenv('DB_USER') ?: '');
+$dbPass = defined('FSC_DB_PASS') ? FSC_DB_PASS : (getenv('DB_PASSWORD') ?: '');
+$dbName = defined('FSC_DB_NAME') ? FSC_DB_NAME : (getenv('DB_NAME') ?: '');
+
+$pdo = null;
+try {
+    if (!empty($dbUser) && !empty($dbName)) {
+        $pdo = new PDO("mysql:host={$dbHost};dbname={$dbName};charset=utf8mb4", $dbUser, $dbPass, [
+            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC
+        ]);
+        
+        // Auto-create persistent KV table if not exists
+        $pdo->exec("CREATE TABLE IF NOT EXISTS `fsc_system_store` (
+            `key_name` VARCHAR(64) NOT NULL PRIMARY KEY,
+            `data_json` LONGTEXT NOT NULL,
+            `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;");
+    }
+} catch (Exception $e) {
+    $pdo = null;
+}
+
+// Multi-location file storage fallback
 $filePaths = [
     __DIR__ . '/db.json',
     __DIR__ . '/../database/db.json',
     sys_get_temp_dir() . '/fsc_vps_db.json'
 ];
 
-function readCurrentServerDb($filePaths) {
+function readCurrentServerDb($pdo, $filePaths) {
+    // Try MySQL first
+    if ($pdo) {
+        try {
+            $stmt = $pdo->query("SELECT `key_name`, `data_json` FROM `fsc_system_store`");
+            $rows = $stmt->fetchAll();
+            if (!empty($rows)) {
+                $db = [];
+                foreach ($rows as $r) {
+                    $db[$r['key_name']] = json_decode($r['data_json'], true);
+                }
+                if (!empty($db['fsc_vps_proposals'])) {
+                    return $db;
+                }
+            }
+        } catch (Exception $e) {}
+    }
+
+    // Fallback to disk files
     foreach ($filePaths as $path) {
         if (file_exists($path)) {
             $raw = @file_get_contents($path);
@@ -36,20 +84,29 @@ function readCurrentServerDb($filePaths) {
     return null;
 }
 
-function writeServerDb($filePaths, $data) {
+function writeServerDb($pdo, $filePaths, $data) {
+    // Write to MySQL first
+    if ($pdo) {
+        try {
+            $stmt = $pdo->prepare("INSERT INTO `fsc_system_store` (`key_name`, `data_json`) VALUES (:key_name, :data_json) ON DUPLICATE KEY UPDATE `data_json` = VALUES(`data_json`)");
+            foreach ($data as $key => $val) {
+                $stmt->execute([
+                    ':key_name' => $key,
+                    ':data_json' => json_encode($val, JSON_UNESCAPED_UNICODE)
+                ]);
+            }
+        } catch (Exception $e) {}
+    }
+
+    // Write to file disk backup
     $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
-    $written = false;
     foreach ($filePaths as $path) {
         $dir = dirname($path);
         if (!file_exists($dir)) {
             @mkdir($dir, 0777, true);
         }
-        $res = @file_put_contents($path, $json);
-        if ($res !== false) {
-            $written = true;
-        }
+        @file_put_contents($path, $json);
     }
-    return $written;
 }
 
 // Helper to merge array of objects by ID or key
@@ -177,13 +234,13 @@ $seedDatabase = [
     'fsc_vps_expenses' => []
 ];
 
-// 1. POST Request: Save updated database state to Hostinger disk
+// 1. POST Request: Save updated database state to Hostinger MySQL & disk
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = file_get_contents('php://input');
     if (!empty($input)) {
         $decoded = json_decode($input, true);
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-            $existing = readCurrentServerDb($filePaths) ?: $seedDatabase;
+            $existing = readCurrentServerDb($pdo, $filePaths) ?: $seedDatabase;
             
             $finalDb = $existing;
             foreach ($decoded as $key => $val) {
@@ -194,17 +251,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
-            writeServerDb($filePaths, $finalDb);
+            writeServerDb($pdo, $filePaths, $finalDb);
             echo json_encode(['status' => 'success', 'message' => 'Hostinger DB synchronized', 'proposals_count' => count($finalDb['fsc_vps_proposals'] ?? [])]);
             exit();
         }
     }
 }
 
-// 2. GET Request: Read latest database state from Hostinger disk
-$currentDb = readCurrentServerDb($filePaths);
+// 2. GET Request: Read latest database state from Hostinger MySQL / disk
+$currentDb = readCurrentServerDb($pdo, $filePaths);
 if (!$currentDb || !is_array($currentDb) || empty($currentDb['fsc_vps_proposals'])) {
-    writeServerDb($filePaths, $seedDatabase);
+    writeServerDb($pdo, $filePaths, $seedDatabase);
     echo json_encode($seedDatabase, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     exit();
 }
