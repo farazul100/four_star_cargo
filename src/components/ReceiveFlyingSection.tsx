@@ -184,8 +184,10 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       existing.total_weight += (p.total_weight || 0);
       existing.total_cbm += (p.total_cbm || 0);
 
-      if (p.status === 'in_transit') {
-        existing.status = 'in_transit';
+      if (p.status === ('arrived_bd' as any) && existing.status !== 'received') {
+        existing.status = 'arrived_bd' as any;
+      } else if (p.status === 'received') {
+        existing.status = 'received';
       }
     }
   });
@@ -505,7 +507,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
               ) : (
                 groupedFlightList.map((gf) => {
                   const isReceived = gf.status === 'received';
-                  const isArrivedBd = gf.status === ('arrived_bd' as any) || isReceived;
+                  const isArrivedBd = gf.status === ('arrived_bd' as any) || isReceived || isBdWarehouseStaff;
 
                   return (
                     <tr key={gf.groupKey} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
