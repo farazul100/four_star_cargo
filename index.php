@@ -3,13 +3,15 @@
  * M/S FOUR STAR CARGO — HOSTINGER PRODUCTION ENTRY POINT
  * Serves compiled dist/index.html cleanly with 100% HTTP/2 protocol compatibility
  */
+@ini_set('display_errors', '0');
+error_reporting(0);
 
 $distIndex = __DIR__ . '/dist/index.html';
 if (file_exists($distIndex)) {
     http_response_code(200);
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: no-cache, no-store, must-revalidate');
-    readfile($distIndex);
+    @readfile($distIndex);
     exit();
 }
 
@@ -18,7 +20,7 @@ if (file_exists($rootIndex)) {
     http_response_code(200);
     header('Content-Type: text/html; charset=utf-8');
     header('Cache-Control: no-cache, no-store, must-revalidate');
-    readfile($rootIndex);
+    @readfile($rootIndex);
     exit();
 }
 
