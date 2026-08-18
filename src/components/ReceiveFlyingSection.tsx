@@ -505,6 +505,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
               ) : (
                 groupedFlightList.map((gf) => {
                   const isReceived = gf.status === 'received';
+                  const isArrivedBd = gf.status === ('arrived_bd' as any) || isReceived;
 
                   return (
                     <tr key={gf.groupKey} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
@@ -542,7 +543,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                         </div>
                       </td>
                       <td className="p-3.5 border-r border-b border-slate-200 dark:border-slate-800">
-                        {isReceived ? (
+                        {isArrivedBd ? (
                           <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-none bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-medium border border-emerald-500/20">
                             <span>🛬 বাংলাদেশ এয়ারপোর্টে প্রাপ্ত</span>
                           </span>
@@ -578,18 +579,38 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
                               <span>{isBn ? 'ওয়্যারহাউজে স্থানান্তরিত' : 'Transferred to BD Warehouse'}</span>
                             </span>
+                          ) : isArrivedBd ? (
+                            isBdWarehouseStaff ? (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedFlightForCartonReceive(gf)}
+                                className="px-3.5 py-2 rounded-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all shadow-md flex items-center space-x-1.5 cursor-pointer select-none hover:scale-105 active:scale-95"
+                              >
+                                <Package className="w-4 h-4" />
+                                <span>{isBn ? '📦 কার্টুন লিস্ট ও রিসিভ করুন' : 'View Cartons & Receive'}</span>
+                              </button>
+                            ) : (
+                              <span
+                                className={`text-[11px] font-normal inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-none border ${
+                                  isDark
+                                    ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800/70'
+                                    : 'bg-emerald-50 text-emerald-700 border-emerald-300 shadow-2xs'
+                                }`}
+                              >
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                <span>{isBn ? 'বাংলাদেশ এয়ারপোর্টে রিসিভড' : 'Received at BD Airport'}</span>
+                              </span>
+                            )
                           ) : isBdWarehouseStaff ? (
-                            /* WAREHOUSE INCHARGE ACTION: Open modal to receive and calibrate carton by carton */
                             <button
                               type="button"
                               onClick={() => setSelectedFlightForCartonReceive(gf)}
-                              className="px-3.5 py-2 rounded-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all shadow-md flex items-center space-x-1.5 cursor-pointer select-none hover:scale-105 active:scale-95"
+                              className="px-3.5 py-2 rounded-none bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs transition-all shadow-md flex items-center space-x-1.5 cursor-pointer select-none"
                             >
                               <Package className="w-4 h-4" />
                               <span>{isBn ? '📦 কার্টুন লিস্ট ও রিসিভ করুন' : 'View Cartons & Receive'}</span>
                             </button>
                           ) : (
-                            /* OPERATIONS DIRECTOR ACTION: Receive entire flight at once in 1 click! */
                             <button
                               type="button"
                               onClick={() => handleMarkReceivedAtBdAirport(gf.proposal_ids, gf.flight_number, gf.carton_ids)}
