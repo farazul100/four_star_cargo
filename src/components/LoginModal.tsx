@@ -19,9 +19,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 }) => {
   const isBn = language === 'bn';
   const roleUsers = users.filter((u) => u.role === role);
-  const [selectedUserId, setSelectedUserId] = useState<string>(roleUsers[0]?.id || '');
-  const [email, setEmail] = useState<string>(roleUsers[0]?.email || '');
-  const [password, setPassword] = useState<string>('password123');
+  const [selectedUserId, setSelectedUserId] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
 
@@ -110,41 +110,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
               {isBn ? 'অ্যাকাউন্টে সাইন ইন করুন' : 'Sign In To Account'}
             </h3>
             <p className="text-xs text-[#8FA3AD] mt-1">
-              {isBn ? 'নিচের ডেমো অ্যাকাউন্ট সিলেক্ট করুন অথবা ইমেইল দিন' : 'Select a demo account or type credentials'}
+              {isBn ? 'আপনার ইমেইল ও পাসওয়ার্ড প্রদান করুন' : 'Enter your email and password'}
             </p>
           </div>
-
-          {/* Quick Demo User Selector */}
-          {roleUsers.length > 0 && (
-            <div className="space-y-2">
-              <label className="text-xs font-semibold text-[#8FA3AD] flex items-center justify-between">
-                <span>{isBn ? 'ডেমো অ্যাকাউন্ট সিলেক্ট করুন:' : 'Select Demo Account:'}</span>
-                <span className="text-[10px] text-[#1FB6A8]">{roleUsers.length} Users</span>
-              </label>
-              <div className="space-y-2">
-                {roleUsers.map((u) => (
-                  <button
-                    key={u.id}
-                    type="button"
-                    onClick={() => handleSelectUser(u.id)}
-                    className={`w-full text-left p-3 rounded-xl border transition-all text-xs flex items-center justify-between ${
-                      selectedUserId === u.id
-                        ? 'bg-[#1FB6A8]/15 border-[#1FB6A8] text-white font-medium'
-                        : 'bg-[#0B1622] border-[#1E3247] text-[#8FA3AD] hover:border-[#1FB6A8]/50'
-                    }`}
-                  >
-                    <div className="truncate">
-                      <div className="text-white font-semibold truncate">{u.name}</div>
-                      <div className="text-[11px] text-[#8FA3AD] truncate">{u.email}</div>
-                    </div>
-                    {selectedUserId === u.id && (
-                      <CheckCircle2 className="w-4 h-4 text-[#1FB6A8] shrink-0 ml-2" />
-                    )}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
 
           {error && (
             <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs">
@@ -165,7 +133,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   onChange={(e) => setEmail(e.target.value)}
                   required
                   className="w-full bg-[#0B1622] border border-[#1E3247] focus:border-[#1FB6A8] rounded-xl py-2.5 pl-10 pr-4 text-xs text-white placeholder-[#8FA3AD] outline-none transition-colors"
-                  placeholder="name@fourstarcargo.com"
+                  placeholder="superadmin@cargo.com"
                 />
               </div>
             </div>
@@ -182,11 +150,12 @@ export const LoginModal: React.FC<LoginModalProps> = ({
                   onChange={(e) => setPassword(e.target.value)}
                   required
                   className="w-full bg-[#0B1622] border border-[#1E3247] focus:border-[#1FB6A8] rounded-xl py-2.5 pl-10 pr-10 text-xs text-white placeholder-[#8FA3AD] outline-none transition-colors"
+                  placeholder="••••••••"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-3 text-[#8FA3AD] hover:text-white"
+                  className="absolute right-3 top-3 text-[#8FA3AD] hover:text-white cursor-pointer"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
@@ -195,7 +164,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
 
             <button
               type="submit"
-              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#1B4F91] to-[#1FB6A8] hover:from-[#1FB6A8] hover:to-[#22A6B3] text-white font-bold text-xs shadow-lg shadow-[#1FB6A8]/20 transition-all flex items-center justify-center space-x-2"
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#1B4F91] to-[#1FB6A8] hover:from-[#1FB6A8] hover:to-[#22A6B3] text-white font-bold text-xs shadow-lg shadow-[#1FB6A8]/20 transition-all cursor-pointer flex items-center justify-center space-x-2"
             >
               <span>{isBn ? 'লগইন সম্পন্ন করুন' : 'Sign In Now'}</span>
               <ArrowRight className="w-4 h-4" />

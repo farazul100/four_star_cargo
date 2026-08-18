@@ -30,13 +30,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
   }
   const roleUsers = dbUsers.filter((u: UserType) => u.role === expectedRole);
 
-  const [selectedUserId, setSelectedUserId] = useState<string>(roleUsers[0]?.id || '');
-  const [email, setEmail] = useState<string>(
-    expectedRole === 'super_admin' ? 'superadmin@cargo.com' : roleUsers[0]?.email || ''
-  );
-  const [password, setPassword] = useState<string>(
-    expectedRole === 'super_admin' ? 'Cargo@2026' : 'password123'
-  );
+  const [selectedUserId, setSelectedUserId] = useState<string>('');
+  const [email, setEmail] = useState<string>('');
+  const [password, setPassword] = useState<string>('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [showForgotModal, setShowForgotModal] = useState(false);
@@ -203,41 +199,6 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
               {currentConfig.desc}
             </p>
 
-            {/* Demo User Selection Cards */}
-            {roleUsers.length > 0 && (
-              <div className="mb-6 space-y-2">
-                <div className="text-[11px] font-medium text-[#9E9E9E] mb-1">
-                  {lang === 'bn' ? 'ডেমো অ্যাকাউন্ট বাছাই করুন:' : 'Select Demo Account:'}
-                </div>
-                <div className="space-y-1.5">
-                  {roleUsers.map((u) => (
-                    <button
-                      key={u.id}
-                      type="button"
-                      onClick={() => handleSelectDemoUser(u.id)}
-                      className={`w-full text-left p-2.5 rounded-xl border transition-all text-xs flex items-center justify-between ${
-                        selectedUserId === u.id
-                          ? isDark
-                            ? 'bg-[#0099FF]/20 border-[#0099FF] text-white font-medium shadow-xs'
-                            : 'bg-[#0099FF]/10 border-[#0099FF] text-[#0F2D52] font-medium shadow-xs'
-                          : isDark
-                          ? 'bg-[#121214] border-[#2C2C2E] text-[#9E9E9E] hover:border-[#3A3A3C]'
-                          : 'bg-slate-50 border-[#E4E9EC] text-[#5C6B73] hover:border-[#CBD5E1]'
-                      }`}
-                    >
-                      <div className="truncate">
-                        <div className="font-medium text-white truncate">{u.name}</div>
-                        <div className="text-[10px] opacity-70 truncate font-mono">{u.email}</div>
-                      </div>
-                      {selectedUserId === u.id && (
-                        <CheckCircle2 className="w-4 h-4 text-[#0099FF] shrink-0 ml-2" />
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Error Message Alert */}
             {error && (
               <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium flex items-center space-x-2">
@@ -288,7 +249,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3 text-[#9E9E9E] hover:text-white transition-colors"
+                    className="absolute right-3.5 top-3 text-[#9E9E9E] hover:text-white transition-colors cursor-pointer"
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
@@ -298,9 +259,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
               {/* Submit Button */}
               <button
                 type="submit"
-                className={`w-full py-3.5 px-4 rounded-xl text-white font-bold text-xs shadow-lg transition-all transform active:scale-98 ${currentConfig.btnBg}`}
+                className={`w-full py-3.5 px-4 rounded-xl text-white font-bold text-xs shadow-lg transition-all cursor-pointer transform active:scale-98 ${currentConfig.btnBg}`}
               >
-                Login
+                {lang === 'bn' ? 'লগইন করুন' : 'Login'}
               </button>
             </form>
           </div>
