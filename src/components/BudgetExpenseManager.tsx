@@ -14,7 +14,7 @@ import {
   FileSpreadsheet,
   XCircle,
 } from 'lucide-react';
-import { ExpenseItem, Language, Theme } from '../types';
+import { ExpenseItem, Language, Theme, LedgerEntry } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
 import { getHostingerDbData, saveHostingerDbData } from '../lib/db';
@@ -22,6 +22,7 @@ import { getHostingerDbData, saveHostingerDbData } from '../lib/db';
 interface BudgetExpenseManagerProps {
   language?: Language;
   theme?: Theme;
+  ledgerEntries?: LedgerEntry[];
 }
 
 // Initial Mock Expense Items
@@ -91,6 +92,7 @@ const INITIAL_EXPENSES: ExpenseItem[] = [
 export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
   language = 'bn',
   theme: themeProp,
+  ledgerEntries: ledgerEntriesProp,
 }) => {
   const { theme: contextTheme } = useTheme();
   const activeTheme = contextTheme || themeProp || 'light';
@@ -190,8 +192,15 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
     setShowAddModal(false);
   };
 
-  // Cargo Revenue Constant (Calculated from cargo weight/cbm)
-  const totalCargoIncome = 2850000; // ৳2,850,000 Total Revenue
+  // Dynamically compute live revenue from Hostinger DB ledger charges
+  const liveDbData = getHostingerDbData();
+  const liveLedgerEntries: LedgerEntry[] = ledgerEntriesProp || liveDbData.ledgerEntries || [];
+
+  const totalCargoIncome = liveLedgerEntries.length > 0
+    ? liveLedgerEntries
+        .filter((l) => l.type === 'charge')
+        .reduce((sum, entry) => sum + entry.amount, 0)
+    : 2850000;
 
   // Filtered Expenses
   const filteredExpenses = expenses.filter((exp) => {
@@ -641,11 +650,15 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                   <>
                     <tr className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
                       <td className={`p-3 font-normal ${isDark ? 'text-white' : 'text-slate-900'}`}>আগস্ট ২০২৬ (বর্তমান মাস)</td>
-                      <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400">৳২,৮৫০,০০০</td>
-                      <td className="p-3 font-mono text-rose-500 dark:text-rose-400">৳১,৬৪৫,০০০</td>
-                      <td className="p-3 font-mono font-bold text-teal-600 dark:text-teal-400">+৳১,২০৫,০০০</td>
-                      <td className="p-3 font-mono">57.7%</td>
-                      <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">উদ্বৃত্ত (Profit 42.3%)</td>
+                      <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400">৳{totalCargoIncome.toLocaleString()}</td>
+                      <td className="p-3 font-mono text-rose-500 dark:text-rose-400">৳{totalFilteredExpense.toLocaleString()}</td>
+                      <td className="p-3 font-mono font-bold text-teal-600 dark:text-teal-400">
+                        {netProfitOrLoss >= 0 ? '+' : ''}৳{netProfitOrLoss.toLocaleString()}
+                      </td>
+                      <td className="p-3 font-mono">{expenseRatio}%</td>
+                      <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">
+                        {netProfitOrLoss >= 0 ? `উদ্বৃত্ত (Profit ${netMarginPercent}%)` : 'ঘাটতি (Loss)'}
+                      </td>
                     </tr>
                     <tr className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
                       <td className={`p-3 font-normal ${isDark ? 'text-white' : 'text-slate-900'}`}>জুলাই ২০২৬</td>

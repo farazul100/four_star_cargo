@@ -935,7 +935,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
             <span>{isBn ? 'অ্যাকাউন্টস ড্যাশবোর্ডে ফিরে যান' : 'Back to Accounts Dashboard'}</span>
           </button>
         </div>
-        <BudgetExpenseManager language={language} theme={contextTheme || 'light'} />
+        <BudgetExpenseManager language={language} theme={contextTheme || 'light'} ledgerEntries={ledgerEntries} />
       </div>
     );
   }
