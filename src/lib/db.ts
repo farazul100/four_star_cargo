@@ -42,21 +42,17 @@ export const resetHostingerDbToDefault = () => {
   }
 };
 
-// Initialize Hostinger local persistence
+// Initialize Hostinger local persistence safely without wiping real data on refresh
 export const initHostingerDb = () => {
-  // Clear any old legacy mock cartons, proposals or customers
-  const rawCartons = localStorage.getItem(DB_KEYS.CARTONS);
-  if (!rawCartons || rawCartons.includes('ctn-bs02') || rawCartons.includes('fsc-carton-')) {
+  if (!localStorage.getItem(DB_KEYS.CARTONS)) {
     localStorage.setItem(DB_KEYS.CARTONS, JSON.stringify([]));
   }
 
-  const rawProposals = localStorage.getItem(DB_KEYS.PROPOSALS);
-  if (!rawProposals || rawProposals.includes('prop-bs02')) {
+  if (!localStorage.getItem(DB_KEYS.PROPOSALS)) {
     localStorage.setItem(DB_KEYS.PROPOSALS, JSON.stringify([]));
   }
 
-  const rawCustomers = localStorage.getItem(DB_KEYS.CUSTOMERS);
-  if (!rawCustomers || rawCustomers.includes('cust-101') || rawCustomers.includes('cust-102')) {
+  if (!localStorage.getItem(DB_KEYS.CUSTOMERS)) {
     localStorage.setItem(DB_KEYS.CUSTOMERS, JSON.stringify([]));
   }
 
