@@ -96,11 +96,15 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
   const [newCustPhone, setNewCustPhone] = useState('');
   const [newCustAddress, setNewCustAddress] = useState('');
 
-  // Add Manual Ledger Entry Form Modal State
+  // Add Manual Ledger Entry Form Modal State (Easy 1-Click Due/Payment Entry)
   const [showAddLedgerModal, setShowAddLedgerModal] = useState(false);
+  const [entryCustId, setEntryCustId] = useState<string>('');
   const [entryType, setEntryType] = useState<'charge' | 'payment'>('charge');
-  const [entryAmount, setEntryAmount] = useState<number>(15000);
+  const [entryAmount, setEntryAmount] = useState<string>('');
   const [entryNote, setEntryNote] = useState('');
+  const [entryRefNo, setEntryRefNo] = useState('');
+  const [entryPaymentMethod, setEntryPaymentMethod] = useState<'cash' | 'bkash' | 'nagad' | 'bank_wire' | 'check'>('cash');
+  const [entryDateTime, setEntryDateTime] = useState(new Date().toISOString().slice(0, 16));
 
   // Add Expense Voucher Modal State (Direct Sync to Super Admin)
   const [showAddExpenseModal, setShowAddExpenseModal] = useState(false);
@@ -115,7 +119,24 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
   const [reportEndDate, setReportEndDate] = useState(new Date().toISOString().split('T')[0]);
   const [reportCustFilter, setReportCustFilter] = useState('all');
 
-  // Compute live customer ledger statistics on the fly
+  // Helper to format ISO timestamp cleanly into Date & Time
+  const formatDateTime = (isoStr: string) => {
+    try {
+      const d = new Date(isoStr);
+      return d.toLocaleString(isBn ? 'bn-BD' : 'en-US', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: true,
+      });
+    } catch {
+      return isoStr;
+    }
+  };
+
+  // Compute live customer ledger statistics on the fly with chronological running balance
   /*
    * ARCHITECTURE DECISION COMMENT (PRD Section 4.3):
    * Running balance is calculated ON THE FLY from raw `ledger_entries` instead of storing
@@ -123,16 +144,53 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
    * stale balances, and guarantees 100% audit accuracy with auto-synced warehouse cash collections.
    */
   const getCustomerStats = (custCode: string) => {
-    const entries = ledgerEntries.filter((l) => l.customer_code === custCode);
-    const totalCharges = entries
+    const rawEntries = ledgerEntries.filter((l) => l.customer_code === custCode);
+    
+    // Sort chronologically (oldest to newest) to calculate step-by-step running balance
+    const sortedChronological = [...rawEntries].sort(
+      (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+
+    let accumulator = 0;
+    const entriesWithBalance = sortedChronological.map((entry) => {
+      if (entry.type === 'charge') {
+        accumulator += entry.amount;
+      } else {
+        accumulator -= entry.amount;
+      }
+      return {
+        ...entry,
+        runningBalance: accumulator,
+      };
+    });
+
+    const totalCharges = rawEntries
       .filter((l) => l.type === 'charge')
       .reduce((acc, curr) => acc + curr.amount, 0);
-    const totalPayments = entries
+    const totalPayments = rawEntries
       .filter((l) => l.type === 'payment')
       .reduce((acc, curr) => acc + curr.amount, 0);
     const currentDue = totalCharges - totalPayments;
 
-    return { totalCharges, totalPayments, currentDue, entries };
+    return {
+      totalCharges,
+      totalPayments,
+      currentDue,
+      entries: entriesWithBalance.reverse(), // Newest entry first for display
+    };
+  };
+
+  // Open Quick Ledger Entry Modal Helper
+  const openQuickLedgerModal = (customerId?: string, defaultType: 'charge' | 'payment' = 'charge') => {
+    const targetId = customerId || selectedCustomerId || (customers[0]?.id ?? '');
+    setEntryCustId(targetId);
+    setEntryType(defaultType);
+    setEntryAmount('');
+    setEntryNote('');
+    setEntryRefNo('');
+    setEntryPaymentMethod('cash');
+    setEntryDateTime(new Date().toISOString().slice(0, 16));
+    setShowAddLedgerModal(true);
   };
 
   // Add Customer Handler
@@ -151,7 +209,10 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
       created_at: new Date().toISOString(),
     };
 
-    setCustomers((prev) => [newCust, ...prev]);
+    const updatedCustList = [newCust, ...customers];
+    setCustomers(updatedCustList);
+    saveHostingerDbData('fsc_vps_customers', updatedCustList);
+
     addToast('success', isBn ? 'নতুন কাস্টমার তৈরি হয়েছে!' : 'Customer Created Successfully!');
     setNewCustName('');
     setNewCustPhone('');
@@ -163,10 +224,13 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
   // Add Manual Ledger Entry Handler
   const handleSaveLedgerEntry = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedCustomerId || entryAmount <= 0) return;
+    const targetCustId = entryCustId || selectedCustomerId;
+    if (!targetCustId || !entryAmount || Number(entryAmount) <= 0) return;
 
-    const cust = customers.find((c) => c.id === selectedCustomerId);
+    const cust = customers.find((c) => c.id === targetCustId);
     if (!cust) return;
+
+    const createdIso = entryDateTime ? new Date(entryDateTime).toISOString() : new Date().toISOString();
 
     const newEntry: LedgerEntry = {
       id: `ledg-${Date.now()}`,
@@ -174,23 +238,44 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
       customer_code: cust.customer_code,
       customer_name: cust.name,
       type: entryType,
-      amount: entryAmount,
-      note: entryNote || (entryType === 'charge' ? 'শিপমেন্ট চার্জ' : 'ক্যাশ পেমেন্ট'),
+      amount: Number(entryAmount),
+      payment_method: entryType === 'payment' ? entryPaymentMethod : undefined,
+      reference_no: entryRefNo.trim() || undefined,
+      note: entryNote.trim() || (entryType === 'charge' ? 'কার্গো শিপিং ও হ্যান্ডলিং চার্জ' : 'ক্যাশ/ব্যাংক পেমেন্ট পরিশোধ'),
       source: 'manual',
       entered_by: currentUser.id,
       entered_by_name: `${currentUser.name} (Accountant)`,
-      created_at: new Date().toISOString(),
+      created_at: createdIso,
     };
 
-    setLedgerEntries((prev) => [newEntry, ...prev]);
+    const updatedLedger = [newEntry, ...ledgerEntries];
+    setLedgerEntries(updatedLedger);
+    saveHostingerDbData('fsc_vps_ledger_entries', updatedLedger);
+
     addToast(
       'success',
-      isBn ? 'লেজার এন্ট্রি সফল হয়েছে!' : 'Ledger Entry Recorded!',
-      isBn ? `৳${entryAmount.toLocaleString()} (${entryType.toUpperCase()}) সিঙ্ক করা হয়েছে` : `৳${entryAmount.toLocaleString()} added`
+      isBn ? 'কাস্টমার বকেয়া/জমা রেকর্ড সফল হয়েছে!' : 'Customer Ledger Entry Recorded!',
+      isBn
+        ? `কাস্টমার ${cust.customer_code} (${cust.name}) এর নামে ৳${Number(entryAmount).toLocaleString()} (${entryType === 'charge' ? 'বকেয়া' : 'জমা'}) এন্ট্রি এবং সুপার এডমিন অডিটে সিঙ্ক হয়েছে`
+        : `৳${Number(entryAmount).toLocaleString()} recorded for ${cust.customer_code}`
     );
 
+    setEntryAmount('');
     setEntryNote('');
+    setEntryRefNo('');
     setShowAddLedgerModal(false);
+  };
+
+  // Delete / Void Ledger Entry Handler
+  const handleDeleteLedgerEntry = (entryId: string) => {
+    const updated = ledgerEntries.filter((l) => l.id !== entryId);
+    setLedgerEntries(updated);
+    saveHostingerDbData('fsc_vps_ledger_entries', updated);
+    addToast(
+      'info',
+      isBn ? 'লেজার এন্ট্রি মোছা হয়েছে!' : 'Ledger Entry Voided',
+      isBn ? 'কাস্টমার লেজার ব্যালেন্স ও রানিং বকেয়া আপডেট করা হয়েছে' : 'Updated customer running balance'
+    );
   };
 
   // Export CSV Handler
@@ -963,8 +1048,8 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
       <div className="space-y-6">
         <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
-        {/* Back Header */}
-        <div className={`flex items-center justify-between border-b pb-4 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
+        {/* Back & Quick Action Header */}
+        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-4 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
           <button
             onClick={() => setViewMode('directory')}
             className={`flex items-center space-x-2 text-xs font-normal transition-colors cursor-pointer ${
@@ -975,13 +1060,33 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
             <span className="font-light">{isBn ? 'কাস্টমার তালিকায় ফিরে যান' : 'Back to Customer Directory'}</span>
           </button>
 
-          <button
-            onClick={() => setShowAddLedgerModal(true)}
-            className="flex items-center space-x-2 py-2 px-4 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-normal text-xs shadow-sm cursor-pointer"
-          >
-            <Plus className="w-4 h-4" />
-            <span className="font-light">{isBn ? 'ম্যানুয়াল লেজার এন্ট্রি করুন' : 'Add Manual Ledger Entry'}</span>
-          </button>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => openQuickLedgerModal(selectedCust.id, 'charge')}
+              className="flex items-center space-x-1.5 py-2 px-4 rounded-none bg-amber-600 hover:bg-amber-700 text-white font-normal text-xs shadow-sm cursor-pointer"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="font-light">{isBn ? '➕ বকেয়া টাকা যোগ করুন' : '+ Add Due Charge'}</span>
+            </button>
+
+            <button
+              onClick={() => openQuickLedgerModal(selectedCust.id, 'payment')}
+              className="flex items-center space-x-1.5 py-2 px-4 rounded-none bg-emerald-600 hover:bg-emerald-700 text-white font-normal text-xs shadow-sm cursor-pointer"
+            >
+              <DollarSign className="w-4 h-4" />
+              <span className="font-light">{isBn ? '💵 জমা পরিশোধ এন্ট্রি' : '+ Record Payment'}</span>
+            </button>
+
+            <button
+              onClick={handleExportCSV}
+              className={`py-2 px-3 rounded-none text-xs font-normal border transition-all flex items-center space-x-1 cursor-pointer ${
+                isDark ? 'bg-[#0B1622] text-[#8FA3AD] border-[#1E3247]' : 'bg-slate-100 text-slate-700 border-slate-300'
+              }`}
+            >
+              <Download className="w-3.5 h-3.5 text-[#00897B]" />
+              <span className="font-light">{isBn ? 'CSV স্টেটমেন্ট' : 'CSV Statement'}</span>
+            </button>
+          </div>
         </div>
 
         {/* Customer Balance Header Card */}
@@ -991,34 +1096,52 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
             : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <div>
-            <span className={`text-xs uppercase font-bold tracking-wider ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{selectedCust.customer_code}</span>
+            <div className="flex items-center space-x-2">
+              <span className={`text-xs uppercase font-bold tracking-wider font-mono ${isDark ? 'text-[#1FB6A8]' : 'text-[#00897B]'}`}>
+                {selectedCust.customer_code}
+              </span>
+              {selectedCust.shipping_mark && (
+                <span className="text-[10px] bg-blue-500/20 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-none font-mono">
+                  MARK: {selectedCust.shipping_mark}
+                </span>
+              )}
+            </div>
             <h2 className={`text-xl font-bold mt-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>{selectedCust.name}</h2>
             <p className={`text-xs mt-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{selectedCust.phone} | {selectedCust.address}</p>
           </div>
 
           <div className={`border-t sm:border-t-0 sm:border-l pt-4 sm:pt-0 sm:pl-6 space-y-1 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
-            <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'মোট চার্জ (Total Charges)' : 'Total Charges'}</span>
+            <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'মোট চার্জ (Total Charges Billed)' : 'Total Billed Charges'}</span>
             <div className="text-lg font-bold text-amber-600 dark:text-amber-400 font-mono">৳{stats.totalCharges.toLocaleString()}</div>
-            <span className={`text-[11px] block font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'মোট পরিশোধ (Total Paid)' : 'Total Paid'}: ৳{stats.totalPayments.toLocaleString()}</span>
+            <span className={`text-[11px] block font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'মোট পরিশোধ (Total Paid)' : 'Total Paid Collections'}: ৳{stats.totalPayments.toLocaleString()}</span>
           </div>
 
           <div className={`border-t sm:border-t-0 sm:border-l pt-4 sm:pt-0 sm:pl-6 space-y-1 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
-            <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'বর্তমান নিট বকেয়া (Current Net Due)' : 'Current Net Outstanding Due'}</span>
-            <div className="text-2xl font-bold text-[#00897B] dark:text-[#1FB6A8] font-mono">৳{stats.currentDue.toLocaleString()}</div>
-            <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal bg-emerald-500/10 px-2 py-0.5 rounded-none inline-block">
-              ON-THE-FLY COMPUTED (LIVE)
+            <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'বর্তমান নিট অবশিষ্ট বকেয়া' : 'Current Net Remaining Balance Due'}</span>
+            <div className={`text-2xl font-bold font-mono ${stats.currentDue > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
+              ৳{stats.currentDue.toLocaleString()}
+            </div>
+            <span className={`text-[10px] font-normal px-2 py-0.5 rounded-none inline-block ${
+              stats.currentDue > 0 ? 'bg-rose-500/10 text-rose-600 dark:text-rose-300' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300'
+            }`}>
+              {stats.currentDue > 0 ? (isBn ? '🔴 বকেয়া টাকা পরিশোধ করতে হবে' : '🔴 Dues Outstanding') : (isBn ? '🟢 সর্বমোট পরিশোধিত (No Dues)' : '🟢 Fully Paid')}
             </span>
           </div>
         </div>
 
-        {/* Timeline Ledger Entries List */}
+        {/* Timeline Ledger Entries Detailed Audit Statement Table */}
         <div className={`border rounded-none p-6 space-y-4 shadow-sm ${
           isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
-          <h3 className="text-sm font-bold flex items-center space-x-2">
-            <FileText className="w-4 h-4 text-[#00897B]" />
-            <span>{isBn ? 'লেজার লেনদেন ইতিহাস (Chronological Timeline)' : 'Chronological Transaction History'}</span>
-          </h3>
+          <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-[#1E3247]">
+            <h3 className="text-sm font-bold flex items-center space-x-2">
+              <FileText className="w-4 h-4 text-[#00897B]" />
+              <span>{isBn ? 'কাস্টমার লেজার অডিট স্টেটমেন্ট ও ক্রোনোলজিক্যাল হিস্ট্রি' : 'Customer Detailed Ledger Audit Statement'}</span>
+            </h3>
+            <span className={`text-xs font-mono font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>
+              {stats.entries.length} Total Ledger Events
+            </span>
+          </div>
 
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs">
@@ -1026,45 +1149,108 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                 isDark ? 'bg-[#0B1622] text-[#8FA3AD] border-[#1E3247]' : 'bg-slate-100 text-slate-600 border-slate-200'
               }`}>
                 <tr>
-                  <th className="p-3.5">Date</th>
-                  <th className="p-3.5">Type</th>
-                  <th className="p-3.5">Amount (BDT ৳)</th>
-                  <th className="p-3.5">Source / Initiator</th>
-                  <th className="p-3.5">Note</th>
+                  <th className="p-3">তারিখ ও সময় (Date & Time)</th>
+                  <th className="p-3">ধরন (Type)</th>
+                  <th className="p-3">কি জন্য / কারণ (Reason & Description)</th>
+                  <th className="p-3">বকেয়া চার্জ (Debit ৳)</th>
+                  <th className="p-3">পরিশোধ জমা (Credit ৳)</th>
+                  <th className="p-3 font-bold">চলতি বকেয়া (Running Due ৳)</th>
+                  <th className="p-3">এন্ট্রি কারী স্টাফ (Initiator)</th>
+                  <th className="p-3 text-right">Action</th>
                 </tr>
               </thead>
               <tbody className={`divide-y ${isDark ? 'divide-[#1E3247]' : 'divide-slate-200'}`}>
                 {stats.entries.map((entry) => (
                   <tr key={entry.id} className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
-                    <td className={`p-3.5 font-mono ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{entry.created_at.split('T')[0]}</td>
-                    <td className="p-3.5">
+                    {/* 1. Date & Time */}
+                    <td className={`p-3 font-mono text-[11px] whitespace-nowrap ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>
+                      {formatDateTime(entry.created_at)}
+                    </td>
+
+                    {/* 2. Type Badge */}
+                    <td className="p-3 whitespace-nowrap">
                       <span
                         className={`px-2.5 py-0.5 rounded-none text-[10px] font-normal uppercase flex items-center space-x-1 w-fit ${
                           entry.type === 'charge'
-                            ? 'bg-amber-500/20 text-amber-600 dark:text-amber-300'
-                            : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300'
+                            ? 'bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30'
+                            : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30'
                         }`}
                       >
                         {entry.type === 'charge' ? (
-                          <ArrowUpRight className="w-3 h-3" />
+                          <ArrowUpRight className="w-3 h-3 text-amber-500" />
                         ) : (
-                          <ArrowDownLeft className="w-3 h-3" />
+                          <ArrowDownLeft className="w-3 h-3 text-emerald-500" />
                         )}
-                        <span>{entry.type}</span>
+                        <span>{entry.type === 'charge' ? (isBn ? '+ বকেয়া' : 'CHARGE') : (isBn ? '- জমা' : 'PAYMENT')}</span>
                       </span>
                     </td>
-                    <td className={`p-3.5 font-bold font-mono text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>৳{entry.amount.toLocaleString()}</td>
-                    <td className={`p-3.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>
+
+                    {/* 3. Reason & Note & Ref */}
+                    <td className="p-3 max-w-xs">
+                      <div className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        {entry.note}
+                      </div>
+                      <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                        {entry.reference_no && (
+                          <span className="text-[10px] font-mono bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 px-1.5 py-0.2 rounded-none">
+                            Ref: {entry.reference_no}
+                          </span>
+                        )}
+                        {entry.payment_method && (
+                          <span className="text-[10px] font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.2 rounded-none uppercase">
+                            Method: {entry.payment_method}
+                          </span>
+                        )}
+                      </div>
+                    </td>
+
+                    {/* 4. Debit Charge Amount */}
+                    <td className="p-3 font-mono font-bold whitespace-nowrap">
+                      {entry.type === 'charge' ? (
+                        <span className="text-amber-600 dark:text-amber-400 text-sm">৳{entry.amount.toLocaleString()}</span>
+                      ) : (
+                        <span className="text-slate-400">-</span>
+                      )}
+                    </td>
+
+                    {/* 5. Credit Payment Amount */}
+                    <td className="p-3 font-mono font-bold whitespace-nowrap">
+                      {entry.type === 'payment' ? (
+                        <span className="text-emerald-600 dark:text-emerald-400 text-sm">৳{entry.amount.toLocaleString()}</span>
+                      ) : (
+                        <span className="text-slate-400">-</span>
+                      )}
+                    </td>
+
+                    {/* 6. Running Due Balance */}
+                    <td className="p-3 font-mono font-extrabold whitespace-nowrap text-sm">
+                      <span className={entry.runningBalance > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}>
+                        ৳{entry.runningBalance.toLocaleString()}
+                      </span>
+                    </td>
+
+                    {/* 7. Initiator & Source */}
+                    <td className={`p-3 text-[11px] whitespace-nowrap ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>
                       {entry.source === 'auto_cash_collection' ? (
-                        <span className="text-emerald-600 dark:text-emerald-400 font-semibold flex items-center space-x-1">
+                        <span className="text-emerald-600 dark:text-emerald-400 font-medium flex items-center space-x-1">
                           <DollarSign className="w-3.5 h-3.5" />
-                          <span>Auto-Cash ({entry.entered_by_name})</span>
+                          <span>Counter Auto-Cash ({entry.entered_by_name})</span>
                         </span>
                       ) : (
                         <span>Manual ({entry.entered_by_name})</span>
                       )}
                     </td>
-                    <td className={`p-3.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{entry.note}</td>
+
+                    {/* 8. Action */}
+                    <td className="p-3 text-right whitespace-nowrap">
+                      <button
+                        onClick={() => handleDeleteLedgerEntry(entry.id)}
+                        title="Delete / Void Entry"
+                        className="text-rose-500 hover:text-rose-700 p-1 transition-colors cursor-pointer"
+                      >
+                        <XCircle className="w-4 h-4" />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -1077,79 +1263,248 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
           <div className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
             <form
               onSubmit={handleSaveLedgerEntry}
-              className={`border rounded-none p-6 max-w-md w-full space-y-4 shadow-2xl animate-in zoom-in-95 ${
+              className={`border rounded-none p-6 max-w-lg w-full space-y-4 shadow-2xl animate-in zoom-in-95 ${
                 isDark ? 'bg-[#11202F] border-[#1FB6A8]/40 text-white' : 'bg-white border-slate-300 text-slate-900'
               }`}
             >
-              <h3 className="text-base font-bold flex items-center space-x-2">
-                <Plus className="w-5 h-5 text-[#00897B]" />
-                <span>{isBn ? 'ম্যানুয়াল লেজার এন্ট্রি ফরম' : 'Add Manual Ledger Entry'}</span>
-              </h3>
+              <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-[#1E3247]">
+                <h3 className="text-base font-bold flex items-center space-x-2">
+                  <Plus className="w-5 h-5 text-[#00897B]" />
+                  <span>{isBn ? 'সহজ কাস্টমার বকেয়া ও জমা এন্ট্রি ফরম' : 'Quick Customer Ledger Entry Form'}</span>
+                </h3>
+                <button
+                  type="button"
+                  onClick={() => setShowAddLedgerModal(false)}
+                  className="text-slate-400 hover:text-white text-xs p-1"
+                >
+                  ✕
+                </button>
+              </div>
 
-              <div className="space-y-3 text-xs">
+              <div className="space-y-3.5 text-xs">
+                {/* 1. Customer Selection */}
                 <div>
-                  <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'এন্ট্রি টাইপ (Type)' : 'Entry Type'}</label>
+                  <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
+                    {isBn ? 'কাস্টমার নির্বাচন করুন *' : 'Select Customer *'}
+                  </label>
+                  <select
+                    required
+                    value={entryCustId}
+                    onChange={(e) => setEntryCustId(e.target.value)}
+                    className={`w-full border rounded-none p-2.5 outline-none font-medium ${
+                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-white border-slate-300 text-slate-900'
+                    }`}
+                  >
+                    <option value="" disabled>-- কাস্টমার সিলেক্ট করুন --</option>
+                    {customers.map((c) => {
+                      const due = getCustomerStats(c.customer_code).currentDue;
+                      return (
+                        <option key={c.id} value={c.id}>
+                          {c.name} ({c.customer_code}) — [বর্তমান বকেয়া: ৳{due.toLocaleString()}]
+                        </option>
+                      );
+                    })}
+                  </select>
+                </div>
+
+                {/* 2. Entry Type Toggle (Charge vs Payment) */}
+                <div>
+                  <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
+                    {isBn ? 'এন্ট্রি টাইপ (Type) *' : 'Entry Type *'}
+                  </label>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => setEntryType('charge')}
-                      className={`p-2.5 rounded-none font-bold transition-all ${
+                      className={`p-2.5 rounded-none font-bold text-xs transition-all flex items-center justify-center space-x-1 cursor-pointer ${
                         entryType === 'charge'
-                          ? 'bg-amber-500 text-black shadow-sm'
+                          ? 'bg-amber-600 text-white shadow-sm ring-2 ring-amber-400'
                           : isDark
-                          ? 'bg-[#0B1622] text-[#8FA3AD]'
-                          : 'bg-slate-100 text-slate-700'
+                          ? 'bg-[#0B1622] text-[#8FA3AD] border border-[#1E3247]'
+                          : 'bg-slate-100 text-slate-700 border border-slate-200'
                       }`}
                     >
-                      CHARGE (বকেয়া চার্জ)
+                      <span>➕ CHARGE (বকেয়া টাকা যোগ)</span>
                     </button>
 
                     <button
                       type="button"
                       onClick={() => setEntryType('payment')}
-                      className={`p-2.5 rounded-none font-bold transition-all ${
+                      className={`p-2.5 rounded-none font-bold text-xs transition-all flex items-center justify-center space-x-1 cursor-pointer ${
                         entryType === 'payment'
-                          ? 'bg-emerald-600 text-white shadow-sm'
+                          ? 'bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-400'
                           : isDark
-                          ? 'bg-[#0B1622] text-[#8FA3AD]'
-                          : 'bg-slate-100 text-slate-700'
+                          ? 'bg-[#0B1622] text-[#8FA3AD] border border-[#1E3247]'
+                          : 'bg-slate-100 text-slate-700 border border-slate-200'
                       }`}
                     >
-                      PAYMENT (পরিশোধ)
+                      <span>💵 PAYMENT (জমা পরিশোধ)</span>
                     </button>
                   </div>
                 </div>
 
+                {/* 3. Amount Input & Instant Preview */}
                 <div>
-                  <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'টাকার পরিমাণ (BDT ৳)' : 'Amount (BDT ৳)'}</label>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className={`block font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
+                      {isBn ? 'টাকার পরিমাণ (BDT ৳) *' : 'Amount (BDT ৳) *'}
+                    </label>
+                    {entryAmount && Number(entryAmount) > 0 && (
+                      <span className="text-xs font-mono font-bold text-[#00897B]">
+                        ৳ {Number(entryAmount).toLocaleString()}
+                      </span>
+                    )}
+                  </div>
                   <input
                     type="number"
                     required
                     min="1"
                     value={entryAmount}
-                    onChange={(e) => setEntryAmount(Number(e.target.value))}
-                    className={`w-full border rounded-none p-2.5 font-bold font-mono outline-none ${
+                    onChange={(e) => setEntryAmount(e.target.value)}
+                    placeholder="e.g. 25000"
+                    className={`w-full border rounded-none p-2.5 font-bold font-mono text-sm outline-none ${
                       isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
                     }`}
                   />
                 </div>
 
+                {/* Preset Reason Suggestions */}
                 <div>
-                  <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'নোট / বিবরণ' : 'Description Note'}</label>
+                  <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
+                    {isBn ? 'কুইক কারণ সিলেক্ট (1-Click Presets):' : 'Quick Presets:'}
+                  </label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {entryType === 'charge' ? (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setEntryNote('✈️ চায়না ফ্রেইট ও শিপিং চার্জ')}
+                          className="px-2 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/30 text-[11px] rounded-none hover:bg-amber-500/20 cursor-pointer"
+                        >
+                          ✈️ চায়না ফ্রেইট চার্জ
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEntryNote('🛃 কাস্টমস ডিউটি ও ট্যাক্স ফি')}
+                          className="px-2 py-1 bg-purple-500/10 text-purple-600 dark:text-purple-300 border border-purple-500/30 text-[11px] rounded-none hover:bg-purple-500/20 cursor-pointer"
+                        >
+                          🛃 কাস্টমস ডিউটি
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEntryNote('🚚 লোকাল ট্রাক ট্রানজিট ও প্যাকিং')}
+                          className="px-2 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-300 border border-blue-500/30 text-[11px] rounded-none hover:bg-blue-500/20 cursor-pointer"
+                        >
+                          🚚 লোকাল ট্রানজিট
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEntryNote('🏢 ওয়্যারহাউজ হোল্ডিং ও ডেমারেজ ফি')}
+                          className="px-2 py-1 bg-slate-500/10 text-slate-600 dark:text-slate-300 border border-slate-500/30 text-[11px] rounded-none hover:bg-slate-500/20 cursor-pointer"
+                        >
+                          🏢 ওয়্যারহাউজ ফি
+                        </button>
+                      </>
+                    ) : (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setEntryNote('💵 ওয়্যারহাউজ কাউন্টারে নগদ ক্যাশ জমা')}
+                          className="px-2 py-1 bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30 text-[11px] rounded-none hover:bg-emerald-500/20 cursor-pointer"
+                        >
+                          💵 কাউন্টার ক্যাশ
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEntryNote('🏦 ব্যাংক অনলাইন ট্রান্সফার জমা')}
+                          className="px-2 py-1 bg-blue-500/10 text-blue-600 dark:text-blue-300 border border-blue-500/30 text-[11px] rounded-none hover:bg-blue-500/20 cursor-pointer"
+                        >
+                          🏦 ব্যাংক ট্রান্সফার
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setEntryNote('📱 bKash / Nagad ওয়ালেট পেমেন্ট')}
+                          className="px-2 py-1 bg-pink-500/10 text-pink-600 dark:text-pink-300 border border-pink-500/30 text-[11px] rounded-none hover:bg-pink-500/20 cursor-pointer"
+                        >
+                          📱 bKash / Nagad
+                        </button>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* 4. Description Note */}
+                <div>
+                  <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
+                    {isBn ? 'কারণ / বিস্তারিত বিবরণ *' : 'Reason / Description *'}
+                  </label>
                   <input
                     type="text"
                     required
                     value={entryNote}
                     onChange={(e) => setEntryNote(e.target.value)}
-                    placeholder="e.g. ব্যাংক ট্রান্সফার রসিদ #9901"
+                    placeholder="e.g. চায়না ফ্রেইট বিকেএস চার্জ - কার্টন #CTN-9918"
                     className={`w-full border rounded-none p-2.5 outline-none font-light ${
                       isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
                     }`}
                   />
                 </div>
+
+                {/* 5. Reference No & Date/Time */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                  <div>
+                    <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
+                      {isBn ? 'রসিদ / রেফারেন্স নং' : 'Ref / Receipt No'}
+                    </label>
+                    <input
+                      type="text"
+                      value={entryRefNo}
+                      onChange={(e) => setEntryRefNo(e.target.value)}
+                      placeholder="e.g. #REC-8821"
+                      className={`w-full border rounded-none p-2.5 font-mono outline-none ${
+                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-white border-slate-300 text-slate-900'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
+                      {isBn ? 'তারিখ ও সময় (Date & Time)' : 'Date & Time'}
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={entryDateTime}
+                      onChange={(e) => setEntryDateTime(e.target.value)}
+                      className={`w-full border rounded-none p-2 font-mono outline-none ${
+                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-white border-slate-300 text-slate-900'
+                      }`}
+                    />
+                  </div>
+                </div>
+
+                {entryType === 'payment' && (
+                  <div>
+                    <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
+                      {isBn ? 'পেমেন্ট মেথড (Payment Method)' : 'Payment Method'}
+                    </label>
+                    <select
+                      value={entryPaymentMethod}
+                      onChange={(e) => setEntryPaymentMethod(e.target.value as any)}
+                      className={`w-full border rounded-none p-2 outline-none font-light ${
+                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-white border-slate-300 text-slate-900'
+                      }`}
+                    >
+                      <option value="cash">💵 Cash Collection (নগদ ক্যাশ)</option>
+                      <option value="bkash">📱 bKash (বিকাশ)</option>
+                      <option value="nagad">📱 Nagad (নগদ)</option>
+                      <option value="bank_wire">🏦 Bank Wire Transfer (ব্যাংক ট্রান্সফার)</option>
+                      <option value="check">🧾 Bank Check (ব্যাংক চেক)</option>
+                    </select>
+                  </div>
+                )}
               </div>
 
-              <div className="flex justify-end space-x-2 pt-2">
+              <div className="flex justify-end space-x-2 pt-3 border-t border-slate-200 dark:border-[#1E3247]">
                 <button
                   type="button"
                   onClick={() => setShowAddLedgerModal(false)}
@@ -1161,9 +1516,17 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-normal text-xs cursor-pointer shadow-sm"
+                  className={`px-5 py-2 rounded-none text-white font-normal text-xs cursor-pointer shadow-sm ${
+                    entryType === 'charge' ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'
+                  }`}
                 >
-                  <span className="font-light">{isBn ? 'এন্ট্রি সেভ করুন' : 'Save Entry'}</span>
+                  <span className="font-light">
+                    {isBn
+                      ? entryType === 'charge'
+                        ? '💾 বকেয়া টাকা যোগ করুন'
+                        : '💾 জমা রেকর্ড সংরক্ষণ করুন'
+                      : 'Save Entry'}
+                  </span>
                 </button>
               </div>
             </form>
@@ -1293,15 +1656,25 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                     <td className={`p-3.5 font-bold text-sm font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       ৳{stats.currentDue.toLocaleString()}
                     </td>
-                    <td className="p-3.5 text-right">
+                    <td className="p-3.5 text-right space-x-1.5 whitespace-nowrap">
+                      <button
+                        onClick={() => openQuickLedgerModal(cust.id, 'charge')}
+                        className="px-3 py-1.5 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-normal text-xs transition-all shadow-sm cursor-pointer inline-flex items-center space-x-1"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        <span className="font-light">{isBn ? '➕ বকেয়া/জমা' : '+ Due/Payment'}</span>
+                      </button>
+
                       <button
                         onClick={() => {
                           setSelectedCustomerId(cust.id);
                           setViewMode('detail');
                         }}
-                        className="px-3.5 py-1.5 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-normal text-xs transition-all shadow-sm cursor-pointer"
+                        className={`px-3 py-1.5 rounded-none font-normal text-xs transition-all shadow-sm cursor-pointer inline-flex items-center space-x-1 ${
+                          isDark ? 'bg-slate-800 hover:bg-slate-700 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300'
+                        }`}
                       >
-                        <span className="font-light">{isBn ? 'লেজার বিবরণ দেখুন →' : 'View Ledger →'}</span>
+                        <span className="font-light">{isBn ? '📋 বিবরণ ও ইতিহাস →' : 'View Ledger →'}</span>
                       </button>
                     </td>
                   </tr>
