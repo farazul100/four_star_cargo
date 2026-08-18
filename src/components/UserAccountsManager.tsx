@@ -90,13 +90,17 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Load live DB data
+  // Load live DB data & subscribe to real-time updates
   useEffect(() => {
-    const data = getHostingerDbData();
-    setUsers(data.users || []);
-    setWarehouses(data.warehouses || []);
-    setAuditLogs(data.auditLogs || []);
-    setCartons(data.cartons || []);
+    const loadData = () => {
+      const data = getHostingerDbData();
+      setUsers(data.users || []);
+      setWarehouses(data.warehouses || []);
+      setAuditLogs(data.auditLogs || []);
+      setCartons(data.cartons || []);
+    };
+    loadData();
+    return subscribeToDbUpdates(loadData);
   }, []);
 
   // Sync users to DB
@@ -147,6 +151,28 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
       created_at: new Date().toISOString(),
     };
 
+    // If warehouse incharge role, also sync into the assigned warehouse's incharge roster
+    if (newUserRole === 'warehouse_incharge' && assignedWh) {
+      const updatedWhs = warehouses.map((w) => {
+        if (w.id === assignedWh.id) {
+          const currentStaff = w.incharge_staff || [];
+          const newStaff = {
+            id: userId,
+            name: newUserName,
+            email: newUserEmail,
+            phone: newUserPhone || '+880 1700-000000',
+            role: 'warehouse_incharge' as const,
+            status: 'active' as const,
+            created_at: new Date().toISOString(),
+          };
+          return { ...w, incharge_staff: [...currentStaff, newStaff] };
+        }
+        return w;
+      });
+      setWarehouses(updatedWhs);
+      saveHostingerDbData(DB_KEYS.WAREHOUSES, updatedWhs);
+    }
+
     const updatedUsers = [newUser, ...users];
     syncUsers(updatedUsers, `Super Admin created user account for ${newUser.name} (${newUser.role})`);
 
@@ -193,13 +219,21 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
   const handleConfirmDeleteUser = () => {
     if (!userToDelete) return;
 
-    if (userToDelete.id === 'usr-1') {
+    if (userToDelete.id === 'usr-1' || userToDelete.email === 'superadmin@cargo.com') {
       addToast('error', isBn ? 'অ্যাকশন সম্ভব নয়' : 'Action Forbidden', isBn ? 'মূল সুপার এডমিন অ্যাকাউন্ট ডিলেট করা যাবে না।' : 'Primary Super Admin cannot be deleted.');
       setUserToDelete(null);
       return;
     }
 
-    const updatedUsers = users.filter((u) => u.id !== userToDelete.id);
+    // Also remove from any warehouse incharge roster if applicable
+    const updatedWhs = warehouses.map((w) => ({
+      ...w,
+      incharge_staff: (w.incharge_staff || []).filter((s) => s.id !== userToDelete.id && s.email !== userToDelete.email),
+    }));
+    setWarehouses(updatedWhs);
+    saveHostingerDbData(DB_KEYS.WAREHOUSES, updatedWhs);
+
+    const updatedUsers = users.filter((u) => u.id !== userToDelete.id && u.email !== userToDelete.email);
     syncUsers(updatedUsers, `Super Admin permanently deleted user account: ${userToDelete.name} (${userToDelete.email})`);
 
     addToast(

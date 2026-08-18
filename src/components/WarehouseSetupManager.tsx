@@ -82,12 +82,16 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Load live persistent data on mount
+  // Load live persistent data on mount & subscribe to real-time updates
   useEffect(() => {
-    const data = getHostingerDbData();
-    setWarehouses(data.warehouses || []);
-    setUsers(data.users || []);
-    setCartons(data.cartons || []);
+    const loadData = () => {
+      const data = getHostingerDbData();
+      setWarehouses(data.warehouses || []);
+      setUsers(data.users || []);
+      setCartons(data.cartons || []);
+    };
+    loadData();
+    return subscribeToDbUpdates(loadData);
   }, []);
 
   // Save helper
@@ -218,7 +222,11 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
       created_at: new Date().toISOString(),
     };
 
-    const updatedUsers = [...users, newUser];
+    const currentDbUsers = getHostingerDbData().users || [];
+    const updatedUsers = [
+      ...currentDbUsers.filter((u) => u.id !== staffId && u.email !== inchargeEmail),
+      newUser,
+    ];
     setUsers(updatedUsers);
     saveHostingerDbData(DB_KEYS.USERS, updatedUsers);
 
