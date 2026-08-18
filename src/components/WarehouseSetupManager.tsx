@@ -209,8 +209,11 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
       id: staffId,
       name: inchargeName,
       email: inchargeEmail,
+      password: inchargePassword,
       role: 'warehouse_incharge',
       warehouse_id: targetWhForIncharge.id,
+      warehouse_name: targetWhForIncharge.name,
+      phone: inchargePhone || '+880 1700-000000',
       status: 'active',
       created_at: new Date().toISOString(),
     };

@@ -67,11 +67,14 @@ export const initHostingerDb = () => {
   } catch (e) {
     usersList = [];
   }
-  const hasMasterAdmin = usersList.some((u) => u.email && u.email.toLowerCase() === 'superadmin@cargo.com');
-  const hasOldDemoAdmin = usersList.some((u) => u.email && u.email.toLowerCase() === 'admin@fourstarcargo.com');
-  if (!currentUsersRaw || !hasMasterAdmin || hasOldDemoAdmin) {
-    localStorage.setItem(DB_KEYS.USERS, JSON.stringify(INITIAL_USERS));
+
+  // Clean old demo admin if present, but strictly PRESERVE all newly created staff users
+  usersList = usersList.filter((u) => u && u.email && u.email.toLowerCase() !== 'admin@fourstarcargo.com');
+  const hasMasterAdmin = usersList.some((u) => u && u.email && u.email.toLowerCase() === 'superadmin@cargo.com');
+  if (!hasMasterAdmin) {
+    usersList.unshift(INITIAL_USERS[0]);
   }
+  localStorage.setItem(DB_KEYS.USERS, JSON.stringify(usersList));
   if (!localStorage.getItem(DB_KEYS.WAREHOUSES)) {
     localStorage.setItem(DB_KEYS.WAREHOUSES, JSON.stringify(INITIAL_WAREHOUSES));
   }

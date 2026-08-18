@@ -91,7 +91,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
     }
 
     const currentUsers = getHostingerDbData().users || INITIAL_USERS;
-    const foundUser = currentUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
+    const foundUser = currentUsers.find((u) => u.email && u.email.trim().toLowerCase() === email.trim().toLowerCase());
 
     if (!foundUser) {
       setError(lang === 'bn' ? 'ইউজার অ্যাকাউন্ট পাওয়া যায়নি! সুপার এডমিন প্যানেল থেকে একাউন্ট তৈরি করুন।' : 'User account not found!');
@@ -103,7 +103,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
       return;
     }
 
-    if (foundUser.email.toLowerCase() === 'superadmin@cargo.com' && password !== 'Cargo@2026') {
+    if (foundUser.status === 'inactive' || foundUser.status === 'suspended') {
+      setError(lang === 'bn' ? 'আপনার অ্যাকাউন্টটি নিষ্ক্রিয় বা স্থগিত করা হয়েছে।' : 'Account is inactive or suspended.');
+      return;
+    }
+
+    const expectedPassword = foundUser.password || 'Cargo@2026';
+    if (password !== expectedPassword) {
       setError(lang === 'bn' ? 'ভুল পাসওয়ার্ড! সঠিক পাসওয়ার্ড প্রদান করুন।' : 'Invalid password! Please check your credentials.');
       return;
     }

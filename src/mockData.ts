@@ -5,6 +5,7 @@ export const INITIAL_USERS: User[] = [
     id: 'usr-admin-master',
     name: 'সুপার এডমিন (Super Admin)',
     email: 'superadmin@cargo.com',
+    password: 'Cargo@2026',
     role: 'super_admin',
     status: 'active',
     created_at: '2026-01-01T00:00:00Z',
