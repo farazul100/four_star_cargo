@@ -221,6 +221,22 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
     setShowAddCustomerModal(false);
   };
 
+  // Helper to re-calculate customer stats from a given ledger list
+  const computeCustomerBalanceFromLedger = (custCode: string, targetLedger: LedgerEntry[]) => {
+    const rawEntries = targetLedger.filter((l) => l.customer_code === custCode);
+    const totalCharges = rawEntries
+      .filter((l) => l.type === 'charge')
+      .reduce((acc, curr) => acc + curr.amount, 0);
+    const totalPayments = rawEntries
+      .filter((l) => l.type === 'payment')
+      .reduce((acc, curr) => acc + curr.amount, 0);
+    return {
+      totalCharges,
+      totalPayments,
+      currentDue: totalCharges - totalPayments,
+    };
+  };
+
   // Add Manual Ledger Entry Handler
   const handleSaveLedgerEntry = (e: React.FormEvent) => {
     e.preventDefault();
@@ -252,11 +268,25 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
     setLedgerEntries(updatedLedger);
     saveHostingerDbData('fsc_vps_ledger_entries', updatedLedger);
 
+    // Also sync customers state array & Hostinger DB fsc_vps_customers
+    const newStats = computeCustomerBalanceFromLedger(cust.customer_code, updatedLedger);
+    const updatedCustList = customers.map((c) =>
+      c.id === cust.id
+        ? {
+            ...c,
+            total_due: newStats.currentDue,
+            total_paid: newStats.totalPayments,
+          }
+        : c
+    );
+    setCustomers(updatedCustList);
+    saveHostingerDbData('fsc_vps_customers', updatedCustList);
+
     addToast(
       'success',
       isBn ? 'কাস্টমার বকেয়া/জমা রেকর্ড সফল হয়েছে!' : 'Customer Ledger Entry Recorded!',
       isBn
-        ? `কাস্টমার ${cust.customer_code} (${cust.name}) এর নামে ৳${Number(entryAmount).toLocaleString()} (${entryType === 'charge' ? 'বকেয়া' : 'জমা'}) এন্ট্রি এবং সুপার এডমিন অডিটে সিঙ্ক হয়েছে`
+        ? `কাস্টমার ${cust.customer_code} (${cust.name}) এর বকেয়া ৳${newStats.currentDue.toLocaleString()} তে আপডেট করা হয়েছে (নতুন যোগ: ৳${Number(entryAmount).toLocaleString()})`
         : `৳${Number(entryAmount).toLocaleString()} recorded for ${cust.customer_code}`
     );
 
@@ -268,9 +298,26 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
   // Delete / Void Ledger Entry Handler
   const handleDeleteLedgerEntry = (entryId: string) => {
-    const updated = ledgerEntries.filter((l) => l.id !== entryId);
-    setLedgerEntries(updated);
-    saveHostingerDbData('fsc_vps_ledger_entries', updated);
+    const targetEntry = ledgerEntries.find((l) => l.id === entryId);
+    const updatedLedger = ledgerEntries.filter((l) => l.id !== entryId);
+    setLedgerEntries(updatedLedger);
+    saveHostingerDbData('fsc_vps_ledger_entries', updatedLedger);
+
+    if (targetEntry) {
+      const newStats = computeCustomerBalanceFromLedger(targetEntry.customer_code, updatedLedger);
+      const updatedCustList = customers.map((c) =>
+        c.customer_code === targetEntry.customer_code
+          ? {
+              ...c,
+              total_due: newStats.currentDue,
+              total_paid: newStats.totalPayments,
+            }
+          : c
+      );
+      setCustomers(updatedCustList);
+      saveHostingerDbData('fsc_vps_customers', updatedCustList);
+    }
+
     addToast(
       'info',
       isBn ? 'লেজার এন্ট্রি মোছা হয়েছে!' : 'Ledger Entry Voided',
