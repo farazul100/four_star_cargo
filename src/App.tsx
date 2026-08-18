@@ -61,6 +61,8 @@ export function App() {
         <Route path="/admin/ledger" element={<AdminDashboardPage />} />
         <Route path="/admin/audit-logs" element={<AdminDashboardPage />} />
         <Route path="/admin/public-track" element={<AdminDashboardPage />} />
+        <Route path="/admin/cargo-search" element={<AdminDashboardPage />} />
+        <Route path="/admin/search" element={<AdminDashboardPage />} />
         <Route path="/admin/*" element={<AdminDashboardPage />} />
       </Route>
 
@@ -77,6 +79,8 @@ export function App() {
         <Route path="/operations/proposals" element={<OperationsDashboardPage />} />
         <Route path="/operations/final-flying-list" element={<OperationsDashboardPage />} />
         <Route path="/operations/cartons" element={<OperationsDashboardPage />} />
+        <Route path="/operations/cargo-search" element={<OperationsDashboardPage />} />
+        <Route path="/operations/search" element={<OperationsDashboardPage />} />
         <Route path="/operations/*" element={<OperationsDashboardPage />} />
       </Route>
 
@@ -91,6 +95,8 @@ export function App() {
         <Route path="/warehouse/inventory" element={<WarehouseDashboardPage />} />
         <Route path="/warehouse/notifications" element={<WarehouseDashboardPage />} />
         <Route path="/warehouse/final-flying-list" element={<WarehouseDashboardPage />} />
+        <Route path="/warehouse/cargo-search" element={<WarehouseDashboardPage />} />
+        <Route path="/warehouse/search" element={<WarehouseDashboardPage />} />
         <Route path="/warehouse/*" element={<WarehouseDashboardPage />} />
       </Route>
 
@@ -102,6 +108,8 @@ export function App() {
         <Route path="/accounts/reports" element={<AccountsDashboardPage />} />
         <Route path="/accounts/cash-collections" element={<AccountsDashboardPage />} />
         <Route path="/accounts/notifications" element={<AccountsDashboardPage />} />
+        <Route path="/accounts/search" element={<AccountsDashboardPage />} />
+        <Route path="/accounts/cargo-search" element={<AccountsDashboardPage />} />
         <Route path="/accounts/*" element={<AccountsDashboardPage />} />
       </Route>
 

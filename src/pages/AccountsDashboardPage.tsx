@@ -19,6 +19,7 @@ export const AccountsDashboardPage: React.FC = () => {
     if (path.includes('/budget') || path.includes('/expenses')) return 'expenses';
     if (path.includes('/reports')) return 'reports';
     if (path.includes('/cash-collections')) return 'cash_collections';
+    if (path.includes('/search') || path.includes('/cargo-search') || path.includes('/tracking')) return 'cargo_search';
     return 'dashboard';
   };
 
@@ -46,6 +47,10 @@ export const AccountsDashboardPage: React.FC = () => {
       case 'cash_collections':
         navigate('/accounts/cash-collections');
         break;
+      case 'cargo_search':
+      case 'public_track':
+        navigate('/accounts/search');
+        break;
       default:
         navigate('/accounts/dashboard');
         break;
@@ -71,6 +76,10 @@ export const AccountsDashboardPage: React.FC = () => {
     dashboard: {
       title: lang === 'bn' ? 'অ্যাকাউন্টস অ্যানালিটিক্স ও ফিনান্সিয়াল ওভারভিউ ড্যাশবোর্ড' : 'Accounts Analytics & Overview Dashboard',
       subtitle: lang === 'bn' ? 'আয়, বকেয়া, খরচ সিঙ্ক এবং ম্যানুয়াল হিসাব এন্ট্রি হাব' : 'Real-time financial analytics, dues monitoring & live expense sync with Super Admin',
+    },
+    cargo_search: {
+      title: lang === 'bn' ? '🔍 ইউনিভার্সাল কার্গো ট্র্যাকিং সার্চ ও লাইভ মনিটর' : 'Universal Cargo Tracking Search & Live Monitor',
+      subtitle: lang === 'bn' ? 'ট্র্যাকিং নম্বর, কাস্টমার কোড বা ফোন নম্বর দিয়ে যেকোনো কার্টুনের স্ট্যাটাস ও হিস্ট্রি খুঁজুন' : 'Live cargo tracking search by tracking number, customer code, or phone',
     },
     ledger: {
       title: lang === 'bn' ? 'কাস্টমার লেজার ও ফাইনান্সিয়াল স্টেটমেন্ট' : 'Customer Ledger & Financial Directory',

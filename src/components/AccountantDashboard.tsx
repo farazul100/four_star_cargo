@@ -31,6 +31,7 @@ import {
 import { Customer, LedgerEntry, User, Language, ExpenseItem } from '../types';
 import { ToastContainer, ToastMessage } from './Toast';
 import { BudgetExpenseManager } from './BudgetExpenseManager';
+import { ShipmentDataTracker } from './ShipmentDataTracker';
 import { saveHostingerDbData } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 
@@ -70,14 +71,15 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // State: Active View Mode ('overview' | 'directory' | 'detail' | 'reports' | 'expenses' | 'cash_collections')
-  const [viewMode, setViewMode] = useState<'overview' | 'directory' | 'detail' | 'reports' | 'expenses' | 'cash_collections'>('overview');
+  // State: Active View Mode ('overview' | 'directory' | 'detail' | 'reports' | 'expenses' | 'cash_collections' | 'cargo_search')
+  const [viewMode, setViewMode] = useState<'overview' | 'directory' | 'detail' | 'reports' | 'expenses' | 'cash_collections' | 'cargo_search'>('overview');
 
   useEffect(() => {
     if (activeTab === 'ledger') setViewMode('directory');
     else if (activeTab === 'expenses' || activeTab === 'budget') setViewMode('expenses');
     else if (activeTab === 'reports') setViewMode('reports');
     else if (activeTab === 'cash_collections') setViewMode('cash_collections');
+    else if (activeTab === 'cargo_search' || activeTab === 'public_track') setViewMode('cargo_search');
     else if (activeTab === 'dashboard') setViewMode('overview');
   }, [activeTab]);
 
@@ -419,6 +421,13 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
   );
   const totalExpenseAmount = (expenses || []).reduce((acc, curr) => acc + curr.amount, 0);
   const netCashflow = totalCollectedCash - totalExpenseAmount;
+
+  // --------------------------------------------------------------------------
+  // TAB: CARGO TRACKING SEARCH & LIVE MONITOR
+  // --------------------------------------------------------------------------
+  if (viewMode === 'cargo_search') {
+    return <ShipmentDataTracker language={language} />;
+  }
 
   // --------------------------------------------------------------------------
   // TAB: ACCOUNTS OVERVIEW & ANALYTICS DASHBOARD (Landing Tab)
