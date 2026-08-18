@@ -20,7 +20,7 @@ import {
   Check,
 } from 'lucide-react';
 import { Warehouse, User, Language, Theme, WarehouseInchargeStaff, AuditLog } from '../types';
-import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, publishSystemNotification } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
 
@@ -231,6 +231,15 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
     saveHostingerDbData(DB_KEYS.USERS, updatedUsers);
 
     syncWarehouses(updatedWhs, `Super Admin assigned Incharge ${inchargeName} (${inchargeEmail}) to Warehouse ${targetWhForIncharge.name}`);
+
+    publishSystemNotification({
+      title: isBn ? 'নতুন ইনচার্জ দায়িত্ব গ্রহণ' : 'New Incharge Assigned',
+      message: isBn ? `${inchargeName}-কে "${targetWhForIncharge.name}" ওয়্যারহাউজের ইনচার্জ হিসেবে নিযুক্ত করা হয়েছে।` : `${inchargeName} assigned as incharge of ${targetWhForIncharge.name}.`,
+      type: 'success',
+      target_role: 'warehouse_incharge',
+      target_warehouse_id: targetWhForIncharge.id,
+      target_user_id: staffId,
+    });
 
     // Reset Incharge Form
     setInchargeName('');

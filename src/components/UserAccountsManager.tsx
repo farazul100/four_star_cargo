@@ -28,7 +28,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { User, UserRole, Warehouse, Language, Theme, AuditLog, Carton } from '../types';
-import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, publishSystemNotification } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
 
@@ -175,6 +175,14 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
 
     const updatedUsers = [newUser, ...users];
     syncUsers(updatedUsers, `Super Admin created user account for ${newUser.name} (${newUser.role})`);
+
+    publishSystemNotification({
+      title: isBn ? 'নতুন অ্যাকাউন্ট সক্রিয়' : 'New Account Activated',
+      message: isBn ? `${newUser.name} (${newUser.email})-এর সিস্টেমে একাউন্ট খোলা হয়েছে।` : `Account created for ${newUser.name} (${newUser.email}).`,
+      type: 'info',
+      target_role: newUser.role,
+      target_user_id: newUser.id,
+    });
 
     // Reset Form
     setNewUserName('');

@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Menu, Bell, Sun, Moon, LogOut, Check, Info, AlertTriangle, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { User, Language, Theme } from '../types';
 import { LanguageSelector } from './LanguageSelector';
-import { resetHostingerDbToDefault } from '../lib/db';
+import { resetHostingerDbToDefault, getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '../lib/db';
 
 interface HeaderProps {
   currentUser: User | null;
@@ -20,7 +20,8 @@ interface NotificationItem {
   id: string;
   title: string;
   message: string;
-  time: string;
+  time?: string;
+  created_at?: string;
   isRead: boolean;
   type: 'info' | 'warning' | 'success' | 'alert';
 }
@@ -43,42 +44,32 @@ export const Header: React.FC<HeaderProps> = ({
   const notifRef = useRef<HTMLDivElement>(null);
 
   // System Notifications state
-  const [notifications, setNotifications] = useState<NotificationItem[]>([
-    {
-      id: 'notif-1',
-      title: isBn ? 'নতুন ফ্লাইং প্রস্তাবনা' : 'New Flying Proposal',
-      message: isBn ? 'ওয়্যারহাউজ ইনচার্জ ১টি ফ্লাইং প্রস্তাবনা পেন্ডিং অনুমোদনের জন্য জমা দিয়েছেন।' : 'Warehouse Incharge submitted a proposal for flight approval.',
-      time: isBn ? '৫ মিনিট আগে' : '5 mins ago',
-      isRead: false,
-      type: 'warning',
-    },
-    {
-      id: 'notif-2',
-      title: isBn ? 'লো স্টক অ্যালার্ট' : 'Low Stock Alert',
-      message: isBn ? 'ঢাকা সেন্ট্রাল ওয়্যারহাউজে ৩টি ক্যাটালগ কার্টুন স্টক শেষ পর্যায়ে।' : '3 catalog cartons are running out of stock in Dhaka Central Warehouse.',
-      time: isBn ? '২০ মিনিট আগে' : '20 mins ago',
-      isRead: false,
-      type: 'alert',
-    },
-    {
-      id: 'notif-3',
-      title: isBn ? 'ক্যাশ কালেকশন সিঙ্ক' : 'Cash Collection Synced',
-      message: isBn ? 'চট্টগ্রাম ওয়্যারহাউজ ৳৪৫,০০০ ডেলিভারি ক্যাশ সিঙ্ক সম্পন্ন করেছে।' : 'Chittagong Warehouse synced ৳45,000 cash collection.',
-      time: isBn ? '১ ঘণ্টা আগে' : '1 hour ago',
-      isRead: true,
-      type: 'success',
-    },
-    {
-      id: 'notif-4',
-      title: isBn ? 'শিপমেন্ট রিসিভড' : 'Shipment Received',
-      message: isBn ? 'কার্টুন #ST-9942 ফ্লাইট CZ-304 এ রিসিভড হিসেবে মার্ক করা হয়েছে।' : 'Carton #ST-9942 marked as received on Flight CZ-304.',
-      time: isBn ? '২ ঘণ্টা আগে' : '2 hours ago',
-      isRead: true,
-      type: 'info',
-    },
-  ]);
+  const [allNotifs, setAllNotifs] = useState<any[]>([]);
 
-  const unreadCount = notifications.filter(n => !n.isRead).length;
+  useEffect(() => {
+    const loadNotifs = () => {
+      const db = getHostingerDbData();
+      setAllNotifs(db.notifications || []);
+    };
+    loadNotifs();
+    return subscribeToDbUpdates(loadNotifs);
+  }, []);
+
+  // Filter notifications for active user's role and assigned warehouse
+  const roleNotifs = allNotifs.filter((n) => {
+    if (!currentUser) return false;
+    if (currentUser.role === 'super_admin') return true;
+    if (n.target_user_id && n.target_user_id === currentUser.id) return true;
+    if (n.target_role && (n.target_role === 'all' || n.target_role === currentUser.role)) {
+      if (n.target_warehouse_id) {
+        return !currentUser.warehouse_id || currentUser.warehouse_id === n.target_warehouse_id;
+      }
+      return true;
+    }
+    return false;
+  });
+
+  const unreadCount = roleNotifs.filter((n) => !n.isRead).length;
 
   // Outside click listener for notification popup
   useEffect(() => {
@@ -92,11 +83,15 @@ export const Header: React.FC<HeaderProps> = ({
   }, []);
 
   const markAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    const updated = allNotifs.map((n) => ({ ...n, isRead: true }));
+    setAllNotifs(updated);
+    saveHostingerDbData('notifications', updated);
   };
 
   const markOneRead = (id: string) => {
-    setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
+    const updated = allNotifs.map((n) => (n.id === id ? { ...n, isRead: true } : n));
+    setAllNotifs(updated);
+    saveHostingerDbData('notifications', updated);
   };
 
   const getRoleBadge = (role?: string) => {
@@ -210,12 +205,12 @@ export const Header: React.FC<HeaderProps> = ({
 
               {/* Notification List */}
               <div className={`max-h-80 overflow-y-auto divide-y ${isDark ? 'divide-[#2C2C2E]/60' : 'divide-gray-100'}`}>
-                {notifications.length === 0 ? (
+                {roleNotifs.length === 0 ? (
                   <div className={`p-6 text-center text-xs ${isDark ? 'text-[#9E9E9E]' : 'text-gray-500'}`}>
                     {isBn ? 'কোনো নোটিফিকেশন নেই' : 'No notifications'}
                   </div>
                 ) : (
-                  notifications.map((ntf) => (
+                  roleNotifs.map((ntf) => (
                     <div
                       key={ntf.id}
                       onClick={() => markOneRead(ntf.id)}

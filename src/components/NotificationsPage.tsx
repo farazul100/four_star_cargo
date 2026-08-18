@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Check, Filter, Bell, AlertTriangle, ShieldAlert, CheckCircle2, Info, Copy } from 'lucide-react';
 import { Language, Theme } from '../types';
+import { useAuth } from '../hooks/useAuth';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '../lib/db';
 
 interface NotificationsPageProps {
   language: Language;
@@ -11,70 +13,61 @@ interface NotificationItem {
   id: string;
   title: string;
   message: string;
-  time: string;
-  created_at: string;
+  time?: string;
+  created_at?: string;
   isRead: boolean;
   type: 'info' | 'warning' | 'success' | 'alert';
   cid?: string;
+  target_role?: string;
+  target_warehouse_id?: string;
+  target_user_id?: string;
 }
 
 export const NotificationsPage: React.FC<NotificationsPageProps> = ({ language, theme }) => {
   const isBn = language === 'bn';
   const isDark = theme === 'dark';
+  const { user } = useAuth();
 
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [readFilter, setReadFilter] = useState<string>('all');
+  const [allNotifications, setAllNotifications] = useState<NotificationItem[]>([]);
 
-  const [notifications, setNotifications] = useState<NotificationItem[]>([
-    {
-      id: 'n-1',
-      title: isBn ? 'নতুন ফ্লাইং প্রস্তাবনা' : 'New Flying Proposal Submitted',
-      message: isBn ? 'ঢাকা সেন্ট্রাল ওয়্যারহাউজের ইনচার্জ ১টি নতুন ফ্লাইং ফাইল পেন্ডিং অনুমোদনের জন্য জমা দিয়েছেন।' : 'Dhaka Central Warehouse Incharge submitted a new flying proposal for approval.',
-      time: isBn ? '৫ মিনিট আগে' : '5 mins ago',
-      created_at: '2026-08-15 00:50',
-      isRead: false,
-      type: 'warning',
-      cid: 'CID-884920',
-    },
-    {
-      id: 'n-2',
-      title: isBn ? 'লো স্টক সর্তকতা' : 'Low Stock Warning',
-      message: isBn ? 'চট্টগ্রাম হাব ইনভেন্টরিতে ৩টি কার্টুন আইটেম আউট অব স্টক হতে চলেছে।' : '3 carton inventory items in Chittagong Hub are close to out of stock.',
-      time: isBn ? '২০ মিনিট আগে' : '20 mins ago',
-      created_at: '2026-08-15 00:35',
-      isRead: false,
-      type: 'alert',
-    },
-    {
-      id: 'n-3',
-      title: isBn ? 'ক্যাশ আদায় সিঙ্ক সম্পন্ন' : 'Cash Collection Synced',
-      message: isBn ? 'চট্টগ্রাম শাখা ৳৪৫,০০০ কালেকশন জমা দিয়ে সুপার এডমিন দ্বারা ভেরিফাইড হয়েছে।' : 'Chittagong branch synced ৳45,000 cash collection verified by Super Admin.',
-      time: isBn ? '১ ঘণ্টা আগে' : '1 hour ago',
-      created_at: '2026-08-14 23:55',
-      isRead: true,
-      type: 'success',
-    },
-    {
-      id: 'n-4',
-      title: isBn ? 'ফ্লাইট শিপমেন্ট আগমন' : 'Flight Shipment Arrived',
-      message: isBn ? 'কার্টুন #ST-9942 সিডিজি ফ্লাইট CZ-304 সফলভাবে রিসিভ করা হয়েছে।' : 'Carton #ST-9942 on Flight CZ-304 successfully received.',
-      time: isBn ? '৩ ঘণ্টা আগে' : '3 hours ago',
-      created_at: '2026-08-14 21:40',
-      isRead: true,
-      type: 'info',
-      cid: 'CID-112039',
-    },
-  ]);
+  useEffect(() => {
+    const loadNotifs = () => {
+      const data = getHostingerDbData();
+      setAllNotifications(data.notifications || []);
+    };
+    loadNotifs();
+    return subscribeToDbUpdates(loadNotifs);
+  }, []);
 
   const markAllRead = () => {
-    setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+    const updated = allNotifications.map((n) => ({ ...n, isRead: true }));
+    setAllNotifications(updated);
+    saveHostingerDbData('fsc_vps_notifications', updated);
   };
 
   const markOneRead = (id: string) => {
-    setNotifications(prev => prev.map(n => (n.id === id ? { ...n, isRead: true } : n)));
+    const updated = allNotifications.map((n) => (n.id === id ? { ...n, isRead: true } : n));
+    setAllNotifications(updated);
+    saveHostingerDbData('fsc_vps_notifications', updated);
   };
 
-  const filteredNotifications = notifications.filter(n => {
+  // Filter for active user role and assigned warehouse
+  const roleNotifications = allNotifications.filter((n) => {
+    if (!user) return false;
+    if (user.role === 'super_admin') return true;
+    if (n.target_user_id && n.target_user_id === user.id) return true;
+    if (n.target_role && (n.target_role === 'all' || n.target_role === user.role)) {
+      if (n.target_warehouse_id) {
+        return !user.warehouse_id || user.warehouse_id === n.target_warehouse_id;
+      }
+      return true;
+    }
+    return false;
+  });
+
+  const filteredNotifications = roleNotifications.filter((n) => {
     if (typeFilter !== 'all' && n.type !== typeFilter) return false;
     if (readFilter === 'unread' && n.isRead) return false;
     if (readFilter === 'read' && !n.isRead) return false;
@@ -90,22 +83,35 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({ language, 
     }
   };
 
+  const getTimeAgo = (createdAt?: string, timeStr?: string) => {
+    if (timeStr) return timeStr;
+    if (!createdAt) return isBn ? 'সম্প্রতি' : 'Just now';
+    const diff = Date.now() - new Date(createdAt).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 1) return isBn ? 'এইমাত্র' : 'Just now';
+    if (mins < 60) return isBn ? `${mins} মিনিট আগে` : `${mins} mins ago`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return isBn ? `${hours} ঘণ্টা আগে` : `${hours} hours ago`;
+    const days = Math.floor(hours / 24);
+    return isBn ? `${days} দিন আগে` : `${days} days ago`;
+  };
+
   return (
     <div className="space-y-6 font-sans">
       {/* Top Header & Action */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className={`text-2xl font-bold ${isDark ? 'text-white' : 'text-gray-900'} tracking-tight`}>
-            Notifications
+            {isBn ? 'নোটিফিকেশন ও অ্যালার্ট হাব' : 'Notifications & Alerts Hub'}
           </h1>
           <p className={`text-xs ${isDark ? 'text-[#9E9E9E]' : 'text-gray-500'} mt-1`}>
-            {isBn ? 'গত ৩০ দিনের notifications' : 'Notifications for past 30 days'}
+            {isBn ? 'আপনার রোল ও ওয়্যারহাউজের জন্য সকল রিয়েল-টাইম সিস্টেম অ্যালার্ট' : 'All real-time system alerts for your role & warehouse'}
           </p>
         </div>
 
         <button
           onClick={markAllRead}
-          className={`flex items-center space-x-1.5 px-4 py-2 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+          className={`flex items-center space-x-1.5 px-4 py-2 rounded-none text-xs font-semibold border transition-all cursor-pointer ${
             isDark
               ? 'bg-[#1C1C1E] text-white border-[#2C2C2E] hover:bg-[#2C2C2E]'
               : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-100 shadow-xs'
@@ -123,7 +129,7 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({ language, 
           <select
             value={typeFilter}
             onChange={(e) => setTypeFilter(e.target.value)}
-            className={`px-3 py-2 text-xs rounded-xl border outline-none font-medium appearance-none pr-8 cursor-pointer ${
+            className={`px-3 py-2 text-xs rounded-none border outline-none font-medium appearance-none pr-8 cursor-pointer ${
               isDark
                 ? 'bg-[#1C1C1E] text-white border-[#2C2C2E] hover:border-gray-600'
                 : 'bg-white text-gray-800 border-gray-300 hover:border-gray-400 shadow-xs'
@@ -142,7 +148,7 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({ language, 
         <select
           value={readFilter}
           onChange={(e) => setReadFilter(e.target.value)}
-          className={`px-3 py-2 text-xs rounded-xl border outline-none font-medium cursor-pointer ${
+          className={`px-3 py-2 text-xs rounded-none border outline-none font-medium cursor-pointer ${
             isDark
               ? 'bg-[#1C1C1E] text-white border-[#2C2C2E] hover:border-gray-600'
               : 'bg-white text-gray-800 border-gray-300 hover:border-gray-400 shadow-xs'
@@ -155,12 +161,12 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({ language, 
       </div>
 
       {/* Notifications Card List Container */}
-      <div className={`rounded-2xl border ${isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]' : 'bg-white border-gray-200 shadow-xs'} overflow-hidden`}>
+      <div className={`rounded-none border ${isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]' : 'bg-white border-gray-200 shadow-xs'} overflow-hidden`}>
         {filteredNotifications.length === 0 ? (
           <div className="p-12 text-center">
             <Bell className={`w-10 h-10 mx-auto mb-3 ${isDark ? 'text-[#3A3A3C]' : 'text-gray-300'}`} />
             <p className={`text-sm ${isDark ? 'text-[#9E9E9E]' : 'text-gray-500'} font-medium`}>
-              {isBn ? 'কোনো notification নেই' : 'No notifications'}
+              {isBn ? 'কোনো নোটিফিকেশন পাওয়া যায়নি' : 'No notifications found'}
             </p>
           </div>
         ) : (
@@ -187,7 +193,7 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({ language, 
                     </p>
                     <div className="flex items-center space-x-2">
                       <span className={`text-[11px] ${isDark ? 'text-[#7C7C7C]' : 'text-gray-400'}`}>
-                        {n.time}
+                        {getTimeAgo(n.created_at, n.time)}
                       </span>
                       {!n.isRead && (
                         <span className="w-2.5 h-2.5 rounded-full bg-[#EA580C] shrink-0" />
@@ -205,7 +211,7 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({ language, 
                         e.stopPropagation();
                         navigator.clipboard.writeText(n.cid!);
                       }}
-                      className="inline-flex items-center space-x-1 mt-2 px-2 py-0.5 text-[10px] font-mono text-[#00897B] bg-[#00897B]/10 hover:bg-[#00897B]/20 rounded-md transition-colors border-0 outline-none cursor-pointer"
+                      className="inline-flex items-center space-x-1 mt-2 px-2 py-0.5 text-[10px] font-mono text-[#00897B] bg-[#00897B]/10 hover:bg-[#00897B]/20 rounded-none transition-colors border-0 outline-none cursor-pointer"
                     >
                       <Copy className="w-3 h-3" />
                       <span>{n.cid}</span>

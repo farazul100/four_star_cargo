@@ -221,6 +221,49 @@ export const getHostingerDbData = () => {
     localStorage.setItem(DB_KEYS.USERS, JSON.stringify(mergedUsers));
   } catch {}
 
+  let notifications: any[] = [];
+  try {
+    const rawNotif = localStorage.getItem('fsc_vps_notifications');
+    notifications = rawNotif ? JSON.parse(rawNotif) : [];
+  } catch (e) {
+    notifications = [];
+  }
+
+  if (!notifications || notifications.length === 0) {
+    notifications = [
+      {
+        id: 'notif-base-1',
+        title: 'সিস্টেম অ্যাক্টিভেশন সম্পন্ন',
+        message: 'M/S Four Star Cargo রিয়েল-টাইম অপারেশনস সিঙ্ক চালু হয়েছে।',
+        type: 'info',
+        target_role: 'all',
+        isRead: false,
+        created_at: new Date(Date.now() - 5 * 60000).toISOString(),
+      },
+      {
+        id: 'notif-base-2',
+        title: 'ওয়্যারহাউজ বাউন্ডারি সিকিউরিটি',
+        message: 'ওয়্যারহাউজ ইনচার্জদের জন্য সুনির্দিষ্ট স্টক ভিউ ও বাউন্ডারি কন্ট্রোল সক্রিয়।',
+        type: 'success',
+        target_role: 'warehouse_incharge',
+        isRead: false,
+        created_at: new Date(Date.now() - 15 * 60000).toISOString(),
+      },
+      {
+        id: 'notif-base-3',
+        title: 'ফ্লাইট প্রপোজাল সিস্টেম',
+        message: 'অপারেশন ডিরেক্টর ও সুপার এডমিন প্যানেল সরাসরি প্রপোজাল রিভিউ করতে পারবেন।',
+        type: 'warning',
+        target_role: 'operation_director',
+        isRead: false,
+        created_at: new Date(Date.now() - 30 * 60000).toISOString(),
+      },
+    ];
+    try {
+      localStorage.setItem('fsc_vps_notifications', JSON.stringify(notifications));
+    } catch {}
+  }
+
   return {
     users: mergedUsers,
     warehouses: warehouses,
@@ -230,7 +273,35 @@ export const getHostingerDbData = () => {
     ledgerEntries: JSON.parse(localStorage.getItem(DB_KEYS.LEDGER) || '[]') as LedgerEntry[],
     auditLogs: JSON.parse(localStorage.getItem(DB_KEYS.AUDIT) || '[]') as AuditLog[],
     expenses: JSON.parse(localStorage.getItem(DB_KEYS.EXPENSES) || '[]') as ExpenseItem[],
+    notifications: notifications,
   };
+};
+
+export const publishSystemNotification = (notif: {
+  title: string;
+  message: string;
+  type?: 'info' | 'success' | 'warning' | 'alert' | 'error';
+  target_role?: string;
+  target_warehouse_id?: string;
+  target_user_id?: string;
+  link?: string;
+}) => {
+  const data = getHostingerDbData();
+  const newNotif = {
+    id: `notif-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+    title: notif.title,
+    message: notif.message,
+    type: notif.type || 'info',
+    target_role: notif.target_role || 'all',
+    target_warehouse_id: notif.target_warehouse_id,
+    target_user_id: notif.target_user_id,
+    isRead: false,
+    created_at: new Date().toISOString(),
+    link: notif.link,
+  };
+  const updatedNotifs = [newNotif, ...(data.notifications || [])];
+  saveHostingerDbData('fsc_vps_notifications', updatedNotifs);
+  return newNotif;
 };
 
 // Global BroadcastChannel for 100% reliable cross-tab live synchronization locally
