@@ -185,11 +185,23 @@ const pushFullDbToServer = () => {
         [DB_KEYS.AUDIT]: JSON.parse(localStorage.getItem(DB_KEYS.AUDIT) || '[]'),
         [DB_KEYS.EXPENSES]: JSON.parse(localStorage.getItem(DB_KEYS.EXPENSES) || '[]'),
       };
-      await fetch('/api/db', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(fullDb),
-      });
+      const payloadStr = JSON.stringify(fullDb);
+
+      try {
+        await fetch('/api/db', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payloadStr,
+        });
+      } catch {}
+
+      try {
+        await fetch('/api/db.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payloadStr,
+        });
+      } catch {}
     } catch {}
   }, 100);
 };
@@ -227,7 +239,7 @@ export const saveHostingerDbData = (key: string, data: any) => {
     console.warn(`LocalStorage setItem warning for key "${key}":`, e);
   }
 
-  // Push full DB snapshot to server file DB for cross-browser (Chrome <-> Edge) sync
+  // Push full DB snapshot to server file DB for cross-browser (Chrome <-> Edge <-> Incognito) sync
   pushFullDbToServer();
 
   if (typeof window !== 'undefined') {
@@ -236,11 +248,14 @@ export const saveHostingerDbData = (key: string, data: any) => {
   }
 };
 
-// Helper to fetch latest server disk DB (/api/db) and sync to LocalStorage across different browsers
+// Helper to fetch latest server disk DB (/api/db & /api/db.php) and sync to LocalStorage across different browsers
 export const fetchServerDbAndSync = async () => {
   if (typeof window === 'undefined') return;
   try {
-    const res = await fetch('/api/db');
+    let res = await fetch('/api/db');
+    if (!res.ok) {
+      res = await fetch('/api/db.php');
+    }
     if (res.ok) {
       const serverDb = await res.json();
       if (serverDb && typeof serverDb === 'object') {

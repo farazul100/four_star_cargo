@@ -1,6 +1,11 @@
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
+
+  # 1. API Route Rewrite for Hostinger Backend Persistence
+  RewriteRule ^api/db/?$ api/db.php [L,QSA]
+
+  # 2. SPA Single Page Application Route Rewrite
   RewriteRule ^index\.html$ - [L]
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
