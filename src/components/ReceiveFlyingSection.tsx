@@ -244,23 +244,37 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
     const ctnNo = typeof target === 'object' ? target.ctn_no : target;
     const shippingMark = typeof target === 'object' ? target.shipping_mark : undefined;
 
+    const norm = (s?: string) => (s ? s.trim().toLowerCase() : '');
+
     // Check if user entered a custom weight in local weights
-    const localWtStr = localWeights[cartonId] || (ctnNo ? localWeights[ctnNo] : undefined);
+    const localWtStr =
+      (cartonId && localWeights[cartonId]) ||
+      (ctnNo && localWeights[ctnNo]) ||
+      (cartonId && localWeights[norm(cartonId)]) ||
+      (ctnNo && localWeights[norm(ctnNo)]);
     const parsedLocalWt = localWtStr !== undefined ? parseFloat(localWtStr) : NaN;
 
+    let targetMatched = false;
+
     const updatedCartons = cartons.map((c) => {
-      if (
-        c.id === cartonId ||
-        c.ctn_no === cartonId ||
-        (ctnNo && c.ctn_no === ctnNo) ||
-        (shippingMark && c.shipping_mark === shippingMark)
-      ) {
-        const finalWt = !isNaN(parsedLocalWt) && parsedLocalWt >= 0 ? parsedLocalWt : (c.bd_calibrated_weight || c.gross_weight || 0);
+      const matches =
+        (c.id && cartonId && norm(c.id) === norm(cartonId)) ||
+        (c.ctn_no && cartonId && norm(c.ctn_no) === norm(cartonId)) ||
+        (ctnNo && c.ctn_no && norm(c.ctn_no) === norm(ctnNo)) ||
+        (ctnNo && c.id && norm(c.id) === norm(ctnNo)) ||
+        (shippingMark && c.shipping_mark && norm(c.shipping_mark) === norm(shippingMark));
+
+      if (matches) {
+        targetMatched = true;
+        const origWt = c.origin_weight !== undefined ? c.origin_weight : (c.gross_weight || 0);
+        const finalWt = !isNaN(parsedLocalWt) && parsedLocalWt >= 0 ? parsedLocalWt : (c.bd_calibrated_weight !== undefined ? c.bd_calibrated_weight : (c.gross_weight || 0));
+
         return {
           ...c,
           status: 'received' as const,
           gross_weight: finalWt,
           bd_calibrated_weight: finalWt,
+          origin_weight: origWt,
           current_warehouse_id: 'wh-bd',
           destination_warehouse_id: 'wh-bd',
           updated_at: new Date().toISOString(),
@@ -269,20 +283,27 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       return c;
     });
 
+    if (!targetMatched) {
+      console.warn('Carton match failed for receive target:', target);
+    }
+
     setCartons(updatedCartons);
     saveHostingerDbData('fsc_vps_cartons', updatedCartons);
 
     // Find the carton's flight number and update the proposal's total_weight in Super Admin DB
     const targetCartonObj = updatedCartons.find(
-      (c) => c.id === cartonId || c.ctn_no === cartonId || (ctnNo && c.ctn_no === ctnNo)
+      (c) =>
+        (c.id && cartonId && norm(c.id) === norm(cartonId)) ||
+        (c.ctn_no && cartonId && norm(c.ctn_no) === norm(cartonId)) ||
+        (ctnNo && c.ctn_no && norm(c.ctn_no) === norm(ctnNo))
     );
     if (targetCartonObj && targetCartonObj.flight_number) {
       const flightNo = targetCartonObj.flight_number;
-      const flightCartons = updatedCartons.filter((c) => c.flight_number === flightNo);
+      const flightCartons = updatedCartons.filter((c) => norm(c.flight_number) === norm(flightNo));
       const newTotalWeight = flightCartons.reduce((acc, c) => acc + (c.gross_weight || 0), 0);
 
       const updatedProposals = proposals.map((p) => {
-        if (p.flight_number === flightNo || p.flying_name === flightNo) {
+        if (norm(p.flight_number) === norm(flightNo) || norm(p.flying_name) === norm(flightNo)) {
           return { ...p, total_weight: newTotalWeight };
         }
         return p;

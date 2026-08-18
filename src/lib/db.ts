@@ -442,13 +442,42 @@ export const fetchServerDbAndSync = async () => {
 
             const itemMap = new Map<string, any>();
             localList.forEach((item: any) => {
-              if (item && (item.id || item.ctn_no || item.email)) {
-                itemMap.set(item.id || item.ctn_no || item.email, item);
+              if (item) {
+                const k = (item.id || item.ctn_no || item.email || '').toString().trim().toLowerCase();
+                if (k) itemMap.set(k, item);
               }
             });
+
             serverData.forEach((item: any) => {
-              if (item && (item.id || item.ctn_no || item.email)) {
-                itemMap.set(item.id || item.ctn_no || item.email, item);
+              if (item) {
+                const k = (item.id || item.ctn_no || item.email || '').toString().trim().toLowerCase();
+                if (k) {
+                  const existing = itemMap.get(k);
+                  if (existing && key === DB_KEYS.CARTONS) {
+                    const isExistingReceived = existing.status === 'received' || existing.status === 'delivered' || existing.current_warehouse_id === 'wh-bd';
+                    const isServerReceived = item.status === 'received' || item.status === 'delivered' || item.current_warehouse_id === 'wh-bd';
+
+                    const finalStatus = isExistingReceived || isServerReceived ? (existing.status === 'delivered' ? 'delivered' : 'received') : item.status || existing.status;
+                    const finalWh = isExistingReceived || isServerReceived ? 'wh-bd' : item.current_warehouse_id || existing.current_warehouse_id;
+
+                    const finalBdWeight = existing.bd_calibrated_weight !== undefined
+                      ? existing.bd_calibrated_weight
+                      : item.bd_calibrated_weight !== undefined
+                      ? item.bd_calibrated_weight
+                      : existing.gross_weight || item.gross_weight;
+
+                    itemMap.set(k, {
+                      ...item,
+                      ...existing,
+                      status: finalStatus,
+                      current_warehouse_id: finalWh,
+                      bd_calibrated_weight: finalBdWeight,
+                      gross_weight: finalBdWeight || existing.gross_weight || item.gross_weight,
+                    });
+                  } else {
+                    itemMap.set(k, item);
+                  }
+                }
               }
             });
 
