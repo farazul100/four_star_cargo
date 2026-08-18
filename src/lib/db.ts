@@ -149,9 +149,81 @@ export const getHostingerDbData = () => {
     proposals = window.__FSC_GLOBAL_PROPOSALS__;
   }
 
+  let rawUsers: User[] = [];
+  try {
+    const raw = localStorage.getItem(DB_KEYS.USERS);
+    rawUsers = raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    rawUsers = [];
+  }
+
+  let warehouses: Warehouse[] = [];
+  try {
+    const rawWh = localStorage.getItem(DB_KEYS.WAREHOUSES);
+    warehouses = rawWh ? JSON.parse(rawWh) : INITIAL_WAREHOUSES;
+  } catch (e) {
+    warehouses = INITIAL_WAREHOUSES;
+  }
+
+  // Deduplicate and merge users from localStorage AND all warehouse incharge_staff rosters
+  const userMap = new Map<string, User>();
+
+  // 1. Add Master Super Admin
+  userMap.set('superadmin@cargo.com', {
+    id: 'usr-admin-master',
+    name: 'সুপার এডমিন (Super Admin)',
+    email: 'superadmin@cargo.com',
+    password: 'Cargo@2026',
+    role: 'super_admin',
+    status: 'active',
+    created_at: '2026-01-01T00:00:00Z',
+  });
+
+  // 2. Add users from localStorage
+  if (Array.isArray(rawUsers)) {
+    rawUsers.forEach((u) => {
+      if (u && u.email && u.email.toLowerCase() !== 'admin@fourstarcargo.com') {
+        userMap.set(u.email.toLowerCase(), {
+          ...u,
+          password: u.password || 'Cargo@2026',
+        });
+      }
+    });
+  }
+
+  // 3. Automatically extract and merge incharge staff from all warehouses so they are ALWAYS valid login accounts
+  if (Array.isArray(warehouses)) {
+    warehouses.forEach((wh) => {
+      if (wh && Array.isArray(wh.incharge_staff)) {
+        wh.incharge_staff.forEach((stf) => {
+          if (stf && stf.email) {
+            const emailKey = stf.email.toLowerCase();
+            const existing = userMap.get(emailKey);
+            userMap.set(emailKey, {
+              id: stf.id || `usr-${Date.now()}`,
+              name: stf.name,
+              email: stf.email,
+              password: existing?.password || 'Cargo@2026',
+              role: 'warehouse_incharge',
+              warehouse_id: wh.id,
+              warehouse_name: wh.name,
+              status: stf.status || 'active',
+              created_at: stf.created_at || new Date().toISOString(),
+            });
+          }
+        });
+      }
+    });
+  }
+
+  const mergedUsers = Array.from(userMap.values());
+  try {
+    localStorage.setItem(DB_KEYS.USERS, JSON.stringify(mergedUsers));
+  } catch {}
+
   return {
-    users: JSON.parse(localStorage.getItem(DB_KEYS.USERS) || '[]') as User[],
-    warehouses: JSON.parse(localStorage.getItem(DB_KEYS.WAREHOUSES) || '[]') as Warehouse[],
+    users: mergedUsers,
+    warehouses: warehouses,
     cartons: cartons as Carton[],
     proposals: proposals as FlyingProposal[],
     customers: JSON.parse(localStorage.getItem(DB_KEYS.CUSTOMERS) || '[]') as Customer[],

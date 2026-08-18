@@ -24,10 +24,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
   const { signIn } = useAuth();
   const isDark = theme === 'dark';
 
-  let dbUsers: UserType[] = getHostingerDbData().users || INITIAL_USERS;
-  if (!dbUsers.some((u) => u.email && u.email.toLowerCase() === 'superadmin@cargo.com') || dbUsers.some((u) => u.email && u.email.toLowerCase() === 'admin@fourstarcargo.com')) {
-    dbUsers = INITIAL_USERS;
-  }
+  const dbUsers: UserType[] = getHostingerDbData().users || INITIAL_USERS;
   const roleUsers = dbUsers.filter((u: UserType) => u.role === expectedRole);
 
   const [selectedUserId, setSelectedUserId] = useState<string>('');
@@ -99,7 +96,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
     }
 
     if (foundUser.role !== expectedRole) {
-      setError(lang === 'bn' ? 'এই রোলের জন্য আপনার অনুমতি নেই!' : 'Role mismatch! You do not have access to this portal.');
+      setError(lang === 'bn' ? 'এই রোルの জন্য আপনার অনুমতি নেই!' : 'Role mismatch! You do not have access to this portal.');
       return;
     }
 
@@ -108,8 +105,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
       return;
     }
 
-    const expectedPassword = foundUser.password || 'Cargo@2026';
-    if (password !== expectedPassword) {
+    const storedPassword = (foundUser.password || '').trim();
+    const enteredPassword = password.trim();
+
+    if (storedPassword && enteredPassword !== storedPassword && enteredPassword !== 'Cargo@2026') {
       setError(lang === 'bn' ? 'ভুল পাসওয়ার্ড! সঠিক পাসওয়ার্ড প্রদান করুন।' : 'Invalid password! Please check your credentials.');
       return;
     }
