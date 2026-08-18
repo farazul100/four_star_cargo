@@ -231,8 +231,9 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
       return w;
     });
 
+    const statusText = nextStatus === 'active' ? (isBn ? 'সক্রিয় (Active)' : 'ACTIVE') : nextStatus === 'maintenance' ? (isBn ? 'রক্ষণাবেক্ষণ (Maintenance)' : 'MAINTENANCE') : (isBn ? 'নিষ্ক্রিয় (Inactive)' : 'INACTIVE');
     syncWarehouses(updatedWhs, `Super Admin changed Warehouse #${whId} status to ${nextStatus}`);
-    addToast('info', isBn ? 'ওয়্যারহাউজ স্টেটাস পরিবর্তিত' : 'Warehouse Status Updated', `Status: ${nextStatus.toUpperCase()}`);
+    addToast('info', isBn ? 'ওয়্যারহাউজ স্টেটাস পরিবর্তিত' : 'Warehouse Status Updated', isBn ? `নতুন স্ট্যাটাস: ${statusText}` : `New Status: ${statusText}`);
   };
 
   // ACTION: REMOVE INCHARGE STAFF FROM WAREHOUSE
