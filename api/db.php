@@ -21,6 +21,31 @@ if (!file_exists($dbDir)) {
     @mkdir($dbDir, 0777, true);
 }
 
+// Helper to merge array of objects by ID or key
+function smartMergeArrays($existing, $incoming) {
+    if (!is_array($existing)) $existing = [];
+    if (!is_array($incoming)) return $existing;
+
+    $map = [];
+    foreach ($existing as $item) {
+        if (is_array($item)) {
+            $key = $item['id'] ?? $item['ctn_no'] ?? $item['email'] ?? null;
+            if ($key) {
+                $map[$key] = $item;
+            }
+        }
+    }
+    foreach ($incoming as $item) {
+        if (is_array($item)) {
+            $key = $item['id'] ?? $item['ctn_no'] ?? $item['email'] ?? null;
+            if ($key) {
+                $map[$key] = $item;
+            }
+        }
+    }
+    return array_values($map);
+}
+
 // 1. POST Request: Save updated database state to Hostinger disk
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $input = file_get_contents('php://input');
@@ -33,9 +58,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $existing = json_decode($rawExisting, true) ?: [];
             }
             
-            $merged = array_merge($existing, $decoded);
-            @file_put_contents($dataFile, json_encode($merged, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
-            echo json_encode(['status' => 'success', 'message' => 'Hostinger DB synchronized']);
+            $finalDb = $existing;
+            foreach ($decoded as $key => $val) {
+                if (is_array($val)) {
+                    $finalDb[$key] = smartMergeArrays($existing[$key] ?? [], $val);
+                } else {
+                    $finalDb[$key] = $val;
+                }
+            }
+
+            @file_put_contents($dataFile, json_encode($finalDb, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            echo json_encode(['status' => 'success', 'message' => 'Hostinger DB synchronized', 'proposals_count' => count($finalDb['fsc_vps_proposals'] ?? [])]);
             exit();
         }
     }

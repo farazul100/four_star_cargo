@@ -5,11 +5,11 @@ DirectoryIndex index.html index.php
   RewriteEngine On
   RewriteBase /
 
-  # API Route Rewrite for Hostinger Backend Persistence
+  # 1. API Route Rewrite for Hostinger Backend Persistence (MUST BE FIRST!)
   RewriteRule ^api/db/?$ api/db.php [L,QSA]
   RewriteRule ^api/db\.php$ api/db.php [L,QSA]
 
-  # SPA Route Rewrite - Send all non-file/non-directory requests to index.html
+  # 2. SPA Route Rewrite - Send all non-file/non-directory requests to index.html
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_URI} !^/api/

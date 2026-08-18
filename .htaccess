@@ -5,19 +5,22 @@ DirectoryIndex index.php dist/index.html index.html
   RewriteEngine On
   RewriteBase /
 
-  # 1. API Route Rewrite for Hostinger Database Persistence
+  # 1. API Route Rewrite for Hostinger Database Persistence (MUST BE FIRST!)
   RewriteRule ^api/db/?$ api/db.php [L,QSA]
   RewriteRule ^api/db\.php$ api/db.php [L,QSA]
 
-  # 2. Serve static dist assets & files (assets/, images, etc.) natively
+  # 2. Immediate Stop Rules for Physical Files
+  RewriteRule ^index\.html$ - [L]
+  RewriteRule ^dist/index\.html$ - [L]
+
+  # 3. Serve static dist assets & files (assets/, images, etc.) natively
   RewriteCond %{DOCUMENT_ROOT}/dist/$1 -f
   RewriteRule ^(.*)$ dist/$1 [L]
 
-  # 3. Direct Root Request (/) to index.php
+  # 4. Direct Root Request (/) to index.php
   RewriteRule ^$ index.php [L]
 
-  # 4. SPA Sub-Route Rewrite: Send all non-file/non-directory requests to index.php
-  # index.php cleanly serves compiled dist/index.html with zero rewrite loops
+  # 5. SPA Sub-Route Rewrite: Send all non-file/non-directory requests to index.php
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
   RewriteCond %{REQUEST_URI} !^/api/
