@@ -8,8 +8,9 @@ import { ForgotPasswordModal } from '../components/ForgotPasswordModal';
 import { useTranslation } from '../hooks/useTranslation';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../hooks/useAuth';
-import { UserRole } from '../types';
+import { UserRole, User as UserType } from '../types';
 import { INITIAL_USERS } from '../mockData';
+import { getHostingerDbData } from '../lib/db';
 
 interface LoginPageProps {
   expectedRole: UserRole;
@@ -23,11 +24,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
   const { signIn } = useAuth();
   const isDark = theme === 'dark';
 
-  const roleUsers = INITIAL_USERS.filter((u) => u.role === expectedRole);
+  const dbUsers: UserType[] = getHostingerDbData().users || INITIAL_USERS;
+  const roleUsers = dbUsers.filter((u: UserType) => u.role === expectedRole);
 
   const [selectedUserId, setSelectedUserId] = useState<string>(roleUsers[0]?.id || '');
-  const [email, setEmail] = useState<string>(roleUsers[0]?.email || '');
-  const [password, setPassword] = useState<string>('password123');
+  const [email, setEmail] = useState<string>(
+    expectedRole === 'super_admin' ? 'superadmin@cargo.com' : roleUsers[0]?.email || ''
+  );
+  const [password, setPassword] = useState<string>(
+    expectedRole === 'super_admin' ? 'Cargo@2026' : 'password123'
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [showForgotModal, setShowForgotModal] = useState(false);
@@ -69,7 +75,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
 
   const handleSelectDemoUser = (uId: string) => {
     setSelectedUserId(uId);
-    const u = INITIAL_USERS.find((x) => x.id === uId);
+    const u = dbUsers.find((x) => x.id === uId);
     if (u) {
       setEmail(u.email);
     }
@@ -85,15 +91,21 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
       return;
     }
 
-    const foundUser = INITIAL_USERS.find((u) => u.email.toLowerCase() === email.toLowerCase());
+    const currentUsers = getHostingerDbData().users || INITIAL_USERS;
+    const foundUser = currentUsers.find((u) => u.email.toLowerCase() === email.toLowerCase());
 
     if (!foundUser) {
-      setError(lang === 'bn' ? 'ইউজার অ্যাকাউন্ট পাওয়া যায়নি!' : 'User account not found!');
+      setError(lang === 'bn' ? 'ইউজার অ্যাকাউন্ট পাওয়া যায়নি! সুপার এডমিন প্যানেল থেকে একাউন্ট তৈরি করুন।' : 'User account not found!');
       return;
     }
 
     if (foundUser.role !== expectedRole) {
       setError(lang === 'bn' ? 'এই রোলের জন্য আপনার অনুমতি নেই!' : 'Role mismatch! You do not have access to this portal.');
+      return;
+    }
+
+    if (foundUser.email.toLowerCase() === 'superadmin@cargo.com' && password !== 'Cargo@2026') {
+      setError(lang === 'bn' ? 'ভুল পাসওয়ার্ড! (পাসওয়ার্ড: Cargo@2026)' : 'Invalid password!');
       return;
     }
 

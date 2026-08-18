@@ -125,3 +125,11 @@ CREATE INDEX idx_cartons_dest_warehouse ON cartons(destination_warehouse_id);
 CREATE INDEX idx_cartons_status ON cartons(status);
 CREATE INDEX idx_customers_code ON customers(customer_code);
 CREATE INDEX idx_ledger_customer ON ledger_entries(customer_id);
+
+-- ============================================================================
+-- DEFAULT MASTER SUPER ADMIN SEED
+-- ============================================================================
+INSERT INTO users (id, name, email, password_hash, role, status)
+VALUES ('usr-admin-master', 'Super Admin System Owner', 'superadmin@cargo.com', 'Cargo@2026', 'super_admin', 'active')
+ON DUPLICATE KEY UPDATE email = 'superadmin@cargo.com', password_hash = 'Cargo@2026';
+
