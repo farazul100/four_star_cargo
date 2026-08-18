@@ -943,6 +943,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                                 ) : isBdWarehouseStaff ? (
                                   <button
                                     type="button"
+                                    onMouseDown={(e) => e.preventDefault()}
                                     onClick={() => handleReceiveSingleCarton(c)}
                                     className="px-2.5 py-1 rounded-none bg-emerald-600 hover:bg-emerald-700 text-white font-light text-xs transition-all inline-flex items-center space-x-1 cursor-pointer border border-emerald-700 shadow-xs"
                                   >

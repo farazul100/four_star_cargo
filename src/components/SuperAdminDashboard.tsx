@@ -988,25 +988,18 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   const proposedCartons = cartons.filter((c) => c.status === 'proposed');
   const totalGrossWeight = cartons.reduce((acc, c) => acc + (c.gross_weight || 0), 0);
   const totalCbm = cartons.reduce((acc, c) => acc + (c.cbm || 0), 0);
+
+  // 1. Sum of original booked weights from origin hub (China)
   const totalOriginBookedWeight = cartons.reduce(
     (acc, c) => acc + (c.origin_weight !== undefined ? c.origin_weight : (c.gross_weight || 0)),
     0
   );
-  const bdCartonsList = cartons.filter(
-    (c) =>
-      c.bd_calibrated_weight !== undefined ||
-      c.status === 'received' ||
-      c.status === 'delivered' ||
-      c.current_warehouse_id === 'wh-bd' ||
-      c.destination_warehouse_id === 'wh-bd'
+
+  // 2. Sum of calibrated weights from BD Warehouse for ALL cartons
+  const totalBdCalibratedWeight = cartons.reduce(
+    (acc, c) => acc + (c.bd_calibrated_weight !== undefined ? c.bd_calibrated_weight : (c.gross_weight || 0)),
+    0
   );
-  const totalBdCalibratedWeight =
-    bdCartonsList.length > 0
-      ? bdCartonsList.reduce(
-          (acc, c) => acc + (c.bd_calibrated_weight !== undefined ? c.bd_calibrated_weight : (c.gross_weight || 0)),
-          0
-        )
-      : totalGrossWeight;
 
   const displayDeliveredRev = totalDeliveredRevenue;
   const avgValuePerKg = totalGrossWeight > 0 ? Math.round(displayDeliveredRev / totalGrossWeight) : 0;
