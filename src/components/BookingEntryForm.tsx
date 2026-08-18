@@ -235,7 +235,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
     const cbmVal = Number(batchCbm) > 0 ? Number(batchCbm) : 0.15;
 
     const markToUse = `${finalMarkPrefix}${finalMarkCode}`;
-    const generatedRows = generatePreviewFromHeader(
+    generatePreviewFromHeader(
       ctnCount,
       markToUse,
       finalProdEn,
@@ -249,51 +249,11 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       Number(cartonStartNum) || 1
     );
 
-    // AUTO-SAVE IMMEDIATELY TO DATABASE ON GENERATE / UPDATE BUTTON CLICK
-    const totalBatchWeight = generatedRows.reduce((acc, curr) => acc + (curr.gross_weight || 0), 0);
-    const customer = processCustomerBooking(selectedCustomer, customerSearchInput, totalBatchWeight);
-    const finalMark = shippingMark.trim() || customer.shipping_mark || markToUse;
-
-    const newCartonObjects: Carton[] = generatedRows.map((r, idx) => ({
-      id: `fsc-carton-${Date.now()}-${idx + 1}`,
-      ctn_no: r.ctn_no.trim() || `CTN-${idx + 1}`,
-      packaging_number: r.packaging_number.trim() || `BOX-${101 + idx}`,
-      shipping_mark: r.shipping_mark || finalMark,
-      tracking_number: finalTrackingNo,
-      master_tracking_number: finalTrackingNo,
-      product_name_en: r.product_name_en,
-      product_name_cn: r.product_name_cn.trim() || r.product_name_en.trim(),
-      quantity: r.quantity || 1,
-      net_weight: r.net_weight || Math.round((r.gross_weight * 0.9) * 10) / 10,
-      gross_weight: r.gross_weight || 1,
-      cbm: r.cbm || 0.05,
-      photo_url: r.photo_url || batchPhotoUrl || undefined,
-      current_warehouse_id: myWhId,
-      destination_warehouse_id: destWhId,
-      status: 'booked',
-      booked_by: currentUser.id,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      current_warehouse_name: myWh?.name || 'অরিজিন হাব',
-      destination_warehouse_name: warehouses.find((w) => w.id === destWhId)?.name || 'ঢাকা সেন্ট্রাল হাব',
-    }));
-
-    const currentDbCartons = getHostingerDbData().cartons;
-    const filteredExisting = currentDbCartons.filter((c) => c.tracking_number !== finalTrackingNo);
-    const fullUpdatedCartons = [...newCartonObjects, ...filteredExisting];
-
-    saveHostingerDbData('fsc_vps_cartons', fullUpdatedCartons);
-    onSaveCartons(newCartonObjects);
-    setAllSavedCartons(fullUpdatedCartons);
-
-    publishSystemNotification({
-      title: isBn ? 'নতুন কার্টুন বুকিং সম্পন্ন' : 'New Carton Batch Booked',
-      message: isBn ? `${myWh?.name || 'ওয়্যারহাউজ'}-এ ${customer.name}-এর ${ctnCount}টি কার্টুন (কোড: ${finalMark}) বুক করা হয়েছে।` : `${ctnCount} cartons booked for ${customer.name} at ${myWh?.name}.`,
-      type: 'info',
-      target_role: 'all',
-    });
-
-    setSuccessMsg(isBn ? `সফলভাবে ${ctnCount}টি কার্টুন ইনভেন্টরিতে সেভ ও বুক করা হয়েছে!` : `Successfully booked ${ctnCount} cartons into warehouse inventory!`);
+    setSuccessMsg(
+      isBn
+        ? `প্রিভিউ তালিকা জেনারেট সম্পন্ন! মোট ${ctnCount}টি কার্টুন রো আপডেট করা হয়েছে। টেবিলে চেক করে "বুকিং ডাইরেক্ট সেভ করুন" বাটনে ক্লিক করুন।`
+        : `Preview generated with ${ctnCount} cartons! Review the table below and click "Save Booking Direct".`
+    );
   };
 
   // METHOD 1 ONLY: FAST WEIGHT SEQUENCE PASTING FOR N.WT & G.WT
@@ -549,9 +509,13 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       destination_warehouse_name: warehouses.find((w) => w.id === destWhId)?.name,
     }));
 
-    // Save cartons to central database & propagate state
+    // Save cartons to central database & propagate state (Filter out previous cartons with same tracking number)
+    const finalTrackingNo = masterTrackingNumber.trim() || `EXP-${Math.floor(Math.random() * 899999 + 100000)}`;
     const currentDbCartons = getHostingerDbData().cartons;
-    const fullUpdatedCartons = [...newCartonObjects, ...currentDbCartons];
+    const filteredExisting = currentDbCartons.filter(
+      (c) => c.tracking_number !== finalTrackingNo && c.master_tracking_number !== finalTrackingNo
+    );
+    const fullUpdatedCartons = [...newCartonObjects, ...filteredExisting];
     saveHostingerDbData('fsc_vps_cartons', fullUpdatedCartons);
 
     onSaveCartons(newCartonObjects);

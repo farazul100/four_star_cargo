@@ -116,11 +116,11 @@ export const getHostingerDbData = () => {
     const cartonMap = new Map<string, Carton>();
     cartons.forEach((c) => {
       if (c) {
-        const itemKey = c.id || c.ctn_no;
-        if (itemKey) {
-          const existing = cartonMap.get(itemKey);
+        const compositeKey = c.tracking_number && c.ctn_no ? `${c.tracking_number.trim()}_${c.ctn_no.trim()}` : (c.id || c.ctn_no);
+        if (compositeKey) {
+          const existing = cartonMap.get(compositeKey);
           if (!existing || c.status === 'received' || c.status === 'delivered' || c.current_warehouse_id === 'wh-bd') {
-            cartonMap.set(itemKey, c);
+            cartonMap.set(compositeKey, c);
           }
         }
       }
