@@ -104,7 +104,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
     }
 
     if (foundUser.email.toLowerCase() === 'superadmin@cargo.com' && password !== 'Cargo@2026') {
-      setError(lang === 'bn' ? 'ভুল পাসওয়ার্ড! (পাসওয়ার্ড: Cargo@2026)' : 'Invalid password!');
+      setError(lang === 'bn' ? 'ভুল পাসওয়ার্ড! সঠিক পাসওয়ার্ড প্রদান করুন।' : 'Invalid password! Please check your credentials.');
       return;
     }
 
