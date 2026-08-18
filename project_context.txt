@@ -1,0 +1,34 @@
+PROJECT: M/S Four Star Cargo — Cargo Operations Management System
+
+STACK: React 18 + TypeScript + Vite, Tailwind CSS, Shadcn UI (Radix-based),
+Supabase (PostgreSQL + Auth + Row Level Security + Realtime).
+Hosting target: Hostinger VPS (Node.js + PM2 + Nginx) — but for now build/run locally with Vite dev server.
+
+BRAND COLORS:
+- Turquoise (primary accent): #1FB6A8
+- Cyan-Teal (secondary): #22A6B3
+- Deep Blue (buttons/links/headers): #1B4F91
+- Navy (headings/dark UI): #0F2D52
+Status colors: Pending/Booked = #F5A623 (amber), In Transit = #1B4F91 (blue),
+Received = #1FB6A8 (teal), Delivered = #16A34A (green), Cancelled = #DC2626 (red)
+
+Light mode neutrals: bg #F7FAFB, card #FFFFFF, border #E4E9EC, text primary #0F2D52, text secondary #5C6B73
+Dark mode neutrals: bg #0B1622, card #11202F, border #1E3247, text primary #EAF2F5, text secondary #8FA3AD
+
+TYPOGRAPHY:
+- English headings: Poppins or Sora
+- English body: Inter or IBM Plex Sans
+- Bangla (all UI): Hind Siliguri or Noto Sans Bengali
+- UI default language: Bangla, with an English toggle (persist choice in localStorage / user profile)
+
+DESIGN STYLE: Clean modern SaaS dashboard. Fixed left sidebar with icon+label nav,
+active item highlighted with turquoise left border/soft tint. Top bar with hamburger
+(mobile), notification bell, theme toggle, language toggle, user avatar menu.
+Cards lift subtly on hover (soft shadow + faint turquoise glow border). Skeleton
+loaders instead of blank screens. Motion subtle and professional — never slows data entry.
+Desktop-first, but fully responsive (sidebar collapses to hamburger on tablet/mobile,
+multi-column forms stack to single column).
+
+ROLES (4 total): super_admin, operation_director, warehouse_incharge, accountant.
+Each has a separate login route and dashboard, strictly scoped by role — enforced
+at the Supabase RLS (database) level, not just hidden in the UI.

@@ -1,0 +1,40 @@
+{
+  "brand_name": "شركة فور ستار للشحن (Four Star Cargo)",
+  "app_title": "نظام إدارة عمليات الشحن الجوي",
+  "landing_tagline": "المنصة الرقمية المتكاملة لعمليات الشحن الجوي والخدمات اللوجستية",
+  "select_portal_title": "اختر بوابة تسجيل الدخول حسب دورك",
+  "select_portal_subtitle": "يمتلك كل دور لوحة تحكم مخصصة وصلاحيات أمان صارمة.",
+  "login": "تسجيل الدخول",
+  "logout": "تسجيل الخروج",
+  "dashboard": "لوحة التحكم",
+  "save": "حفظ",
+  "cancel": "إلغاء",
+  "search": "بحث",
+  "back_to_landing": "العودة لاختيار البوابة",
+  "forgot_password": "هل نسيت كلمة المرور؟",
+  "email_label": "البريد الإلكتروني",
+  "password_label": "كلمة المرور",
+  "login_button": "تسجيل الدخول الآن →",
+  "demo_account_select": "اختر حساب تجريبي:",
+
+  "super_admin": "لوحة المدير العام (Super Admin)",
+  "super_admin_desc": "إدارة المستخدمين، إعداد المستودعات، سجلات التدقيق الكاملة والتحليلات",
+
+  "operation_director": "لوحة مدير العمليات (Operation Director)",
+  "operation_director_desc": "مراجعة مقترحات الرحلات الجوية للمستودعات وتأكيد الشحن",
+
+  "warehouse_incharge": "لوحة مسؤول المستودع (Warehouse Incharge)",
+  "warehouse_incharge_desc": "حجز الطرود، إدارة المخزون، إنشاء مقترحات الرحلات واستلام البضائع",
+
+  "accountant": "لوحة المحاسب (Accountant)",
+  "accountant_desc": "دفاتر الحسابات المالية للعملاء، سجلات الدفع والتحصيل النظري",
+
+  "public_track_title": "بوابة تتبع الشحنات العامة",
+  "public_track_desc": "تتيح للعملاء تتبع حالة الشحنة المباشرة برقم التتبع دون تسجيل دخول",
+
+  "role_mismatch_error": "حسابك غير مصرح له بالدخول لهذه اللوحة! يرجى اختيار البوابة الصحيحة.",
+  "invalid_email_error": "يرجى إدخال بريد إلكتروني صحيح.",
+  "forgot_password_notice": "يمكن للمدير العام فقط إعادة تعيين كلمة المرور. يرجى التواصل مع المدير العام.",
+
+  "footer_text": "© 2026 M/S Four Star Cargo. جميع الحقوق محفوظة."
+}

@@ -1,0 +1,40 @@
+{
+  "brand_name": "M/S 四星货运 (Four Star Cargo)",
+  "app_title": "航空货运运营管理系统",
+  "landing_tagline": "全球航空货运与物流运营数字化平台",
+  "select_portal_title": "选择您的角色入口",
+  "select_portal_subtitle": "每个角色都有独立的登录面板和严格的安全权限。",
+  "login": "登录",
+  "logout": "退出登录",
+  "dashboard": "仪表板",
+  "save": "保存",
+  "cancel": "取消",
+  "search": "搜索",
+  "back_to_landing": "返回角色选择",
+  "forgot_password": "忘记密码？",
+  "email_label": "电子邮件地址",
+  "password_label": "密码",
+  "login_button": "立即登录 →",
+  "demo_account_select": "选择演示账号:",
+
+  "super_admin": "超级管理员面板",
+  "super_admin_desc": "用户管理、多仓库设置、完整审计日志和公司运营分析",
+
+  "operation_director": "运营总监面板",
+  "operation_director_desc": "审核始发仓库飞行方案、调整箱数并最终批准出运",
+
+  "warehouse_incharge": "仓库主管面板",
+  "warehouse_incharge_desc": "纸箱预订登记、库存盘点、飞行方案创建和目的港接收",
+
+  "accountant": "财务会计面板",
+  "accountant_desc": "客户财务账簿、应收应付记账与现金自动同步",
+
+  "public_track_title": "货物实时查询门户",
+  "public_track_desc": "无需登录，客户输入单号即可实时追踪货物状态",
+
+  "role_mismatch_error": "您的账号无权访问此面板！请选择正确的登录入口。",
+  "invalid_email_error": "请输入有效的电子邮件地址。",
+  "forgot_password_notice": "只有超级管理员可以重置或解锁账号。请联系超级管理员。",
+
+  "footer_text": "© 2026 M/S Four Star Cargo. 保留所有权利。"
+}

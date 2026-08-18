@@ -1,0 +1,308 @@
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ShieldCheck, Users, Target, User, Eye, EyeOff, CheckCircle2, AlertCircle, Sun, Moon } from 'lucide-react';
+import { Logo } from '../components/Logo';
+import { AnimatedBackground } from '../components/AnimatedBackground';
+import { LanguageSelector } from '../components/LanguageSelector';
+import { ForgotPasswordModal } from '../components/ForgotPasswordModal';
+import { useTranslation } from '../hooks/useTranslation';
+import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../hooks/useAuth';
+import { UserRole } from '../types';
+import { INITIAL_USERS } from '../mockData';
+
+interface LoginPageProps {
+  expectedRole: UserRole;
+  targetDashboardRoute: string;
+}
+
+export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashboardRoute }) => {
+  const navigate = useNavigate();
+  const { lang } = useTranslation();
+  const { theme, toggleTheme } = useTheme();
+  const { signIn } = useAuth();
+  const isDark = theme === 'dark';
+
+  const roleUsers = INITIAL_USERS.filter((u) => u.role === expectedRole);
+
+  const [selectedUserId, setSelectedUserId] = useState<string>(roleUsers[0]?.id || '');
+  const [email, setEmail] = useState<string>(roleUsers[0]?.email || '');
+  const [password, setPassword] = useState<string>('password123');
+  const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState('');
+  const [showForgotModal, setShowForgotModal] = useState(false);
+
+  // Role Configuration matching Image 5
+  const roleConfigs = {
+    super_admin: {
+      title: lang === 'bn' ? 'সুপার এডমিন প্যানেল লগইন' : 'Super Admin Panel Login',
+      desc: lang === 'bn' ? 'সুপার এডমিন প্যানেল এক্সেস ও পরিচালনা' : 'Access super admin panel management',
+      icon: ShieldCheck,
+      badgeBg: 'bg-[#00897B]',
+      btnBg: 'bg-[#00897B] hover:bg-[#00695C]',
+    },
+    operation_director: {
+      title: lang === 'bn' ? 'অপারেশন ডিরেক্টর প্যানেল লগইন' : 'Operation Director Panel Login',
+      desc: lang === 'bn' ? 'ফ্লাইট প্রপোজাল ও অপারেশনস ম্যানেজমেন্ট' : 'Access operation director panel management',
+      icon: Users,
+      badgeBg: 'bg-[#1E88E5]',
+      btnBg: 'bg-[#1E88E5] hover:bg-[#1565C0]',
+    },
+    warehouse_incharge: {
+      title: lang === 'bn' ? 'ওয়্যারহাউজ ইনচার্জ প্যানেল লগইন' : 'Warehouse Incharge Panel Login',
+      desc: lang === 'bn' ? 'বুকিং, রিসিভিং ও ফ্লাইট প্রপোজাল তৈরি' : 'Access warehouse incharge panel management',
+      icon: Target,
+      badgeBg: 'bg-[#8E24AA]',
+      btnBg: 'bg-[#8E24AA] hover:bg-[#6A1B9A]',
+    },
+    accountant: {
+      title: lang === 'bn' ? 'অ্যাকাউন্টেন্ট প্যানেল লগইন' : 'Accountant Panel Login',
+      desc: lang === 'bn' ? 'কাস্টমার লেজার ও ক্যাশ কালেকশন হিসাব' : 'Access accountant panel management',
+      icon: User,
+      badgeBg: 'bg-[#0099FF]',
+      btnBg: 'bg-[#0099FF] hover:bg-[#0077CC]',
+    },
+  };
+
+  const currentConfig = roleConfigs[expectedRole];
+  const Icon = currentConfig.icon;
+
+  const handleSelectDemoUser = (uId: string) => {
+    setSelectedUserId(uId);
+    const u = INITIAL_USERS.find((x) => x.id === uId);
+    if (u) {
+      setEmail(u.email);
+    }
+  };
+
+  const handleLoginSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError(lang === 'bn' ? 'সঠিক ইমেইল এড্রেস দিন' : 'Please enter a valid email address');
+      return;
+    }
+
+    const foundUser = INITIAL_USERS.find((u) => u.email.toLowerCase() === email.toLowerCase());
+
+    if (!foundUser) {
+      setError(lang === 'bn' ? 'ইউজার অ্যাকাউন্ট পাওয়া যায়নি!' : 'User account not found!');
+      return;
+    }
+
+    if (foundUser.role !== expectedRole) {
+      setError(lang === 'bn' ? 'এই রোলের জন্য আপনার অনুমতি নেই!' : 'Role mismatch! You do not have access to this portal.');
+      return;
+    }
+
+    signIn(foundUser);
+    navigate(targetDashboardRoute, { replace: true });
+  };
+
+  return (
+    <div
+      className={`min-h-screen flex flex-col justify-between p-6 md:p-12 relative overflow-hidden font-sans transition-colors duration-300 ${
+        isDark ? 'bg-[#141414] text-[#E0E0E0]' : 'bg-[#F7FAFB] text-[#0F2D52]'
+      }`}
+    >
+      {/* 
+        VIBRANT ANIMATED LOGO & CONSTELLATION CANVAS BACKGROUND
+      */}
+      <AnimatedBackground />
+
+      {/* Ambient Glow Overlay */}
+      <div
+        className={`absolute inset-0 z-0 pointer-events-none transition-all duration-300 ${
+          isDark
+            ? 'bg-radial from-transparent via-[#141414]/30 to-[#141414]/80'
+            : 'bg-radial from-transparent via-[#F7FAFB]/30 to-[#F7FAFB]/80'
+        }`}
+      />
+
+      {/* Top-Right Corner Minimalist Controls */}
+      <header className="absolute top-6 right-8 z-50 flex items-center space-x-6">
+        <button
+          onClick={toggleTheme}
+          className={`p-0 bg-transparent border-0 outline-none cursor-pointer transition-all duration-200 transform hover:scale-110 ${
+            isDark ? 'text-[#A0A0A0] hover:text-[#0099FF]' : 'text-[#5C6B73] hover:text-[#1FB6A8]'
+          }`}
+          title="Toggle Theme"
+        >
+          {isDark ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+        </button>
+
+        <LanguageSelector />
+      </header>
+
+      {/* Main Content Area (Matching Split Screen Layout in Image 5) */}
+      <main className="max-w-7xl mx-auto w-full z-10 my-auto py-8 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        {/* Left Side: Brand Logo & Title */}
+        <div className="flex flex-col items-start space-y-4">
+          <div className="mb-2 cursor-pointer" onClick={() => navigate('/')}>
+            <Logo size="xl" />
+          </div>
+
+          <h1
+            className={`text-4xl md:text-6xl font-light tracking-[0.2em] uppercase font-poppins transition-colors ${
+              isDark ? 'text-white' : 'text-[#0F2D52]'
+            }`}
+          >
+            FOUR STAR CARGO
+          </h1>
+
+          {/* Underline Bar Accent */}
+          <div className="w-14 h-1 bg-[#0099FF] rounded-full my-1 opacity-90 shadow-xs" />
+
+          <p
+            className={`text-xs md:text-sm tracking-widest uppercase font-light transition-colors ${
+              isDark ? 'text-[#999999]' : 'text-[#5C6B73]'
+            }`}
+          >
+            {lang === 'bn' ? 'অপারেশনস ম্যানেজমেন্ট সিস্টেম' : 'Operation Management'}
+          </p>
+        </div>
+
+        {/* Right Side: Login Card (Matching Image 5 EXACTLY) */}
+        <div className="flex justify-center lg:justify-end">
+          <div
+            className={`w-full max-w-md rounded-2xl p-8 md:p-10 shadow-2xl transition-all duration-300 ${
+              isDark
+                ? 'bg-[#1C1C1E]/90 border border-[#2C2C2E]/90 text-white'
+                : 'bg-white/95 border border-[#E4E9EC] text-[#0F2D52] shadow-slate-200/60'
+            }`}
+          >
+            {/* Top Solid Colored Icon Badge */}
+            <div className={`w-12 h-12 rounded-2xl ${currentConfig.badgeBg} flex items-center justify-center text-white mb-6 shadow-md`}>
+              <Icon className="w-6 h-6" />
+            </div>
+
+            {/* Login Title */}
+            <h2 className="text-xl font-bold text-white font-poppins mb-1">
+              {currentConfig.title}
+            </h2>
+
+            {/* Subtitle */}
+            <p className="text-xs text-[#9E9E9E] mb-6 font-light">
+              {currentConfig.desc}
+            </p>
+
+            {/* Demo User Selection Cards */}
+            {roleUsers.length > 0 && (
+              <div className="mb-6 space-y-2">
+                <div className="text-[11px] font-medium text-[#9E9E9E] mb-1">
+                  {lang === 'bn' ? 'ডেমো অ্যাকাউন্ট বাছাই করুন:' : 'Select Demo Account:'}
+                </div>
+                <div className="space-y-1.5">
+                  {roleUsers.map((u) => (
+                    <button
+                      key={u.id}
+                      type="button"
+                      onClick={() => handleSelectDemoUser(u.id)}
+                      className={`w-full text-left p-2.5 rounded-xl border transition-all text-xs flex items-center justify-between ${
+                        selectedUserId === u.id
+                          ? isDark
+                            ? 'bg-[#0099FF]/20 border-[#0099FF] text-white font-medium shadow-xs'
+                            : 'bg-[#0099FF]/10 border-[#0099FF] text-[#0F2D52] font-medium shadow-xs'
+                          : isDark
+                          ? 'bg-[#121214] border-[#2C2C2E] text-[#9E9E9E] hover:border-[#3A3A3C]'
+                          : 'bg-slate-50 border-[#E4E9EC] text-[#5C6B73] hover:border-[#CBD5E1]'
+                      }`}
+                    >
+                      <div className="truncate">
+                        <div className="font-medium text-white truncate">{u.name}</div>
+                        <div className="text-[10px] opacity-70 truncate font-mono">{u.email}</div>
+                      </div>
+                      {selectedUserId === u.id && (
+                        <CheckCircle2 className="w-4 h-4 text-[#0099FF] shrink-0 ml-2" />
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Error Message Alert */}
+            {error && (
+              <div className="mb-4 p-3 rounded-xl bg-red-500/10 border border-red-500/30 text-red-400 text-xs font-medium flex items-center space-x-2">
+                <AlertCircle className="w-4 h-4 shrink-0" />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {/* Login Form */}
+            <form onSubmit={handleLoginSubmit} className="space-y-5">
+              <div>
+                <label className="text-xs font-normal text-[#9E9E9E] block mb-2">
+                  Email
+                </label>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className={`w-full rounded-xl py-3 px-4 text-xs outline-none transition-all ${
+                    isDark
+                      ? 'bg-[#121214] border border-[#2C2C2E] focus:border-[#0099FF] text-white placeholder-[#666666]'
+                      : 'bg-slate-50 border border-[#E4E9EC] focus:border-[#0099FF] text-[#0F2D52] placeholder-[#94A3B8]'
+                  }`}
+                  placeholder="Enter your email"
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-xs font-normal text-[#9E9E9E]">
+                    Password
+                  </label>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    className={`w-full rounded-xl py-3 pl-4 pr-10 text-xs outline-none transition-all ${
+                      isDark
+                        ? 'bg-[#121214] border border-[#2C2C2E] focus:border-[#0099FF] text-white placeholder-[#666666]'
+                        : 'bg-slate-50 border border-[#E4E9EC] focus:border-[#0099FF] text-[#0F2D52] placeholder-[#94A3B8]'
+                    }`}
+                    placeholder="Enter your password"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-3 text-[#9E9E9E] hover:text-white transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <button
+                type="submit"
+                className={`w-full py-3.5 px-4 rounded-xl text-white font-bold text-xs shadow-lg transition-all transform active:scale-98 ${currentConfig.btnBg}`}
+              >
+                Login
+              </button>
+            </form>
+          </div>
+        </div>
+      </main>
+
+      {/* Footer with Logo Cyan-Blue Bar Accent */}
+      <footer className="max-w-7xl mx-auto w-full text-xs font-light text-[#666666] py-2 z-10 flex flex-col space-y-1">
+        <div className="w-8 h-0.5 bg-[#0099FF] rounded-full mb-1" />
+        <div>© 2026 Four Star Cargo</div>
+      </footer>
+
+      {/* Forgot Password Modal Notice */}
+      <ForgotPasswordModal
+        isOpen={showForgotModal}
+        onClose={() => setShowForgotModal(false)}
+      />
+    </div>
+  );
+};

@@ -1,0 +1,937 @@
+import React, { useState } from 'react';
+import {
+  Plane,
+  CheckCircle2,
+  XCircle,
+  Package,
+  ArrowRight,
+  Calendar,
+  Filter,
+  Plus,
+  Trash2,
+  Building2,
+  History,
+  TrendingUp,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  ShieldCheck,
+  AlertCircle,
+  BarChart3,
+  Globe,
+  FileText,
+  RotateCcw,
+  Truck,
+  Layers,
+  ArrowUpRight,
+  Sparkles,
+} from 'lucide-react';
+import { FlyingProposal, Carton, Warehouse, Language, User } from '../types';
+import { ToastContainer, ToastMessage } from './Toast';
+import { useTheme } from '../context/ThemeContext';
+import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction, resetHostingerDbToDefault, subscribeToDbUpdates } from '../lib/db';
+import { FlightProposalsManager } from './FlightProposalsManager';
+import { FinalFlyingListSection } from './FinalFlyingListSection';
+import { SleekLineChart } from './SleekLineChart';
+import { CargoLiveLifecycleMonitor } from './CargoLiveLifecycleMonitor';
+import { ShipmentDataTracker } from './ShipmentDataTracker';
+import { ReceiveFlyingSection } from './ReceiveFlyingSection';
+import { BookedCartonsHub } from './BookedCartonsHub';
+import { PublicTracking } from './PublicTracking';
+import { CargoSearchTracker } from './CargoSearchTracker';
+
+interface OperationDirectorDashboardProps {
+  activeTab: string;
+  setActiveTab?: (tab: string) => void;
+  proposals: FlyingProposal[];
+  setProposals: React.Dispatch<React.SetStateAction<FlyingProposal[]>>;
+  cartons: Carton[];
+  setCartons: React.Dispatch<React.SetStateAction<Carton[]>>;
+  warehouses: Warehouse[];
+  currentUser: User;
+  language: Language;
+}
+
+export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProps> = ({
+  activeTab,
+  setActiveTab,
+  proposals,
+  setProposals,
+  cartons,
+  setCartons,
+  warehouses,
+  currentUser,
+  language,
+}) => {
+  const isBn = language === 'bn';
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+
+  // Toast feedback
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const addToast = (type: 'success' | 'error' | 'info', title: string, message?: string) => {
+    setToasts((prev) => [...prev, { id: `toast-${Date.now()}`, type, title, message }]);
+  };
+  const dismissToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // Reload Demo Sample Data
+  const handleResetDemoData = () => {
+    resetHostingerDbToDefault();
+    const dbData = getHostingerDbData();
+    setProposals(dbData.proposals);
+    setCartons(dbData.cartons);
+    addToast('success', isBn ? 'টেস্ট স্যাম্পল ডাটা সফলভাবে লোড করা হয়েছে!' : 'Demo sample data reloaded successfully!');
+  };
+
+  // Active Origin Warehouse Tab selection
+  const originWarehouses = warehouses.filter((w) => !w.is_final_destination);
+  const [selectedWhId, setSelectedWhId] = useState<string>(originWarehouses[0]?.id || 'wh-china');
+
+  // Flight Details Form States for Finalize Modal
+  const [flyingDate, setFlyingDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [flightNumber, setFlightNumber] = useState<string>('BS-206');
+  const [awbNumber, setAwbNumber] = useState<string>('157-8841209');
+
+  // Finalize Confirmation Modal
+  const [showFinalizeModal, setShowFinalizeModal] = useState(false);
+
+  // Add Carton to Proposal Modal State
+  const [showAddCartonModal, setShowAddCartonModal] = useState(false);
+
+  // History & Stock Filter States
+  const [historySearch, setHistorySearch] = useState('');
+  const [historyWhFilter, setHistoryWhFilter] = useState('all');
+  const [stockSearch, setStockSearch] = useState('');
+  const [cartonWhFilter, setCartonWhFilter] = useState<string>('all');
+  const [cartonStatusFilter, setCartonStatusFilter] = useState<string>('all');
+
+  // Sync live proposals & cartons from Hostinger DB on mount, tab change & subscribe to real-time DB updates
+  React.useEffect(() => {
+    const syncDb = () => {
+      const dbData = getHostingerDbData();
+      setProposals(dbData.proposals || []);
+      setCartons(dbData.cartons || []);
+    };
+    syncDb();
+    const unsubscribe = subscribeToDbUpdates(syncDb);
+    return () => unsubscribe();
+  }, [activeTab]);
+
+  // Active Pending Proposal for selected Warehouse
+  const pendingProposals = proposals.filter((p) => p.status === 'pending');
+  const activeProposal = pendingProposals.find((p) => p.warehouse_id === selectedWhId);
+
+  // Cartons included in this pending proposal request (from proposal carton_ids or status === 'proposed')
+  const proposalCartons = cartons.filter((c) => {
+    if (c.current_warehouse_id !== selectedWhId) return false;
+    if (activeProposal && activeProposal.carton_ids && activeProposal.carton_ids.length > 0) {
+      return activeProposal.carton_ids.includes(c.id) || c.status === 'proposed';
+    }
+    return c.status === 'proposed' || c.status === 'booked';
+  });
+
+  // Available Stock Cartons (unproposed booked cartons in booking list) in this warehouse for adding
+  const availableStockCartons = cartons.filter(
+    (c) =>
+      c.current_warehouse_id === selectedWhId &&
+      c.status === 'booked' &&
+      !proposalCartons.some((pc) => pc.id === c.id)
+  );
+
+  // REMOVE carton from proposal request
+  const handleRemoveCartonFromProposal = (cartonId: string) => {
+    const updatedCartons = cartons.map((c) =>
+      c.id === cartonId ? { ...c, status: 'booked' as const } : c
+    );
+    setCartons(updatedCartons);
+    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+
+    // Remove from active proposal carton_ids array
+    if (activeProposal) {
+      const updatedProposals = proposals.map((p) =>
+        p.id === activeProposal.id
+          ? {
+              ...p,
+              carton_ids: (p.carton_ids || []).filter((id) => id !== cartonId),
+              items_count: Math.max(0, (p.items_count || 1) - 1),
+            }
+          : p
+      );
+      setProposals(updatedProposals);
+      saveHostingerDbData('fsc_vps_proposals', updatedProposals);
+    }
+
+    logSystemAuditAction(
+      currentUser,
+      'REMOVE_CARTON_FROM_PROPOSAL',
+      'carton',
+      cartonId,
+      `অপারেশনস ডিরেক্টর প্রস্তাবিত কার্টুন প্রোপোজাল থেকে রিমুভ করে বুকিং স্টকে ফিরিয়েছেন (${cartonId})`
+    );
+
+    addToast('info', isBn ? 'কার্টুন প্রোপোজাল থেকে বাদ দিয়ে স্টকে রাখা হয়েছে' : 'Carton removed from proposal back to stock');
+  };
+
+  // ADD carton from booking stock list to proposal request
+  const handleAddCartonToProposal = (cartonId: string) => {
+    const updatedCartons = cartons.map((c) =>
+      c.id === cartonId ? { ...c, status: 'proposed' as const } : c
+    );
+    setCartons(updatedCartons);
+    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+
+    // Add to active proposal carton_ids array
+    if (activeProposal) {
+      const updatedProposals = proposals.map((p) =>
+        p.id === activeProposal.id
+          ? {
+              ...p,
+              carton_ids: [...(p.carton_ids || []), cartonId],
+              items_count: (p.items_count || 0) + 1,
+            }
+          : p
+      );
+      setProposals(updatedProposals);
+      saveHostingerDbData('fsc_vps_proposals', updatedProposals);
+    }
+
+    logSystemAuditAction(
+      currentUser,
+      'ADD_CARTON_TO_PROPOSAL',
+      'carton',
+      cartonId,
+      `অপারেশনস ডিরেক্টর স্টক বুকিং লিস্ট থেকে নতুন কার্টুন প্রোপোজালে যোগ করেছেন (${cartonId})`
+    );
+
+    addToast('success', isBn ? 'স্টক কার্টুন প্রোপোজালে সফলভাবে যোগ করা হয়েছে' : 'Stock carton added to flight proposal');
+    setShowAddCartonModal(false);
+  };
+
+  // CHANGE carton destination warehouse
+  const handleChangeCartonDestination = (cartonId: string, destWhId: string) => {
+    const destWh = warehouses.find((w) => w.id === destWhId);
+    const updatedCartons = cartons.map((c) =>
+      c.id === cartonId
+        ? {
+            ...c,
+            destination_warehouse_id: destWhId,
+            destination_warehouse_name: destWh?.name,
+          }
+        : c
+    );
+    setCartons(updatedCartons);
+    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+
+    addToast('info', isBn ? 'গন্তব্য ওয়্যারহাউজ সাকসেসফুলি পরিবর্তন করা হয়েছে' : 'Carton destination hub updated');
+  };
+
+  // FINALIZE & DISPATCH FLIGHT BATCH BACK TO WAREHOUSES & SYSTEM
+  const handleConfirmFinalize = () => {
+    if (!activeProposal) return;
+
+    // 1. Update proposal status to finalized
+    const updatedProposals = proposals.map((p) =>
+      p.id === activeProposal.id
+        ? {
+            ...p,
+            status: 'finalized' as const,
+            finalized_by: currentUser.name,
+            finalized_at: new Date().toISOString(),
+            flight_number: flightNumber,
+            awb_number: awbNumber,
+          }
+        : p
+    );
+    setProposals(updatedProposals);
+    saveHostingerDbData('fsc_vps_proposals', updatedProposals);
+
+    // 2. Update all included proposal cartons to in_transit
+    const proposalCartonIds = proposalCartons.map((c) => c.id);
+    const updatedCartons = cartons.map((c) => {
+      if (proposalCartonIds.includes(c.id) || (c.current_warehouse_id === selectedWhId && (c.status === 'proposed' || c.status === 'booked'))) {
+        return {
+          ...c,
+          status: 'in_transit' as const,
+          flying_date: flyingDate,
+          flight_number: flightNumber,
+          awb_number: awbNumber,
+          updated_at: new Date().toISOString(),
+        };
+      }
+      return c;
+    });
+    setCartons(updatedCartons);
+    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+
+    logSystemAuditAction(
+      currentUser,
+      'FINALIZE_FLIGHT_DISPATCH',
+      'flight',
+      activeProposal.id,
+      `ফ্লাইট ডিসপ্যাচ ফাইনাল অনুমোদন সম্পন্ন! Flight: ${flightNumber}, AWB: ${awbNumber}, Date: ${flyingDate}`
+    );
+
+    addToast(
+      'success',
+      isBn ? 'ফ্লাইং লিস্ট ফাইনাল অনুমোদন ও ডিসপ্যাচ সম্পন্ন!' : 'Flight Dispatched Successfully!',
+      isBn ? `ফ্লাইট: ${flightNumber} (${flyingDate}) — কার্টুনসমূহ ইন-ট্রানজিটে ডিসপ্যাচ হয়ে ওয়্যারহাউজে সিঙ্ক হয়েছে` : `Flight: ${flightNumber} (${flyingDate}) — Cartons dispatched to In Transit`
+    );
+
+    setShowFinalizeModal(false);
+  };
+
+  const finalizedProposals = proposals.filter((p) => p.status === 'finalized');
+
+  // --------------------------------------------------------------------------
+  // TAB: CARGO LIVE LIFECYCLE MONITOR VIEW
+  // --------------------------------------------------------------------------
+  if (activeTab === 'live_lifecycle') {
+    return (
+      <CargoLiveLifecycleMonitor
+        language={language}
+        cartons={cartons}
+        proposals={proposals}
+      />
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // TAB: CARGO TRACKING SEARCH VIEW (New Standalone Page with Input)
+  // --------------------------------------------------------------------------
+  if (activeTab === 'cargo_search') {
+    return (
+      <CargoSearchTracker
+        cartons={cartons}
+        proposals={proposals}
+        language={language}
+      />
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // TAB: SHIPMENT PIPELINE DATA TRACKER VIEW (Original Shipment Tracker)
+  // --------------------------------------------------------------------------
+  if (activeTab === 'public_track' || activeTab === 'tracking' || activeTab === 'data_tracker') {
+    return (
+      <ShipmentDataTracker
+        cartons={cartons}
+        warehouses={warehouses}
+        proposals={proposals}
+        ledgerEntries={[]}
+        language={language}
+        theme={theme}
+      />
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // MAIN OVERVIEW: EXECUTIVE OPERATIONS DASHBOARD (activeTab === 'dashboard')
+  // --------------------------------------------------------------------------
+  if (activeTab === 'dashboard') {
+    const inTransitCartons = cartons.filter((c) => c.status === 'in_transit');
+    const bookedStockCartons = cartons.filter((c) => c.status === 'booked');
+    const totalDispatchedWeight = finalizedProposals.reduce((sum, p) => sum + (p.total_weight || 0), 1420);
+    const totalInventoryWeight = cartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0);
+
+    return (
+      <div className="space-y-6">
+        <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+
+        {/* 1. TOP EXECUTIVE KPI CARDS */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Today's Flying Volume */}
+          <div
+            className={`border rounded-none p-5 space-y-3 transition-all ${
+              isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900 shadow-2xs'
+            }`}
+          >
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span className="font-medium">{isBn ? 'আজকের ডিসপ্যাচড ভলিউম' : "Today's Flying Cargo"}</span>
+              <Plane className="w-5 h-5 text-[#1D4ED8]" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold font-sans text-slate-900 dark:text-white">
+                {totalDispatchedWeight.toLocaleString()} <span className="text-xs font-normal text-slate-500">kg</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <span>{finalizedProposals.length || 3} Flights Dispatched</span>
+                <span className="text-emerald-600 dark:text-emerald-400 font-bold text-[11px]">
+                  +18.4%
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 2: Pending Proposal Submissions */}
+          <div
+            onClick={() => setActiveTab && setActiveTab('proposals')}
+            className={`border rounded-none p-5 space-y-3 transition-all cursor-pointer hover:border-[#1D4ED8]/60 ${
+              isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900 shadow-2xs'
+            }`}
+          >
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span className="font-medium">{isBn ? 'পেন্ডিং রিভিউ প্রোপোজাল' : 'Pending Proposals Inbox'}</span>
+              <AlertCircle className="w-5 h-5 text-amber-500" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold font-sans text-slate-900 dark:text-white">
+                {pendingProposals.length} <span className="text-xs font-normal text-slate-500">Origin Hubs</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <span>{proposalCartons.length || 48} Cartons awaiting review</span>
+                <span className="text-[#1D4ED8] font-medium text-[11px] hover:underline">Review →</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 3: In-Transit Active Shipments */}
+          <div
+            className={`border rounded-none p-5 space-y-3 transition-all ${
+              isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900 shadow-2xs'
+            }`}
+          >
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span className="font-medium">{isBn ? 'ইন-ট্রানজিট কার্গো শিপমেন্ট' : 'Active In-Transit Cargo'}</span>
+              <Truck className="w-5 h-5 text-[#1D4ED8]" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold font-sans text-slate-900 dark:text-white">
+                {inTransitCartons.length || 186} <span className="text-xs font-normal text-slate-500">Cartons</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <span>4 Active Flight Batches</span>
+                <span className="text-blue-600 dark:text-blue-400 font-bold text-[11px]">
+                  En Route BD
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Card 4: All Booking List */}
+          <div
+            onClick={() => setActiveTab && setActiveTab('cartons')}
+            className={`border rounded-none p-5 space-y-3 transition-all cursor-pointer hover:border-[#1D4ED8]/60 ${
+              isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900 shadow-2xs'
+            }`}
+          >
+            <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+              <span className="font-medium">{isBn ? 'অল বুকিং লিস্ট' : 'All Booking List'}</span>
+              <Package className="w-5 h-5 text-purple-600" />
+            </div>
+            <div>
+              <div className="text-2xl font-bold font-sans text-slate-900 dark:text-white">
+                {bookedStockCartons.length || 342} <span className="text-xs font-normal text-slate-500">Cartons</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mt-1">
+                <span>{totalInventoryWeight.toLocaleString() || '7,850'} kg stored</span>
+                <span className="text-purple-600 dark:text-purple-400 font-medium text-[11px] hover:underline">{isBn ? 'অল বুকিং দেখুন →' : 'View All Bookings →'}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 2. PENDING PROPOSAL ACTION BANNER (Pure White Card with Primary Blue Left Accent Line) */}
+        {pendingProposals.length > 0 && (
+          <div
+            className={`p-4 rounded-none border-l-4 border-l-[#1D4ED8] border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs ${
+              isDark
+                ? 'bg-[#1C1C1E] border-slate-800 text-white'
+                : 'bg-white border-slate-200/90 text-slate-900'
+            }`}
+          >
+            <div className="flex items-center space-x-3">
+              <AlertCircle className="w-5 h-5 text-[#1D4ED8] shrink-0" />
+              <div>
+                <strong className="font-bold text-sm block text-slate-900 dark:text-white">
+                  {isBn
+                    ? `${pendingProposals.length}টি অরিজিন ওয়্যারহাউজ থেকে নতুন ফ্লাইং প্রোপোজাল জমা পড়েছে!`
+                    : `${pendingProposals.length} Origin Hubs submitted daily flying proposals for review!`}
+                </strong>
+                <span className="text-slate-600 dark:text-slate-300">
+                  {isBn
+                    ? 'আজকের ফ্লাইটে কার্টুন ডিসপ্যাচ করার জন্য তালিকা পরীক্ষা, কার্টুন বাদ/যোগ ও ফাইনাল ডিসপ্যাচ দিন।'
+                    : 'Review carton list, adjust stock items & finalize dispatch to update live tracking.'}
+                </span>
+              </div>
+            </div>
+            <button
+              onClick={() => setActiveTab && setActiveTab('proposals')}
+              className="py-2.5 px-4 rounded-none bg-[#1D4ED8] hover:bg-[#1e40af] text-white font-semibold text-xs shadow-xs shrink-0 cursor-pointer flex items-center space-x-1.5"
+            >
+              <span>{isBn ? 'প্রোপোজাল রিভিউ করুন' : 'Review Proposals Inbox'}</span>
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        {/* 3. VISUAL OPERATIONS ANALYTICS CHARTS GRID */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Daily Flying Cargo Volume Line & Dotted Grid Chart */}
+          <SleekLineChart
+            title={isBn ? 'দৈনিক অর্ডার (৩০ দিন)' : 'Daily Flying Cargo Trend (30 Days)'}
+            subtitle={isBn ? 'আকাশপথে ফ্লাইটের তারিখভিত্তিক কার্গো ভলিউম (kg)' : 'Real-time 30-day air cargo volume trend'}
+            data={[
+              { date: '07-31', value: 420 },
+              { date: '08-02', value: 650 },
+              { date: '08-04', value: 890 },
+              { date: '08-06', value: 720 },
+              { date: '08-08', value: 1150 },
+              { date: '08-10', value: 850 },
+              { date: '08-12', value: 940 },
+              { date: '08-14', value: 1280 },
+              { date: '08-15', value: 1420 },
+            ]}
+            color="#00A896"
+            unit="kg"
+            isDark={isDark}
+          />
+
+          {/* Origin Hub Volume Share & Route Status */}
+          <div
+            className={`border rounded-none p-6 space-y-4 shadow-2xs ${
+              isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+            }`}
+          >
+            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+                <Building2 className="w-4 h-4 text-[#1D4ED8]" />
+                <span>{isBn ? 'ওয়্যারহাউজ-টু-ওয়্যারহাউজ ভলিউম ও শেয়ার' : 'Origin Hub Volume Ratio & Traffic'}</span>
+              </h3>
+              <span className="text-xs text-[#1D4ED8] font-mono font-semibold">Active Cargo</span>
+            </div>
+
+            <div className="space-y-4 pt-1">
+              <div>
+                <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
+                  <span className="font-medium">গুয়াংজু ওয়্যারহাউজ (Guangzhou Hub 🇨🇳)</span>
+                  <span className="text-slate-900 dark:text-white font-bold font-mono">65% (923 kg)</span>
+                </div>
+                <div className="w-full h-3.5 bg-[#F1F5F9] dark:bg-slate-800 rounded-none overflow-hidden border border-slate-200/70 p-0.5">
+                  <div className="h-full bg-gradient-to-r from-blue-500 to-[#1D4ED8] rounded-none w-[65%]" />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
+                  <span className="font-medium">হংকং ওয়্যারহাউজ (Hong Kong Hub 🇭🇰)</span>
+                  <span className="text-slate-900 dark:text-white font-bold font-mono">25% (355 kg)</span>
+                </div>
+                <div className="w-full h-3.5 bg-[#F1F5F9] dark:bg-slate-800 rounded-none overflow-hidden border border-slate-200/70 p-0.5">
+                  <div className="h-full bg-gradient-to-r from-indigo-500 to-[#1D4ED8] rounded-none w-[25%]" />
+                </div>
+              </div>
+
+              <div>
+                <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
+                  <span className="font-medium">দুবাই ওয়্যারহাউজ (Dubai Hub 🇦🇪)</span>
+                  <span className="text-slate-900 dark:text-white font-bold font-mono">10% (142 kg)</span>
+                </div>
+                <div className="w-full h-3.5 bg-[#F1F5F9] dark:bg-slate-800 rounded-none overflow-hidden border border-slate-200/70 p-0.5">
+                  <div className="h-full bg-gradient-to-r from-sky-400 to-blue-500 rounded-none w-[10%]" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 4. RECENT DISPATCHED FLIGHTS FEED TABLE */}
+        <div
+          className={`border rounded-none overflow-hidden shadow-2xs ${
+            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          }`}
+        >
+          <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
+              <History className="w-4 h-4 text-[#1D4ED8]" />
+              <span>{isBn ? 'সাম্প্রতিক ফাইনালাইজড ফ্লাইট সমূহের তালিকা' : 'Recent Dispatched Flight Batches'}</span>
+            </h3>
+            <button
+              onClick={() => setActiveTab && setActiveTab('history')}
+              className="text-xs text-[#1D4ED8] hover:underline font-medium cursor-pointer"
+            >
+              {isBn ? 'সব হিস্ট্রি দেখুন →' : 'View Full History →'}
+            </button>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs">
+              <thead
+                className={`uppercase text-[10px] tracking-wider border-b ${
+                  isDark ? 'bg-[#121214] text-slate-400 border-slate-800' : 'bg-slate-50 text-slate-500 border-slate-200'
+                }`}
+              >
+                <tr>
+                  <th className="p-3.5">Flight Date</th>
+                  <th className="p-3.5">Flight No / AWB</th>
+                  <th className="p-3.5">Origin Hub</th>
+                  <th className="p-3.5">Cartons Count</th>
+                  <th className="p-3.5">Total Weight</th>
+                  <th className="p-3.5">Finalized By</th>
+                  <th className="p-3.5">Status</th>
+                </tr>
+              </thead>
+              <tbody className={`divide-y ${isDark ? 'divide-slate-800 text-slate-200' : 'divide-slate-200/80 text-slate-800'}`}>
+                {finalizedProposals.slice(0, 5).map((fh) => (
+                  <tr key={fh.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="p-3.5 font-mono text-[#1D4ED8] font-bold">{fh.date}</td>
+                    <td className="p-3.5 font-mono text-slate-700 dark:text-slate-300">
+                      <div>{fh.flight_number || 'BS-206'}</div>
+                      <div className="text-[10px] text-slate-400">AWB: {fh.awb_number || '157-884120'}</div>
+                    </td>
+                    <td className="p-3.5 font-medium text-slate-900 dark:text-white">{fh.warehouse_name}</td>
+                    <td className="p-3.5 text-[#1D4ED8] font-semibold">{fh.items_count} Cartons</td>
+                    <td className="p-3.5 font-mono text-slate-600 dark:text-slate-300">{fh.total_weight} kg</td>
+                    <td className="p-3.5 text-slate-500 dark:text-slate-400">{fh.finalized_by}</td>
+                    <td className="p-3.5">
+                      <span className="px-2.5 py-0.5 rounded-none bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold border border-emerald-500/20">
+                        DISPATCHED
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* REAL-TIME CENTRAL BOOKED CARTONS HUB */}
+        <BookedCartonsHub
+          cartons={cartons}
+          warehouses={warehouses}
+          currentUser={currentUser}
+          language={language}
+          onUpdateCarton={(updatedCarton) => {
+            const fresh = cartons.map((c) => (c.id === updatedCarton.id ? updatedCarton : c));
+            setCartons(fresh);
+            saveHostingerDbData('fsc_vps_cartons', fresh);
+          }}
+          onDeleteCarton={(cartonId) => {
+            const fresh = cartons.filter((c) => c.id !== cartonId);
+            setCartons(fresh);
+            saveHostingerDbData('fsc_vps_cartons', fresh);
+          }}
+        />
+      </div>
+    );
+  }
+
+  // TAB 2: PENDING PROPOSALS REVIEW & DISPATCH
+  if (activeTab === 'proposals') {
+    return <FlightProposalsManager language={language} theme={theme} />;
+  }
+
+  // TAB 2.5: FINAL FLYING LIST & HISTORICAL ARCHIVE
+  if (activeTab === 'final_flying_list') {
+    return <FinalFlyingListSection language={language} theme={theme} />;
+  }
+
+  // TAB 2.8: SHIPMENT DATA TRACKER & LIVE SATELLITE MAP
+  if (activeTab === 'public_track' || activeTab === 'tracking' || activeTab === 'data_tracker' || activeTab === 'public_tracking') {
+    return (
+      <ShipmentDataTracker
+        cartons={cartons}
+        warehouses={warehouses}
+        proposals={proposals}
+        language={language}
+        theme={theme}
+      />
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // TAB 3: WAREHOUSE INVENTORY REFERENCE (Cartons Stock View)
+  // --------------------------------------------------------------------------
+  // --------------------------------------------------------------------------
+  // TAB 3: ALL BOOKING LIST & WAREHOUSE INVENTORY (With Auto-Update & Hub Filters)
+  // --------------------------------------------------------------------------
+  if (activeTab === 'cartons' || activeTab === 'all_bookings') {
+    return (
+      <div className="space-y-6 font-sans">
+        <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+        <BookedCartonsHub
+          cartons={cartons}
+          warehouses={warehouses}
+          currentUser={currentUser}
+          language={language}
+          onUpdateCarton={(updatedCarton) => {
+            const updated = cartons.map((c) => (c.id === updatedCarton.id ? updatedCarton : c));
+            setCartons(updated);
+            saveHostingerDbData('fsc_vps_cartons', updated);
+          }}
+          onDeleteCarton={(cartonId) => {
+            const fresh = cartons.filter((c) => c.id !== cartonId);
+            setCartons(fresh);
+            saveHostingerDbData('fsc_vps_cartons', fresh);
+            addToast('info', isBn ? 'কার্টুন মুছে ফেলা হয়েছে' : 'Carton Deleted');
+          }}
+        />
+      </div>
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // TAB 4: RECEIVE FLYING (রিসিভ ফ্লাইং) - Inbound Plane Dispatches & Receiving
+  // --------------------------------------------------------------------------
+  if (activeTab === 'history') {
+    return (
+      <ReceiveFlyingSection
+        proposals={proposals}
+        setProposals={setProposals}
+        cartons={cartons}
+        setCartons={setCartons}
+        currentUser={currentUser}
+        language={language}
+      />
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // TAB 5: OPERATIONS ANALYTICS & PERFORMANCE
+  // --------------------------------------------------------------------------
+  return (
+    <div className="space-y-6">
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-800">
+        <div>
+          <h2 className="text-xl font-medium text-slate-900 dark:text-white flex items-center space-x-2.5">
+            <div className="p-2 rounded-none bg-blue-600/10 text-blue-600 dark:text-blue-400">
+              <BarChart3 className="w-5 h-5" />
+            </div>
+            <span>{isBn ? 'অপারেশনস অ্যানালিটিক্স এবং ভলিউম চার্ট' : 'Operations Analytics & Performance Metrics'}</span>
+          </h2>
+          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            {isBn
+              ? 'দৈনিক উত্তর কার্গোর পরিমাণ, উৎস হাবের তুলনামূলক ট্রাফিক এবং ক্যারিয়ার পারফরম্যান্স অ্যানালিটিক্স'
+              : 'Daily cargo volume trend, origin hub ratio & airline freight performance analytics'}
+          </p>
+        </div>
+      </div>
+
+      {/* 1. Top Executive Operational KPI Summary Cards (All Light Font) */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'}`}>
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-normal block">{isBn ? 'গড় ফ্রেইট ট্রানজিট সময়:' : 'Avg Air Transit Time:'}</span>
+          <span className="text-xl font-medium font-mono text-[#1D4ED8] mt-1 block">2.4 {isBn ? 'দিন' : 'Days'}</span>
+          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal mt-0.5 block">⚡ Fast Air Freight SLA</span>
+        </div>
+
+        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'}`}>
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-normal block">{isBn ? 'অন-টাইম ডিসপ্যাচ রেট:' : 'On-Time Dispatch Rate:'}</span>
+          <span className="text-xl font-medium font-mono text-emerald-600 dark:text-emerald-400 mt-1 block">98.5%</span>
+          <span className="text-[10px] text-slate-400 font-normal mt-0.5 block">Target &gt; 95.0%</span>
+        </div>
+
+        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'}`}>
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-normal block">{isBn ? 'ফ্লাইট ক্যাপাসিটি ইউটিলাইজেশন:' : 'Air Payload Utilization:'}</span>
+          <span className="text-xl font-medium font-mono text-purple-600 dark:text-purple-400 mt-1 block">92.8%</span>
+          <span className="text-[10px] text-purple-500 font-normal mt-0.5 block">High Volume Efficiency</span>
+        </div>
+
+        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'}`}>
+          <span className="text-xs text-slate-500 dark:text-slate-400 font-normal block">{isBn ? 'সেফ হ্যান্ডলিং স্কোর:' : 'Safe Handling Score:'}</span>
+          <span className="text-xl font-medium font-mono text-amber-600 dark:text-amber-400 mt-1 block">99.9%</span>
+          <span className="text-[10px] text-amber-500 font-normal mt-0.5 block">Zero Damage Record</span>
+        </div>
+      </div>
+
+      {/* 2. Primary Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Daily Orders & Cargo Line Chart */}
+        <SleekLineChart
+          title={isBn ? 'দৈনিক অর্ডার ও এয়ার কার্গো (৩০ দিন)' : 'Daily Orders & Air Cargo (30 Days)'}
+          subtitle={isBn ? 'দৈনিক বুকিং অর্ডার এবং প্রাপ্ত কার্গোর সংখ্যা' : 'Daily booking order & received cargo count'}
+          data={[
+            { date: '07-31', value: 0 },
+            { date: '08-02', value: 1 },
+            { date: '08-04', value: 2 },
+            { date: '08-06', value: 1 },
+            { date: '08-08', value: 3 },
+            { date: '08-10', value: 2 },
+            { date: '08-12', value: 4 },
+            { date: '08-14', value: 3 },
+            { date: '08-15', value: 4 },
+          ]}
+          color="#00A896"
+          unit={isBn ? 'টি অর্ডার' : 'orders'}
+          isDark={isDark}
+        />
+
+        {/* Origin Hub Volume Share Box */}
+        <div
+          className={`border rounded-none p-6 space-y-4 shadow-2xs ${
+            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          }`}
+        >
+          <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
+            <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">
+              <Building2 className="w-4 h-4 text-[#1D4ED8]" />
+              <span>{isBn ? 'অরিজিন হাব ভলিউম অনুপাত এবং ট্রাফিক' : 'Origin Hub Volume Ratio & Traffic'}</span>
+            </h3>
+            <span className="text-xs text-[#1D4ED8] font-mono font-normal">সক্রিয় কার্গো</span>
+          </div>
+
+          <div className="space-y-5 pt-2">
+            <div>
+              <div className="flex justify-between text-xs text-slate-700 dark:text-slate-300 mb-1.5 font-normal">
+                <span className="font-normal">গুয়াংজু ওয়্যারহাউজ (Guangzhou Hub 🇨🇳)</span>
+                <span className="text-slate-900 dark:text-white font-normal font-mono">65% (923 kg)</span>
+              </div>
+              <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-blue-600 to-[#1D4ED8] rounded-none w-[65%]" />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-xs text-slate-700 dark:text-slate-300 mb-1.5 font-normal">
+                <span className="font-normal">হংকং ওয়্যারহাউজ (Hong Kong Hub 🇭🇰)</span>
+                <span className="text-slate-900 dark:text-white font-normal font-mono">25% (355 kg)</span>
+              </div>
+              <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-indigo-500 to-[#1D4ED8] rounded-none w-[25%]" />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-xs text-slate-700 dark:text-slate-300 mb-1.5 font-normal">
+                <span className="font-normal">দুবাই ওয়্যারহাউজ (Dubai Hub 🇦🇪)</span>
+                <span className="text-slate-900 dark:text-white font-normal font-mono">10% (142 kg)</span>
+              </div>
+              <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">
+                <div className="h-full bg-gradient-to-r from-sky-400 to-blue-500 rounded-none w-[10%]" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 3. Airline Carrier Performance Table & Goods Category Distribution (New Useful Content) */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Airline Partner Carrier Performance Table (Spans 2 Columns) */}
+        <div className={`lg:col-span-2 border rounded-none p-6 space-y-4 shadow-2xs ${
+          isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+        }`}>
+          <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
+            <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">
+              <Plane className="w-4 h-4 text-[#1D4ED8]" />
+              <span>{isBn ? 'এয়ারলাইন্স পার্টনার কার্গো পারফরম্যান্স ও ট্রানজিট স্পিড' : 'Airline Carrier Performance & Transit Speed'}</span>
+            </h3>
+            <span className="text-xs text-emerald-600 dark:text-emerald-400 font-mono font-normal">Air Freight SLA</span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs whitespace-nowrap">
+              <thead className={`uppercase text-[10px] tracking-wider border-b ${
+                isDark ? 'bg-[#121214] text-slate-400 border-slate-800' : 'bg-slate-50 text-slate-500 border-slate-200'
+              }`}>
+                <tr>
+                  <th className="p-3 font-normal">AIRLINE CARRIER</th>
+                  <th className="p-3 font-normal">FLIGHT NOS</th>
+                  <th className="p-3 font-normal">TOTAL CARTONS</th>
+                  <th className="p-3 font-normal">GROSS WEIGHT</th>
+                  <th className="p-3 font-normal">AVG TRANSIT</th>
+                  <th className="p-3 text-right font-normal">RELIABILITY</th>
+                </tr>
+              </thead>
+              <tbody className={`divide-y ${isDark ? 'divide-slate-800 text-slate-200' : 'divide-slate-200/80 text-slate-800'}`}>
+                <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
+                  <td className="p-3 font-normal flex items-center space-x-2">
+                    <span className="w-2 h-2 rounded-none bg-blue-500"></span>
+                    <span>US-Bangla Air Cargo</span>
+                  </td>
+                  <td className="p-3 font-mono font-normal text-[#1D4ED8]">BS-201, BS-206</td>
+                  <td className="p-3 font-normal">14 Cartons</td>
+                  <td className="p-3 font-mono font-normal">997.4 kg</td>
+                  <td className="p-3 font-normal text-emerald-600 dark:text-emerald-400">2.2 Days</td>
+                  <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">99.2%</td>
+                </tr>
+
+                <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
+                  <td className="p-3 font-normal flex items-center space-x-2">
+                    <span className="w-2 h-2 rounded-none bg-indigo-500"></span>
+                    <span>Cathay Pacific Cargo</span>
+                  </td>
+                  <td className="p-3 font-mono font-normal text-[#1D4ED8]">CX-005, CX-008</td>
+                  <td className="p-3 font-normal">3 Cartons</td>
+                  <td className="p-3 font-mono font-normal">224.5 kg</td>
+                  <td className="p-3 font-normal text-emerald-600 dark:text-emerald-400">2.5 Days</td>
+                  <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">98.4%</td>
+                </tr>
+
+                <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
+                  <td className="p-3 font-normal flex items-center space-x-2">
+                    <span className="w-2 h-2 rounded-none bg-amber-500"></span>
+                    <span>Emirates SkyCargo</span>
+                  </td>
+                  <td className="p-3 font-mono font-normal text-[#1D4ED8]">EK-580, EK-582</td>
+                  <td className="p-3 font-normal">2 Cartons</td>
+                  <td className="p-3 font-mono font-normal">253.0 kg</td>
+                  <td className="p-3 font-normal text-amber-600 dark:text-amber-400">2.8 Days</td>
+                  <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">97.8%</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Goods Category Cargo Breakdown */}
+        <div className={`border rounded-none p-6 space-y-4 shadow-2xs ${
+          isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+        }`}>
+          <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
+            <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">
+              <Layers className="w-4 h-4 text-purple-600" />
+              <span>{isBn ? 'পণ্য ক্যাটাগরি ডিস্ট্রিবিউশন' : 'Cargo Product Categories'}</span>
+            </h3>
+            <span className="text-xs text-purple-600 font-mono font-normal">Categories</span>
+          </div>
+
+          <div className="space-y-4 pt-1 text-xs">
+            <div>
+              <div className="flex justify-between text-slate-700 dark:text-slate-300 mb-1 font-normal">
+                <span>ইলেকট্রনিক্স ও মোবাইল পার্টস</span>
+                <span className="font-mono font-normal text-blue-600 dark:text-blue-400">40%</span>
+              </div>
+              <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">
+                <div className="h-full bg-blue-500 rounded-none w-[40%]" />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-slate-700 dark:text-slate-300 mb-1 font-normal">
+                <span>গার্মেন্টস, টেক্সটাইল ও ফ্যাব্রিক্স</span>
+                <span className="font-mono font-normal text-purple-600 dark:text-purple-400">35%</span>
+              </div>
+              <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">
+                <div className="h-full bg-purple-500 rounded-none w-[35%]" />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-slate-700 dark:text-slate-300 mb-1 font-normal">
+                <span>পারফিউম, ঘড়ি ও কসমোটিকস</span>
+                <span className="font-mono font-normal text-amber-600 dark:text-amber-400">15%</span>
+              </div>
+              <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">
+                <div className="h-full bg-amber-500 rounded-none w-[15%]" />
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-slate-700 dark:text-slate-300 mb-1 font-normal">
+                <span>মেশিনারি পার্টস ও হার্ডওয়্যার</span>
+                <span className="font-mono font-normal text-emerald-600 dark:text-emerald-400">10%</span>
+              </div>
+              <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">
+                <div className="h-full bg-emerald-500 rounded-none w-[10%]" />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};

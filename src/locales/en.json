@@ -1,0 +1,40 @@
+{
+  "brand_name": "M/S Four Star Cargo",
+  "app_title": "Cargo Operations Management System",
+  "landing_tagline": "Digital Platform for End-to-End Air Freight Operations",
+  "select_portal_title": "Access Your Role-Based Dashboard",
+  "select_portal_subtitle": "Each role has a separate login panel with strictly enforced security permissions.",
+  "login": "Login",
+  "logout": "Logout",
+  "dashboard": "Dashboard",
+  "save": "Save",
+  "cancel": "Cancel",
+  "search": "Search",
+  "back_to_landing": "Back to Portal Selection",
+  "forgot_password": "Forgot password?",
+  "email_label": "Email Address",
+  "password_label": "Password",
+  "login_button": "Login Now →",
+  "demo_account_select": "Select Demo Account:",
+
+  "super_admin": "Super Admin Panel",
+  "super_admin_desc": "User management, multi-warehouse setup, full audit logs & company analytics",
+
+  "operation_director": "Operation Director Panel",
+  "operation_director_desc": "Review origin warehouse flying proposals, adjust cartons & finalize dispatch",
+
+  "warehouse_incharge": "Warehouse Incharge Panel",
+  "warehouse_incharge_desc": "Carton booking entry, stock inventory, flying proposals & destination receiving",
+
+  "accountant": "Accountant Panel",
+  "accountant_desc": "Customer financial ledgers, charge/payment entries & auto-synced cash dues",
+
+  "public_track_title": "Shipment Tracking Portal",
+  "public_track_desc": "Allows end customers to check live status via tracking ID without login",
+
+  "role_mismatch_error": "Your account role is not authorized for this login panel! Please use the correct login portal.",
+  "invalid_email_error": "Please enter a valid email address.",
+  "forgot_password_notice": "Only a Super Admin can unlock or reset another user account. Please contact your Super Admin.",
+
+  "footer_text": "© 2026 M/S Four Star Cargo. All rights reserved."
+}

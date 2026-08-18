@@ -1,0 +1,571 @@
+@import "tailwindcss";
+@import "leaflet/dist/leaflet.css";
+
+@layer base {
+  :root {
+    --brand-turquoise: #1FB6A8;
+    --brand-cyan: #22A6B3;
+    --brand-blue: #1B4F91;
+    --brand-navy: #0F2D52;
+    
+    --status-pending: #F5A623;
+    --status-transit: #1B4F91;
+    --status-received: #1FB6A8;
+    --status-delivered: #16A34A;
+    --status-cancelled: #DC2626;
+
+    /* Light Theme */
+    --bg-main: #F4F5F7;
+    --bg-card: #FFFFFF;
+    --border-color: #E5E7EB;
+    --text-main: #111827;
+    --text-muted: #6B7280;
+  }
+
+  .dark {
+    /* Dark Theme */
+    --bg-main: #141414;
+    --bg-card: #1C1C1E;
+    --border-color: #2C2C2E;
+    --text-main: #FFFFFF;
+    --text-muted: #9E9E9E;
+  }
+}
+
+* {
+  font-family: 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, span, p, div, a {
+  font-family: 'Hind Siliguri', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.font-hind {
+  font-family: 'Hind Siliguri', sans-serif !important;
+}
+
+.font-light-hind {
+  font-family: 'Hind Siliguri', sans-serif !important;
+  font-weight: 300 !important;
+}
+
+.font-normal-hind {
+  font-family: 'Hind Siliguri', sans-serif !important;
+  font-weight: 400 !important;
+}
+
+.font-medium-hind {
+  font-family: 'Hind Siliguri', sans-serif !important;
+  font-weight: 500 !important;
+}
+
+/* =========================================================
+   LIGHT THEME OVERRIDES (MATCHING IMAGE 9 REFERENCE)
+   ========================================================= */
+html.light, html.light body {
+  background-color: #F8FAFC !important;
+  color: #111827 !important;
+}
+
+/* Canvas & Containers */
+html.light .bg-\[\#141414\] {
+  background-color: #F8FAFC !important;
+  color: #111827 !important;
+}
+
+/* Header & Sidebar */
+html.light header,
+html.light aside {
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  border-color: #E5E7EB !important;
+}
+
+/* Cards & Content Panels */
+html.light .bg-\[\#1C1C1E\],
+html.light .bg-\[\#18181A\],
+html.light .bg-\[\#11202F\],
+html.light .bg-\[\#18181B\] {
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  border-color: #E5E7EB !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+}
+
+/* Hover & Active Pill States */
+html.light .bg-\[\#242426\],
+html.light .bg-\[\#1E3247\] {
+  background-color: #F3F4F6 !important;
+  color: #111827 !important;
+}
+
+html.light .hover\:bg-\[\#1E1E20\]:hover,
+html.light .hover\:bg-\[\#242426\]:hover {
+  background-color: #F9FAFB !important;
+}
+
+/* Borders */
+html.light .border-\[\#2C2C2E\],
+html.light .border-\[\#2C2C2E\]\/80,
+html.light .border-\[\#2C2C2E\]\/60,
+html.light .border-\[\#1E3247\] {
+  border-color: #E5E7EB !important;
+}
+
+/* Typography Overrides & Clean Readable Light Text */
+html.light .text-\[\#9E9E9E\],
+html.light .text-\[\#8FA3AD\],
+html.light .text-\[\#7C7C7C\] {
+  color: #475569 !important;
+}
+
+html.light .text-slate-400,
+html.light .text-slate-500 {
+  color: #475569 !important;
+}
+
+html.light .text-slate-600,
+html.light .text-slate-700 {
+  color: #334155 !important;
+}
+
+html.light .text-slate-800,
+html.light .text-slate-900 {
+  color: #0F172A !important;
+}
+
+/* Form Controls, Inputs & Selects */
+html.light select,
+html.light input,
+html.light textarea {
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  border-color: #E5E7EB !important;
+}
+
+/* Light Mode Overrides for Tailwind Dark Utilities */
+html.light .bg-slate-900,
+html.light .bg-slate-800,
+html.light .bg-slate-950,
+html.light .dark\:bg-slate-900,
+html.light .dark\:bg-slate-800,
+html.light .dark\:bg-slate-950 {
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+  border-color: #E2E8F0 !important;
+}
+
+html.light .bg-slate-900\/80,
+html.light .bg-slate-900\/60,
+html.light .bg-slate-900\/40,
+html.light .dark\:bg-slate-900\/60 {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+  border-color: #E2E8F0 !important;
+}
+
+/* Table Headers & Rows */
+html.light table th {
+  background-color: #F9FAFB !important;
+  color: #374151 !important;
+  border-color: #E5E7EB !important;
+}
+
+html.light table td {
+  border-color: #E5E7EB !important;
+  color: #111827 !important;
+}
+
+html.light table tr:hover {
+  background-color: #F9FAFB !important;
+}
+
+/* Custom scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #00897B;
+}
+
+/* Glow & Hover Animation Utilities */
+.card-hover-glow {
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.card-hover-glow:hover {
+  transform: translateY(-2px);
+  border-color: rgba(0, 137, 123, 0.4);
+  box-shadow: 0 8px 25px -5px rgba(0, 137, 123, 0.15);
+}
+
+/* Floating Background Animations for Glassmorphism */
+@keyframes floatSlow {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translateY(-25px) rotate(6deg) scale(1.05);
+  }
+}
+
+@keyframes floatReverse {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg) scale(1);
+  }
+  50% {
+    transform: translateY(20px) rotate(-6deg) scale(0.95);
+  }
+}
+
+.animate-float-slow {
+  animation: floatSlow 12s ease-in-out infinite;
+}
+
+.animate-float-reverse {
+  animation: floatReverse 14s ease-in-out infinite;
+}
+
+/* =========================================================
+   HIDE ALL GOOGLE TRANSLATE POPUP OVERLAYS & TOOLTIPS
+   ========================================================= */
+#google_translate_element,
+.goog-te-banner-frame,
+.goog-te-banner-frame.skiptranslate,
+.goog-te-gadget,
+.goog-te-gadget-simple,
+#goog-gt-tt,
+.goog-te-balloon-frame,
+.goog-text-highlight,
+.VIpgJd-yD12fd-v4Y7uf,
+.goog-tooltip,
+.goog-tooltip:hover {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  width: 0 !important;
+  height: 0 !important;
+  pointer-events: none !important;
+}
+
+#google_translate_element * {
+  display: none !important;
+}
+
+body {
+  top: 0px !important;
+  position: static !important;
+}
+
+.goog-te-spinner-pos {
+  display: none !important;
+}
+
+iframe.skiptranslate {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+.goog-te-combo {
+  display: none !important;
+}
+
+/* =========================================================
+   HARDWARE ACCELERATED ELASTIC SPRING MODAL ANIMATIONS
+   ========================================================= */
+@keyframes popBounce {
+  0% {
+    opacity: 0;
+    transform: scale(0.65) translateY(40px);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.04) translateY(-6px);
+  }
+  85% {
+    transform: scale(0.98) translateY(2px);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes backdropBlurFade {
+  0% {
+    opacity: 0;
+    backdrop-filter: blur(0px);
+  }
+  100% {
+    opacity: 1;
+    backdrop-filter: blur(6px);
+  }
+}
+
+.animate-modal-pop-bounce {
+  animation: popBounce 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards !important;
+  will-change: transform, opacity;
+}
+
+.animate-backdrop-blur-fade {
+  animation: backdropBlurFade 0.35s ease-out forwards !important;
+  will-change: opacity, backdrop-filter;
+}
+
+.animate-float-plane {
+  animation: floatPlane 2.5s ease-in-out infinite;
+  will-change: transform;
+}
+
+.animate-pulse-ripple {
+  animation: pulseRipple 2s infinite;
+}
+
+/* =========================================================
+   PLANE TAKEOFF FROM BUTTON TO CENTER MODAL REVEAL ANIMATION
+   ========================================================= */
+@keyframes planeTakeoffArc {
+  0% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0) scale(0.4) rotate(-35deg);
+    filter: drop-shadow(0 0 12px rgba(0, 137, 123, 1));
+  }
+  45% {
+    opacity: 1;
+    transform: translate3d(calc(50vw - var(--start-x) - 40px), calc(45vh - var(--start-y) - 50px), 0) scale(1.6) rotate(20deg);
+    filter: drop-shadow(0 0 25px rgba(245, 158, 11, 1));
+  }
+  80% {
+    opacity: 0.9;
+    transform: translate3d(calc(50vw - var(--start-x)), calc(50vh - var(--start-y)), 0) scale(1.1) rotate(0deg);
+    filter: drop-shadow(0 0 15px rgba(0, 137, 123, 0.8));
+  }
+  100% {
+    opacity: 0;
+    transform: translate3d(calc(50vw - var(--start-x)), calc(50vh - var(--start-y)), 0) scale(0.6) rotate(0deg);
+    filter: drop-shadow(0 0 0px transparent);
+  }
+}
+
+.animate-plane-takeoff {
+  animation: planeTakeoffArc 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* =========================================================
+   CINEMATIC 360° SKY LOOP FLIGHT TAKEOFF ANIMATION (1.8s RELAXED FLIGHT)
+   ========================================================= */
+@keyframes planeSkyLoop {
+  0% {
+    opacity: 0.9;
+    transform: translate3d(0, 0, 0) scale(0.6) rotate(-45deg);
+    filter: drop-shadow(0 0 15px rgba(0, 137, 123, 1));
+  }
+  25% {
+    opacity: 1;
+    transform: translate3d(calc(25vw - var(--start-x)), calc(-140px - var(--start-y)), 0) scale(1.6) rotate(-110deg);
+    filter: drop-shadow(0 0 35px rgba(245, 158, 11, 1));
+  }
+  55% {
+    opacity: 1;
+    transform: translate3d(calc(75vw - var(--start-x)), calc(15vh - var(--start-y)), 0) scale(2.0) rotate(-220deg);
+    filter: drop-shadow(0 0 40px rgba(168, 85, 247, 1));
+  }
+  85% {
+    opacity: 1;
+    transform: translate3d(calc(50vw - var(--start-x)), calc(50vh - var(--start-y)), 0) scale(1.4) rotate(-360deg);
+    filter: drop-shadow(0 0 45px rgba(0, 137, 123, 1));
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(calc(50vw - var(--start-x)), calc(50vh - var(--start-y)), 0) scale(1.2) rotate(-360deg);
+    filter: drop-shadow(0 0 50px rgba(16, 185, 129, 1));
+  }
+}
+
+.animate-plane-sky-loop {
+  animation: planeSkyLoop 1.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+  will-change: transform, opacity;
+}
+
+/* =========================================================
+   STRICT STEP-BY-STEP TOP-TO-BOTTOM CASCADING ANIMATIONS
+   ========================================================= */
+@keyframes cascadeDown {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, -24px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.animate-cascade-1  { animation: cascadeDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.10s both; }
+.animate-cascade-2  { animation: cascadeDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both; }
+.animate-cascade-3  { animation: cascadeDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.34s both; }
+.animate-cascade-4  { animation: cascadeDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.46s both; }
+.animate-cascade-5  { animation: cascadeDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.58s both; }
+.animate-cascade-6  { animation: cascadeDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.70s both; }
+.animate-cascade-7  { animation: cascadeDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.82s both; }
+.animate-cascade-8  { animation: cascadeDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) 0.94s both; }
+.animate-cascade-9  { animation: cascadeDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) 1.06s both; }
+.animate-cascade-10 { animation: cascadeDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) 1.18s both; }
+.animate-cascade-11 { animation: cascadeDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) 1.30s both; }
+.animate-cascade-12 { animation: cascadeDown 0.35s cubic-bezier(0.16, 1, 0.3, 1) 1.42s both; }
+
+/* =========================================================
+   LIGHT & DARK MODE DROPDOWN SELECT & OPTION STYLING FIX
+   ========================================================= */
+html.dark select,
+.dark select {
+  color-scheme: dark !important;
+  background-color: #121214 !important;
+  color: #FFFFFF !important;
+}
+
+html.dark select option,
+.dark select option,
+.dark option {
+  background-color: #1C1C1E !important;
+  color: #FFFFFF !important;
+  padding: 8px 12px;
+}
+
+html:not(.dark) select,
+select:not(.dark select) {
+  color-scheme: light !important;
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+}
+
+html:not(.dark) select option,
+select:not(.dark select) option {
+  background-color: #FFFFFF !important;
+  color: #111827 !important;
+  padding: 8px 12px;
+}
+
+/* =========================================================
+   GOOGLE TRANSLATION ENGINE & UI CLEANUP RULES
+   ========================================================= */
+.goog-te-banner-frame,
+iframe.goog-te-banner-frame,
+.goog-te-balloon-frame,
+#goog-gt-tt,
+.goog-te-spinner-pos {
+  display: none !important;
+  visibility: hidden !important;
+}
+
+body {
+  top: 0px !important;
+  position: static !important;
+}
+
+.goog-te-combo {
+  display: none !important;
+}
+
+.goog-tooltip,
+.goog-tooltip:hover {
+  display: none !important;
+}
+
+.goog-text-highlight {
+  background-color: transparent !important;
+  box-shadow: none !important;
+}
+
+/* =========================================================
+   PREVENT CHROME TRANSLATION & HOVER WHITE BACKGROUND OVERLAYS ON BUTTONS
+   ========================================================= */
+font,
+font:hover,
+span.goog-text-highlight,
+span.goog-text-highlight:hover,
+.goog-text-highlight,
+mark,
+mark:hover {
+  background-color: transparent !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: inherit !important;
+  border-radius: 0 !important;
+}
+
+button font,
+button span,
+button:hover font,
+button:hover span,
+a font,
+a span,
+a:hover font,
+a:hover span {
+  background-color: transparent !important;
+  background: transparent !important;
+}
+
+/* =========================================================
+   EXECUTIVE A4 PRINTABLE FINANCIAL STATEMENT STYLING
+   ========================================================= */
+@media print {
+  /* Hide all dashboard UI navigation bars, sidebars, headers & non-print elements */
+  aside,
+  header,
+  nav,
+  .no-print,
+  button {
+    display: none !important;
+  }
+
+  body, html {
+    background-color: #FFFFFF !important;
+    color: #000000 !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Show dedicated printable document */
+  .printable-document {
+    display: block !important;
+    width: 100% !important;
+    margin: 0 auto !important;
+    padding: 20px !important;
+    background: #FFFFFF !important;
+    color: #000000 !important;
+  }
+
+  table, tr, td, th {
+    page-break-inside: avoid;
+  }
+}
+
+
+
+
+
+
+
+
