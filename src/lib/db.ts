@@ -141,8 +141,23 @@ export const getHostingerDbData = () => {
     console.error('Error reading proposals from LocalStorage:', e);
   }
 
-  if ((!proposals || proposals.length === 0) && typeof window !== 'undefined' && window.__FSC_GLOBAL_PROPOSALS__ && window.__FSC_GLOBAL_PROPOSALS__.length > 0) {
-    proposals = window.__FSC_GLOBAL_PROPOSALS__;
+  // Strictly purge any old legacy demo proposals (e.g. BS-01, prop-bs01) so map starts 100% clean
+  if (Array.isArray(proposals) && proposals.length > 0) {
+    const cleanProposals = proposals.filter(
+      (p) =>
+        p &&
+        p.id !== 'prop-bs01' &&
+        p.id !== 'prop-bs02' &&
+        (p.flying_name || '').toUpperCase() !== 'BS-01' &&
+        (p.flight_number || '').toUpperCase() !== 'BS-01'
+    );
+
+    if (cleanProposals.length !== proposals.length) {
+      proposals = cleanProposals;
+      try {
+        localStorage.setItem(DB_KEYS.PROPOSALS, JSON.stringify(cleanProposals));
+      } catch {}
+    }
   }
 
   let rawUsers: User[] = [];
