@@ -17,7 +17,7 @@ import {
 import { ExpenseItem, Language, Theme, LedgerEntry } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
-import { getHostingerDbData, saveHostingerDbData } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '../lib/db';
 
 interface BudgetExpenseManagerProps {
   language?: Language;
@@ -25,7 +25,7 @@ interface BudgetExpenseManagerProps {
   ledgerEntries?: LedgerEntry[];
 }
 
-// Initial Mock Expense Items
+// Initial Mock Expense Items (All Operational Categories Populated)
 const INITIAL_EXPENSES: ExpenseItem[] = [
   {
     id: 'exp-101',
@@ -41,7 +41,7 @@ const INITIAL_EXPENSES: ExpenseItem[] = [
   },
   {
     id: 'exp-102',
-    title: 'Dhaka Central Warehouse Monthly Lease & Utilities',
+    title: 'Dhaka Central Warehouse Monthly Lease & Rent',
     category: 'warehouse_rent',
     amount: 250000,
     date: '2026-08-01',
@@ -87,6 +87,30 @@ const INITIAL_EXPENSES: ExpenseItem[] = [
     created_by: 'Warehouse Incharge',
     created_at: '2026-08-10T16:45:00Z',
   },
+  {
+    id: 'exp-106',
+    title: 'Dhaka Hub Electricity, Water Utility & Fiber Internet Bill',
+    category: 'utilities',
+    amount: 45000,
+    date: '2026-08-08',
+    payment_method: 'bank_transfer',
+    voucher_no: 'VCH-9915',
+    notes: 'DESCO electricity & ISP optical fiber monthly bill',
+    created_by: 'Accountant',
+    created_at: '2026-08-08T11:20:00Z',
+  },
+  {
+    id: 'exp-107',
+    title: 'Office Stationery, Printing Supplies & Legal Audit Fee',
+    category: 'other',
+    amount: 35000,
+    date: '2026-08-03',
+    payment_method: 'cash',
+    voucher_no: 'VCH-9905',
+    notes: 'Printed thermal sticker rolls & audit document fees',
+    created_by: 'Super Admin',
+    created_at: '2026-08-03T15:10:00Z',
+  },
 ];
 
 export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
@@ -117,6 +141,16 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
     saveHostingerDbData('fsc_vps_expenses', INITIAL_EXPENSES);
     return INITIAL_EXPENSES;
   });
+
+  // Real-time DB Sync Listener
+  React.useEffect(() => {
+    return subscribeToDbUpdates(() => {
+      const dbData = getHostingerDbData();
+      if (dbData.expenses && Array.isArray(dbData.expenses) && dbData.expenses.length > 0) {
+        setExpenses(dbData.expenses);
+      }
+    });
+  }, []);
 
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
