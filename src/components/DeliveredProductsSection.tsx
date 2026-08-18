@@ -496,29 +496,29 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
                         )}
                       </td>
                       <td className="p-3.5 text-right border-b border-slate-200 dark:border-slate-800">
-                        <div className="flex items-center justify-end space-x-1.5 flex-wrap gap-y-1">
+                        <div className="flex items-center justify-end space-x-1.5 whitespace-nowrap">
                           {c.delivery_status !== 'sent_to_pathao' && c.status !== 'delivered' && (
                             <>
                               {/* 1-Click Pathao Courier Booking Button */}
                               <button
                                 type="button"
                                 onClick={() => handleOpenPathaoModal(c)}
-                                className="px-2.5 py-1 rounded-none bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold transition-all border border-emerald-700 cursor-pointer flex items-center space-x-1 shadow-xs"
+                                className="px-2.5 py-1 rounded-md bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-normal transition-all border border-emerald-700 cursor-pointer flex items-center space-x-1 shadow-2xs"
                                 title={isBn ? 'পাঠাও কুরিয়ারে ১-ক্লিক বুকিং' : 'Book with Pathao Courier'}
                               >
-                                <Bike className="w-3.5 h-3.5" />
-                                <span>{isBn ? 'পাঠাও কুরিয়ার' : 'Pathao'}</span>
+                                <Bike className="w-3.5 h-3.5 text-emerald-100" />
+                                <span className="font-light tracking-tight">{isBn ? 'পাঠাও কুরিয়ার' : 'Pathao'}</span>
                               </button>
 
                               {/* Manual Delivery Button */}
                               <button
                                 type="button"
                                 onClick={() => handleOpenManualModal(c)}
-                                className="px-2.5 py-1 rounded-none bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold transition-all border border-blue-700 cursor-pointer flex items-center space-x-1 shadow-xs"
+                                className="px-2.5 py-1 rounded-md bg-blue-600 hover:bg-blue-700 text-white text-[11px] font-normal transition-all border border-blue-700 cursor-pointer flex items-center space-x-1 shadow-2xs"
                                 title={isBn ? 'ম্যানুয়াল কাস্টমার ডেলিভারি' : 'Manual Customer Delivery'}
                               >
-                                <Truck className="w-3.5 h-3.5" />
-                                <span>{isBn ? 'ম্যানুয়াল ডেলিভারি' : 'Manual'}</span>
+                                <Truck className="w-3.5 h-3.5 text-blue-100" />
+                                <span className="font-light tracking-tight">{isBn ? 'ম্যানুয়াল ডেলিভারি' : 'Manual'}</span>
                               </button>
                             </>
                           )}
@@ -527,11 +527,11 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
                           <button
                             type="button"
                             onClick={() => handlePrintSticker(c)}
-                            className="px-2.5 py-1 rounded-none bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-xs font-normal transition-all border border-slate-300 dark:border-slate-700 cursor-pointer flex items-center space-x-1"
+                            className="px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 text-slate-700 dark:text-slate-300 text-[11px] font-normal transition-all border border-slate-300 dark:border-slate-700 cursor-pointer flex items-center space-x-1"
                             title={isBn ? 'মেমো / স্টিকার প্রিন্ট' : 'Print Receipt Memo'}
                           >
-                            <Printer className="w-3.5 h-3.5" />
-                            <span>{isBn ? 'মেমো' : 'Memo'}</span>
+                            <Printer className="w-3.5 h-3.5 text-slate-500" />
+                            <span className="font-light tracking-tight">{isBn ? 'মেমো' : 'Memo'}</span>
                           </button>
                         </div>
                       </td>
