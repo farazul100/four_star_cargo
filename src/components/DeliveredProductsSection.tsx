@@ -24,6 +24,7 @@ import { Carton, FlyingProposal, User, Language, LedgerEntry } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
 import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../lib/db';
+import { getPathaoApiSettings, createPathaoParcel } from '../lib/pathaoApi';
 
 interface DeliveredProductsSectionProps {
   cartons?: Carton[];
@@ -67,8 +68,19 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
   const [manualPaymentStatus, setManualPaymentStatus] = useState<'paid' | 'unpaid'>('unpaid');
   const [manualCashAmount, setManualCashAmount] = useState<number>(0);
 
-  // Open Pathao Modal
+  // Open Pathao Modal (Strictly verifies Pathao is Connected)
   const handleOpenPathaoModal = (carton: Carton) => {
+    const pathaoSettings = getPathaoApiSettings();
+    if (!pathaoSettings.isConnected || !pathaoSettings.clientId || !pathaoSettings.clientSecret) {
+      addToast(
+        isBn
+          ? '❌ পাঠাও কুরিয়ার কানেক্টেড নেই! সুপার এডমিন সেটিংস (API সেটিংস) থেকে পাঠাও মার্চেন্ট অ্যাকাউন্ট কানেক্ট করুন।'
+          : '❌ Pathao Courier is not connected! Please connect Pathao Merchant credentials in Super Admin Settings.',
+        'error'
+      );
+      return;
+    }
+
     setSelectedPathaoCarton(carton);
     setRecipientName(carton.recipient_name || carton.shipping_mark || 'Customer');
     setRecipientPhone(carton.recipient_phone || '01700000000');
@@ -78,15 +90,50 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
     setCodAmount(carton.cod_amount !== undefined ? carton.cod_amount : defaultCod);
   };
 
-  // Confirm Pathao Booking
-  const handleConfirmPathaoBooking = (e: React.FormEvent) => {
+  // Confirm Pathao Booking (Calls Pathao Official Merchant API)
+  const handleConfirmPathaoBooking = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedPathaoCarton) return;
 
+    const pathaoSettings = getPathaoApiSettings();
+
+    // STRICT CONNECTION CHECK: Block dummy dispatching when disconnected
+    if (!pathaoSettings.isConnected || !pathaoSettings.clientId || !pathaoSettings.clientSecret) {
+      addToast(
+        isBn
+          ? '❌ পাঠাও কুরিয়ার কানেক্টেড নেই! সুপার এডমিন সেটিংস থেকে মার্চেন্ট অ্যাকাউন্ট ভেরিফাই করুন।'
+          : '❌ Pathao Courier is not connected! Connect Merchant credentials first.',
+        'error'
+      );
+      return;
+    }
+
     setIsSubmittingPathao(true);
 
-    const consignmentId = `PTO-2026-${Math.floor(100000 + Math.random() * 900000)}`;
-    const trackingCode = `PTOTRACK-${Math.floor(1000 + Math.random() * 9000)}`;
+    // Call Real Pathao API Endpoint
+    const apiRes = await createPathaoParcel(pathaoSettings, {
+      merchant_order_id: selectedPathaoCarton.ctn_no,
+      recipient_name: recipientName,
+      recipient_phone: recipientPhone,
+      recipient_address: recipientAddress,
+      item_quantity: selectedPathaoCarton.quantity || 1,
+      item_weight: selectedPathaoCarton.gross_weight || 0.5,
+      amount_to_collect: paymentStatus === 'unpaid' ? codAmount : 0,
+    });
+
+    if (!apiRes.success || !apiRes.consignmentId) {
+      setIsSubmittingPathao(false);
+      addToast(
+        isBn
+          ? `❌ পাঠাও বুকিং ব্যর্থ: ${apiRes.message}`
+          : `❌ Pathao booking failed: ${apiRes.message}`,
+        'error'
+      );
+      return;
+    }
+
+    const consignmentId = apiRes.consignmentId;
+    const trackingCode = apiRes.trackingCode || consignmentId;
 
     const updatedCartons = allCartons.map((c) => {
       if (c.id === selectedPathaoCarton.id || c.ctn_no === selectedPathaoCarton.ctn_no) {
@@ -123,7 +170,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
 
     addToast(
       isBn
-        ? `✅ পাঠাও কুরিয়ারে ১-ক্লিক বুকিং সম্পন্ন! কনসাইনমেন্ট আইডি: ${consignmentId}`
+        ? `✅ পাঠাও কুরিয়ারে বুকিং সফল! আসল ট্র্যাকিং আইডি: ${consignmentId}`
         : `✅ Pathao Courier booking confirmed! Consignment ID: ${consignmentId}`,
       'success'
     );

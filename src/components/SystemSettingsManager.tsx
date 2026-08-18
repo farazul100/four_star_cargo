@@ -9,6 +9,12 @@ import {
 } from 'lucide-react';
 import { Language, User } from '../types';
 import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../lib/db';
+import {
+  PathaoApiCredentials,
+  getPathaoApiSettings,
+  savePathaoApiSettings,
+  testPathaoConnection,
+} from '../lib/pathaoApi';
 
 interface SystemSettingsManagerProps {
   currentUser: User;
@@ -30,17 +36,6 @@ export interface GeneralSettingsData {
   fontFamily: string;
 }
 
-export interface PathaoApiSettingsData {
-  clientId: string;
-  clientSecret: string;
-  username: string;
-  password: string;
-  storeId: string;
-  envMode: 'sandbox' | 'production';
-  autoSendCod: boolean;
-  enabled: boolean;
-}
-
 const DEFAULT_GENERAL_SETTINGS: GeneralSettingsData = {
   companyLogoUrl: '',
   faviconUrl: '',
@@ -55,17 +50,6 @@ const DEFAULT_GENERAL_SETTINGS: GeneralSettingsData = {
   fontFamily: 'Atkinson Hyperlegible',
 };
 
-const DEFAULT_PATHAO_API_SETTINGS: PathaoApiSettingsData = {
-  clientId: 'fsc_pathao_client_2026',
-  clientSecret: 'fsc_pathao_sec_998877',
-  username: 'fourstarcargo@pathao.com',
-  password: '••••••••••••',
-  storeId: 'STORE-DAC-01',
-  envMode: 'production',
-  autoSendCod: true,
-  enabled: true,
-};
-
 export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
   currentUser,
   language,
@@ -73,6 +57,7 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
 }) => {
   const isBn = language === 'bn';
   const [activeTab, setActiveTab] = useState<'general' | 'api'>('general');
+  const [isTestingPathao, setIsTestingPathao] = useState(false);
 
   // General Form Settings State
   const [settings, setSettings] = useState<GeneralSettingsData>(() => {
@@ -85,15 +70,9 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
     return DEFAULT_GENERAL_SETTINGS;
   });
 
-  // Pathao API Settings State
-  const [pathaoSettings, setPathaoSettings] = useState<PathaoApiSettingsData>(() => {
-    const saved = localStorage.getItem('fsc_vps_pathao_api_settings');
-    if (saved) {
-      try {
-        return { ...DEFAULT_PATHAO_API_SETTINGS, ...JSON.parse(saved) };
-      } catch (e) {}
-    }
-    return DEFAULT_PATHAO_API_SETTINGS;
+  // Pathao API Settings State (Defaults to Disconnected / Empty)
+  const [pathaoSettings, setPathaoSettings] = useState<PathaoApiCredentials>(() => {
+    return getPathaoApiSettings();
   });
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -157,22 +136,41 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
     }
   };
 
-  // Handle Save Pathao API Settings
-  const handleSavePathao = (e?: React.FormEvent) => {
+  // Handle Save & Test Pathao API Settings
+  const handleSavePathao = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
 
-    localStorage.setItem('fsc_vps_pathao_api_settings', JSON.stringify(pathaoSettings));
-    saveHostingerDbData('fsc_vps_pathao_api_settings', pathaoSettings);
+    setIsTestingPathao(true);
+
+    const testRes = await testPathaoConnection(pathaoSettings);
+
+    const updatedSettings: PathaoApiCredentials = {
+      ...pathaoSettings,
+      isConnected: testRes.success,
+      lastConnectedAt: testRes.success ? new Date().toLocaleString() : pathaoSettings.lastConnectedAt,
+      accessToken: testRes.accessToken || pathaoSettings.accessToken,
+      enabled: testRes.success,
+    };
+
+    setPathaoSettings(updatedSettings);
+    savePathaoApiSettings(updatedSettings);
+    saveHostingerDbData('fsc_vps_pathao_api_settings', updatedSettings);
 
     logSystemAuditAction(
       currentUser,
-      'UPDATE_PATHAO_API_SETTINGS',
+      'TEST_PATHAO_API_SETTINGS',
       'system',
       'PATHAO_API',
-      `পাঠাও কুরিয়ার API সেটিংস আপডেট করা হয়েছে (Store: ${pathaoSettings.storeId}, Mode: ${pathaoSettings.envMode})`
+      `Pathao API Connection Test: ${testRes.success ? 'SUCCESS' : 'FAILED'} (${testRes.message})`
     );
 
-    showToast(isBn ? 'পাঠাও কুরিয়ার API সেটিংস সফলভাবে সংরক্ষণ করা হয়েছে!' : 'Pathao Courier API settings saved successfully!');
+    setIsTestingPathao(false);
+
+    if (testRes.success) {
+      showToast(isBn ? '🟢 পাঠাও কুরিয়ার API সফলভাবে ভেরিফাইড ও কানেক্টেড হয়েছে!' : '🟢 Pathao API verified & connected successfully!');
+    } else {
+      showToast(isBn ? `🔴 কানেকশন ব্যর্থ: ${testRes.message}` : `🔴 Connection failed: ${testRes.message}`);
+    }
   };
 
   return (
@@ -490,12 +488,20 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                 <span>{isBn ? 'পাঠাও কুরিয়ার API কানেকশন সেটিংস' : 'Pathao Courier API Settings'}</span>
               </h2>
               <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-normal">
-                {isBn ? 'এই তথ্যগুলো দিয়ে সরাসরি ওয়্যারহাউজ থেকে ১-ক্লিকে পাঠাও কুরিয়ারে বুকিং সম্পন্ন হবে' : 'Configure Pathao merchant credentials for 1-click dispatching'}
+                {isBn
+                  ? 'সঠিক Pathao Merchant Client ID & Password দিয়ে কানেক্ট করুন। সংযোগ না থাকলে ডেমো বুকিং তৈরি হবে না।'
+                  : 'Connect with verified Pathao Merchant Credentials. Demo submissions are strictly blocked when disconnected.'}
               </p>
             </div>
-            <span className="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-              Pathao Official Merchant API v1
-            </span>
+            {pathaoSettings.isConnected ? (
+              <span className="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/30">
+                🟢 কানেক্টেড (Pathao API Connected)
+              </span>
+            ) : (
+              <span className="px-3 py-1 text-xs font-semibold rounded-full bg-red-500/10 text-red-600 border border-red-500/30">
+                🔴 ডিসকানেক্টেড (Pathao API Disconnected)
+              </span>
+            )}
           </div>
 
           <form onSubmit={handleSavePathao} className="space-y-6">
@@ -525,7 +531,7 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                       onChange={() => setPathaoSettings({ ...pathaoSettings, envMode: 'sandbox' })}
                       className="w-4 h-4 accent-amber-500 cursor-pointer"
                     />
-                    <span className="text-amber-600 dark:text-amber-400">🟡 Sandbox (টেস্টিং ডেমো মোড)</span>
+                    <span className="text-amber-600 dark:text-amber-400">🟡 Sandbox (টেস্টিং মার্চেন্ট মোড)</span>
                   </label>
                 </div>
               </div>
@@ -629,14 +635,19 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
               </div>
             </div>
 
-            {/* Save Pathao API Button */}
+            {/* Save & Test Pathao API Button */}
             <div className="pt-3 border-t dark:border-slate-800 flex justify-end">
               <button
                 type="submit"
-                className="py-2.5 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 flex items-center space-x-2 transition-all cursor-pointer"
+                disabled={isTestingPathao}
+                className="py-2.5 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 flex items-center space-x-2 transition-all cursor-pointer disabled:opacity-50"
               >
-                <Save className="w-4 h-4 text-white" />
-                <span>{isBn ? '💾 API সেটিংস সংরক্ষণ করুন' : 'Save Pathao API Credentials'}</span>
+                <Globe className="w-4 h-4 text-white" />
+                <span>
+                  {isTestingPathao
+                    ? (isBn ? '⏳ কানেকশন টেস্ট করা হচ্ছে...' : 'Testing Connection...')
+                    : (isBn ? '⚡ টেস্ট কানেকশন & সেভ করুন' : 'Test Connection & Save')}
+                </span>
               </button>
             </div>
           </form>
