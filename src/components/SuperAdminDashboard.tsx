@@ -957,15 +957,15 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   // --------------------------------------------------------------------------
   // DEFAULT TAB: COMPANY ANALYTICS HOME SCREEN (CARGO LOGISTICS METRICS)
   // --------------------------------------------------------------------------
-  const totalCartonCount = cartons.length || 5;
+  const totalCartonCount = cartons.length;
   const deliveredCartons = cartons.filter((c) => c.status === 'delivered');
   const inTransitCartons = cartons.filter((c) => c.status === 'in_transit');
   const proposedCartons = cartons.filter((c) => c.status === 'proposed');
-  const totalGrossWeight = cartons.reduce((acc, c) => acc + c.gross_weight, 0) || 1480.5;
-  const totalCbm = cartons.reduce((acc, c) => acc + c.cbm, 0) || 4.25;
+  const totalGrossWeight = cartons.reduce((acc, c) => acc + (c.gross_weight || 0), 0);
+  const totalCbm = cartons.reduce((acc, c) => acc + (c.cbm || 0), 0);
 
-  const displayDeliveredRev = totalDeliveredRevenue > 0 ? totalDeliveredRevenue : 525000;
-  const avgValuePerKg = totalGrossWeight > 0 ? Math.round(displayDeliveredRev / totalGrossWeight) : 1200;
+  const displayDeliveredRev = totalDeliveredRevenue;
+  const avgValuePerKg = totalGrossWeight > 0 ? Math.round(displayDeliveredRev / totalGrossWeight) : 0;
 
   const formatCurr = (val: number) => {
     return isBn ? `৳${val.toLocaleString('bn-BD')}` : `৳${val.toLocaleString('en-US')}`;
@@ -1146,7 +1146,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
           <div className={`grid grid-cols-3 gap-2 pt-2.5 border-t text-center ${isDark ? 'border-[#2C2C2E]' : 'border-slate-100'}`}>
             <div>
-              <p className={`text-sm font-bold font-hind ${isDark ? 'text-white' : 'text-slate-900'}`}>{deliveredCartons.length || 5}</p>
+              <p className={`text-sm font-bold font-hind ${isDark ? 'text-white' : 'text-slate-900'}`}>{deliveredCartons.length}</p>
               <p className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>{isBn ? 'ডেলিভারি' : 'Delivered'}</p>
             </div>
             <div>

@@ -32,7 +32,7 @@ export const resetHostingerDbToDefault = () => {
   localStorage.setItem(DB_KEYS.WAREHOUSES, JSON.stringify(INITIAL_WAREHOUSES));
   localStorage.setItem(DB_KEYS.CARTONS, JSON.stringify([]));
   localStorage.setItem(DB_KEYS.PROPOSALS, JSON.stringify([]));
-  localStorage.setItem(DB_KEYS.CUSTOMERS, JSON.stringify(INITIAL_CUSTOMERS));
+  localStorage.setItem(DB_KEYS.CUSTOMERS, JSON.stringify([]));
   localStorage.setItem(DB_KEYS.LEDGER, JSON.stringify([]));
   localStorage.setItem(DB_KEYS.AUDIT, JSON.stringify([]));
   localStorage.setItem(DB_KEYS.EXPENSES, JSON.stringify([]));
@@ -44,19 +44,20 @@ export const resetHostingerDbToDefault = () => {
 
 // Initialize Hostinger local persistence
 export const initHostingerDb = () => {
+  // Clear any old legacy mock cartons, proposals or customers
   const rawCartons = localStorage.getItem(DB_KEYS.CARTONS);
-  if (
-    rawCartons === null ||
-    rawCartons === '[]'
-  ) {
-    localStorage.setItem(DB_KEYS.CARTONS, JSON.stringify(INITIAL_CARTONS));
+  if (!rawCartons || rawCartons.includes('ctn-bs02') || rawCartons.includes('fsc-carton-')) {
+    localStorage.setItem(DB_KEYS.CARTONS, JSON.stringify([]));
   }
+
   const rawProposals = localStorage.getItem(DB_KEYS.PROPOSALS);
-  if (
-    rawProposals === null ||
-    rawProposals === '[]'
-  ) {
-    localStorage.setItem(DB_KEYS.PROPOSALS, JSON.stringify(INITIAL_PROPOSALS));
+  if (!rawProposals || rawProposals.includes('prop-bs02')) {
+    localStorage.setItem(DB_KEYS.PROPOSALS, JSON.stringify([]));
+  }
+
+  const rawCustomers = localStorage.getItem(DB_KEYS.CUSTOMERS);
+  if (!rawCustomers || rawCustomers.includes('cust-101') || rawCustomers.includes('cust-102')) {
+    localStorage.setItem(DB_KEYS.CUSTOMERS, JSON.stringify([]));
   }
 
   const currentUsersRaw = localStorage.getItem(DB_KEYS.USERS);
@@ -73,9 +74,6 @@ export const initHostingerDb = () => {
   }
   if (!localStorage.getItem(DB_KEYS.WAREHOUSES)) {
     localStorage.setItem(DB_KEYS.WAREHOUSES, JSON.stringify(INITIAL_WAREHOUSES));
-  }
-  if (!localStorage.getItem(DB_KEYS.CUSTOMERS)) {
-    localStorage.setItem(DB_KEYS.CUSTOMERS, JSON.stringify(INITIAL_CUSTOMERS));
   }
   if (!localStorage.getItem(DB_KEYS.LEDGER)) {
     localStorage.setItem(DB_KEYS.LEDGER, JSON.stringify([]));
