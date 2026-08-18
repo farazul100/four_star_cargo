@@ -29,6 +29,7 @@ import { BookingEntryForm } from './BookingEntryForm';
 import { DeliveriesManagement } from './DeliveriesManagement';
 import { FinalFlyingListSection } from './FinalFlyingListSection';
 import { ReceiveFlyingSection } from './ReceiveFlyingSection';
+import { DeliveredProductsSection } from './DeliveredProductsSection';
 import { WarehouseAnalyticsDashboard } from './WarehouseAnalyticsDashboard';
 import { BookedCartonsHub } from './BookedCartonsHub';
 import { ToastContainer, ToastMessage } from './Toast';
@@ -395,6 +396,18 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
           language={language}
         />
       </div>
+    );
+  }
+
+  // TAB: DELIVERED PRODUCTS (বিলিকৃত প্রোডাক্ট)
+  if (activeTab === 'delivered_products') {
+    return (
+      <DeliveredProductsSection
+        cartons={cartons}
+        proposals={proposalHistory}
+        currentUser={currentUser}
+        language={language}
+      />
     );
   }
 

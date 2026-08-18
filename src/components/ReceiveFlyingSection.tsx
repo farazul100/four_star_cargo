@@ -225,6 +225,23 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
     setCartons(updatedCartons);
     saveHostingerDbData('fsc_vps_cartons', updatedCartons);
 
+    // Find the carton's flight number and update the proposal's total_weight in Super Admin DB
+    const targetCarton = updatedCartons.find((c) => c.id === cartonId || c.ctn_no === cartonId);
+    if (targetCarton && targetCarton.flight_number) {
+      const flightNo = targetCarton.flight_number;
+      const flightCartons = updatedCartons.filter((c) => c.flight_number === flightNo);
+      const newTotalWeight = flightCartons.reduce((acc, c) => acc + (c.gross_weight || 0), 0);
+
+      const updatedProposals = proposals.map((p) => {
+        if (p.flight_number === flightNo || p.flying_name === flightNo) {
+          return { ...p, total_weight: newTotalWeight };
+        }
+        return p;
+      });
+      updateProposals(updatedProposals);
+      saveHostingerDbData('fsc_vps_proposals', updatedProposals);
+    }
+
     logSystemAuditAction(
       currentUser,
       'carton_received_bd',
@@ -234,7 +251,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
     );
 
     addToast(
-      isBn ? '✅ কার্টুনটি সফলভাবে মেপে পেয়ে বাংলাদেশ ওয়্যারহাউজে স্টক রিসিভড হয়েছে!' : '✅ Carton weight saved and received at BD Warehouse!',
+      isBn ? '✅ কার্টুনটি মেপে বুঝে পেয়েছি! চূড়ান্ত ওজন সেট করে "বিলিকৃত প্রোডাক্ট" সেকশনে স্থানান্তরিত করা হয়েছে।' : '✅ Carton weight saved and received into Delivered Products stock!',
       'success'
     );
   };

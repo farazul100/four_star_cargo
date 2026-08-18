@@ -146,16 +146,13 @@ export const Sidebar: React.FC<SidebarProps> = ({
               { id: 'receive_incoming', label: isBn ? 'ইনকামিং কার্গো গ্রহণ' : 'Receive Incoming Cargo', icon: Package },
             ],
           },
-          ...(currentUser.warehouse_id === 'wh-bd'
-            ? [
-                {
-                  section: isBn ? 'ডেলিভারি' : 'DELIVERY',
-                  items: [
-                    { id: 'delivery_cash', label: isBn ? 'ডেলিভারি ও ক্যাশ আদায়' : 'Delivery & Cash Collection', icon: CheckCircle2 },
-                  ],
-                },
-              ]
-            : []),
+          {
+            section: isBn ? 'ডেলিভারি' : 'DELIVERY',
+            items: [
+              { id: 'delivered_products', label: isBn ? 'বিলিকৃত প্রোডাক্ট' : 'Delivered Products Stock', icon: CheckCircle2 },
+              { id: 'delivery_cash', label: isBn ? 'ডেলিভারি ও ক্যাশ আদায়' : 'Delivery & Cash Collection', icon: CheckCircle2 },
+            ],
+          },
         ];
 
       case 'accountant':

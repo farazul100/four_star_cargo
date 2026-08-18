@@ -21,6 +21,7 @@ export const WarehouseDashboardPage: React.FC = () => {
     if (path.includes('/proposal-create')) return 'proposal_create';
     if (path.includes('/final-flying-list')) return 'final_flying_list';
     if (path.includes('/history')) return 'history';
+    if (path.includes('/delivered')) return 'delivered_products';
     if (path.includes('/delivery-cash')) return 'delivery_cash';
     if (path.includes('/cargo-search')) return 'cargo_search';
     if (path.includes('/public-track') || path.includes('/tracking')) return 'public_track';
@@ -58,6 +59,10 @@ export const WarehouseDashboardPage: React.FC = () => {
         break;
       case 'history':
         navigate('/warehouse/history');
+        break;
+      case 'delivered_products':
+      case 'delivered':
+        navigate('/warehouse/delivered');
         break;
       case 'delivery_cash':
         navigate('/warehouse/delivery-cash');
