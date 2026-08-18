@@ -86,6 +86,13 @@ export const initHostingerDb = () => {
 
   // Sync from server disk file (/api/db) for multi-browser support
   fetchServerDbAndSync();
+
+  // Start automatic 3-second background polling for 100% real-time multi-browser sync
+  if (typeof window !== 'undefined' && !(window as any).__FSC_SYNC_INTERVAL__) {
+    (window as any).__FSC_SYNC_INTERVAL__ = setInterval(() => {
+      fetchServerDbAndSync();
+    }, 3000);
+  }
 };
 
 declare global {
@@ -417,13 +424,32 @@ export const fetchServerDbAndSync = async () => {
 
         Object.keys(serverDb).forEach((key) => {
           const serverData = serverDb[key];
-          if (Array.isArray(serverData) && serverData.length > 0) {
+          if (Array.isArray(serverData)) {
             const localRaw = localStorage.getItem(key);
-            const localStr = localRaw || '';
-            const serverStr = JSON.stringify(serverData);
+            let localList: any[] = [];
+            try {
+              localList = localRaw ? JSON.parse(localRaw) : [];
+            } catch {
+              localList = [];
+            }
 
-            if (localStr !== serverStr) {
-              localStorage.setItem(key, serverStr);
+            const itemMap = new Map<string, any>();
+            localList.forEach((item: any) => {
+              if (item && (item.id || item.ctn_no || item.email)) {
+                itemMap.set(item.id || item.ctn_no || item.email, item);
+              }
+            });
+            serverData.forEach((item: any) => {
+              if (item && (item.id || item.ctn_no || item.email)) {
+                itemMap.set(item.id || item.ctn_no || item.email, item);
+              }
+            });
+
+            const mergedList = Array.from(itemMap.values());
+            const mergedStr = JSON.stringify(mergedList);
+
+            if (localRaw !== mergedStr) {
+              localStorage.setItem(key, mergedStr);
               hasChanges = true;
             }
           }
