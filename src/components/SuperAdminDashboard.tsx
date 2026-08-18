@@ -988,9 +988,25 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   const proposedCartons = cartons.filter((c) => c.status === 'proposed');
   const totalGrossWeight = cartons.reduce((acc, c) => acc + (c.gross_weight || 0), 0);
   const totalCbm = cartons.reduce((acc, c) => acc + (c.cbm || 0), 0);
-  const totalBdCalibratedWeight = cartons
-    .filter((c) => c.status === 'received' || c.status === 'delivered' || c.current_warehouse_id === 'wh-bd')
-    .reduce((acc, c) => acc + (c.gross_weight || 0), 0);
+  const totalOriginBookedWeight = cartons.reduce(
+    (acc, c) => acc + (c.origin_weight !== undefined ? c.origin_weight : (c.gross_weight || 0)),
+    0
+  );
+  const bdCartonsList = cartons.filter(
+    (c) =>
+      c.bd_calibrated_weight !== undefined ||
+      c.status === 'received' ||
+      c.status === 'delivered' ||
+      c.current_warehouse_id === 'wh-bd' ||
+      c.destination_warehouse_id === 'wh-bd'
+  );
+  const totalBdCalibratedWeight =
+    bdCartonsList.length > 0
+      ? bdCartonsList.reduce(
+          (acc, c) => acc + (c.bd_calibrated_weight !== undefined ? c.bd_calibrated_weight : (c.gross_weight || 0)),
+          0
+        )
+      : totalGrossWeight;
 
   const displayDeliveredRev = totalDeliveredRevenue;
   const avgValuePerKg = totalGrossWeight > 0 ? Math.round(displayDeliveredRev / totalGrossWeight) : 0;
@@ -1275,11 +1291,16 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                 <Scale className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
                 <span>{isBn ? 'বাংলাদেশে থেকে সংশোধনি ওজন (BD Calibrated Weight)' : 'BD Calibrated Weight'}</span>
               </p>
-              <p className="text-lg font-bold font-mono mt-1 text-emerald-600 dark:text-emerald-400">
-                {totalBdCalibratedWeight.toFixed(1)} kg
-              </p>
+              <div className="flex items-center justify-center space-x-3 mt-1">
+                <span className="text-xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
+                  {totalBdCalibratedWeight.toFixed(1)} kg
+                </span>
+                <span className="text-xs text-slate-500 dark:text-slate-400 font-mono font-medium">
+                  (চীন বুকিং মূল ওজন: {totalOriginBookedWeight.toFixed(1)} kg)
+                </span>
+              </div>
               <p className="text-[10px] text-emerald-600/80 dark:text-emerald-400/80 font-normal mt-0.5">
-                {isBn ? 'বাংলাদেশ ওয়্যারহাউজ থেকে নির্ধারিত করা ওজন' : 'Calibrated official weight from BD Warehouse'}
+                {isBn ? 'বাংলাদেশ ওয়্যারহাউজ থেকে পরিমাপকৃত চূড়ান্ত সংশোধিত ওজন' : 'Calibrated official weight from BD Warehouse'}
               </p>
             </div>
           </div>

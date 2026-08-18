@@ -203,10 +203,13 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
     if (isNaN(newWeight) || newWeight < 0) return;
 
     const updatedCartons = cartons.map((c) => {
-      if (c.id === cartonId) {
+      if (c.id === cartonId || c.ctn_no === cartonId) {
+        const origWt = c.origin_weight !== undefined ? c.origin_weight : (c.gross_weight || newWeight);
         return {
           ...c,
           gross_weight: newWeight,
+          bd_calibrated_weight: newWeight,
+          origin_weight: origWt,
           updated_at: new Date().toISOString(),
         };
       }
@@ -215,6 +218,23 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
     setCartons(updatedCartons);
     saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+
+    // Sync flight proposal total weight with Hostinger DB immediately
+    const targetCarton = updatedCartons.find((c) => c.id === cartonId || c.ctn_no === cartonId);
+    if (targetCarton && targetCarton.flight_number) {
+      const flightNo = targetCarton.flight_number;
+      const flightCartons = updatedCartons.filter((c) => c.flight_number === flightNo);
+      const newTotalWeight = flightCartons.reduce((acc, c) => acc + (c.gross_weight || 0), 0);
+
+      const updatedProposals = proposals.map((p) => {
+        if (p.flight_number === flightNo || p.flying_name === flightNo) {
+          return { ...p, total_weight: newTotalWeight };
+        }
+        return p;
+      });
+      updateProposals(updatedProposals);
+      saveHostingerDbData('fsc_vps_proposals', updatedProposals);
+    }
   };
 
   // Individual Carton Receive Handler
@@ -853,14 +873,14 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                                     type="number"
                                     step="0.1"
                                     min="0"
-                                    value={c.gross_weight || ''}
+                                    value={c.bd_calibrated_weight !== undefined ? c.bd_calibrated_weight : (c.gross_weight || '')}
                                     onChange={(e) => handleUpdateCartonWeight(c.id, parseFloat(e.target.value) || 0)}
-                                    disabled={isCartonReceived}
-                                    className={`w-20 px-2 py-1 text-xs font-normal text-center rounded-none border transition-all ${
+                                    className={`w-20 px-2 py-1 text-xs font-bold text-center rounded-none border transition-all ${
                                       isCartonReceived
-                                        ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-700 dark:text-emerald-300'
-                                        : 'bg-white dark:bg-slate-800 border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 focus:outline-none focus:border-blue-500'
+                                        ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-700 dark:text-emerald-300 focus:ring-2 focus:ring-emerald-500'
+                                        : 'bg-white dark:bg-slate-800 border-blue-400 dark:border-blue-700 text-blue-900 dark:text-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500'
                                     }`}
+                                    title="বাংলাদেশে মেপে পাওয়া ওজন টিউন/এডিট করুন"
                                   />
                                   <span className="text-[10px] font-light text-slate-400">KG</span>
                                 </div>
