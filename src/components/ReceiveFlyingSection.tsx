@@ -47,6 +47,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'in_transit' | 'received'>('all');
+  const [localWeights, setLocalWeights] = useState<Record<string, string>>({});
 
   const addToast = (title: string, type: 'success' | 'error' | 'info' = 'info') => {
     const id = Date.now().toString();
@@ -238,12 +239,28 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
   };
 
   // Individual Carton Receive Handler
-  const handleReceiveSingleCarton = (cartonId: string) => {
+  const handleReceiveSingleCarton = (target: Carton | string) => {
+    const cartonId = typeof target === 'string' ? target : target.id;
+    const ctnNo = typeof target === 'object' ? target.ctn_no : target;
+    const shippingMark = typeof target === 'object' ? target.shipping_mark : undefined;
+
+    // Check if user entered a custom weight in local weights
+    const localWtStr = localWeights[cartonId] || (ctnNo ? localWeights[ctnNo] : undefined);
+    const parsedLocalWt = localWtStr !== undefined ? parseFloat(localWtStr) : NaN;
+
     const updatedCartons = cartons.map((c) => {
-      if (c.id === cartonId || c.ctn_no === cartonId) {
+      if (
+        c.id === cartonId ||
+        c.ctn_no === cartonId ||
+        (ctnNo && c.ctn_no === ctnNo) ||
+        (shippingMark && c.shipping_mark === shippingMark)
+      ) {
+        const finalWt = !isNaN(parsedLocalWt) && parsedLocalWt >= 0 ? parsedLocalWt : (c.bd_calibrated_weight || c.gross_weight || 0);
         return {
           ...c,
           status: 'received' as const,
+          gross_weight: finalWt,
+          bd_calibrated_weight: finalWt,
           current_warehouse_id: 'wh-bd',
           destination_warehouse_id: 'wh-bd',
           updated_at: new Date().toISOString(),
@@ -256,9 +273,11 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
     saveHostingerDbData('fsc_vps_cartons', updatedCartons);
 
     // Find the carton's flight number and update the proposal's total_weight in Super Admin DB
-    const targetCarton = updatedCartons.find((c) => c.id === cartonId || c.ctn_no === cartonId);
-    if (targetCarton && targetCarton.flight_number) {
-      const flightNo = targetCarton.flight_number;
+    const targetCartonObj = updatedCartons.find(
+      (c) => c.id === cartonId || c.ctn_no === cartonId || (ctnNo && c.ctn_no === ctnNo)
+    );
+    if (targetCartonObj && targetCartonObj.flight_number) {
+      const flightNo = targetCartonObj.flight_number;
       const flightCartons = updatedCartons.filter((c) => c.flight_number === flightNo);
       const newTotalWeight = flightCartons.reduce((acc, c) => acc + (c.gross_weight || 0), 0);
 
@@ -277,11 +296,11 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       'carton_received_bd',
       'carton',
       cartonId,
-      `Carton ${cartonId} received at BD Warehouse stock by ${currentUser.name}`
+      `Carton ${ctnNo || cartonId} received at BD Warehouse stock by ${currentUser.name}`
     );
 
     addToast(
-      isBn ? '✅ কার্টুনটি মেপে বুঝে পেয়েছি! চূড়ান্ত ওজন সেট করে "বিলিকৃত প্রোডাক্ট" সেকশনে স্থানান্তরিত করা হয়েছে।' : '✅ Carton weight saved and received into Delivered Products stock!',
+      isBn ? '✅ কার্টুনটি মেপে বুঝে পেয়েছি! স্টক ইনভেন্টরি ও বিলিকৃত প্রোডাক্ট সেকশনে স্থানান্তরিত করা হয়েছে।' : '✅ Carton weight saved and received into Delivered Products stock!',
       'success'
     );
   };
@@ -294,10 +313,16 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
     }
 
     const updatedCartons = cartons.map((c) => {
-      if (cartonIdsToReceive.includes(c.id) || (flightNo && c.flight_number === flightNo)) {
+      if (cartonIdsToReceive.includes(c.id) || cartonIdsToReceive.includes(c.ctn_no) || (flightNo && c.flight_number === flightNo)) {
+        const localWtStr = localWeights[c.id] || localWeights[c.ctn_no];
+        const parsedLocalWt = localWtStr !== undefined ? parseFloat(localWtStr) : NaN;
+        const finalWt = !isNaN(parsedLocalWt) && parsedLocalWt >= 0 ? parsedLocalWt : (c.bd_calibrated_weight || c.gross_weight || 0);
+
         return {
           ...c,
           status: 'received' as const,
+          gross_weight: finalWt,
+          bd_calibrated_weight: finalWt,
           current_warehouse_id: 'wh-bd',
           destination_warehouse_id: 'wh-bd',
           updated_at: new Date().toISOString(),
@@ -870,11 +895,25 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                               <td className="p-2.5">
                                 <div className="flex items-center space-x-1">
                                   <input
-                                    type="number"
-                                    step="0.1"
-                                    min="0"
-                                    value={c.bd_calibrated_weight !== undefined ? c.bd_calibrated_weight : (c.gross_weight || '')}
-                                    onChange={(e) => handleUpdateCartonWeight(c.id, parseFloat(e.target.value) || 0)}
+                                    type="text"
+                                    inputMode="decimal"
+                                    value={
+                                      localWeights[c.id] !== undefined
+                                        ? localWeights[c.id]
+                                        : (c.bd_calibrated_weight !== undefined
+                                          ? String(c.bd_calibrated_weight)
+                                          : String(c.gross_weight || ''))
+                                    }
+                                    onChange={(e) => {
+                                      const val = e.target.value;
+                                      setLocalWeights((prev) => ({ ...prev, [c.id]: val }));
+                                    }}
+                                    onBlur={(e) => {
+                                      const parsed = parseFloat(e.target.value);
+                                      if (!isNaN(parsed) && parsed >= 0) {
+                                        handleUpdateCartonWeight(c.id, parsed);
+                                      }
+                                    }}
                                     className={`w-20 px-2 py-1 text-xs font-bold text-center rounded-none border transition-all ${
                                       isCartonReceived
                                         ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-700 dark:text-emerald-300 focus:ring-2 focus:ring-emerald-500'
@@ -904,8 +943,8 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                                 ) : isBdWarehouseStaff ? (
                                   <button
                                     type="button"
-                                    onClick={() => handleReceiveSingleCarton(c.id)}
-                                    className="px-2.5 py-1 rounded-none bg-emerald-600 hover:bg-emerald-700 text-white font-light text-xs transition-all inline-flex items-center space-x-1 cursor-pointer border border-emerald-700"
+                                    onClick={() => handleReceiveSingleCarton(c)}
+                                    className="px-2.5 py-1 rounded-none bg-emerald-600 hover:bg-emerald-700 text-white font-light text-xs transition-all inline-flex items-center space-x-1 cursor-pointer border border-emerald-700 shadow-xs"
                                   >
                                     <CheckCircle2 className="w-3 h-3" />
                                     <span>বুঝে পেয়েছি (রিসিভড)</span>
