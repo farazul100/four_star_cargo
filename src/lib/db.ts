@@ -59,7 +59,16 @@ export const initHostingerDb = () => {
     localStorage.setItem(DB_KEYS.PROPOSALS, JSON.stringify(INITIAL_PROPOSALS));
   }
 
-  if (!localStorage.getItem(DB_KEYS.USERS)) {
+  const currentUsersRaw = localStorage.getItem(DB_KEYS.USERS);
+  let usersList: User[] = [];
+  try {
+    usersList = currentUsersRaw ? JSON.parse(currentUsersRaw) : [];
+  } catch (e) {
+    usersList = [];
+  }
+  const hasMasterAdmin = usersList.some((u) => u.email && u.email.toLowerCase() === 'superadmin@cargo.com');
+  const hasOldDemoAdmin = usersList.some((u) => u.email && u.email.toLowerCase() === 'admin@fourstarcargo.com');
+  if (!currentUsersRaw || !hasMasterAdmin || hasOldDemoAdmin) {
     localStorage.setItem(DB_KEYS.USERS, JSON.stringify(INITIAL_USERS));
   }
   if (!localStorage.getItem(DB_KEYS.WAREHOUSES)) {

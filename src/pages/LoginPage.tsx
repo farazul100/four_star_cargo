@@ -24,7 +24,10 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
   const { signIn } = useAuth();
   const isDark = theme === 'dark';
 
-  const dbUsers: UserType[] = getHostingerDbData().users || INITIAL_USERS;
+  let dbUsers: UserType[] = getHostingerDbData().users || INITIAL_USERS;
+  if (!dbUsers.some((u) => u.email && u.email.toLowerCase() === 'superadmin@cargo.com') || dbUsers.some((u) => u.email && u.email.toLowerCase() === 'admin@fourstarcargo.com')) {
+    dbUsers = INITIAL_USERS;
+  }
   const roleUsers = dbUsers.filter((u: UserType) => u.role === expectedRole);
 
   const [selectedUserId, setSelectedUserId] = useState<string>(roleUsers[0]?.id || '');
