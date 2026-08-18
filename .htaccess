@@ -1,20 +1,24 @@
 # M/S FOUR STAR CARGO — HOSTINGER APACHE CONFIGURATION
-DirectoryIndex index.php dist/index.html index.html
+DirectoryIndex dist/index.html index.html index.php
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
-  # 1. API Route Rewrite for Hostinger Backend Persistence
+  # 1. Direct API Backend Rewrite for Hostinger Database Persistence
   RewriteRule ^api/db/?$ api/db.php [L,QSA]
   RewriteRule ^api/db\.php$ api/db.php [L,QSA]
 
-  # 2. Serve compiled dist assets directly
-  RewriteCond %{DOCUMENT_ROOT}/dist/$1 -f
-  RewriteRule ^(assets/.*)$ dist/$1 [L]
+  # 2. Serve static dist assets & files (assets/, images, etc.) natively
+  RewriteCond %{DOCUMENT_ROOT}/dist%{REQUEST_URI} -f
+  RewriteRule ^(.*)$ dist/$1 [L]
 
-  # 3. SPA Route Rewrite - Send all non-file/non-directory requests to index.php
+  # 3. Direct Root Request (/) to dist/index.html
+  RewriteRule ^$ dist/index.html [L]
+
+  # 4. SPA Route Rewrite - Send all non-file/non-directory frontend routes directly to dist/index.html
   RewriteCond %{REQUEST_FILENAME} !-f
   RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteRule . index.php [L]
+  RewriteCond %{REQUEST_URI} !^/api/
+  RewriteRule ^(.*)$ dist/index.html [L]
 </IfModule>
