@@ -1,17 +1,16 @@
 # M/S FOUR STAR CARGO — HOSTINGER APACHE CONFIGURATION (DIST)
+Options -Indexes -MultiViews
 DirectoryIndex index.html index.php
 
 <IfModule mod_rewrite.c>
   RewriteEngine On
   RewriteBase /
 
-  # 1. API Route Rewrite for Hostinger Backend Persistence (MUST BE FIRST!)
+  # 1. API Backend Route Rewrites
   RewriteRule ^api/db/?$ api/db.php [L,QSA]
   RewriteRule ^api/db\.php$ api/db.php [L,QSA]
 
-  # 2. SPA Route Rewrite - Send all non-file/non-directory requests to index.html
+  # 2. SPA Fallback: Send all non-file requests directly to index.html
   RewriteCond %{REQUEST_FILENAME} !-f
-  RewriteCond %{REQUEST_FILENAME} !-d
-  RewriteCond %{REQUEST_URI} !^/api/
-  RewriteRule . index.html [L]
+  RewriteRule ^(.*)$ index.html [L]
 </IfModule>

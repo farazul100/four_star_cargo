@@ -413,11 +413,16 @@ export const saveHostingerDbData = (key: string, data: any) => {
 export const fetchServerDbAndSync = async () => {
   if (typeof window === 'undefined') return;
   try {
-    let res = await fetch('/api/db');
+    let res = await fetch('/api/db.php', {
+      headers: { Accept: 'application/json' },
+    });
     if (!res.ok) {
-      res = await fetch('/api/db.php');
+      res = await fetch('/api/db');
     }
     if (res.ok) {
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) return;
+
       const serverDb = await res.json();
       if (serverDb && typeof serverDb === 'object') {
         let hasChanges = false;
