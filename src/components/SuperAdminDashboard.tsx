@@ -1001,27 +1001,27 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
       {/* 1. Header Title & Subtitle */}
       <div>
-        <h1 className={`text-xl md:text-2xl font-bold font-hind tracking-wide ${isDark ? 'text-white' : 'text-slate-900'}`}>
+        <h1 className={`text-xl md:text-2xl font-light font-hind tracking-wide ${isDark ? 'text-white' : 'text-slate-900'}`}>
           {isBn ? 'কোম্পানি অ্যানালিটিক্স' : 'Company Analytics'}
         </h1>
-        <p className={`text-[11px] mt-0.5 font-normal ${isDark ? 'text-gray-400' : 'text-slate-600'}`}>
+        <p className={`text-[11px] mt-0.5 font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>
           {isBn ? 'ফোর স্টার কার্গো রিয়েল-টাইম পারফরম্যান্স ও শিপমেন্ট ওভারভিউ' : 'Four Star Cargo real-time freight performance & shipment overview'}
         </p>
       </div>
 
       {/* 2. Top Filter Bar (Cargo System Filters) */}
-      <div className={`border rounded-2xl p-2.5 flex flex-wrap items-center gap-2.5 text-xs shadow-sm ${
+      <div className={`border rounded-none p-2.5 flex flex-wrap items-center gap-2.5 text-xs shadow-none ${
         isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
       }`}>
         {/* Date Range Selector */}
-        <div className={`flex items-center space-x-2 border rounded-xl px-2.5 py-1 ${
+        <div className={`flex items-center space-x-2 border rounded-none px-2.5 py-1 ${
           isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
         }`}>
           <Calendar className="w-3.5 h-3.5 opacity-60" />
           <select
             value={dashDateFilter}
             onChange={(e) => setDashDateFilter(e.target.value)}
-            className="bg-transparent outline-none text-xs cursor-pointer"
+            className="bg-transparent outline-none text-xs cursor-pointer font-light"
           >
             <option value="month" className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>{isBn ? 'এই মাস' : 'This Month'}</option>
             <option value="today" className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>{isBn ? 'আজকে' : 'Today'}</option>
@@ -1037,7 +1037,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
         <select
           value={dashWhFilter}
           onChange={(e) => setDashWhFilter(e.target.value)}
-          className={`border rounded-xl px-3 py-1 outline-none min-w-[140px] cursor-pointer ${
+          className={`border rounded-none px-3 py-1 outline-none min-w-[140px] cursor-pointer font-light ${
             isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
           }`}
         >
@@ -1053,7 +1053,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
         <select
           value={dashModeFilter}
           onChange={(e) => setDashModeFilter(e.target.value)}
-          className={`border rounded-xl px-3 py-1 outline-none cursor-pointer ${
+          className={`border rounded-none px-3 py-1 outline-none cursor-pointer font-light ${
             isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
           }`}
         >
@@ -1066,7 +1066,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
         <select
           value={dashSourceFilter}
           onChange={(e) => setDashSourceFilter(e.target.value)}
-          className={`border rounded-xl px-3 py-1 outline-none cursor-pointer ${
+          className={`border rounded-none px-3 py-1 outline-none cursor-pointer font-light ${
             isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
           }`}
         >
@@ -1079,66 +1079,66 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
       {/* 3. Top 4 Cargo Metric Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Card 1: Total Cargo Volume */}
-        <div className={`border rounded-2xl p-4 flex items-start space-x-3 shadow-xs transition-colors ${
+        <div className={`border rounded-none p-4 flex items-start space-x-3 transition-colors ${
           isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white hover:border-[#3A3A3C]' : 'bg-white border-slate-200/90 text-slate-900 hover:border-slate-300'
         }`}>
-          <div className="w-10 h-10 rounded-xl bg-[#00897B]/15 flex items-center justify-center text-[#00897B] shrink-0">
+          <div className="w-10 h-10 rounded-none bg-[#00897B]/15 flex items-center justify-center text-[#00897B] shrink-0">
             <Package className="w-5 h-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className={`text-[11px] font-medium mb-0.5 ${isDark ? 'text-gray-400' : 'text-slate-600'}`}>{isBn ? 'মোট কার্গো ভলিউম' : 'Total Cargo Volume'}</p>
-            <p className="text-lg font-bold text-[#00897B] font-hind">{totalGrossWeight} kg</p>
-            <p className={`text-[10px] mt-0.5 ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>
+            <p className={`text-[11px] font-light mb-0.5 ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'মোট কার্গো ভলিউম' : 'Total Cargo Volume'}</p>
+            <p className="text-lg font-light text-[#00897B] font-hind">{totalGrossWeight} kg</p>
+            <p className={`text-[10px] mt-0.5 font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>
               {isBn ? `${totalCartonCount}টি কার্টুন | ${totalCbm.toFixed(2)} CBM` : `${totalCartonCount} Cartons | ${totalCbm.toFixed(2)} CBM`}
             </p>
           </div>
         </div>
 
         {/* Card 2: Flight & Sea Shipments */}
-        <div className={`border rounded-2xl p-4 flex items-start space-x-3 shadow-xs transition-colors ${
+        <div className={`border rounded-none p-4 flex items-start space-x-3 transition-colors ${
           isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white hover:border-[#3A3A3C]' : 'bg-white border-slate-200/90 text-slate-900 hover:border-slate-300'
         }`}>
-          <div className="w-10 h-10 rounded-xl bg-[#22C55E]/15 flex items-center justify-center text-[#22C55E] shrink-0">
+          <div className="w-10 h-10 rounded-none bg-[#22C55E]/15 flex items-center justify-center text-[#22C55E] shrink-0">
             <Plane className="w-5 h-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className={`text-[11px] font-medium mb-0.5 ${isDark ? 'text-gray-400' : 'text-slate-600'}`}>{isBn ? 'শিপমেন্ট ট্রানজিট' : 'Active Shipments'}</p>
-            <p className="text-lg font-bold text-[#22C55E] font-hind">
+            <p className={`text-[11px] font-light mb-0.5 ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'শিপমেন্ট ট্রানজিট' : 'Active Shipments'}</p>
+            <p className="text-lg font-light text-[#22C55E] font-hind">
               {isBn ? `${inTransitCartons.length}টি ফ্লাইট` : `${inTransitCartons.length} Flights`}
             </p>
-            <p className={`text-[10px] mt-0.5 ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>
+            <p className={`text-[10px] mt-0.5 font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>
               {isBn ? `${deliveredCartons.length}টি কার্টুন ডেলিভারড` : `${deliveredCartons.length} Cartons Delivered`}
             </p>
           </div>
         </div>
 
         {/* Card 3: Pending Flying Proposals */}
-        <div className={`border rounded-2xl p-4 flex items-start space-x-3 shadow-xs transition-colors ${
+        <div className={`border rounded-none p-4 flex items-start space-x-3 transition-colors ${
           isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white hover:border-[#3A3A3C]' : 'bg-white border-slate-200/90 text-slate-900 hover:border-slate-300'
         }`}>
-          <div className="w-10 h-10 rounded-xl bg-[#1E88E5]/15 flex items-center justify-center text-[#1E88E5] shrink-0">
+          <div className="w-10 h-10 rounded-none bg-[#1E88E5]/15 flex items-center justify-center text-[#1E88E5] shrink-0">
             <Truck className="w-5 h-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className={`text-[11px] font-medium mb-0.5 ${isDark ? 'text-gray-400' : 'text-slate-600'}`}>{isBn ? 'ফ্লাইং প্রস্তাবনা' : 'Pending Flying'}</p>
-            <p className="text-lg font-bold text-[#1E88E5] font-hind">
+            <p className={`text-[11px] font-light mb-0.5 ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'ফ্লাইং প্রস্তাবনা' : 'Pending Flying'}</p>
+            <p className="text-lg font-light text-[#1E88E5] font-hind">
               {isBn ? `${proposedCartons.length}টি পেন্ডিং` : `${proposedCartons.length} Pending`}
             </p>
-            <p className={`text-[10px] mt-0.5 ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>{isBn ? 'অনুমোদনের জন্য প্রস্তুত' : 'Ready for approval'}</p>
+            <p className={`text-[10px] mt-0.5 font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'অনুমোদনের জন্য প্রস্তুত' : 'Ready for approval'}</p>
           </div>
         </div>
 
         {/* Card 4: Customer Dues Ledger */}
-        <div className={`border rounded-2xl p-4 flex items-start space-x-3 shadow-xs transition-colors ${
+        <div className={`border rounded-none p-4 flex items-start space-x-3 transition-colors ${
           isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white hover:border-[#3A3A3C]' : 'bg-white border-slate-200/90 text-slate-900 hover:border-slate-300'
         }`}>
-          <div className="w-10 h-10 rounded-xl bg-[#F59E0B]/15 flex items-center justify-center text-[#F59E0B] shrink-0">
+          <div className="w-10 h-10 rounded-none bg-[#F59E0B]/15 flex items-center justify-center text-[#F59E0B] shrink-0">
             <Wallet className="w-5 h-5" />
           </div>
           <div className="min-w-0 flex-1">
-            <p className={`text-[11px] font-medium mb-0.5 ${isDark ? 'text-gray-400' : 'text-slate-600'}`}>{isBn ? 'কাস্টমার লেজার বকেয়া' : 'Customer Ledger Dues'}</p>
-            <p className="text-lg font-bold text-[#F59E0B] font-hind">{formatCurr(totalOutstandingDue)}</p>
-            <p className={`text-[10px] mt-0.5 ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>{isBn ? 'বকেয়া কার্গো কালেকশন' : 'Pending dues collection'}</p>
+            <p className={`text-[11px] font-light mb-0.5 ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'কাস্টমার লেজার বকেয়া' : 'Customer Ledger Dues'}</p>
+            <p className="text-lg font-light text-[#F59E0B] font-hind">{formatCurr(totalOutstandingDue)}</p>
+            <p className={`text-[10px] mt-0.5 font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'বকেয়া কার্গো কালেকশন' : 'Pending dues collection'}</p>
           </div>
         </div>
       </div>
@@ -1146,23 +1146,23 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
       {/* 4. 3-Column Middle Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Column 1: Freight Revenue Summary */}
-        <div className={`border rounded-2xl p-5 space-y-3.5 shadow-xs ${
+        <div className={`border rounded-none p-5 space-y-3.5 ${
           isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}>
-          <h3 className={`text-xs font-bold flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          <h3 className={`text-xs font-light flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
             <DollarSign className="w-4 h-4 text-[#EA580C]" />
             <span>{isBn ? 'ফ্রেইট রেভিনিউ সারসংক্ষেপ' : 'Freight Revenue Summary'}</span>
           </h3>
 
           <div className="text-center py-2">
-            <p className={`text-[11px] mb-0.5 ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>{isBn ? 'মোট কার্গো আদায় (Delivered Revenue)' : 'Delivered Cargo Revenue'}</p>
-            <p className={`text-2xl font-bold font-hind ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            <p className={`text-[11px] mb-0.5 font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'মোট কার্গো আদায় (Delivered Revenue)' : 'Delivered Cargo Revenue'}</p>
+            <p className={`text-2xl font-light font-hind ${isDark ? 'text-white' : 'text-slate-900'}`}>
               {formatCurr(displayDeliveredRev)}
             </p>
-            <div className="flex items-center justify-center space-x-1 mt-1.5">
+            <div className="flex items-center justify-center space-x-1 mt-1.5 font-light">
               <TrendingUp className="w-3 h-3 text-[#22C55E]" />
-              <span className="text-[11px] font-semibold text-[#22C55E]">+14.2%</span>
-              <span className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-slate-600'}`}>
+              <span className="text-[11px] font-light text-[#22C55E]">+14.2%</span>
+              <span className={`text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>
                 {isBn ? 'vs আগের মাস' : 'vs prev month'}
               </span>
             </div>
@@ -1170,27 +1170,27 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
           <div className={`grid grid-cols-3 gap-2 pt-2.5 border-t text-center ${isDark ? 'border-[#2C2C2E]' : 'border-slate-100'}`}>
             <div>
-              <p className={`text-sm font-bold font-hind ${isDark ? 'text-white' : 'text-slate-900'}`}>{deliveredCartons.length}</p>
-              <p className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>{isBn ? 'ডেলিভারি' : 'Delivered'}</p>
+              <p className={`text-sm font-light font-hind ${isDark ? 'text-white' : 'text-slate-900'}`}>{deliveredCartons.length}</p>
+              <p className={`text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'ডেলিভারি' : 'Delivered'}</p>
             </div>
             <div>
-              <p className={`text-sm font-bold font-hind ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              <p className={`text-sm font-light font-hind ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {isBn ? `৳${avgValuePerKg}/কেজি` : `৳${avgValuePerKg}/kg`}
               </p>
-              <p className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>{isBn ? 'গড় রেট' : 'Avg Rate'}</p>
+              <p className={`text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'গড় রেট' : 'Avg Rate'}</p>
             </div>
             <div>
-              <p className="text-sm font-bold text-[#00897B] font-hind">{totalGrossWeight}kg</p>
-              <p className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>{isBn ? 'মোট ওজন' : 'Gross Wt'}</p>
+              <p className="text-sm font-light text-[#00897B] font-hind">{totalGrossWeight}kg</p>
+              <p className={`text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'মোট ওজন' : 'Gross Wt'}</p>
             </div>
           </div>
         </div>
 
         {/* Column 2: Network & Warehouse Hub Health */}
-        <div className={`border rounded-2xl p-5 space-y-3.5 shadow-xs ${
+        <div className={`border rounded-none p-5 space-y-3.5 ${
           isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}>
-          <h3 className={`text-xs font-bold flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+          <h3 className={`text-xs font-light flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
             <Activity className="w-4 h-4 text-[#00897B]" />
             <span>{isBn ? 'ওয়্যারহাউজ হাব ও নেটওয়ার্ক' : 'Warehouse Hubs & Network'}</span>
           </h3>
@@ -1199,13 +1199,13 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
             {warehouses.map((w) => (
               <div key={w.id} className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <span className={`w-2 h-2 rounded-full ${w.status === 'active' ? 'bg-[#22C55E]' : 'bg-gray-400'}`} />
+                  <span className={`w-2 h-2 ${w.status === 'active' ? 'bg-[#22C55E]' : 'bg-gray-400'}`} />
                   <Building2 className="w-3.5 h-3.5 opacity-70" />
-                  <span className={isDark ? 'text-gray-200' : 'text-slate-800 font-medium'}>
+                  <span className={`font-light ${isDark ? 'text-gray-200' : 'text-slate-700'}`}>
                     {w.name} ({w.country})
                   </span>
                 </div>
-                <span className={`font-mono font-bold text-[11px] ${w.status === 'active' ? 'text-[#22C55E]' : 'text-gray-400'}`}>
+                <span className={`font-mono font-light text-[11px] ${w.status === 'active' ? 'text-[#22C55E]' : 'text-gray-400'}`}>
                   {w.status === 'active' ? 'Active' : 'Inactive'}
                 </span>
               </div>
@@ -1213,127 +1213,127 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
             <div className="flex items-center justify-between pt-2 border-t border-slate-200/50">
               <div className="flex items-center space-x-2">
-                <span className="w-2 h-2 rounded-full bg-[#22C55E] animate-pulse" />
+                <span className="w-2 h-2 bg-[#22C55E] animate-pulse" />
                 <Server className="w-3.5 h-3.5 opacity-70" />
-                <span className={isDark ? 'text-gray-200' : 'text-slate-800 font-medium'}>Hostinger VPS Database Sync</span>
+                <span className={`font-light ${isDark ? 'text-gray-200' : 'text-slate-700'}`}>Hostinger VPS Database Sync</span>
               </div>
-              <span className="font-mono text-[#22C55E] font-bold text-[11px]">{dbLatency}ms (Live)</span>
+              <span className="font-mono text-[#22C55E] font-light text-[11px]">{dbLatency}ms (Live)</span>
             </div>
           </div>
         </div>
 
         {/* Column 3: Cargo Stock & Inventory Status (With Database Speed Indicator) */}
-        <div className={`border rounded-2xl p-5 space-y-3.5 shadow-xs ${
+        <div className={`border rounded-none p-5 space-y-3.5 ${
           isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}>
           <div className="flex items-center justify-between">
-            <h3 className={`text-xs font-bold flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            <h3 className={`text-xs font-light flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               <Package className="w-4 h-4 text-[#EA580C]" />
               <span>{isBn ? 'কার্গো স্টক ইনভেন্টরি' : 'Cargo Stock Inventory'}</span>
             </h3>
 
             {/* Live Database Speed Indicator Metric on Top Right */}
-            <div className="flex items-center space-x-1.5 px-2 py-0.5 rounded-md bg-[#22C55E]/10 border border-[#22C55E]/20 text-[10px] font-mono text-[#22C55E]">
+            <div className="flex items-center space-x-1.5 px-2 py-0.5 rounded-none bg-[#22C55E]/10 border border-[#22C55E]/20 text-[10px] font-mono text-[#22C55E] font-light">
               <Clock className="w-3 h-3" />
               <span>{dbLatency}ms</span>
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-2">
-            <div className={`border rounded-xl p-2.5 text-center ${
+            <div className={`border rounded-none p-2.5 text-center ${
               isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
             }`}>
-              <p className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>{isBn ? 'মোট কার্টুন' : 'Total Cartons'}</p>
-              <p className="text-sm font-bold font-hind mt-0.5">{totalCartonCount}</p>
+              <p className={`text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'মোট কার্টুন' : 'Total Cartons'}</p>
+              <p className="text-sm font-light font-hind mt-0.5">{totalCartonCount}</p>
             </div>
-            <div className={`border rounded-xl p-2.5 text-center ${
+            <div className={`border rounded-none p-2.5 text-center ${
               isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
             }`}>
-              <p className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>{isBn ? 'মোট CBM' : 'Total CBM'}</p>
-              <p className="text-sm font-bold text-[#F59E0B] font-hind mt-0.5">{totalCbm.toFixed(2)}</p>
+              <p className={`text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'মোট CBM' : 'Total CBM'}</p>
+              <p className="text-sm font-light text-[#F59E0B] font-hind mt-0.5">{totalCbm.toFixed(2)}</p>
             </div>
-            <div className={`border rounded-xl p-2.5 text-center ${
+            <div className={`border rounded-none p-2.5 text-center ${
               isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
             }`}>
-              <p className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>{isBn ? 'মোট চার্জেবল ওয়েট' : 'Chargeable Wt'}</p>
-              <p className="text-xs font-bold text-[#22C55E] font-hind mt-0.5">{(totalGrossWeight * 1.05).toFixed(1)} kg</p>
+              <p className={`text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'মোট চার্জেবল ওয়েট' : 'Chargeable Wt'}</p>
+              <p className="text-xs font-light text-[#22C55E] font-hind mt-0.5">{(totalGrossWeight * 1.05).toFixed(1)} kg</p>
             </div>
-            <div className={`border rounded-xl p-2.5 text-center ${
+            <div className={`border rounded-none p-2.5 text-center ${
               isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
             }`}>
-              <p className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>{isBn ? 'হোল্ড কার্টুন' : 'Held Cartons'}</p>
-              <p className="text-sm font-bold text-[#22C55E] font-hind mt-0.5">0</p>
+              <p className={`text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'হোল্ড কার্টুন' : 'Held Cartons'}</p>
+              <p className="text-sm font-light text-[#22C55E] font-hind mt-0.5">0</p>
             </div>
           </div>
         </div>
       </div>
 
       {/* 5. Employee Overview (Matching Image 2) */}
-      <div className={`border rounded-2xl p-6 space-y-4 shadow-xs ${
+      <div className={`border rounded-none p-6 space-y-4 ${
         isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
       }`}>
-        <h3 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'কর্মী সারসংক্ষেপ' : 'Employee Overview'}</h3>
+        <h3 className={`text-sm font-light ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'কর্মী সারসংক্ষেপ' : 'Employee Overview'}</h3>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className={`border rounded-xl p-3 flex items-center space-x-3 ${
+          <div className={`border rounded-none p-3 flex items-center space-x-3 ${
             isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
           }`}>
             <Users className="w-4 h-4 text-[#EA580C]" />
             <div>
-              <p className={`text-base font-bold font-poppins ${isDark ? 'text-white' : 'text-slate-900'}`}>{users.length}</p>
-              <p className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>{isBn ? 'মোট কর্মী' : 'Total Staff'}</p>
+              <p className={`text-base font-light font-poppins ${isDark ? 'text-white' : 'text-slate-900'}`}>{users.length}</p>
+              <p className={`text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'মোট কর্মী' : 'Total Staff'}</p>
             </div>
           </div>
 
-          <div className={`border rounded-xl p-3 flex items-center space-x-3 ${
+          <div className={`border rounded-none p-3 flex items-center space-x-3 ${
             isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
           }`}>
             <UserCheck className="w-4 h-4 text-[#22C55E]" />
             <div>
-              <p className={`text-base font-bold font-poppins ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              <p className={`text-base font-light font-poppins ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {users.filter((u) => u.status === 'active').length}
               </p>
-              <p className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>{isBn ? 'সক্রিয়' : 'Active'}</p>
+              <p className={`text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'সক্রিয়' : 'Active'}</p>
             </div>
           </div>
 
-          <div className={`border rounded-xl p-3 flex items-center space-x-3 ${
+          <div className={`border rounded-none p-3 flex items-center space-x-3 ${
             isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
           }`}>
             <UserX className="w-4 h-4 text-[#EF4444]" />
             <div>
-              <p className={`text-base font-bold font-poppins ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              <p className={`text-base font-light font-poppins ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {users.filter((u) => u.status === 'inactive').length}
               </p>
-              <p className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>{isBn ? 'নিষ্ক্রিয়' : 'Inactive'}</p>
+              <p className={`text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'নিষ্ক্রিয়' : 'Inactive'}</p>
             </div>
           </div>
 
-          <div className={`border rounded-xl p-3 flex items-center space-x-3 ${
+          <div className={`border rounded-none p-3 flex items-center space-x-3 ${
             isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
           }`}>
             <Clock className="w-4 h-4 text-[#F59E0B]" />
             <div>
-              <p className={`text-base font-bold font-poppins ${isDark ? 'text-white' : 'text-slate-900'}`}>0</p>
-              <p className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>{isBn ? 'ছুটিতে' : 'On Leave'}</p>
+              <p className={`text-base font-light font-poppins ${isDark ? 'text-white' : 'text-slate-900'}`}>0</p>
+              <p className={`text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'ছুটিতে' : 'On Leave'}</p>
             </div>
           </div>
         </div>
 
         {/* Panel Distribution Bar */}
         <div className="space-y-1.5 pt-2">
-          <p className={`text-xs ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>{isBn ? 'প্যানেল অনুযায়ী' : 'By Panel'}</p>
-          <div className={`flex h-2.5 rounded-full overflow-hidden ${isDark ? 'bg-[#121214]' : 'bg-slate-100'}`}>
+          <p className={`text-xs font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'প্যানেল অনুযায়ী' : 'By Panel'}</p>
+          <div className={`flex h-2.5 rounded-none overflow-hidden ${isDark ? 'bg-[#121214]' : 'bg-slate-100'}`}>
             <div className="w-1/4 bg-[#1E88E5]" title="HR/Ops (1)" />
             <div className="w-3/4 bg-[#00897B]" title="Super Admin (1)" />
           </div>
-          <div className={`flex items-center space-x-4 text-[10px] ${isDark ? 'text-gray-400' : 'text-slate-600 font-medium'}`}>
+          <div className={`flex items-center space-x-4 text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>
             <span className="flex items-center space-x-1">
-              <span className="w-2 h-2 rounded-full bg-[#1E88E5]" />
+              <span className="w-2 h-2 bg-[#1E88E5]" />
               <span>{isBn ? 'অপারেশন (১)' : 'Operations (1)'}</span>
             </span>
             <span className="flex items-center space-x-1">
-              <span className="w-2 h-2 rounded-full bg-[#00897B]" />
+              <span className="w-2 h-2 bg-[#00897B]" />
               <span>{isBn ? 'সুপার অ্যাডমিন (১)' : 'Super Admin (1)'}</span>
             </span>
           </div>
@@ -1341,26 +1341,26 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
       </div>
 
       {/* 6. Pending Approvals Inbox (Matching Image 2 & 3) */}
-      <div className={`border rounded-2xl p-6 space-y-4 shadow-xs ${
+      <div className={`border rounded-none p-6 space-y-4 ${
         isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
       }`}>
-        <h3 className={`text-sm font-bold flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+        <h3 className={`text-sm font-light flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
           <Target className="w-4 h-4 text-[#7C3AED]" />
           <span>{isBn ? 'পেন্ডিং অনুমোদন' : 'Pending Approvals'}</span>
         </h3>
 
-        <div className={`py-8 text-center text-xs border rounded-xl ${
-          isDark ? 'bg-[#121214] border-[#2C2C2E] text-gray-400' : 'bg-slate-50 border-slate-200 text-slate-600 font-medium'
+        <div className={`py-8 text-center text-xs border rounded-none font-light ${
+          isDark ? 'bg-[#121214] border-[#2C2C2E] text-gray-400' : 'bg-slate-50 border-slate-200 text-slate-500'
         }`}>
           {isBn ? 'কোনো পেন্ডিং অনুমোদন নেই' : 'No pending approvals'}
         </div>
       </div>
 
       {/* 7. Quick Links Bar (Matching Image 3 EXACTLY) */}
-      <div className={`border rounded-2xl p-6 space-y-4 shadow-xs ${
+      <div className={`border rounded-none p-6 space-y-4 ${
         isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
       }`}>
-        <h3 className={`text-sm font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'দ্রুত লিংক' : 'Quick Links'}</h3>
+        <h3 className={`text-sm font-light ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'দ্রুত লিংক' : 'Quick Links'}</h3>
 
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
           {quickLinks.map((link) => {
@@ -1368,18 +1368,18 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
             return (
               <button
                 key={link.label}
-                className={`flex flex-col items-center gap-2.5 p-4 rounded-xl border transition-all group cursor-pointer ${
+                className={`flex flex-col items-center gap-2.5 p-4 rounded-none border transition-all group cursor-pointer ${
                   isDark ? 'bg-[#121214] hover:bg-[#222224] border-[#2C2C2E] text-gray-300' : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800'
                 }`}
               >
                 <div
-                  className="w-10 h-10 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
+                  className="w-10 h-10 rounded-none flex items-center justify-center transition-transform group-hover:scale-110"
                   style={{ backgroundColor: `${link.color}20` }}
                 >
                   <LinkIcon className="w-5 h-5" style={{ color: link.color }} />
                 </div>
-                <span className={`text-[11px] transition-colors text-center leading-tight ${
-                  isDark ? 'text-gray-400 group-hover:text-white' : 'text-slate-700 font-medium group-hover:text-slate-900'
+                <span className={`text-[11px] transition-colors text-center leading-tight font-light ${
+                  isDark ? 'text-gray-400 group-hover:text-white' : 'text-slate-700 group-hover:text-slate-900'
                 }`}>
                   {link.label}
                 </span>
