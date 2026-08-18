@@ -36,6 +36,16 @@ export interface GeneralSettingsData {
   fontFamily: string;
 }
 
+export interface BudgetSettingsData {
+  airFreightRatePerKg: number;
+  customsDutyRatePerKg: number;
+  warehouseRentTarget: number;
+  staffSalaryTarget: number;
+  packingTransportTarget: number;
+  utilitiesTarget: number;
+  otherAdminTarget: number;
+}
+
 const DEFAULT_GENERAL_SETTINGS: GeneralSettingsData = {
   companyLogoUrl: '',
   faviconUrl: '',
@@ -49,16 +59,6 @@ const DEFAULT_GENERAL_SETTINGS: GeneralSettingsData = {
   primaryColor: '#1D4ED8',
   fontFamily: 'Atkinson Hyperlegible',
 };
-
-export interface BudgetSettingsData {
-  airFreightRatePerKg: number;
-  customsDutyRatePerKg: number;
-  warehouseRentTarget: number;
-  staffSalaryTarget: number;
-  packingTransportTarget: number;
-  utilitiesTarget: number;
-  otherAdminTarget: number;
-}
 
 const DEFAULT_BUDGET_SETTINGS: BudgetSettingsData = {
   airFreightRatePerKg: 850,
@@ -120,7 +120,6 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
     localStorage.setItem('fsc_vps_general_settings', JSON.stringify(settings));
 
     // Save to Hostinger DB state as well
-    const dbData = getHostingerDbData();
     saveHostingerDbData('fsc_vps_settings', settings);
 
     // Apply primary color to CSS root variable
@@ -222,35 +221,35 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
   };
 
   return (
-    <div className="space-y-6 max-w-5xl mx-auto">
+    <div className="space-y-6 max-w-5xl mx-auto font-sans font-light">
       {/* Toast Alert */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 bg-[#00897B] text-white px-5 py-3 rounded-xl shadow-2xl flex items-center space-x-3 text-sm font-medium animate-bounce">
-          <CheckCircle2 className="w-5 h-5 text-white" />
+        <div className="fixed bottom-6 right-6 z-50 bg-[#00897B] text-white px-5 py-3 rounded-none shadow-2xl flex items-center space-x-3 text-xs font-light">
+          <CheckCircle2 className="w-4 h-4 text-white" />
           <span>{toastMessage}</span>
         </div>
       )}
 
       {/* Main Header Title */}
       <div>
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white flex items-center space-x-2.5">
-          <Settings className="w-6 h-6 text-[#1D4ED8]" />
-          <span>{isBn ? 'সেটিংস' : 'Settings'}</span>
+        <h1 className="text-xl md:text-2xl font-normal text-slate-900 dark:text-white flex items-center space-x-2.5">
+          <Settings className="w-5 h-5 text-[#1D4ED8]" />
+          <span>{isBn ? 'সেটিংস (Settings)' : 'System Settings'}</span>
         </h1>
-        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+        <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-light">
           {isBn
-            ? 'কোম্পানির ব্র্যান্ড সেটিংস ও পাঠাও কুরিয়ার API ইন্টিগ্রেশন কাস্টমাইজ করুন'
-            : 'Configure company branding, logo, and Pathao Courier API integration settings'}
+            ? 'কোম্পানির ব্র্যান্ড সেটিংস, ফ্রেইট চার্জ রেট ও পাঠাও কুরিয়ার API ইন্টিগ্রেশন কাস্টমাইজ করুন'
+            : 'Configure company branding, freight rates, and Pathao Courier API integration settings'}
         </p>
       </div>
 
-      {/* Sub-Nav Bar (General & API Settings Tabs) */}
+      {/* Sub-Nav Bar (General, API & Budget Settings Tabs - rounded-none & font-light) */}
       <div className="border-b border-slate-200 dark:border-slate-800">
-        <div className="flex space-x-2 pb-1">
+        <div className="flex flex-wrap gap-2 pb-1">
           <button
             type="button"
             onClick={() => setActiveTab('general')}
-            className={`px-5 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-none text-xs font-light flex items-center space-x-2 transition-all cursor-pointer ${
               activeTab === 'general'
                 ? 'bg-[#1D4ED8] text-white shadow-xs'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
@@ -263,7 +262,7 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('api')}
-            className={`px-5 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-none text-xs font-light flex items-center space-x-2 transition-all cursor-pointer ${
               activeTab === 'api'
                 ? 'bg-emerald-600 text-white shadow-xs'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
@@ -276,9 +275,9 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
           <button
             type="button"
             onClick={() => setActiveTab('budget_rates')}
-            className={`px-5 py-2 rounded-xl text-xs font-semibold flex items-center space-x-2 transition-all cursor-pointer ${
+            className={`px-4 py-2 rounded-none text-xs font-light flex items-center space-x-2 transition-all cursor-pointer ${
               activeTab === 'budget_rates'
-                ? 'bg-teal-600 text-white shadow-xs'
+                ? 'bg-[#00897B] text-white shadow-xs'
                 : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200'
             }`}
           >
@@ -290,276 +289,276 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
 
       {/* TAB 1: GENERAL BRANDING */}
       {activeTab === 'general' && (
-      <div
-        className={`border rounded-2xl p-6 shadow-2xs space-y-6 ${
-          isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
-        }`}
-      >
-        <h2 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider border-b pb-3 dark:border-slate-800">
-          {isBn ? 'UI কাস্টমাইজেশন' : 'UI Customization'}
-        </h2>
+        <div
+          className={`border rounded-none p-6 space-y-6 shadow-sm ${
+            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+          }`}
+        >
+          <h2 className="text-xs font-normal text-slate-800 dark:text-white uppercase tracking-wider border-b pb-3 dark:border-[#1E3247]">
+            {isBn ? 'UI কাস্টমাইজেশন' : 'UI Customization'}
+          </h2>
 
-        <form onSubmit={handleSave} className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Company Logo Upload (PNG/JPG) */}
-            <div className="space-y-2">
-              <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
-                {isBn ? 'কোম্পানি লোগো (PNG/JPG)' : 'Company Logo (PNG/JPG)'}
-              </label>
-              <div className="flex items-center space-x-4">
-                <div
-                  className={`w-16 h-16 rounded-xl border border-dashed flex items-center justify-center overflow-hidden shadow-2xs transition-colors ${
-                    isDark ? 'border-slate-700' : 'border-slate-300'
-                  }`}
-                  style={{ backgroundColor: settings.logoBgColor || (isDark ? '#0f172a' : '#ffffff') }}
-                >
-                  {settings.companyLogoUrl ? (
-                    <img src={settings.companyLogoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
-                  ) : (
-                    <Building className="w-7 h-7 text-slate-400" />
-                  )}
-                </div>
-                <label
-                  className={`py-2 px-4 rounded-xl border text-xs font-semibold cursor-pointer transition-all flex items-center space-x-2 ${
-                    isDark
-                      ? 'bg-slate-800/90 border-slate-700 text-white hover:bg-slate-700'
-                      : 'bg-[#1D4ED8] border-[#1D4ED8] text-white hover:bg-[#1e40af] shadow-xs'
-                  }`}
-                >
-                  <Upload className="w-4 h-4 text-white" />
-                  <span>{isBn ? 'আপলোড করুন' : 'Upload Logo'}</span>
-                  <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+          <form onSubmit={handleSave} className="space-y-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Company Logo Upload (PNG/JPG) */}
+              <div className="space-y-2">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
+                  {isBn ? 'কোম্পানি লোগো (PNG/JPG)' : 'Company Logo (PNG/JPG)'}
                 </label>
-              </div>
-            </div>
-
-            {/* Favicon Upload */}
-            <div className="space-y-2">
-              <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
-                {isBn ? 'Favicon' : 'Favicon'}
-              </label>
-              <div className="flex items-center space-x-4">
-                <div
-                  className={`w-16 h-16 rounded-xl border border-dashed flex items-center justify-center overflow-hidden shadow-2xs ${
-                    isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-300'
-                  }`}
-                >
-                  {settings.faviconUrl ? (
-                    <img src={settings.faviconUrl} alt="Favicon" className="w-full h-full object-contain p-1" />
-                  ) : (
-                    <Globe className="w-7 h-7 text-slate-400" />
-                  )}
+                <div className="flex items-center space-x-4">
+                  <div
+                    className={`w-16 h-16 rounded-none border border-dashed flex items-center justify-center overflow-hidden transition-colors ${
+                      isDark ? 'border-[#1E3247]' : 'border-slate-300'
+                    }`}
+                    style={{ backgroundColor: settings.logoBgColor || (isDark ? '#0b1622' : '#ffffff') }}
+                  >
+                    {settings.companyLogoUrl ? (
+                      <img src={settings.companyLogoUrl} alt="Logo" className="w-full h-full object-contain p-1" />
+                    ) : (
+                      <Building className="w-6 h-6 text-slate-400" />
+                    )}
+                  </div>
+                  <label
+                    className={`py-2 px-4 rounded-none border text-xs font-light cursor-pointer transition-all flex items-center space-x-2 ${
+                      isDark
+                        ? 'bg-[#0B1622] border-[#1E3247] text-white hover:bg-[#1E3247]'
+                        : 'bg-[#1D4ED8] border-[#1D4ED8] text-white hover:bg-[#1e40af] shadow-xs'
+                    }`}
+                  >
+                    <Upload className="w-4 h-4 text-white" />
+                    <span>{isBn ? 'আপলোড করুন' : 'Upload Logo'}</span>
+                    <input type="file" accept="image/*" onChange={handleLogoUpload} className="hidden" />
+                  </label>
                 </div>
-                <label
-                  className={`py-2 px-4 rounded-xl border text-xs font-semibold cursor-pointer transition-all flex items-center space-x-2 ${
-                    isDark
-                      ? 'bg-slate-800/90 border-slate-700 text-white hover:bg-slate-700'
-                      : 'bg-[#1D4ED8] border-[#1D4ED8] text-white hover:bg-[#1e40af] shadow-xs'
-                  }`}
-                >
-                  <Upload className="w-4 h-4 text-white" />
-                  <span>{isBn ? 'আপলোড করুন' : 'Upload Favicon'}</span>
-                  <input type="file" accept="image/*" onChange={handleFaviconUpload} className="hidden" />
-                </label>
               </div>
-            </div>
 
-            {/* Logo Background Color Field */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
-                {isBn ? 'লোগো এর ব্যাকগ্রাউন্ড কালার' : 'Logo Background Color'}
-              </label>
-              <div className="flex items-center space-x-3">
-                <input
-                  type="color"
-                  value={settings.logoBgColor || '#ffffff'}
-                  onChange={(e) => setSettings({ ...settings, logoBgColor: e.target.value })}
-                  className="w-10 h-10 rounded-xl cursor-pointer border border-slate-200 dark:border-slate-700 p-0.5"
-                />
+              {/* Favicon Upload */}
+              <div className="space-y-2">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
+                  {isBn ? 'Favicon' : 'Favicon'}
+                </label>
+                <div className="flex items-center space-x-4">
+                  <div
+                    className={`w-16 h-16 rounded-none border border-dashed flex items-center justify-center overflow-hidden ${
+                      isDark ? 'bg-[#0B1622] border-[#1E3247]' : 'bg-slate-50 border-slate-300'
+                    }`}
+                  >
+                    {settings.faviconUrl ? (
+                      <img src={settings.faviconUrl} alt="Favicon" className="w-full h-full object-contain p-1" />
+                    ) : (
+                      <Globe className="w-6 h-6 text-slate-400" />
+                    )}
+                  </div>
+                  <label
+                    className={`py-2 px-4 rounded-none border text-xs font-light cursor-pointer transition-all flex items-center space-x-2 ${
+                      isDark
+                        ? 'bg-[#0B1622] border-[#1E3247] text-white hover:bg-[#1E3247]'
+                        : 'bg-[#1D4ED8] border-[#1D4ED8] text-white hover:bg-[#1e40af] shadow-xs'
+                    }`}
+                  >
+                    <Upload className="w-4 h-4 text-white" />
+                    <span>{isBn ? 'আপলোড করুন' : 'Upload Favicon'}</span>
+                    <input type="file" accept="image/*" onChange={handleFaviconUpload} className="hidden" />
+                  </label>
+                </div>
+              </div>
+
+              {/* Logo Background Color Field */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
+                  {isBn ? 'লোগো এর ব্যাকগ্রাউন্ড কালার' : 'Logo Background Color'}
+                </label>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="color"
+                    value={settings.logoBgColor || '#ffffff'}
+                    onChange={(e) => setSettings({ ...settings, logoBgColor: e.target.value })}
+                    className="w-10 h-10 rounded-none cursor-pointer border border-slate-300 dark:border-[#1E3247] p-0.5"
+                  />
+                  <input
+                    type="text"
+                    value={settings.logoBgColor || '#ffffff'}
+                    onChange={(e) => setSettings({ ...settings, logoBgColor: e.target.value })}
+                    className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-mono font-light outline-none transition-all ${
+                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1D4ED8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#1D4ED8]'
+                    }`}
+                  />
+                </div>
+              </div>
+
+              {/* Primary Color Picker */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
+                  {isBn ? 'প্রাইমারি কালার' : 'Primary Color'}
+                </label>
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="color"
+                    value={settings.primaryColor}
+                    onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
+                    className="w-10 h-10 rounded-none cursor-pointer border border-slate-300 dark:border-[#1E3247] p-0.5"
+                  />
+                  <input
+                    type="text"
+                    value={settings.primaryColor}
+                    onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
+                    className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-mono font-light outline-none transition-all ${
+                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1D4ED8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#1D4ED8]'
+                    }`}
+                  />
+                </div>
+              </div>
+
+              {/* Company Name (English) */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
+                  {isBn ? 'কোম্পানির নাম (English)' : 'Company Name (English)'}
+                </label>
                 <input
                   type="text"
-                  value={settings.logoBgColor || '#ffffff'}
-                  onChange={(e) => setSettings({ ...settings, logoBgColor: e.target.value })}
-                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-medium outline-none transition-all ${
-                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-[#1D4ED8]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#1D4ED8]'
+                  value={settings.companyNameEn}
+                  onChange={(e) => setSettings({ ...settings, companyNameEn: e.target.value })}
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-light outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1D4ED8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#1D4ED8]'
                   }`}
                 />
               </div>
-            </div>
 
-            {/* Primary Color Picker */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
-                {isBn ? 'প্রাইমারি কালার' : 'Primary Color'}
-              </label>
-              <div className="flex items-center space-x-3">
-                <input
-                  type="color"
-                  value={settings.primaryColor}
-                  onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
-                  className="w-10 h-10 rounded-xl cursor-pointer border border-slate-200 dark:border-slate-700 p-0.5"
-                />
+              {/* Company Name (Bangla) */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
+                  {isBn ? 'কোম্পানির নাম (বাংলা)' : 'Company Name (Bangla)'}
+                </label>
                 <input
                   type="text"
-                  value={settings.primaryColor}
-                  onChange={(e) => setSettings({ ...settings, primaryColor: e.target.value })}
-                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-medium outline-none transition-all ${
-                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-[#1D4ED8]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#1D4ED8]'
+                  value={settings.companyNameBn}
+                  onChange={(e) => setSettings({ ...settings, companyNameBn: e.target.value })}
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-light outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1D4ED8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#1D4ED8]'
                   }`}
                 />
               </div>
+
+              {/* Subtitle / Tagline (English) */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
+                  {isBn ? 'সাবনাম / ট্যাগলাইন (English)' : 'Subtitle / Tagline (English)'}
+                </label>
+                <input
+                  type="text"
+                  value={settings.taglineEn}
+                  onChange={(e) => setSettings({ ...settings, taglineEn: e.target.value })}
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-light outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1D4ED8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#1D4ED8]'
+                  }`}
+                />
+              </div>
+
+              {/* Subtitle / Tagline (Bangla) */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
+                  {isBn ? 'সাবনাম / ট্যাগলাইন (বাংলা)' : 'Subtitle / Tagline (Bangla)'}
+                </label>
+                <input
+                  type="text"
+                  value={settings.taglineBn}
+                  onChange={(e) => setSettings({ ...settings, taglineBn: e.target.value })}
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-light outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1D4ED8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#1D4ED8]'
+                  }`}
+                />
+              </div>
+
+              {/* Footer Text (English) */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
+                  {isBn ? 'ফুটার টেক্সট (English)' : 'Footer Text (English)'}
+                </label>
+                <input
+                  type="text"
+                  value={settings.footerTextEn}
+                  onChange={(e) => setSettings({ ...settings, footerTextEn: e.target.value })}
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-light outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1D4ED8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#1D4ED8]'
+                  }`}
+                />
+              </div>
+
+              {/* Footer Text (Bangla) */}
+              <div className="space-y-1.5">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
+                  {isBn ? 'ফুটার টেক্সট (বাংলা)' : 'Footer Text (Bangla)'}
+                </label>
+                <input
+                  type="text"
+                  value={settings.footerTextBn}
+                  onChange={(e) => setSettings({ ...settings, footerTextBn: e.target.value })}
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-light outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1D4ED8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#1D4ED8]'
+                  }`}
+                />
+              </div>
+
+              {/* Font Family Selector */}
+              <div className="space-y-1.5 col-span-1 md:col-span-2">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
+                  {isBn ? 'ফন্ট স্টাইল' : 'Font Family'}
+                </label>
+                <select
+                  value={settings.fontFamily}
+                  onChange={(e) => setSettings({ ...settings, fontFamily: e.target.value })}
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-light outline-none transition-all cursor-pointer ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1D4ED8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#1D4ED8]'
+                  }`}
+                >
+                  <option value="Atkinson Hyperlegible">Atkinson Hyperlegible</option>
+                  <option value="Inter">Inter</option>
+                  <option value="Outfit">Outfit</option>
+                  <option value="Roboto">Roboto</option>
+                  <option value="Hind Siliguri">Hind Siliguri</option>
+                </select>
+              </div>
             </div>
 
-            {/* Company Name (English) */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
-                {isBn ? 'কোম্পানির নাম (English)' : 'Company Name (English)'}
-              </label>
-              <input
-                type="text"
-                value={settings.companyNameEn}
-                onChange={(e) => setSettings({ ...settings, companyNameEn: e.target.value })}
-                className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
-                  isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-[#1D4ED8]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#1D4ED8]'
-                }`}
-              />
-            </div>
-
-            {/* Company Name (Bangla) */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
-                {isBn ? 'কোম্পানির নাম (বাংলা)' : 'Company Name (Bangla)'}
-              </label>
-              <input
-                type="text"
-                value={settings.companyNameBn}
-                onChange={(e) => setSettings({ ...settings, companyNameBn: e.target.value })}
-                className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
-                  isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-[#1D4ED8]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#1D4ED8]'
-                }`}
-              />
-            </div>
-
-            {/* Subtitle / Tagline (English) */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
-                {isBn ? 'সাবনাম / ট্যাগলাইন (English)' : 'Subtitle / Tagline (English)'}
-              </label>
-              <input
-                type="text"
-                value={settings.taglineEn}
-                onChange={(e) => setSettings({ ...settings, taglineEn: e.target.value })}
-                className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
-                  isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-[#1D4ED8]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#1D4ED8]'
-                }`}
-              />
-            </div>
-
-            {/* Subtitle / Tagline (Bangla) */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
-                {isBn ? 'সাবনাম / ট্যাগলাইন (বাংলা)' : 'Subtitle / Tagline (Bangla)'}
-              </label>
-              <input
-                type="text"
-                value={settings.taglineBn}
-                onChange={(e) => setSettings({ ...settings, taglineBn: e.target.value })}
-                className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
-                  isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-[#1D4ED8]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#1D4ED8]'
-                }`}
-              />
-            </div>
-
-            {/* Footer Text (English) */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
-                {isBn ? 'ফুটার টেক্সট (English)' : 'Footer Text (English)'}
-              </label>
-              <input
-                type="text"
-                value={settings.footerTextEn}
-                onChange={(e) => setSettings({ ...settings, footerTextEn: e.target.value })}
-                className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
-                  isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-[#1D4ED8]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#1D4ED8]'
-                }`}
-              />
-            </div>
-
-            {/* Footer Text (Bangla) */}
-            <div className="space-y-1.5">
-              <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
-                {isBn ? 'ফুটার টেক্সট (বাংলা)' : 'Footer Text (Bangla)'}
-              </label>
-              <input
-                type="text"
-                value={settings.footerTextBn}
-                onChange={(e) => setSettings({ ...settings, footerTextBn: e.target.value })}
-                className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
-                  isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-[#1D4ED8]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#1D4ED8]'
-                }`}
-              />
-            </div>
-
-            {/* Font Family Selector */}
-            <div className="space-y-1.5 col-span-1 md:col-span-2">
-              <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
-                {isBn ? 'ফন্ট' : 'Font Family'}
-              </label>
-              <select
-                value={settings.fontFamily}
-                onChange={(e) => setSettings({ ...settings, fontFamily: e.target.value })}
-                className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all cursor-pointer ${
-                  isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-[#1D4ED8]' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-[#1D4ED8]'
-                }`}
+            {/* Save Button */}
+            <div className="pt-2">
+              <button
+                type="submit"
+                className="py-2.5 px-6 rounded-none bg-[#1D4ED8] hover:bg-[#1e40af] text-white font-light text-xs shadow-xs flex items-center space-x-2 transition-all cursor-pointer"
               >
-                <option value="Atkinson Hyperlegible">Atkinson Hyperlegible</option>
-                <option value="Inter">Inter</option>
-                <option value="Outfit">Outfit</option>
-                <option value="Roboto">Roboto</option>
-                <option value="Hind Siliguri">Hind Siliguri</option>
-              </select>
+                <Save className="w-4 h-4" />
+                <span>{isBn ? 'সেটিংস সংরক্ষণ করুন' : 'Save Settings'}</span>
+              </button>
             </div>
-          </div>
-
-          {/* Save Button */}
-          <div className="pt-2">
-            <button
-              type="submit"
-              className="py-2.5 px-6 rounded-xl bg-[#1D4ED8] hover:bg-[#1e40af] text-white font-bold text-xs shadow-md shadow-[#1D4ED8]/20 flex items-center space-x-2 transition-all cursor-pointer"
-            >
-              <Save className="w-4 h-4" />
-              <span>{isBn ? 'সংরক্ষণ' : 'Save Settings'}</span>
-            </button>
-          </div>
-        </form>
-      </div>
+          </form>
+        </div>
       )}
 
       {/* TAB 2: PATHAO API & COURIER INTEGRATION */}
       {activeTab === 'api' && (
         <div
-          className={`border rounded-2xl p-6 shadow-2xs space-y-6 ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          className={`border rounded-none p-6 space-y-6 shadow-sm ${
+            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}
         >
-          <div className="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+          <div className="flex items-center justify-between border-b pb-3 dark:border-[#1E3247]">
             <div>
-              <h2 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider flex items-center space-x-2">
+              <h2 className="text-xs font-normal text-slate-800 dark:text-white uppercase tracking-wider flex items-center space-x-2">
                 <Globe className="w-4 h-4 text-emerald-500" />
                 <span>{isBn ? 'পাঠাও কুরিয়ার API কানেকশন সেটিংস' : 'Pathao Courier API Settings'}</span>
               </h2>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-normal">
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 font-light">
                 {isBn
                   ? 'সঠিক Pathao Merchant Client ID & Password দিয়ে কানেক্ট করুন। সংযোগ না থাকলে ডেমো বুকিং তৈরি হবে না।'
-                  : 'Connect with verified Pathao Merchant Credentials. Demo submissions are strictly blocked when disconnected.'}
+                  : 'Connect with verified Pathao Merchant Credentials.'}
               </p>
             </div>
             {pathaoSettings.isConnected ? (
-              <span className="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/30">
+              <span className="px-3 py-1 text-xs font-light rounded-none bg-emerald-500/10 text-emerald-600 border border-emerald-500/30">
                 🟢 কানেক্টেড (Pathao API Connected)
               </span>
             ) : (
-              <span className="px-3 py-1 text-xs font-semibold rounded-full bg-red-500/10 text-red-600 border border-red-500/30">
+              <span className="px-3 py-1 text-xs font-light rounded-none bg-red-500/10 text-red-600 border border-red-500/30">
                 🔴 ডিসকানেক্টেড (Pathao API Disconnected)
               </span>
             )}
@@ -569,11 +568,11 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Environment Mode */}
               <div className="space-y-1.5 col-span-1 md:col-span-2">
-                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
                   {isBn ? 'API এনভায়রনমেন্ট মোড' : 'Environment Mode'}
                 </label>
                 <div className="flex items-center space-x-6 pt-1">
-                  <label className="flex items-center space-x-2 cursor-pointer text-xs font-semibold">
+                  <label className="flex items-center space-x-2 cursor-pointer text-xs font-light">
                     <input
                       type="radio"
                       name="envMode"
@@ -584,7 +583,7 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                     <span className="text-emerald-600 dark:text-emerald-400">🟢 Production (লাইভ পাঠাও মার্চেন্ট অ্যাকাউন্ট)</span>
                   </label>
 
-                  <label className="flex items-center space-x-2 cursor-pointer text-xs font-semibold">
+                  <label className="flex items-center space-x-2 cursor-pointer text-xs font-light">
                     <input
                       type="radio"
                       name="envMode"
@@ -599,7 +598,7 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
 
               {/* Pathao Client ID */}
               <div className="space-y-1.5">
-                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
                   {isBn ? 'পাঠাও Client ID' : 'Pathao Client ID'}
                 </label>
                 <input
@@ -607,15 +606,15 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                   value={pathaoSettings.clientId}
                   onChange={(e) => setPathaoSettings({ ...pathaoSettings, clientId: e.target.value })}
                   placeholder="e.g. client_abc123..."
-                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono outline-none transition-all ${
-                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500'
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-mono font-light outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-emerald-500' : 'bg-white border-slate-300 text-slate-900 focus:border-emerald-500'
                   }`}
                 />
               </div>
 
               {/* Pathao Client Secret */}
               <div className="space-y-1.5">
-                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
                   {isBn ? 'পাঠাও Client Secret' : 'Pathao Client Secret'}
                 </label>
                 <input
@@ -623,15 +622,15 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                   value={pathaoSettings.clientSecret}
                   onChange={(e) => setPathaoSettings({ ...pathaoSettings, clientSecret: e.target.value })}
                   placeholder="••••••••••••"
-                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono outline-none transition-all ${
-                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500'
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-mono font-light outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-emerald-500' : 'bg-white border-slate-300 text-slate-900 focus:border-emerald-500'
                   }`}
                 />
               </div>
 
               {/* Pathao Username / Email */}
               <div className="space-y-1.5">
-                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
                   {isBn ? 'মার্চেন্ট ইমেইল / ইউজারনেম' : 'Merchant Username / Email'}
                 </label>
                 <input
@@ -639,15 +638,15 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                   value={pathaoSettings.username}
                   onChange={(e) => setPathaoSettings({ ...pathaoSettings, username: e.target.value })}
                   placeholder="user@pathao.com"
-                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
-                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500'
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-light outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-emerald-500' : 'bg-white border-slate-300 text-slate-900 focus:border-emerald-500'
                   }`}
                 />
               </div>
 
               {/* Pathao Password */}
               <div className="space-y-1.5">
-                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
                   {isBn ? 'মার্চেন্ট পাসওয়ার্ড' : 'Merchant Password'}
                 </label>
                 <input
@@ -655,15 +654,15 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                   value={pathaoSettings.password}
                   onChange={(e) => setPathaoSettings({ ...pathaoSettings, password: e.target.value })}
                   placeholder="••••••••••••"
-                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono outline-none transition-all ${
-                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500'
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-mono font-light outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-emerald-500' : 'bg-white border-slate-300 text-slate-900 focus:border-emerald-500'
                   }`}
                 />
               </div>
 
               {/* Store ID */}
               <div className="space-y-1.5">
-                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
                   {isBn ? 'পাঠাও স্টোর আইডি (Store ID)' : 'Pathao Store ID'}
                 </label>
                 <input
@@ -671,8 +670,8 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                   value={pathaoSettings.storeId}
                   onChange={(e) => setPathaoSettings({ ...pathaoSettings, storeId: e.target.value })}
                   placeholder="STORE-DAC-01"
-                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono outline-none transition-all ${
-                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-emerald-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-emerald-500'
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-mono font-light outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-emerald-500' : 'bg-white border-slate-300 text-slate-900 focus:border-emerald-500'
                   }`}
                 />
               </div>
@@ -680,10 +679,10 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
               {/* Auto COD Toggle */}
               <div className="space-y-1.5 flex items-center justify-between pt-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-800 dark:text-white block">
+                  <label className="text-xs font-light text-slate-800 dark:text-white block">
                     {isBn ? 'অটোমেটিক COD অ্যামাউন্ট সিঙ্ক' : 'Auto Collectible COD Amount'}
                   </label>
-                  <p className="text-[10px] text-slate-400 font-normal">
+                  <p className="text-[10px] text-slate-400 font-light">
                     {isBn ? 'আনপেইড কার্টুনের টাকার অংক সরাসরি পাঠাও ক্যাশ অন ডেলিভারিতে যুক্ত করবে' : 'Automatically sync unpaid billable amount to Pathao COD'}
                   </p>
                 </div>
@@ -691,17 +690,17 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                   type="checkbox"
                   checked={pathaoSettings.autoSendCod}
                   onChange={(e) => setPathaoSettings({ ...pathaoSettings, autoSendCod: e.target.checked })}
-                  className="w-4 h-4 accent-emerald-600 rounded cursor-pointer"
+                  className="w-4 h-4 accent-emerald-600 rounded-none cursor-pointer"
                 />
               </div>
             </div>
 
             {/* Save & Test Pathao API Button */}
-            <div className="pt-3 border-t dark:border-slate-800 flex justify-end">
+            <div className="pt-3 border-t dark:border-[#1E3247] flex justify-end">
               <button
                 type="submit"
                 disabled={isTestingPathao}
-                className="py-2.5 px-6 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 flex items-center space-x-2 transition-all cursor-pointer disabled:opacity-50"
+                className="py-2.5 px-6 rounded-none bg-emerald-600 hover:bg-emerald-700 text-white font-light text-xs shadow-xs flex items-center space-x-2 transition-all cursor-pointer disabled:opacity-50"
               >
                 <Globe className="w-4 h-4 text-white" />
                 <span>
@@ -718,13 +717,13 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
       {/* TAB 3: BUDGET & FREIGHT RATES SETTINGS */}
       {activeTab === 'budget_rates' && (
         <div
-          className={`border rounded-2xl p-6 shadow-2xs space-y-6 ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          className={`border rounded-none p-6 space-y-6 shadow-sm ${
+            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}
         >
-          <div className="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+          <div className="flex items-center justify-between border-b pb-3 dark:border-[#1E3247]">
             <div>
-              <h2 className="text-sm font-bold text-slate-800 dark:text-white uppercase tracking-wider">
+              <h2 className="text-xs font-normal text-slate-800 dark:text-white uppercase tracking-wider">
                 {isBn ? 'সুপার এডমিন অফিশিয়াল বাজেট ও ফ্রেইট রেট সেটিংস' : 'Super Admin Official Budget & Freight Rate Settings'}
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-light">
@@ -739,7 +738,7 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Air Freight Rate per KG */}
               <div className="space-y-1.5">
-                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
                   {isBn ? '✈️ এয়ার ফ্রেইট চার্জ রেট (৳ / কেজি)' : 'Air Freight Cargo Rate (৳ / KG)'}
                 </label>
                 <input
@@ -748,8 +747,8 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                   min="0"
                   value={budgetSettings.airFreightRatePerKg}
                   onChange={(e) => setBudgetSettings({ ...budgetSettings, airFreightRatePerKg: Number(e.target.value) })}
-                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
-                    isDark ? 'bg-[#121214] border-slate-700 text-emerald-400 focus:border-teal-500' : 'bg-slate-50 border-slate-200 text-emerald-700 focus:border-teal-500'
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-emerald-400 focus:border-[#00897B]' : 'bg-white border-slate-300 text-emerald-700 focus:border-[#00897B]'
                   }`}
                 />
                 <p className="text-[11px] text-slate-400 font-light">
@@ -759,7 +758,7 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
 
               {/* Customs Duty & Tax Rate per KG */}
               <div className="space-y-1.5">
-                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
                   {isBn ? '🛃 কাস্টমস শুল্ক ও ট্যাক্স রেট (৳ / কেজি)' : 'Customs Duty & Clearance Rate (৳ / KG)'}
                 </label>
                 <input
@@ -768,8 +767,8 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                   min="0"
                   value={budgetSettings.customsDutyRatePerKg}
                   onChange={(e) => setBudgetSettings({ ...budgetSettings, customsDutyRatePerKg: Number(e.target.value) })}
-                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
-                    isDark ? 'bg-[#121214] border-slate-700 text-emerald-400 focus:border-teal-500' : 'bg-slate-50 border-slate-200 text-emerald-700 focus:border-teal-500'
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-emerald-400 focus:border-[#00897B]' : 'bg-white border-slate-300 text-emerald-700 focus:border-[#00897B]'
                   }`}
                 />
                 <p className="text-[11px] text-slate-400 font-light">
@@ -779,7 +778,7 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
 
               {/* Monthly Warehouse Rent Target */}
               <div className="space-y-1.5">
-                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
                   {isBn ? '🏬 মাসিক ওয়্যারহাউজ ভাড়া ও লিজ বাজেট (৳)' : 'Monthly Warehouse Rent Target (৳)'}
                 </label>
                 <input
@@ -788,15 +787,15 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                   min="0"
                   value={budgetSettings.warehouseRentTarget}
                   onChange={(e) => setBudgetSettings({ ...budgetSettings, warehouseRentTarget: Number(e.target.value) })}
-                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
-                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-teal-500'
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#00897B]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
                   }`}
                 />
               </div>
 
               {/* Monthly Staff Salary Target */}
               <div className="space-y-1.5">
-                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
                   {isBn ? '👷‍♂️ মাসিক স্টাফ বেতন ও ওভারটাইম বাজেট (৳)' : 'Monthly Staff Salary Target (৳)'}
                 </label>
                 <input
@@ -805,15 +804,15 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                   min="0"
                   value={budgetSettings.staffSalaryTarget}
                   onChange={(e) => setBudgetSettings({ ...budgetSettings, staffSalaryTarget: Number(e.target.value) })}
-                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
-                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-teal-500'
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#00897B]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
                   }`}
                 />
               </div>
 
               {/* Monthly Packing & Transport Target */}
               <div className="space-y-1.5">
-                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
                   {isBn ? '📦 মাসিক প্যাকিং ও পরিবহন বরাদ্দ (৳)' : 'Monthly Packing & Transport Budget (৳)'}
                 </label>
                 <input
@@ -822,15 +821,15 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                   min="0"
                   value={budgetSettings.packingTransportTarget}
                   onChange={(e) => setBudgetSettings({ ...budgetSettings, packingTransportTarget: Number(e.target.value) })}
-                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
-                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-teal-500'
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#00897B]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
                   }`}
                 />
               </div>
 
               {/* Monthly Utilities Target */}
               <div className="space-y-1.5">
-                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
                   {isBn ? '⚡ মাসিক ইউটিলিটি (বিদ্যুৎ/ইন্টারনেট) বরাদ্দ (৳)' : 'Monthly Utilities Budget (৳)'}
                 </label>
                 <input
@@ -839,15 +838,15 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                   min="0"
                   value={budgetSettings.utilitiesTarget}
                   onChange={(e) => setBudgetSettings({ ...budgetSettings, utilitiesTarget: Number(e.target.value) })}
-                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
-                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-teal-500'
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#00897B]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
                   }`}
                 />
               </div>
 
               {/* Monthly Other Admin Target */}
               <div className="space-y-1.5">
-                <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+                <label className="text-xs text-slate-600 dark:text-slate-400 font-light block">
                   {isBn ? '📄 মাসিক প্রশাসনিক ও অডিট বরাদ্দ (৳)' : 'Monthly Administrative Budget (৳)'}
                 </label>
                 <input
@@ -856,21 +855,21 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                   min="0"
                   value={budgetSettings.otherAdminTarget}
                   onChange={(e) => setBudgetSettings({ ...budgetSettings, otherAdminTarget: Number(e.target.value) })}
-                  className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
-                    isDark ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500' : 'bg-slate-50 border-slate-200 text-slate-900 focus:border-teal-500'
+                  className={`w-full border rounded-none py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#00897B]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
                   }`}
                 />
               </div>
             </div>
 
             {/* Save Budget Settings Button */}
-            <div className="pt-3 border-t dark:border-slate-800 flex justify-end">
+            <div className="pt-3 border-t dark:border-[#1E3247] flex justify-end">
               <button
                 type="submit"
-                className="py-2.5 px-6 rounded-xl bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs shadow-md shadow-teal-600/20 flex items-center space-x-2 transition-all cursor-pointer"
+                className="py-2.5 px-6 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-light text-xs shadow-xs flex items-center space-x-2 transition-all cursor-pointer"
               >
                 <Save className="w-4 h-4 text-white" />
-                <span>{isBn ? '💾 বাজেট ও ফ্রেইট রেট সেটিংস সংরক্ষণ করুন' : 'Save Budget & Rate Settings'}</span>
+                <span>{isBn ? 'বাজেট ও ফ্রেইট রেট সেটিংস সংরক্ষণ করুন' : 'Save Budget & Rate Settings'}</span>
               </button>
             </div>
           </form>
