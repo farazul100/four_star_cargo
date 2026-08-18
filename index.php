@@ -1,31 +1,27 @@
 <?php
 /**
  * M/S FOUR STAR CARGO — HOSTINGER PRODUCTION ENTRY POINT
- * Serves compiled dist/index.html with strict HTTP/2 protocol headers
+ * Serves compiled dist/index.html cleanly with 100% HTTP/2 protocol compatibility
  */
 
 $distIndex = __DIR__ . '/dist/index.html';
 if (file_exists($distIndex)) {
-    $content = file_get_contents($distIndex);
-    header('HTTP/1.1 200 OK');
+    http_response_code(200);
     header('Content-Type: text/html; charset=utf-8');
-    header('Content-Length: ' . strlen($content));
     header('Cache-Control: no-cache, no-store, must-revalidate');
-    echo $content;
+    readfile($distIndex);
     exit();
 }
 
 $rootIndex = __DIR__ . '/index.html';
 if (file_exists($rootIndex)) {
-    $content = file_get_contents($rootIndex);
-    header('HTTP/1.1 200 OK');
+    http_response_code(200);
     header('Content-Type: text/html; charset=utf-8');
-    header('Content-Length: ' . strlen($content));
     header('Cache-Control: no-cache, no-store, must-revalidate');
-    echo $content;
+    readfile($rootIndex);
     exit();
 }
 
-header("HTTP/1.1 503 Service Unavailable");
+http_response_code(503);
 echo "Application is updating...";
 ?>
