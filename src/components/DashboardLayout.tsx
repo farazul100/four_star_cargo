@@ -103,7 +103,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 theme={theme}
               />
             ) : activeTab === 'system_chat' ? (
-              <SystemChatPage currentUser={user} language={lang} />
+              <SystemChatPage currentUser={user} language={lang} theme={theme} />
             ) : (
               children
             )}
