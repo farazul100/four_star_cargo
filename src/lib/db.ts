@@ -448,6 +448,8 @@ const pushFullDbToServer = () => {
         [DB_KEYS.CONVERSATIONS]: JSON.parse(localStorage.getItem(DB_KEYS.CONVERSATIONS) || '[]'),
         [DB_KEYS.MESSAGES]: JSON.parse(localStorage.getItem(DB_KEYS.MESSAGES) || '[]'),
         [DB_KEYS.CALLS]: JSON.parse(localStorage.getItem(DB_KEYS.CALLS) || '[]'),
+        notifications: JSON.parse(localStorage.getItem('fsc_vps_notifications') || '[]'),
+        fsc_vps_notifications: JSON.parse(localStorage.getItem('fsc_vps_notifications') || '[]'),
       };
       const payloadStr = JSON.stringify(fullDb);
 
@@ -590,17 +592,22 @@ export const fetchServerDbAndSync = async () => {
                 localStorage.setItem(key, mergedStr);
                 hasChanges = true;
               }
-            } else if (key === DB_KEYS.MESSAGES || key === DB_KEYS.CONVERSATIONS) {
+            } else if (key === DB_KEYS.MESSAGES || key === DB_KEYS.CONVERSATIONS || key === 'notifications' || key === 'fsc_vps_notifications') {
               const localItems: any[] = localRaw ? JSON.parse(localRaw) : [];
               const serverItems: any[] = serverData;
               const itemMap = new Map<string, any>();
 
-              serverItems.forEach((item) => { if (item && item.id) itemMap.set(item.id, item); });
-              localItems.forEach((item) => { if (item && item.id && !itemMap.has(item.id)) itemMap.set(item.id, item); });
+              serverItems.forEach((item) => { if (item && item.id && !item.id.startsWith('notif-base-')) itemMap.set(item.id, item); });
+              localItems.forEach((item) => { if (item && item.id && !item.id.startsWith('notif-base-') && !itemMap.has(item.id)) itemMap.set(item.id, item); });
 
-              const mergedStr = JSON.stringify(Array.from(itemMap.values()));
+              const mergedList = Array.from(itemMap.values()).sort(
+                (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+              );
+
+              const mergedStr = JSON.stringify(mergedList);
               if (localRaw !== mergedStr) {
                 localStorage.setItem(key, mergedStr);
+                localStorage.setItem('fsc_vps_notifications', mergedStr);
                 hasChanges = true;
               }
             } else {
