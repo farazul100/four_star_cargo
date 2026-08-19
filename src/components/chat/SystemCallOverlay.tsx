@@ -186,6 +186,35 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
         if (myCall.status === 'active') {
           stopRingtone();
 
+          // Callee process SDP Offer and send SDP Answer if not sent yet
+          if (!isCaller && myCall.sdp_offer && !myCall.sdp_answer) {
+            try {
+              if (!localStreamRef.current) {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                localStreamRef.current = stream;
+              }
+              const pc = initPeerConnection(myCall.id, false);
+              localStreamRef.current.getTracks().forEach((track) => pc.addTrack(track, localStreamRef.current!));
+
+              if (!pc.remoteDescription) {
+                const offerDesc = new RTCSessionDescription(JSON.parse(myCall.sdp_offer));
+                await pc.setRemoteDescription(offerDesc);
+
+                const answer = await pc.createAnswer();
+                await pc.setLocalDescription(answer);
+
+                const currentDb = getHostingerDbData();
+                const latestCalls: CallSession[] = currentDb.calls || [];
+                const updated = latestCalls.map((c) =>
+                  c.id === myCall.id ? { ...c, sdp_answer: JSON.stringify(answer) } : c
+                );
+                saveHostingerDbData('fsc_vps_calls', updated);
+              }
+            } catch (err) {
+              console.warn('Callee SDP answer error:', err);
+            }
+          }
+
           // Caller process SDP Answer from Callee
           if (isCaller && myCall.sdp_answer && peerConnectionRef.current) {
             const pc = peerConnectionRef.current;
@@ -248,30 +277,21 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
     if (!activeCall) return;
     stopRingtone();
 
+    const db = getHostingerDbData();
+    const updatedCalls = (db.calls || []).map((c: CallSession) =>
+      c.id === activeCall.id ? { ...c, status: 'active' as const } : c
+    );
+    saveHostingerDbData('fsc_vps_calls', updatedCalls);
+    setActiveCall({ ...activeCall, status: 'active' });
+    logSystemAuditAction(currentUser, 'CALL_ACCEPTED', 'CALL', activeCall.id, `Accepted voice call from ${activeCall.caller_name}`);
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
-      localStreamRef.current = stream;
-
-      const pc = initPeerConnection(activeCall.id, false);
-      stream.getTracks().forEach((track) => pc.addTrack(track, stream));
-
-      if (activeCall.sdp_offer) {
-        const offerDesc = new RTCSessionDescription(JSON.parse(activeCall.sdp_offer));
-        await pc.setRemoteDescription(offerDesc);
-
-        const answer = await pc.createAnswer();
-        await pc.setLocalDescription(answer);
-
-        const db = getHostingerDbData();
-        const updatedCalls = (db.calls || []).map((c: CallSession) =>
-          c.id === activeCall.id
-            ? { ...c, status: 'active' as const, sdp_answer: JSON.stringify(answer) }
-            : c
-        );
-        saveHostingerDbData('fsc_vps_calls', updatedCalls);
-        setActiveCall({ ...activeCall, status: 'active' });
-        logSystemAuditAction(currentUser, 'CALL_ACCEPTED', 'CALL', activeCall.id, `Accepted voice call from ${activeCall.caller_name}`);
+      if (!localStreamRef.current) {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        localStreamRef.current = stream;
       }
+      const pc = initPeerConnection(activeCall.id, false);
+      localStreamRef.current.getTracks().forEach((track) => pc.addTrack(track, localStreamRef.current!));
     } catch (err) {
       console.warn('Accept call media error:', err);
     }
