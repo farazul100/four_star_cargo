@@ -204,6 +204,14 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
       `Super Admin changed ${targetUser?.name || userId} status to ${nextStatus === 'suspended' ? 'সাময়িক অব্যাহতি (Suspended)' : 'সক্রিয় (Active)'}`
     );
 
+    publishSystemNotification({
+      title: nextStatus === 'suspended' ? (isBn ? 'অ্যাকাউন্ট স্থগিত করা হয়েছে' : 'Account Suspended') : (isBn ? 'অ্যাকাউন্ট পুনরায় সক্রিয়' : 'Account Re-Activated'),
+      message: isBn ? `আপনার ${targetUser?.name || 'একাউন্ট'} এর বর্তমান স্ট্যাটাস: ${nextStatus === 'suspended' ? 'স্থগিত' : 'সক্রিয়'}` : `Your account status was updated to ${nextStatus.toUpperCase()}`,
+      type: nextStatus === 'suspended' ? 'alert' : 'success',
+      target_user_id: userId,
+      target_role: targetUser?.role,
+    });
+
     addToast(
       nextStatus === 'suspended' ? 'error' : 'success',
       nextStatus === 'suspended'
