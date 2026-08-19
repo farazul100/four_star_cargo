@@ -46,6 +46,41 @@ export const getCleanGeminiApiKey = (): string => {
 };
 
 /**
+ * Async API Key resolver with instant Hostinger server fallback for non-admin users & guests
+ */
+export const getCleanGeminiApiKeyAsync = async (): Promise<string> => {
+  let key = getCleanGeminiApiKey();
+  if (key) return key;
+
+  try {
+    const endpoints = ['https://four.kee2mart.com/api/db.php', 'https://four.kee2mart.com/api/db'];
+    for (const url of endpoints) {
+      try {
+        const res = await fetch(url, { headers: { Accept: 'application/json' } });
+        if (res.ok) {
+          const dbData = await res.json();
+          const apiK = 
+            dbData?.settings?.gemini_api_key || 
+            dbData?.fsc_vps_settings?.gemini_api_key || 
+            dbData?.gemini_api_key || 
+            '';
+          if (apiK) {
+            const clean = apiK.replace(/^["']|["']$/g, '').trim();
+            if (clean) {
+              localStorage.setItem('fsc_gemini_api_key', clean);
+              if (typeof window !== 'undefined') (window as any).__FSC_GEMINI_KEY__ = clean;
+              return clean;
+            }
+          }
+        }
+      } catch {}
+    }
+  } catch {}
+
+  return '';
+};
+
+/**
  * Dynamically queries Google AI Studio ModelService.ListModels to get available models for this specific key
  */
 export const getAvailableGeminiModels = async (apiKey: string): Promise<{ models: string[]; error?: string }> => {
@@ -274,7 +309,7 @@ export const askFourStarCargoAI = async (
   history: ChatMessageItem[] = [],
   currentUser?: User | null
 ): Promise<{ text: string; success: boolean; modelUsed?: string }> => {
-  const apiKey = getCleanGeminiApiKey();
+  const apiKey = await getCleanGeminiApiKeyAsync();
 
   if (!apiKey) {
     return {
