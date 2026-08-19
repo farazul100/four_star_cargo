@@ -190,6 +190,129 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                   <span className="text-xs text-slate-400 font-mono">Query: {searchQuery}</span>
                 </div>
 
+                {/* Shipment Location Breakdown Summary Box */}
+                {(() => {
+                  const bookedCount = matchedCartons.filter((c) => c.status === 'booked' || c.status === 'proposed').length;
+                  const transitCount = matchedCartons.filter((c) => c.status === 'in_transit').length;
+                  const receivedCount = matchedCartons.filter((c) => c.status === 'received').length;
+                  const deliveredCount = matchedCartons.filter((c) => c.status === 'delivered').length;
+
+                  return (
+                    <div className={`w-full rounded-3xl p-5 sm:p-6 border-2 shadow-xl backdrop-blur-md transition-all ${
+                      isDark
+                        ? 'bg-slate-900/90 border-[#00897B]/40 text-white'
+                        : 'bg-white border-[#00897B]/30 text-slate-900 shadow-teal-500/5'
+                    }`}>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-700/30 pb-3 mb-4 gap-2">
+                        <div className="flex items-center space-x-2.5">
+                          <div className="p-2 rounded-xl bg-[#00897B]/15 text-[#00897B]">
+                            <Sparkles className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-black uppercase font-poppins tracking-wider flex items-center space-x-2">
+                              <span>{isBn ? 'শিপমেন্টের বর্তমান অবস্থান ওভারভিউ' : 'Shipment Location Overview'}</span>
+                            </h4>
+                            <p className="text-[11px] text-slate-400">
+                              {isBn ? `একনজরে কার্টুনগুলোর বর্তমান অবস্থান এর বিবরণ` : `Location breakdown summary of all searched cartons`}
+                            </p>
+                          </div>
+                        </div>
+
+                        <div className="px-3.5 py-1 rounded-full bg-[#00897B]/10 text-[#00897B] border border-[#00897B]/30 text-xs font-mono font-bold self-start sm:self-auto">
+                          {isBn ? `মোট সার্চড কার্টুন: ${matchedCartons.length} টি` : `Total Cartons: ${matchedCartons.length}`}
+                        </div>
+                      </div>
+
+                      {/* 4 Location Breakdown Badges */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+                        {/* 1. Guangzhou Hub (Booked) */}
+                        <div className={`p-4 rounded-2xl border transition-all flex items-center space-x-3 ${
+                          bookedCount > 0
+                            ? isDark ? 'bg-amber-500/10 border-amber-500/40 text-amber-300' : 'bg-amber-50 border-amber-300 text-amber-900'
+                            : isDark ? 'bg-slate-800/40 border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
+                        }`}>
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${
+                            bookedCount > 0 ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-700/40 text-slate-400'
+                          }`}>
+                            <Box className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <div className="text-[11px] font-bold uppercase tracking-wider opacity-80">
+                              {isBn ? 'গুয়াংজু হাব (চীন)' : 'Guangzhou Hub'}
+                            </div>
+                            <div className="text-lg font-black font-mono">
+                              {bookedCount} <span className="text-xs font-normal">{isBn ? 'টি' : 'CTNs'}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 2. In-Transit (Flying) */}
+                        <div className={`p-4 rounded-2xl border transition-all flex items-center space-x-3 ${
+                          transitCount > 0
+                            ? isDark ? 'bg-blue-500/10 border-blue-500/40 text-blue-300' : 'bg-blue-50 border-blue-300 text-blue-900'
+                            : isDark ? 'bg-slate-800/40 border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
+                        }`}>
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${
+                            transitCount > 0 ? 'bg-blue-500 text-white shadow-md animate-pulse' : 'bg-slate-700/40 text-slate-400'
+                          }`}>
+                            <Plane className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <div className="text-[11px] font-bold uppercase tracking-wider opacity-80">
+                              {isBn ? 'ফ্লাইটে (ইন-ট্রানজিট)' : 'In-Transit (Flying)'}
+                            </div>
+                            <div className="text-lg font-black font-mono">
+                              {transitCount} <span className="text-xs font-normal">{isBn ? 'টি' : 'CTNs'}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 3. Dhaka Hub (Received) */}
+                        <div className={`p-4 rounded-2xl border transition-all flex items-center space-x-3 ${
+                          receivedCount > 0
+                            ? isDark ? 'bg-teal-500/10 border-teal-500/40 text-teal-300' : 'bg-teal-50 border-teal-300 text-teal-900'
+                            : isDark ? 'bg-slate-800/40 border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
+                        }`}>
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${
+                            receivedCount > 0 ? 'bg-[#00897B] text-white shadow-md' : 'bg-slate-700/40 text-slate-400'
+                          }`}>
+                            <MapPin className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <div className="text-[11px] font-bold uppercase tracking-wider opacity-80">
+                              {isBn ? 'ঢাকা হাব (রিসিভড)' : 'Dhaka Hub'}
+                            </div>
+                            <div className="text-lg font-black font-mono">
+                              {receivedCount} <span className="text-xs font-normal">{isBn ? 'টি' : 'CTNs'}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 4. Delivered */}
+                        <div className={`p-4 rounded-2xl border transition-all flex items-center space-x-3 ${
+                          deliveredCount > 0
+                            ? isDark ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300' : 'bg-emerald-50 border-emerald-300 text-emerald-900'
+                            : isDark ? 'bg-slate-800/40 border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
+                        }`}>
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${
+                            deliveredCount > 0 ? 'bg-emerald-500 text-white shadow-md' : 'bg-slate-700/40 text-slate-400'
+                          }`}>
+                            <CheckCircle2 className="w-5 h-5" />
+                          </div>
+                          <div>
+                            <div className="text-[11px] font-bold uppercase tracking-wider opacity-80">
+                              {isBn ? 'ডেলিভারি সম্পন্ন' : 'Delivered'}
+                            </div>
+                            <div className="text-lg font-black font-mono">
+                              {deliveredCount} <span className="text-xs font-normal">{isBn ? 'টি' : 'CTNs'}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })()}
+
                 <div className="grid grid-cols-1 gap-6">
                   {matchedCartons.map((carton) => {
                     const stage = getStatusStage(carton.status);
