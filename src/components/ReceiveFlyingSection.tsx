@@ -110,7 +110,10 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
   };
 
   // Filtered proposals list
-  const isBdWarehouseStaff = currentUser?.role === 'warehouse_incharge';
+  const userWhId = currentUser?.warehouse_id || 'wh-bd';
+  const isSuperAdmin = currentUser?.role === 'super_admin';
+  const isWarehouseStaff = currentUser?.role === 'warehouse_incharge';
+  const isBdWarehouseStaff = isWarehouseStaff;
 
   const filteredProposals = proposals.filter((p) => {
     const search = searchTerm.toLowerCase();
@@ -120,9 +123,16 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       (p.awb_number || '').toLowerCase().includes(search) ||
       (p.warehouse_name || '').toLowerCase().includes(search);
 
+    // STRICT DESTINATION SCOPING: A warehouse ONLY receives incoming flights destined for ITSELF!
+    if (!isSuperAdmin) {
+      const isDestinationMatch =
+        p.destination_warehouse_id === userWhId ||
+        (p as any).destination_warehouse_name?.toLowerCase().includes((currentUser.warehouse_name || '').toLowerCase());
+      if (!isDestinationMatch) return false;
+    }
+
     // CRITICAL REQUIREMENT: If user is Warehouse Incharge, ONLY show flights where Operations has clicked "arrived_bd" or "received"!
-    // If Operations has NOT clicked BD Airport Arrived yet (status is 'in_transit' or 'approved' or 'pending'), HIDE IT!
-    if (isBdWarehouseStaff && (p.status === 'in_transit' || p.status === 'approved' || p.status === 'pending')) {
+    if (isWarehouseStaff && (p.status === 'in_transit' || p.status === 'approved' || p.status === 'pending')) {
       return false;
     }
 
@@ -130,7 +140,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       statusFilter === 'all'
         ? true
         : statusFilter === 'received'
-        ? (p.status === 'received' || p.status === ( 'arrived_bd' as any))
+        ? (p.status === 'received' || p.status === ('arrived_bd' as any))
         : p.status === 'in_transit';
 
     return matchesSearch && matchesStatus;

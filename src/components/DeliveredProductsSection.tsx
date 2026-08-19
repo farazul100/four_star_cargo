@@ -262,23 +262,29 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
   const userWhId = currentUser?.warehouse_id || 'wh-china';
   const dbWarehouses = dbData.warehouses || [];
   const userWh = dbWarehouses.find((w: any) => w.id === userWhId);
-  const isBdHub = currentUser?.role === 'super_admin' || userWhId === 'wh-bd' || userWh?.is_final_destination;
+  const isSuperAdmin = currentUser?.role === 'super_admin';
+  const isBdHub = userWhId === 'wh-bd' || userWh?.is_final_destination;
 
-  // Filter cartons strictly by assigned warehouse
+  // Filter cartons strictly by assigned warehouse (Symmetrical Destination & Physical Warehouse Rule)
   const deliveredCartons = allCartons.filter((c) => {
-    if (isBdHub) {
-      // BD Hub / Admin sees cartons received or delivered at BD
-      return c.current_warehouse_id === 'wh-bd' || c.destination_warehouse_id === 'wh-bd' || c.status === 'received' || c.status === 'delivered';
-    } else {
-      // Origin Hub (e.g. Guangzhou / Yiwu): ONLY show cartons originating from or booked at this specific origin warehouse!
-      const isOriginCarton =
-        c.current_warehouse_id === userWhId ||
-        (c as any).origin_warehouse_id === userWhId ||
-        c.booked_by === currentUser.id ||
-        (userWh && c.current_warehouse_name === userWh.name);
-
-      return isOriginCarton && (c.status === 'received' || c.status === 'delivered');
+    if (isSuperAdmin) {
+      // Super Admin sees all received/delivered cartons globally
+      return c.status === 'received' || c.status === 'delivered';
     }
+
+    // STRICT DESTINATION & PHYSICAL LOCATION MATCH:
+    // A carton ONLY belongs to a warehouse's Delivered Products page if:
+    // 1) THIS warehouse is the DESTINATION hub of the carton (e.g. c.destination_warehouse_id === userWhId)
+    // 2) OR the carton is physically currently located at this warehouse (c.current_warehouse_id === userWhId)
+    // AND its status is 'received' or 'delivered'!
+    const isDestinationOrLocalWh =
+      c.destination_warehouse_id === userWhId ||
+      c.current_warehouse_id === userWhId ||
+      (userWh && c.destination_warehouse_name === userWh.name);
+
+    const isDeliveredOrReceivedStatus = c.status === 'received' || c.status === 'delivered';
+
+    return isDestinationOrLocalWh && isDeliveredOrReceivedStatus;
   });
 
   // Apply search & origin filter

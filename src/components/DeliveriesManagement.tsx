@@ -50,14 +50,18 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
   // Customers State (with inline quick-add support)
   const [customersList, setCustomersList] = useState<Customer[]>(INITIAL_CUSTOMERS);
 
-  // Cartons ready for delivery at BD warehouse (Scoped by assigned warehouse)
+  // Cartons ready for delivery at warehouse (Scoped strictly by destination warehouse ID)
   const userWhId = currentUser?.warehouse_id || 'wh-bd';
-  const isBdHub = currentUser?.role === 'super_admin' || userWhId === 'wh-bd';
+  const isSuperAdmin = currentUser?.role === 'super_admin';
 
   const readyCartons = cartons.filter((c) => {
-    const isReady = c.status === 'received' || (c.current_warehouse_id === 'wh-bd' && c.status !== 'delivered' && c.status !== 'in_transit' && c.status !== 'booked');
-    if (isBdHub) return isReady;
-    return isReady && (c.current_warehouse_id === userWhId || (c as any).origin_warehouse_id === userWhId || c.booked_by === currentUser.id);
+    const isReadyStatus = c.status === 'received' || (c.current_warehouse_id === userWhId && c.status !== 'delivered' && c.status !== 'in_transit' && c.status !== 'booked');
+
+    if (isSuperAdmin) return isReadyStatus;
+
+    // Strict destination / current location match:
+    const isMyDestinationOrWh = c.destination_warehouse_id === userWhId || c.current_warehouse_id === userWhId;
+    return isReadyStatus && isMyDestinationOrWh;
   });
 
   // Payment Type Filter Pill ('all' | 'with_pay' | 'without_pay')
