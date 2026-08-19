@@ -82,6 +82,36 @@ export const Header: React.FC<HeaderProps> = ({
 
   const unreadCount = roleNotifs.filter((n) => !n.isRead).length;
 
+  const prevUnreadCountRef = useRef<number>(-1);
+
+  // Play chime sound when new unread notification arrives
+  const playNotifSound = () => {
+    try {
+      const Ctx = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = new Ctx();
+      const now = ctx.currentTime;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(587.33, now); // D5
+      osc.frequency.setValueAtTime(880, now + 0.08); // A5
+      gain.gain.setValueAtTime(0.001, now);
+      gain.gain.exponentialRampToValueAtTime(0.2, now + 0.05);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now);
+      osc.stop(now + 0.4);
+    } catch (e) {}
+  };
+
+  useEffect(() => {
+    if (prevUnreadCountRef.current !== -1 && unreadCount > prevUnreadCountRef.current) {
+      playNotifSound();
+    }
+    prevUnreadCountRef.current = unreadCount;
+  }, [unreadCount]);
+
   // Outside click listener for notification popup
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
