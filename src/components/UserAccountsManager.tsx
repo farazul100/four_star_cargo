@@ -28,8 +28,9 @@ import {
   Eye,
 } from 'lucide-react';
 import { User, UserRole, Warehouse, Language, Theme, AuditLog, Carton } from '../types';
-import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, publishSystemNotification } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, publishSystemNotification, logSystemAuditAction } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
+import { useAuth } from '../hooks/useAuth';
 import { ToastContainer, ToastMessage } from './Toast';
 
 interface UserAccountsManagerProps {
@@ -48,6 +49,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
   language,
   theme: themeProp,
 }) => {
+  const { user: authUser } = useAuth();
   const { theme: contextTheme } = useTheme();
   const activeTheme = contextTheme || themeProp || 'light';
   const isDark = activeTheme === 'dark';

@@ -85,6 +85,29 @@ export const initHostingerDb = () => {
   }
   if (!localStorage.getItem(DB_KEYS.AUDIT)) {
     localStorage.setItem(DB_KEYS.AUDIT, JSON.stringify([]));
+  } else {
+    // Sanitize any legacy hardcoded demo names in audit logs
+    try {
+      const rawAudit = localStorage.getItem(DB_KEYS.AUDIT);
+      if (rawAudit) {
+        const logs: AuditLog[] = JSON.parse(rawAudit);
+        let changed = false;
+        const active = getActiveSystemUser();
+        const cleaned = logs.map((log) => {
+          if (log.user_name && (log.user_name.includes('তানভীর') || log.user_name.includes('Tanvir'))) {
+            changed = true;
+            return {
+              ...log,
+              user_name: active.name || 'সুপার এডমিন (Super Admin)',
+            };
+          }
+          return log;
+        });
+        if (changed) {
+          localStorage.setItem(DB_KEYS.AUDIT, JSON.stringify(cleaned));
+        }
+      }
+    } catch (e) {}
   }
   if (!localStorage.getItem(DB_KEYS.EXPENSES)) {
     localStorage.setItem(DB_KEYS.EXPENSES, JSON.stringify([]));
@@ -600,8 +623,29 @@ export const subscribeToDbUpdates = (callback: () => void) => {
   };
 };
 
+export const getActiveSystemUser = (): { id: string; name: string; role: any } => {
+  try {
+    const saved = localStorage.getItem('fsc_active_user') || sessionStorage.getItem('fsc_active_user');
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (parsed && parsed.name) {
+        return {
+          id: parsed.id || 'usr-admin-master',
+          name: parsed.name,
+          role: parsed.role || 'super_admin',
+        };
+      }
+    }
+  } catch (e) {}
+  return {
+    id: 'usr-admin-master',
+    name: 'সুপার এডমিন (Super Admin)',
+    role: 'super_admin',
+  };
+};
+
 export const logSystemAuditAction = (
-  user: { id?: string; name?: string; role?: any },
+  user: { id?: string; name?: string; role?: any } | null | undefined,
   action: string,
   entity_type: string,
   entity_id: string,
@@ -609,11 +653,13 @@ export const logSystemAuditAction = (
 ) => {
   initHostingerDb();
   const data = getHostingerDbData();
+  const activeUser = (user && user.name) ? user : getActiveSystemUser();
+
   const newAuditLog: AuditLog = {
     id: `log-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-    user_id: user?.id || 'usr-1',
-    user_name: user?.name || 'তানভীর আহমেদ (Super Admin)',
-    user_role: (user?.role as any) || 'super_admin',
+    user_id: activeUser.id || 'usr-admin-master',
+    user_name: activeUser.name || 'সুপার এডমিন (Super Admin)',
+    user_role: (activeUser.role as any) || 'super_admin',
     action,
     entity_type,
     entity_id,
