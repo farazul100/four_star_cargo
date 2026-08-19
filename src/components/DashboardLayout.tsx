@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { MessageSquare } from 'lucide-react';
+import React, { useState } from 'react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { NotificationsPage } from './NotificationsPage';
 import { UserProfileSettings } from './UserProfileSettings';
-import { SystemChatModal } from './chat/SystemChatModal';
+import { SystemChatPage } from './chat/SystemChatPage';
 import { SystemCallOverlay } from './chat/SystemCallOverlay';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
@@ -29,19 +28,10 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const { lang, setLang } = useTranslation();
   const { theme, setTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [isChatOpen, setIsChatOpen] = useState(false);
-
-  // Auto-open chat modal if user clicks 'system_chat' tab in sidebar
-  useEffect(() => {
-    if (activeTab === 'system_chat') {
-      setIsChatOpen(true);
-    }
-  }, [activeTab]);
 
   if (!user) return null;
 
   const isDark = theme === 'dark';
-  const isBn = lang === 'bn';
 
   return (
     <div
@@ -61,13 +51,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           toggleSidebarMobile={() => setSidebarOpen(!sidebarOpen)}
           onOpenNotifications={() => setActiveTab('notifications')}
           onOpenProfile={() => setActiveTab('profile')}
-          onOpenChat={() => setIsChatOpen(true)}
+          onOpenChat={() => setActiveTab('system_chat')}
         />
       </div>
 
-      {/* Global In-System Calling Overlay & Chat Modal */}
+      {/* Global In-System WebRTC Calling Overlay */}
       <SystemCallOverlay currentUser={user} language={lang} />
-      <SystemChatModal currentUser={user} language={lang} isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
 
       {/* Main Body */}
       <div className="flex flex-1 min-h-0 relative">
@@ -89,8 +78,8 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           }`}
         >
           <div className="max-w-7xl mx-auto space-y-5">
-            {/* Header Pattern: Title + Subtitle (Only render if pageTitle exists and not notifications/profile) */}
-            {activeTab !== 'notifications' && activeTab !== 'profile' && Boolean(pageTitle) && (
+            {/* Header Pattern: Title + Subtitle (Only render if pageTitle exists and not notifications/profile/chat) */}
+            {activeTab !== 'notifications' && activeTab !== 'profile' && activeTab !== 'system_chat' && Boolean(pageTitle) && (
               <div className={`border-b pb-3 ${isDark ? 'border-[#2C2C2E]/60' : 'border-gray-200'}`}>
                 <h1 className={`text-xl font-medium tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
                   {pageTitle}
@@ -114,12 +103,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 theme={theme}
               />
             ) : activeTab === 'system_chat' ? (
-              <SystemChatModal
-                currentUser={user}
-                language={lang}
-                isOpen={true}
-                onClose={() => setActiveTab('dashboard')}
-              />
+              <SystemChatPage currentUser={user} language={lang} />
             ) : (
               children
             )}

@@ -471,6 +471,9 @@ const pushFullDbToServer = () => {
         [DB_KEYS.AUDIT]: JSON.parse(localStorage.getItem(DB_KEYS.AUDIT) || '[]'),
         [DB_KEYS.EXPENSES]: JSON.parse(localStorage.getItem(DB_KEYS.EXPENSES) || '[]'),
         [DB_KEYS.CRM_CUSTOMERS]: JSON.parse(localStorage.getItem(DB_KEYS.CRM_CUSTOMERS) || '[]'),
+        [DB_KEYS.CONVERSATIONS]: JSON.parse(localStorage.getItem(DB_KEYS.CONVERSATIONS) || '[]'),
+        [DB_KEYS.MESSAGES]: JSON.parse(localStorage.getItem(DB_KEYS.MESSAGES) || '[]'),
+        [DB_KEYS.CALLS]: JSON.parse(localStorage.getItem(DB_KEYS.CALLS) || '[]'),
       };
       const payloadStr = JSON.stringify(fullDb);
 
