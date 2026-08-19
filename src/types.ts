@@ -43,6 +43,7 @@ export interface User {
   warehouse_id?: string;
   warehouse_name?: string;
   status: 'active' | 'inactive' | 'suspended';
+  last_active_at?: string;
   created_at: string;
 }
 
@@ -202,6 +203,7 @@ export interface ChatMessage {
   sender_avatar?: string;
   content: string;
   created_at: string;
+  read_by?: string[];
   reactions?: Record<string, string[]>;
   attachments?: { name: string; url: string; type: string }[];
   reply_to_id?: string;

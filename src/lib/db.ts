@@ -16,7 +16,7 @@ import {
   INITIAL_CRM_CUSTOMERS,
 } from '../mockData';
 
-const DB_KEYS = {
+export const DB_KEYS = {
   USERS: 'fsc_vps_users',
   WAREHOUSES: 'fsc_vps_warehouses',
   CARTONS: 'fsc_vps_cartons',

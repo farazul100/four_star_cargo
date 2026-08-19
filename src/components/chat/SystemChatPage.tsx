@@ -11,7 +11,7 @@ import {
   X,
 } from 'lucide-react';
 import { User, ChatConversation, ChatMessage, CallSession, Language, Theme } from '../../types';
-import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../../lib/db';
+import { DB_KEYS, getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../../lib/db';
 import { useTheme } from '../../context/ThemeContext';
 
 interface SystemChatPageProps {
@@ -45,6 +45,34 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
   // Input
   const [messageInput, setMessageInput] = useState('');
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+
+  // 1. Presence Heartbeat: Update currentUser's last_active_at timestamp every 10 seconds
+  useEffect(() => {
+    const updatePresence = () => {
+      const db = getHostingerDbData();
+      const usersList: User[] = db.users || [];
+      const nowIso = new Date().toISOString();
+      let changed = false;
+
+      const updatedUsers = usersList.map((u) => {
+        if (u.id === currentUser.id) {
+          if (!u.last_active_at || Date.now() - new Date(u.last_active_at).getTime() > 5000) {
+            changed = true;
+            return { ...u, last_active_at: nowIso };
+          }
+        }
+        return u;
+      });
+
+      if (changed) {
+        saveHostingerDbData(DB_KEYS.USERS, updatedUsers);
+      }
+    };
+
+    updatePresence();
+    const interval = setInterval(updatePresence, 10000);
+    return () => clearInterval(interval);
+  }, [currentUser.id]);
 
   // Sound Chime generator for incoming message
   const playMessageChime = () => {
@@ -98,6 +126,35 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
     };
   }, []);
 
+  // 2. Auto Mark as Read when viewing active conversation
+  useEffect(() => {
+    if (!activeConvoId) return;
+
+    const db = getHostingerDbData();
+    const msgs: ChatMessage[] = db.messages || [];
+    let updated = false;
+
+    const updatedMsgs = msgs.map((m) => {
+      if (
+        m.conversation_id === activeConvoId &&
+        m.sender_id !== currentUser.id &&
+        (!m.read_by || !m.read_by.includes(currentUser.id))
+      ) {
+        updated = true;
+        return {
+          ...m,
+          read_by: [...(m.read_by || []), currentUser.id],
+        };
+      }
+      return m;
+    });
+
+    if (updated) {
+      saveHostingerDbData('fsc_vps_messages', updatedMsgs);
+      setMessages(updatedMsgs);
+    }
+  }, [activeConvoId, messages.length]);
+
   // Scroll to bottom on new message
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -105,6 +162,23 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
 
   const activeConvo = conversations.find((c) => c.id === activeConvoId);
   const activeMessages = messages.filter((m) => m.conversation_id === activeConvoId);
+
+  // Helper to check if a user is online (active within 45 seconds)
+  const isUserOnline = (userItem: User) => {
+    if (!userItem.last_active_at) return false;
+    const diffSec = (Date.now() - new Date(userItem.last_active_at).getTime()) / 1000;
+    return diffSec <= 45;
+  };
+
+  // Helper to get unread message count for a conversation
+  const getUnreadCount = (convoId: string) => {
+    return messages.filter(
+      (m) =>
+        m.conversation_id === convoId &&
+        m.sender_id !== currentUser.id &&
+        (!m.read_by || !m.read_by.includes(currentUser.id))
+    ).length;
+  };
 
   // Helper to format conversation title
   const getConvoTitle = (convo: ChatConversation) => {
@@ -116,7 +190,7 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
     return otherUser ? `${otherUser.name} (${otherUser.role})` : isBn ? 'ইউজার চ্যাট' : 'Direct Message';
   };
 
-  // 1. Send Message Handler
+  // Send Message Handler
   const handleSendMessage = (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!messageInput.trim() || !activeConvoId) return;
@@ -129,6 +203,7 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
       sender_name: currentUser.name,
       sender_role: currentUser.role,
       content: messageInput.trim(),
+      read_by: [currentUser.id],
       created_at: new Date().toISOString(),
     };
 
@@ -151,7 +226,7 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
     playMessageChime();
   };
 
-  // 2. Direct Chat with Any System User
+  // Direct Chat with Any System User
   const handleStartDirectChat = (targetUser: User) => {
     const db = getHostingerDbData();
     const existingConvos: ChatConversation[] = db.conversations || [];
@@ -180,7 +255,7 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
     loadChatData();
   };
 
-  // 3. Create Group Chat (RESTRICTED STRICTLY TO SUPER ADMIN)
+  // Create Group Chat (RESTRICTED STRICTLY TO SUPER ADMIN)
   const handleCreateGroupChat = (e: React.FormEvent) => {
     e.preventDefault();
     if (!isSuperAdmin) {
@@ -214,7 +289,7 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
     loadChatData();
   };
 
-  // 4. Initiate Native WebRTC Voice or Video Call
+  // Initiate Native WebRTC Voice or Video Call
   const handleInitiateCall = (type: 'audio' | 'video') => {
     if (!activeConvo) return;
     const otherUserId = activeConvo.participants.find((id) => id !== currentUser.id);
@@ -246,14 +321,32 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
       (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
+  // 3. SORT DIRECT USERS BY LATEST MESSAGE TIMESTAMP (NEWEST MESSAGES PUSH USER TO TOP)
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    const convoA = conversations.find(
+      (c) => c.type === 'direct' && c.participants.includes(a.id)
+    );
+    const convoB = conversations.find(
+      (c) => c.type === 'direct' && c.participants.includes(b.id)
+    );
+    const timeA = convoA?.last_message_at ? new Date(convoA.last_message_at).getTime() : 0;
+    const timeB = convoB?.last_message_at ? new Date(convoB.last_message_at).getTime() : 0;
+    return timeB - timeA;
+  });
+
   // Group conversations
   const groupConvos = conversations.filter((c) => c.type === 'group');
+  const sortedGroupConvos = [...groupConvos].sort((a, b) => {
+    const timeA = a.last_message_at ? new Date(a.last_message_at).getTime() : 0;
+    const timeB = b.last_message_at ? new Date(b.last_message_at).getTime() : 0;
+    return timeB - timeA;
+  });
 
   return (
     <div className={`w-full h-[calc(100vh-3.5rem)] rounded-none border-0 shadow-none flex overflow-hidden ${
       isDark ? 'bg-[#18181B] text-white' : 'bg-white text-slate-900'
     }`}>
-      {/* LEFT COLUMN: CHAT SIDEBAR (PERFECT LIGHT & DARK THEME SUPPORT) */}
+      {/* LEFT COLUMN: CHAT SIDEBAR (ONLINE STATUS + UNREAD COUNT + TOP RECENT SORT) */}
       <div className={`w-80 border-r flex flex-col shrink-0 ${
         isDark ? 'bg-[#121214] border-slate-800' : 'bg-slate-50 border-slate-200'
       }`}>
@@ -334,11 +427,11 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
               <div className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider ${
                 isDark ? 'text-slate-400' : 'text-slate-600'
               }`}>
-                ALL USERS ({filteredUsers.length})
+                ALL USERS ({sortedUsers.length})
               </div>
 
               <div className="space-y-0.5 mt-0.5">
-                {filteredUsers.map((userItem) => {
+                {sortedUsers.map((userItem) => {
                   const userConvo = conversations.find(
                     (c) => c.type === 'direct' && c.participants.includes(userItem.id)
                   );
@@ -346,6 +439,9 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                   const initials = userItem.name
                     ? userItem.name.split(' ').map((n) => n[0]).join('').slice(0, 2).toUpperCase()
                     : 'US';
+                  
+                  const online = isUserOnline(userItem);
+                  const unreadCount = userConvo ? getUnreadCount(userConvo.id) : 0;
 
                   return (
                     <button
@@ -360,26 +456,54 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                             : 'hover:bg-slate-200/60 text-slate-900 border-transparent'
                       }`}
                     >
-                      <div className={`w-8 h-8 rounded-none font-bold text-xs flex items-center justify-center shrink-0 border ${
-                        isDark 
-                          ? 'bg-[#00897B]/20 text-[#26A69A] border-[#00897B]/40' 
-                          : 'bg-[#00897B]/15 text-[#00897B] border-[#00897B]/30'
-                      }`}>
-                        {initials}
+                      {/* Avatar Circle with Real-Time Online Badge */}
+                      <div className="relative shrink-0">
+                        <div className={`w-8 h-8 rounded-none font-bold text-xs flex items-center justify-center border ${
+                          isDark 
+                            ? 'bg-[#00897B]/20 text-[#26A69A] border-[#00897B]/40' 
+                            : 'bg-[#00897B]/15 text-[#00897B] border-[#00897B]/30'
+                        }`}>
+                          {initials}
+                        </div>
+                        {online ? (
+                          <span
+                            className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900 animate-pulse"
+                            title={isBn ? 'অনলাইন' : 'Online'}
+                          />
+                        ) : (
+                          <span
+                            className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-slate-400"
+                            title={isBn ? 'অফলাইন' : 'Offline'}
+                          />
+                        )}
                       </div>
+
+                      {/* User Info & Online Status Text */}
                       <div className="flex-1 min-w-0">
-                        <div className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                          {userItem.name}
+                        <div className="flex items-center justify-between">
+                          <span className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                            {userItem.name}
+                          </span>
+                          <span className={`text-[9px] font-semibold ${online ? 'text-emerald-500' : 'text-slate-400'}`}>
+                            {online ? (isBn ? 'অনলাইন' : 'Online') : (isBn ? 'অফলাইন' : 'Offline')}
+                          </span>
                         </div>
                         <div className={`text-[10px] truncate capitalize font-medium ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                           {userItem.department || 'উত্তরা'} • {userItem.role.replace('_', ' ')}
                         </div>
                       </div>
+
+                      {/* UNREAD MESSAGE COUNT BADGE */}
+                      {unreadCount > 0 && (
+                        <div className="px-2 py-0.5 rounded-full bg-red-600 text-white font-bold text-[10px] animate-pulse shrink-0">
+                          {unreadCount}
+                        </div>
+                      )}
                     </button>
                   );
                 })}
 
-                {filteredUsers.length === 0 && (
+                {sortedUsers.length === 0 && (
                   <div className={`p-4 text-center text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                     No users found
                   </div>
@@ -391,12 +515,14 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
               <div className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider ${
                 isDark ? 'text-slate-400' : 'text-slate-600'
               }`}>
-                GROUPS ({groupConvos.length})
+                GROUPS ({sortedGroupConvos.length})
               </div>
 
               <div className="space-y-0.5 mt-0.5">
-                {groupConvos.map((convo) => {
+                {sortedGroupConvos.map((convo) => {
                   const isActive = convo.id === activeConvoId;
+                  const unreadCount = getUnreadCount(convo.id);
+
                   return (
                     <button
                       key={convo.id}
@@ -417,17 +543,27 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                       }`}>
                         <Users className="w-4 h-4" />
                       </div>
+
                       <div className="flex-1 min-w-0">
-                        <div className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{convo.name || 'Group Chat'}</div>
+                        <div className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                          {convo.name || 'Group Chat'}
+                        </div>
                         <div className={`text-[10px] truncate ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                           {convo.last_message || 'Group Chat'}
                         </div>
                       </div>
+
+                      {/* UNREAD MESSAGE COUNT BADGE */}
+                      {unreadCount > 0 && (
+                        <div className="px-2 py-0.5 rounded-full bg-red-600 text-white font-bold text-[10px] animate-pulse shrink-0">
+                          {unreadCount}
+                        </div>
+                      )}
                     </button>
                   );
                 })}
 
-                {groupConvos.length === 0 && (
+                {sortedGroupConvos.length === 0 && (
                   <div className={`p-4 text-center text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                     No groups available
                   </div>
