@@ -3,8 +3,7 @@ import { getHostingerDbData } from '../lib/db';
 
 const GOOGLE_MODEL_CANDIDATES = [
   'gemini-1.5-flash',
-  'gemini-1.5-flash-latest',
-  'gemini-2.0-flash-exp',
+  'gemini-2.0-flash',
 ];
 
 export interface ChatMessageItem {
@@ -138,73 +137,76 @@ RULES & GUIDELINES FOR AI RESPONSES:
 USER QUESTION:
 ${userPrompt}`;
 
-  // Format message history for Gemini REST API
-  const formattedContents = [
+  // Filter out any previous error messages (starting with ⚠️) from history
+  const cleanHistory = history
+    .filter((h) => h && h.content && !h.content.startsWith('⚠️'))
+    .slice(-6);
+
+  const contentsPayload = [
     {
       role: 'user',
       parts: [{ text: fullPromptText }],
     },
-    ...history.slice(-6).map((h) => ({
+    ...cleanHistory.map((h) => ({
       role: h.role === 'user' ? 'user' : 'model',
       parts: [{ text: h.content }],
     })),
   ];
 
-  let lastError = '';
+  let firstErrorMsg = '';
 
   // Try model candidates in order
   for (const model of GOOGLE_MODEL_CANDIDATES) {
-    // Try v1beta and v1 endpoints
-    const endpoints = [
-      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-      `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`,
-    ];
-
-    for (const endpointUrl of endpoints) {
-      try {
-        const response = await fetch(endpointUrl, {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+        {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
           },
           body: JSON.stringify({
-            contents: formattedContents,
+            contents: contentsPayload,
             generationConfig: {
               temperature: 0.7,
               maxOutputTokens: 1500,
             },
           }),
-        });
+        }
+      );
 
-        const data = await response.json();
+      const data = await response.json();
 
-        if (response.ok && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-          const aiText = data.candidates[0].content.parts[0].text.trim();
+      if (response.ok && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+        const aiText = data.candidates[0].content.parts[0].text.trim();
+        return {
+          text: aiText,
+          success: true,
+          modelUsed: model,
+        };
+      }
+
+      if (data.error && data.error.message) {
+        const msg = data.error.message;
+        if (!firstErrorMsg) {
+          firstErrorMsg = `${model}: ${msg}`;
+        }
+        if (msg.includes('API key not valid') || msg.includes('API_KEY_INVALID') || (response.status === 400 && msg.toLowerCase().includes('key'))) {
           return {
-            text: aiText,
-            success: true,
-            modelUsed: model,
+            text: '⚠️ দেওয়া Gemini API Key-টি অকার্যকর বা ভুল (API Key Invalid)। অনুগ্রহ করে Google AI Studio (aistudio.google.com) থেকে নতুন একটি সঠিক API Key নিয়ে সুপার এডমিন সেটিংসে রি-সেভ করুন।',
+            success: false,
           };
         }
-
-        if (data.error) {
-          const msg = data.error.message || '';
-          if (msg.includes('API key not valid') || msg.includes('API_KEY_INVALID') || (response.status === 400 && msg.toLowerCase().includes('key'))) {
-            return {
-              text: '⚠️ দেওয়া Gemini API Key-টি অকার্যকর বা ভুল (API Key Invalid)। অনুগ্রহ করে Google AI Studio (aistudio.google.com) থেকে নতুন একটি সঠিক API Key নিয়ে সুপার এডমিন সেটিংসে সেট করুন।',
-              success: false,
-            };
-          }
-          lastError = msg;
-        }
-      } catch (err: any) {
-        lastError = err.message || 'Network connection failed';
+      }
+    } catch (err: any) {
+      if (!firstErrorMsg) {
+        firstErrorMsg = err.message || 'Network error';
       }
     }
   }
 
   return {
-    text: `⚠️ AI সাড়া দিতে পারেনি (${lastError || 'Gemini API call failed'})। আপনার দেওয়া API Key টি Google AI Studio (aistudio.google.com) থেকে নতুন করে তৈরি করে সেটিংস-এ রি-সেভ করুন।`,
+    text: `⚠️ AI সাড়া দিতে পারেনি (${firstErrorMsg || 'Gemini API call failed'})। আপনার দেওয়া API Key টি Google AI Studio (aistudio.google.com) থেকে নতুন করে রি-জেনারেট করে সেটিংস-এ সেভ করুন।`,
     success: false,
   };
 };
