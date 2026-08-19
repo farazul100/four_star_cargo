@@ -4,12 +4,84 @@ import { getHostingerDbData } from '../lib/db';
 const GOOGLE_MODEL_CANDIDATES = [
   'gemini-1.5-flash',
   'gemini-2.0-flash',
+  'gemini-1.5-pro',
 ];
 
 export interface ChatMessageItem {
   role: 'user' | 'model' | 'assistant';
   content: string;
 }
+
+/**
+ * Sanitizes and extracts clean API key string
+ */
+export const getCleanGeminiApiKey = (): string => {
+  const db = getHostingerDbData() as any;
+  const settings = db.settings || {};
+  let raw = settings.gemini_api_key || localStorage.getItem('fsc_gemini_api_key') || localStorage.getItem('gemini_api_key') || '';
+  
+  if (!raw) {
+    try {
+      const vpsSettings = localStorage.getItem('fsc_vps_settings') || localStorage.getItem('settings');
+      if (vpsSettings) {
+        const parsed = JSON.parse(vpsSettings);
+        raw = parsed.gemini_api_key || '';
+      }
+    } catch {}
+  }
+
+  // Remove any surrounding quotes, whitespace, or copy-paste artifacts
+  return (raw || '').replace(/^["']|["']$/g, '').replace(/[^a-zA-Z0-9_\-]/g, '').trim();
+};
+
+/**
+ * Real-time API Key Validator to test connectivity with Google AI Studio
+ */
+export const testGeminiApiKey = async (rawKey: string): Promise<{ success: boolean; message: string; modelUsed?: string }> => {
+  const cleanKey = (rawKey || '').replace(/^["']|["']$/g, '').replace(/[^a-zA-Z0-9_\-]/g, '').trim();
+  
+  if (!cleanKey) {
+    return { success: false, message: 'API Key ফাকা! অনুগ্রহ করে সঠিক API Key প্রদান করুন।' };
+  }
+
+  if (cleanKey.length < 20 || !cleanKey.startsWith('AIza')) {
+    return { success: false, message: '⚠️ দেওয়া API Key-টির ফরম্যাট সঠিক নয় (গুগল এআই স্টুডিওর এপিআই কী সাধারণত "AIza" দিয়ে শুরু হয়)।' };
+  }
+
+  let lastErr = '';
+
+  for (const model of GOOGLE_MODEL_CANDIDATES) {
+    try {
+      const response = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${cleanKey}`,
+        {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ role: 'user', parts: [{ text: 'Ping' }] }],
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+        return { success: true, message: `✅ Gemini API Key সফলভাবে টেস্ট করা হয়েছে এবং সচল রয়েছে! (Model: ${model})`, modelUsed: model };
+      }
+
+      if (data.error && data.error.message) {
+        lastErr = data.error.message;
+        if (data.error.message.includes('API key not valid') || data.error.message.includes('API_KEY_INVALID') || response.status === 400) {
+          return { success: false, message: `⚠️ দেওয়া API Key-টি অকার্যকর বা বাতিল (Invalid API Key: ${data.error.message})` };
+        }
+      }
+    } catch (err: any) {
+      lastErr = err.message || 'Network error connecting to Google AI Studio';
+    }
+  }
+
+  return { success: false, message: `⚠️ এপিআই টেস্ট সফল হয়নি: ${lastErr || 'Unknown error'}` };
+};
 
 /**
  * Builds live system context for the active user & cargo operations
@@ -105,11 +177,7 @@ export const askFourStarCargoAI = async (
   history: ChatMessageItem[] = [],
   currentUser?: User | null
 ): Promise<{ text: string; success: boolean; modelUsed?: string }> => {
-  const db = getHostingerDbData() as any;
-  const settings = db.settings || {};
-  
-  // Try reading Gemini API key from settings or localStorage
-  const apiKey = (settings.gemini_api_key || localStorage.getItem('fsc_gemini_api_key') || '').trim();
+  const apiKey = getCleanGeminiApiKey();
 
   if (!apiKey) {
     return {
@@ -206,7 +274,7 @@ ${userPrompt}`;
   }
 
   return {
-    text: `⚠️ AI সাড়া দিতে পারেনি (${firstErrorMsg || 'Gemini API call failed'})। আপনার দেওয়া API Key টি Google AI Studio (aistudio.google.com) থেকে নতুন করে রি-জেনারেট করে সেটিংস-এ সেভ করুন।`,
+    text: `⚠️ AI সাড়া দিতে পারেনি (${firstErrorMsg || 'Gemini API call failed'})। অনুগ্রহ করে সুপার এডমিন সেটিংসে (System Settings) আপনার API Key চেক করে টেস্ট করুন।`,
     success: false,
   };
 };

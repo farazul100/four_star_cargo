@@ -327,6 +327,7 @@ export const getHostingerDbData = () => {
     conversations: JSON.parse(localStorage.getItem(DB_KEYS.CONVERSATIONS) || '[]'),
     messages: JSON.parse(localStorage.getItem(DB_KEYS.MESSAGES) || '[]'),
     calls: JSON.parse(localStorage.getItem(DB_KEYS.CALLS) || '[]'),
+    settings: JSON.parse(localStorage.getItem('fsc_vps_settings') || localStorage.getItem('settings') || '{}'),
   };
 };
 
@@ -450,6 +451,7 @@ const pushFullDbToServer = () => {
         [DB_KEYS.CALLS]: JSON.parse(localStorage.getItem(DB_KEYS.CALLS) || '[]'),
         notifications: JSON.parse(localStorage.getItem('fsc_vps_notifications') || '[]'),
         fsc_vps_notifications: JSON.parse(localStorage.getItem('fsc_vps_notifications') || '[]'),
+        settings: JSON.parse(localStorage.getItem('fsc_vps_settings') || localStorage.getItem('settings') || '{}'),
       };
       const payloadStr = JSON.stringify(fullDb);
 

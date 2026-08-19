@@ -16,6 +16,7 @@ import {
   testPathaoConnection,
 } from '../lib/pathaoApi';
 import { compressImageFile } from '../utils/imageCompressor';
+import { testGeminiApiKey } from '../services/aiAssistantService';
 
 interface SystemSettingsManagerProps {
   currentUser: User;
@@ -112,6 +113,8 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
     const db = getHostingerDbData() as any;
     return db.settings?.gemini_api_key || localStorage.getItem('fsc_gemini_api_key') || '';
   });
+  const [testingGeminiKey, setTestingGeminiKey] = useState<boolean>(false);
+  const [geminiTestResult, setGeminiTestResult] = useState<{ success: boolean; message: string } | null>(null);
 
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -899,9 +902,10 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
           </div>
         </div>
 
-        <form onSubmit={(e) => {
+        <form onSubmit={async (e) => {
           e.preventDefault();
-          const cleanKey = (geminiApiKey || '').trim();
+          const cleanKey = (geminiApiKey || '').replace(/^["']|["']$/g, '').replace(/[^a-zA-Z0-9_\-]/g, '').trim();
+          setGeminiApiKey(cleanKey);
           localStorage.setItem('fsc_gemini_api_key', cleanKey);
           const dbData = getHostingerDbData() as any;
           saveHostingerDbData('settings', { ...(dbData.settings || {}), gemini_api_key: cleanKey });
@@ -915,16 +919,25 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
             'Google Gemini AI API Key সেটিংস আপডেট করা হয়েছে'
           );
 
-          showToast(isBn ? '🤖 Google Gemini AI API Key সফলভাবে সংরক্ষিত হয়েছে!' : '🤖 Google Gemini AI API Key saved successfully!');
+          showToast(isBn ? '🤖 Google Gemini AI API Key সংরক্ষিত হয়েছে! টেস্ট চলছে...' : '🤖 Google Gemini AI API Key saved! Testing connection...');
+
+          setTestingGeminiKey(true);
+          setGeminiTestResult(null);
+          const res = await testGeminiApiKey(cleanKey);
+          setTestingGeminiKey(false);
+          setGeminiTestResult(res);
         }} className="space-y-4">
           <div className="space-y-1.5">
             <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
               {isBn ? 'Gemini API Key (Google AI Studio)' : 'Gemini API Key (from Google AI Studio)'}
             </label>
             <input
-              type="password"
+              type="text"
               value={geminiApiKey}
-              onChange={(e) => setGeminiApiKey(e.target.value)}
+              onChange={(e) => {
+                setGeminiApiKey(e.target.value);
+                setGeminiTestResult(null);
+              }}
               placeholder="AIzaSy..."
               className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
                 isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#00897B]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
@@ -932,18 +945,42 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
             />
             <p className="text-[10px] text-slate-400">
               {isBn
-                ? 'গুগল এআই স্টুডিও (aistudio.google.com) থেকে তৈরি করা আপনার ফ্রী বা পেইড Gemini API Key এখানে দিন।'
+                ? 'গুগল এআই স্টুডিও (aistudio.google.com) থেকে ফ্রি API Key তৈরি করে এখানে পেস্ট করুন।'
                 : 'Get your free or paid API key from Google AI Studio (aistudio.google.com) and paste here.'}
             </p>
           </div>
 
-          <div className="pt-2 flex justify-end">
+          {geminiTestResult && (
+            <div className={`p-3 rounded-xl text-xs font-semibold flex items-center space-x-2 ${
+              geminiTestResult.success ? 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30' : 'bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/30'
+            }`}>
+              <span>{geminiTestResult.message}</span>
+            </div>
+          )}
+
+          <div className="pt-2 flex justify-end space-x-3">
+            <button
+              type="button"
+              disabled={testingGeminiKey || !geminiApiKey.trim()}
+              onClick={async () => {
+                setTestingGeminiKey(true);
+                setGeminiTestResult(null);
+                const res = await testGeminiApiKey(geminiApiKey);
+                setTestingGeminiKey(false);
+                setGeminiTestResult(res);
+              }}
+              className="py-2.5 px-4 rounded-xl bg-slate-700 hover:bg-slate-800 text-white font-bold text-xs shadow-md transition-all cursor-pointer disabled:opacity-50"
+            >
+              {testingGeminiKey ? (isBn ? 'টেস্ট হচ্ছে...' : 'Testing...') : (isBn ? '⚡ এপিআই টেস্ট করুন' : '⚡ Test Connection')}
+            </button>
+
             <button
               type="submit"
-              className="py-2.5 px-6 rounded-xl bg-[#00897B] hover:bg-[#00796B] text-white font-bold text-xs shadow-md flex items-center space-x-2 transition-all cursor-pointer"
+              disabled={testingGeminiKey}
+              className="py-2.5 px-6 rounded-xl bg-[#00897B] hover:bg-[#00796B] text-white font-bold text-xs shadow-md flex items-center space-x-2 transition-all cursor-pointer disabled:opacity-50"
             >
               <Save className="w-4 h-4 text-white" />
-              <span>{isBn ? 'Gemini API Key সংরক্ষণ করুন' : 'Save Gemini API Key'}</span>
+              <span>{isBn ? 'Gemini API Key সংরক্ষণ ও সেভ করুন' : 'Save & Verify Key'}</span>
             </button>
           </div>
         </form>
