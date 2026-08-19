@@ -113,6 +113,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
                 setLanguage={setLang}
                 theme={theme}
               />
+            ) : activeTab === 'system_chat' ? (
+              <SystemChatModal
+                currentUser={user}
+                language={lang}
+                isOpen={true}
+                onClose={() => setActiveTab('dashboard')}
+              />
             ) : (
               children
             )}
