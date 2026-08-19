@@ -704,6 +704,6 @@ export const logSystemAuditAction = (
   };
 
   const updatedAuditLogs = [newAuditLog, ...(data.auditLogs || [])];
-  localStorage.setItem(DB_KEYS.AUDIT, JSON.stringify(updatedAuditLogs));
+  saveHostingerDbData(DB_KEYS.AUDIT, updatedAuditLogs);
   return newAuditLog;
 };

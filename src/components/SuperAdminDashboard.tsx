@@ -52,7 +52,7 @@ import {
 import { Warehouse, User as UserType, Carton, AuditLog, Language, LedgerEntry, FlyingProposal, Theme } from '../types';
 import { ToastContainer, ToastMessage } from './Toast';
 import { FlightProposalsManager } from './FlightProposalsManager';
-import { getHostingerDbData, saveHostingerDbData } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../lib/db';
 import { useAuth } from '../hooks/useAuth';
 
 import { CargoSearchTracker } from './CargoSearchTracker';
@@ -128,18 +128,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
   // Audit Logger
   const addAuditLog = (action: string, entityType: string, entityId: string, details: string) => {
-    const newLog: AuditLog = {
-      id: `log-${Date.now()}`,
-      user_id: 'usr-1',
-      user_name: 'তানভীর আহমেদ (Super Admin)',
-      user_role: 'super_admin',
-      action,
-      entity_type: entityType,
-      entity_id: entityId,
-      details,
-      created_at: new Date().toISOString(),
-    };
-    auditLogs.unshift(newLog);
+    logSystemAuditAction(user || { id: 'usr-1', name: 'তানভীর আহমেদ (Super Admin)', role: 'super_admin' }, action, entityType, entityId, details);
   };
 
   // Home Dashboard Filters (Matching Image 1)

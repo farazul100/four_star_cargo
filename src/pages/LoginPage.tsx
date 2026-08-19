@@ -10,7 +10,7 @@ import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../hooks/useAuth';
 import { UserRole, User as UserType } from '../types';
 import { INITIAL_USERS } from '../mockData';
-import { getHostingerDbData } from '../lib/db';
+import { getHostingerDbData, logSystemAuditAction } from '../lib/db';
 
 interface LoginPageProps {
   expectedRole: UserRole;
@@ -131,6 +131,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
     }
 
     signIn(foundUser);
+    logSystemAuditAction(
+      foundUser,
+      'USER_LOGIN',
+      'auth',
+      foundUser.id,
+      `ইউজার ${foundUser.name} (${foundUser.email}) সিস্টেমে সফলভাবে লগইন করেছেন।`
+    );
 
     // Route user to their specific dashboard
     if (foundUser.role === 'crm_executive') {
