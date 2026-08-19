@@ -570,11 +570,48 @@ export const fetchServerDbAndSync = async () => {
           const serverData = serverDb[key];
           if (Array.isArray(serverData)) {
             const localRaw = localStorage.getItem(key);
-            const serverStr = JSON.stringify(serverData);
 
-            if (localRaw !== serverStr) {
-              localStorage.setItem(key, serverStr);
-              hasChanges = true;
+            if (key === DB_KEYS.CALLS) {
+              const localCalls: any[] = localRaw ? JSON.parse(localRaw) : [];
+              const serverCalls: any[] = serverData;
+              const callMap = new Map<string, any>();
+
+              serverCalls.forEach((c) => { if (c && c.id) callMap.set(c.id, c); });
+
+              localCalls.forEach((c) => {
+                if (c && c.id) {
+                  const existing = callMap.get(c.id);
+                  const isFresh = Date.now() - new Date(c.created_at || 0).getTime() < 60000;
+                  if (!existing || c.status === 'ringing' || c.status === 'active' || isFresh) {
+                    callMap.set(c.id, { ...existing, ...c });
+                  }
+                }
+              });
+
+              const mergedStr = JSON.stringify(Array.from(callMap.values()));
+              if (localRaw !== mergedStr) {
+                localStorage.setItem(key, mergedStr);
+                hasChanges = true;
+              }
+            } else if (key === DB_KEYS.MESSAGES || key === DB_KEYS.CONVERSATIONS) {
+              const localItems: any[] = localRaw ? JSON.parse(localRaw) : [];
+              const serverItems: any[] = serverData;
+              const itemMap = new Map<string, any>();
+
+              serverItems.forEach((item) => { if (item && item.id) itemMap.set(item.id, item); });
+              localItems.forEach((item) => { if (item && item.id && !itemMap.has(item.id)) itemMap.set(item.id, item); });
+
+              const mergedStr = JSON.stringify(Array.from(itemMap.values()));
+              if (localRaw !== mergedStr) {
+                localStorage.setItem(key, mergedStr);
+                hasChanges = true;
+              }
+            } else {
+              const serverStr = JSON.stringify(serverData);
+              if (localRaw !== serverStr) {
+                localStorage.setItem(key, serverStr);
+                hasChanges = true;
+              }
             }
           }
         });

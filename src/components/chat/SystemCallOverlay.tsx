@@ -211,10 +211,16 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
         }
       } else {
         stopRingtone();
+        // Check if active call is explicitly ended or rejected in DB, or timed out (60s ringing)
         if (activeCall) {
-          stopWebRTC();
-          setActiveCall(null);
-          setCallDuration(0);
+          const endedCall = calls.find((c) => c.id === activeCall.id && (c.status === 'ended' || c.status === 'rejected'));
+          const callAgeSec = (Date.now() - new Date(activeCall.created_at).getTime()) / 1000;
+
+          if (endedCall || callAgeSec > 60) {
+            stopWebRTC();
+            setActiveCall(null);
+            setCallDuration(0);
+          }
         }
       }
     };
