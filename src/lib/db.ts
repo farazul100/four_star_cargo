@@ -254,8 +254,10 @@ export const getHostingerDbData = () => {
     notifications = [];
   }
 
-  if (!notifications) {
-    notifications = [];
+  if (Array.isArray(notifications)) {
+    notifications = notifications.filter(
+      (n) => n && n.id && !n.id.startsWith('notif-base-')
+    );
     try {
       localStorage.setItem('fsc_vps_notifications', JSON.stringify(notifications));
     } catch {}

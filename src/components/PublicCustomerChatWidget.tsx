@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Send, X, Image as ImageIcon, CheckCircle2, User, ShieldCheck, Minimize2 } from 'lucide-react';
 import { ChatMessage, ChatConversation, Language } from '../types';
-import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, publishSystemNotification } from '../lib/db';
 import { compressImageFile } from '../utils/imageCompressor';
 
 interface PublicCustomerChatWidgetProps {
@@ -162,6 +162,16 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
     });
 
     saveHostingerDbData('fsc_vps_conversations', updatedConvos);
+
+    // Publish system notification for all staff members
+    publishSystemNotification({
+      title: isBn ? '💬 নতুন কাস্টমার সাপোর্ট চ্যাট' : '💬 New Customer Support Message',
+      message: isBn ? `গ্রাহক ${guestName || 'Customer'} বার্তা পাঠিয়েছেন: "${messageInput.trim() || '📷 ছবি'}"` : `Customer ${guestName || 'Customer'}: "${messageInput.trim() || '📷 Photo'}"`,
+      type: 'info',
+      target_role: 'all',
+      link: '/admin/chat',
+    });
+
     setMessageInput('');
 
     // Trigger real-time browser event for staff tabs

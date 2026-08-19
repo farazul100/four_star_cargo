@@ -13,7 +13,7 @@ import {
   ArrowLeft,
 } from 'lucide-react';
 import { User, ChatConversation, ChatMessage, CallSession, Language, Theme } from '../../types';
-import { DB_KEYS, getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../../lib/db';
+import { DB_KEYS, getHostingerDbData, saveHostingerDbData, logSystemAuditAction, publishSystemNotification } from '../../lib/db';
 import { useTheme } from '../../context/ThemeContext';
 import { compressImageFile } from '../../utils/imageCompressor';
 
@@ -228,6 +228,38 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
 
     saveHostingerDbData('fsc_vps_messages', updatedMsgs);
     saveHostingerDbData('fsc_vps_conversations', updatedConvos);
+
+    const activeConvo = conversations.find((c) => c.id === activeConvoId);
+    if (activeConvo) {
+      if (activeConvo.type === 'customer_support') {
+        publishSystemNotification({
+          title: isBn ? `💬 কাস্টমার চ্যাট উত্তর: ${currentUser.name}` : `💬 Customer Support Reply: ${currentUser.name}`,
+          message: `${currentUser.name}: "${newMsg.content}"`,
+          type: 'info',
+          target_role: 'all',
+          link: '/admin/chat',
+        });
+      } else if (activeConvo.type === 'direct') {
+        const recipientId = activeConvo.participants.find((p) => p !== currentUser.id);
+        if (recipientId) {
+          publishSystemNotification({
+            title: isBn ? `💬 নতুন মেসেজ: ${currentUser.name}` : `💬 New Message from ${currentUser.name}`,
+            message: `${newMsg.content}`,
+            type: 'info',
+            target_user_id: recipientId,
+            link: '/admin/chat',
+          });
+        }
+      } else if (activeConvo.type === 'group') {
+        publishSystemNotification({
+          title: isBn ? `💬 গ্রূপ চ্যাট (${activeConvo.name})` : `💬 Group Chat (${activeConvo.name})`,
+          message: `${currentUser.name}: "${newMsg.content}"`,
+          type: 'info',
+          target_role: 'all',
+          link: '/admin/chat',
+        });
+      }
+    }
 
     setMessages(updatedMsgs);
     setMessageInput('');
