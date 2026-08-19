@@ -250,7 +250,7 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
         sender_id: currentUser.id,
         sender_name: currentUser.name,
         sender_role: currentUser.role,
-        content: messageInput.trim() || (isBn ? '📷 ছবি' : '📷 Image'),
+        content: compressedBase64,
         image_url: compressedBase64,
         read_by: [currentUser.id],
         created_at: new Date().toISOString(),
@@ -699,6 +699,9 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                   );
                 }
 
+                const imgSrc = msg.image_url || (msg.content.startsWith('data:image/') ? msg.content : null);
+                const isTextOnly = !imgSrc;
+
                 return (
                   <div
                     key={msg.id}
@@ -713,33 +716,36 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                       <span>{new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
 
-                    <div
-                      className={`max-w-md p-3 rounded-none text-xs leading-relaxed ${
-                        isMe
-                          ? 'bg-[#00897B] text-white font-medium shadow-xs'
-                          : isDark
-                            ? 'bg-slate-800 text-slate-100 border border-slate-700 shadow-xs'
-                            : 'bg-white text-slate-900 border border-slate-300 shadow-xs'
-                      }`}
-                    >
-                      {msg.content}
-                      {msg.image_url && (
-                        <div className="mt-2 relative group overflow-hidden border border-slate-700/50 rounded-none shadow-sm cursor-pointer">
-                          <img
-                            src={msg.image_url}
-                            alt="Attached image"
-                            onClick={() => setPreviewImageUrl(msg.image_url!)}
-                            className="max-h-60 w-full object-cover transition-transform duration-200 group-hover:scale-105"
-                          />
-                          <div
-                            onClick={() => setPreviewImageUrl(msg.image_url!)}
-                            className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold"
-                          >
-                            🔍 {isBn ? 'বড় করে দেখুন' : 'Click to View'}
-                          </div>
+                    {isTextOnly ? (
+                      <div
+                        className={`max-w-md p-3 rounded-none text-xs leading-relaxed ${
+                          isMe
+                            ? 'bg-[#00897B] text-white font-medium shadow-xs'
+                            : isDark
+                              ? 'bg-slate-800 text-slate-100 border border-slate-700 shadow-xs'
+                              : 'bg-white text-slate-900 border border-slate-300 shadow-xs'
+                        }`}
+                      >
+                        {msg.content}
+                      </div>
+                    ) : (
+                      <div
+                        onClick={() => setPreviewImageUrl(imgSrc!)}
+                        className="relative group overflow-hidden border-2 border-[#00897B] rounded-none shadow-md cursor-pointer max-w-xs sm:max-w-sm mt-0.5"
+                      >
+                        <img
+                          src={imgSrc!}
+                          alt="Chat Image Attachment"
+                          className="max-h-64 w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                        />
+                        <div
+                          className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold gap-1.5"
+                        >
+                          <span>🔍</span>
+                          <span>{isBn ? 'বড় করে দেখুন' : 'Click to View'}</span>
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}
