@@ -1,11 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Phone, PhoneOff, Mic, MicOff, ShieldCheck, Volume2, Radio } from 'lucide-react';
+import { Phone, PhoneOff, Mic, MicOff, ShieldCheck } from 'lucide-react';
 import { User, CallSession, Language } from '../../types';
 import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../../lib/db';
 
 interface SystemCallOverlayProps {
   currentUser: User;
   language: Language;
+  theme?: 'light' | 'dark';
 }
 
 const ICE_SERVERS: RTCConfiguration = {
@@ -17,31 +18,21 @@ const ICE_SERVERS: RTCConfiguration = {
   ],
 };
 
-// SDP Optimization helper for 128kbps Opus High-Definition Voice Audio
-const optimizeSdpOpusBitrate = (sdp: string) => {
-  if (!sdp) return sdp;
-  return sdp.replace(
-    /a=fmtp:111 (.*)/g,
-    'a=fmtp:111 $1;maxaveragebitrate=128000;stereo=0;sprop-stereo=0;cbr=1;useinbandfec=1'
-  );
-};
-
-// Helper for high-definition 48kHz microphone audio stream
-const getHdMicrophoneStream = async () => {
+// Helper for crystal-clear microphone audio stream
+const getMicrophoneStream = async () => {
   return await navigator.mediaDevices.getUserMedia({
     audio: {
       echoCancellation: true,
       noiseSuppression: true,
       autoGainControl: true,
-      sampleRate: 48000,
-      channelCount: 1,
     },
     video: false,
   });
 };
 
-export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUser, language }) => {
+export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUser, language, theme = 'dark' }) => {
   const isBn = language === 'bn';
+  const isDark = theme === 'dark';
   const [activeCall, setActiveCall] = useState<CallSession | null>(null);
   const [callDuration, setCallDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
@@ -193,15 +184,13 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
             // Caller: Create offer if not created yet
             if (!myCall.sdp_offer && !peerConnectionRef.current) {
               try {
-                const stream = await getHdMicrophoneStream();
+                const stream = await getMicrophoneStream();
                 localStreamRef.current = stream;
 
                 const pc = initPeerConnection(myCall.id, true);
                 stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
-                const rawOffer = await pc.createOffer();
-                const optimizedSdp = optimizeSdpOpusBitrate(rawOffer.sdp || '');
-                const offer = new RTCSessionDescription({ type: rawOffer.type, sdp: optimizedSdp });
+                const offer = await pc.createOffer();
                 await pc.setLocalDescription(offer);
 
                 const currentDb = getHostingerDbData();
@@ -225,7 +214,7 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
           if (!isCaller && myCall.sdp_offer && !myCall.sdp_answer) {
             try {
               if (!localStreamRef.current) {
-                const stream = await getHdMicrophoneStream();
+                const stream = await getMicrophoneStream();
                 localStreamRef.current = stream;
               }
               const pc = initPeerConnection(myCall.id, false);
@@ -235,9 +224,7 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
                 const offerDesc = new RTCSessionDescription(JSON.parse(myCall.sdp_offer));
                 await pc.setRemoteDescription(offerDesc);
 
-                const rawAnswer = await pc.createAnswer();
-                const optimizedSdp = optimizeSdpOpusBitrate(rawAnswer.sdp || '');
-                const answer = new RTCSessionDescription({ type: rawAnswer.type, sdp: optimizedSdp });
+                const answer = await pc.createAnswer();
                 await pc.setLocalDescription(answer);
 
                 const currentDb = getHostingerDbData();
@@ -324,7 +311,7 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
 
     try {
       if (!localStreamRef.current) {
-        const stream = await getHdMicrophoneStream();
+        const stream = await getMicrophoneStream();
         localStreamRef.current = stream;
       }
       const pc = initPeerConnection(activeCall.id, false);
@@ -393,7 +380,7 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
 
   return (
     <>
-      {/* Hidden Remote Audio Player - Offscreen so browser does not mute media output */}
+      {/* Offscreen Remote Audio Player - Prevents browser autoplay muting */}
       <audio
         ref={remoteAudioRef}
         autoPlay
@@ -401,28 +388,50 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
         style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '1px', height: '1px', opacity: 0.01 }}
       />
 
-      {/* 1. INCOMING VOICE CALL MODAL (CENTERED) */}
+      {/* 1. INCOMING VOICE CALL MODAL (CENTERED & THEMED) */}
       {isIncoming && (
-        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 animate-in fade-in">
-          <div className="w-full max-w-sm bg-[#121214] border-2 border-[#00897B]/50 rounded-none p-6 shadow-2xl text-center space-y-5 text-white relative overflow-hidden">
-            <div className="absolute -top-16 -left-16 w-32 h-32 bg-[#00897B]/20 rounded-full blur-2xl pointer-events-none"></div>
+        <div className={`fixed inset-0 z-[2000] flex items-center justify-center p-4 animate-in fade-in ${
+          isDark ? 'bg-slate-950/85 backdrop-blur-md' : 'bg-slate-900/40 backdrop-blur-md'
+        }`}>
+          <div className={`w-full max-w-sm rounded-none p-6 shadow-2xl text-center space-y-5 relative overflow-hidden ${
+            isDark
+              ? 'bg-[#121214] border-2 border-[#00897B]/50 text-white'
+              : 'bg-white border-2 border-[#00897B] text-slate-900 shadow-slate-400/30'
+          }`}>
+            <div className={`absolute -top-16 -left-16 w-32 h-32 rounded-full blur-2xl pointer-events-none ${
+              isDark ? 'bg-[#00897B]/20' : 'bg-[#00897B]/15'
+            }`}></div>
 
             <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
               <div className="absolute inset-0 rounded-full bg-[#00897B]/30 animate-ping opacity-75"></div>
-              <div className="w-16 h-16 rounded-full bg-[#00897B]/20 text-[#00897B] font-bold text-lg flex items-center justify-center border border-[#00897B] relative z-10 shadow-lg">
-                <Phone className="w-8 h-8 text-[#26A69A] animate-bounce" />
+              <div className={`w-16 h-16 rounded-full font-bold text-lg flex items-center justify-center border relative z-10 shadow-lg ${
+                isDark
+                  ? 'bg-[#00897B]/20 text-[#26A69A] border-[#00897B]'
+                  : 'bg-[#00897B]/10 text-[#00897B] border-[#00897B]'
+              }`}>
+                <Phone className="w-8 h-8 animate-bounce" />
               </div>
             </div>
 
             <div>
-              <span className="px-3 py-1 rounded-none bg-[#00897B]/20 text-[#26A69A] border border-[#00897B]/40 text-[10px] font-bold uppercase tracking-widest">
-                {isBn ? 'ইনকামিং ভয়েস কল (HD)' : 'Incoming Voice Call (HD)'}
+              <span className={`px-3 py-1 rounded-none text-[10px] font-bold uppercase tracking-widest border ${
+                isDark
+                  ? 'bg-[#00897B]/20 text-[#26A69A] border-[#00897B]/40'
+                  : 'bg-[#00897B]/10 text-[#00897B] border-[#00897B]/30'
+              }`}>
+                {isBn ? 'ইনকামিং ভয়েস কল' : 'Incoming Voice Call'}
               </span>
-              <h3 className="text-lg font-extrabold text-white mt-2.5">{activeCall.caller_name}</h3>
-              <p className="text-xs text-slate-400 capitalize">{activeCall.caller_role?.replace('_', ' ')}</p>
+              <h3 className={`text-lg font-extrabold mt-2.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                {activeCall.caller_name}
+              </h3>
+              <p className={`text-xs capitalize ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                {activeCall.caller_role?.replace('_', ' ')}
+              </p>
             </div>
 
-            <div className="flex items-center justify-center space-x-4 pt-3 border-t border-slate-800">
+            <div className={`flex items-center justify-center space-x-4 pt-3 border-t ${
+              isDark ? 'border-slate-800' : 'border-slate-200'
+            }`}>
               <button
                 type="button"
                 onClick={handleRejectCall}
@@ -445,59 +454,82 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
         </div>
       )}
 
-      {/* 2. OUTGOING OR ACTIVE VOICE CALL MODAL (CENTERED ON SCREEN) */}
+      {/* 2. OUTGOING OR ACTIVE VOICE CALL MODAL (CENTERED & THEMED) */}
       {(isOutgoing || isConnected) && (
-        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 animate-in fade-in">
-          <div className="w-full max-w-md bg-[#121214] border-2 border-[#00897B]/50 rounded-none p-6 sm:p-8 shadow-2xl text-center space-y-6 text-white relative overflow-hidden">
+        <div className={`fixed inset-0 z-[2000] flex items-center justify-center p-4 animate-in fade-in ${
+          isDark ? 'bg-slate-950/85 backdrop-blur-md' : 'bg-slate-900/40 backdrop-blur-md'
+        }`}>
+          <div className={`w-full max-w-md rounded-none p-6 sm:p-8 shadow-2xl text-center space-y-6 relative overflow-hidden ${
+            isDark
+              ? 'bg-[#121214] border-2 border-[#00897B]/50 text-white'
+              : 'bg-white border-2 border-[#00897B] text-slate-900 shadow-slate-400/40'
+          }`}>
             {/* Ambient Teal Glow */}
-            <div className="absolute -top-24 -left-24 w-48 h-48 bg-[#00897B]/20 rounded-full blur-3xl pointer-events-none"></div>
-            <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-[#00897B]/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div className={`absolute -top-24 -left-24 w-48 h-48 rounded-full blur-3xl pointer-events-none ${
+              isDark ? 'bg-[#00897B]/20' : 'bg-[#00897B]/10'
+            }`}></div>
 
             {/* Top Status Header Badge */}
             <div className="flex items-center justify-center space-x-2">
               <span className={`w-2.5 h-2.5 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500 animate-ping'}`}></span>
-              <span className="px-3 py-1 bg-[#00897B]/20 border border-[#00897B]/40 text-[#26A69A] font-bold text-xs uppercase tracking-widest rounded-none">
-                {isConnected ? (isBn ? 'ভয়েস কল চলছে (HD Voice)' : 'Active Voice Call (HD)') : (isBn ? 'কল করা হচ্ছে...' : 'Calling Target User...')}
+              <span className={`px-3 py-1 font-bold text-xs uppercase tracking-widest rounded-none border ${
+                isDark
+                  ? 'bg-[#00897B]/20 border-[#00897B]/40 text-[#26A69A]'
+                  : 'bg-[#00897B]/10 border-[#00897B]/30 text-[#00897B]'
+              }`}>
+                {isConnected ? (isBn ? 'ভয়েস কল চলছে' : 'Active Voice Call') : (isBn ? 'কল করা হচ্ছে...' : 'Calling Target User...')}
               </span>
             </div>
 
             {/* Avatar Ring with Pulsing Wave */}
             <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
               <div className="absolute inset-0 rounded-full bg-[#00897B]/20 animate-ping opacity-75"></div>
-              <div className="w-20 h-20 rounded-full bg-[#00897B]/30 text-[#00897B] font-bold text-2xl flex items-center justify-center border-2 border-[#00897B] shadow-lg relative z-10">
+              <div className={`w-20 h-20 rounded-full font-bold text-2xl flex items-center justify-center border-2 shadow-lg relative z-10 ${
+                isDark
+                  ? 'bg-[#00897B]/30 text-[#00897B] border-[#00897B]'
+                  : 'bg-[#00897B]/15 text-[#00897B] border-[#00897B]'
+              }`}>
                 {activeCall.caller_name ? activeCall.caller_name[0].toUpperCase() : 'U'}
               </div>
             </div>
 
             {/* User Info & Live Duration Timer */}
             <div className="space-y-1">
-              <h2 className="text-xl font-extrabold text-white tracking-wide">
+              <h2 className={`text-xl font-extrabold tracking-wide ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 {isOutgoing ? (isBn ? 'ইউজার উত্তর দেওয়ার জন্য অপেক্ষা করা হচ্ছে' : 'Waiting for answer...') : activeCall.caller_name}
               </h2>
-              <p className="text-xs text-slate-400 font-mono flex items-center justify-center space-x-1.5">
-                <ShieldCheck className="w-4 h-4 text-[#26A69A]" />
-                <span>End-to-End Encrypted 128kbps HD Voice</span>
+              <p className={`text-xs font-mono flex items-center justify-center space-x-1.5 ${
+                isDark ? 'text-slate-400' : 'text-slate-500'
+              }`}>
+                <ShieldCheck className="w-4 h-4 text-[#00897B]" />
+                <span>End-to-End Encrypted System Voice</span>
               </p>
 
               {isConnected && (
-                <div className="pt-2 text-3xl font-mono font-black text-[#26A69A] tracking-wider animate-pulse">
+                <div className={`pt-2 text-3xl font-mono font-black tracking-wider animate-pulse ${
+                  isDark ? 'text-[#26A69A]' : 'text-[#00897B]'
+                }`}>
                   {formatTime(callDuration)}
                 </div>
               )}
             </div>
 
             {/* Action Buttons: Mute & End Call */}
-            <div className="flex items-center justify-center space-x-4 pt-4 border-t border-slate-800">
+            <div className={`flex items-center justify-center space-x-4 pt-4 border-t ${
+              isDark ? 'border-slate-800' : 'border-slate-200'
+            }`}>
               <button
                 type="button"
                 onClick={toggleMute}
                 className={`flex-1 py-3 rounded-none font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-md ${
                   isMuted
                     ? 'bg-amber-600 hover:bg-amber-700 text-white ring-2 ring-amber-400/50'
-                    : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+                    : isDark
+                      ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+                      : 'bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300'
                 }`}
               >
-                {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4 text-emerald-400" />}
+                {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4 text-emerald-500" />}
                 <span>{isMuted ? (isBn ? 'আনমিউট' : 'Unmute') : (isBn ? 'মাইক্রোফোন মিউট' : 'Mute Mic')}</span>
               </button>
 

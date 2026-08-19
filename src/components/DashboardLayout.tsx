@@ -56,7 +56,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       </div>
 
       {/* Global In-System WebRTC Calling Overlay */}
-      <SystemCallOverlay currentUser={user} language={lang} />
+      <SystemCallOverlay currentUser={user} language={lang} theme={theme} />
 
       {/* Main Body */}
       <div className="flex flex-1 min-h-0 relative">
