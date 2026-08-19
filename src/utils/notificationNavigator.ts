@@ -6,10 +6,6 @@ export const getNotificationTargetUrl = (
   notification: { title?: string; message?: string; link?: string; type?: string },
   userRole?: string
 ): string => {
-  if (notification.link && notification.link.startsWith('/')) {
-    return notification.link;
-  }
-
   const rolePrefix =
     userRole === 'super_admin'
       ? '/admin'
@@ -22,6 +18,14 @@ export const getNotificationTargetUrl = (
       : userRole === 'crm_executive'
       ? '/crm'
       : '/admin';
+
+  let target = notification.link || '';
+  if (target && target.startsWith('/')) {
+    if (target.startsWith('/admin') || target.startsWith('/operations') || target.startsWith('/warehouse') || target.startsWith('/accounts') || target.startsWith('/crm')) {
+      target = target.replace(/^\/(admin|operations|warehouse|accounts|crm)/, rolePrefix);
+    }
+    return target;
+  }
 
   const text = `${notification.title || ''} ${notification.message || ''}`.toLowerCase();
 

@@ -126,13 +126,21 @@ export const Header: React.FC<HeaderProps> = ({
   const markAllRead = () => {
     const updated = allNotifs.map((n) => ({ ...n, isRead: true }));
     setAllNotifs(updated);
+    saveHostingerDbData('fsc_vps_notifications', updated);
     saveHostingerDbData('notifications', updated);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key: 'notifications', data: updated } }));
+    }
   };
 
   const markOneRead = (id: string) => {
     const updated = allNotifs.map((n) => (n.id === id ? { ...n, isRead: true } : n));
     setAllNotifs(updated);
+    saveHostingerDbData('fsc_vps_notifications', updated);
     saveHostingerDbData('notifications', updated);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key: 'notifications', data: updated } }));
+    }
   };
 
   const handleNotifClick = (ntf: any) => {

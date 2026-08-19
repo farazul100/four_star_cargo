@@ -48,12 +48,20 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({ language, 
     const updated = allNotifications.map((n) => ({ ...n, isRead: true }));
     setAllNotifications(updated);
     saveHostingerDbData('fsc_vps_notifications', updated);
+    saveHostingerDbData('notifications', updated);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key: 'notifications', data: updated } }));
+    }
   };
 
   const markOneRead = (id: string) => {
     const updated = allNotifications.map((n) => (n.id === id ? { ...n, isRead: true } : n));
     setAllNotifications(updated);
     saveHostingerDbData('fsc_vps_notifications', updated);
+    saveHostingerDbData('notifications', updated);
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key: 'notifications', data: updated } }));
+    }
   };
 
   const handleNotifItemClick = (n: NotificationItem) => {

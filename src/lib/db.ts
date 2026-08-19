@@ -597,8 +597,24 @@ export const fetchServerDbAndSync = async () => {
               const serverItems: any[] = serverData;
               const itemMap = new Map<string, any>();
 
-              serverItems.forEach((item) => { if (item && item.id && !item.id.startsWith('notif-base-')) itemMap.set(item.id, item); });
-              localItems.forEach((item) => { if (item && item.id && !item.id.startsWith('notif-base-') && !itemMap.has(item.id)) itemMap.set(item.id, item); });
+              serverItems.forEach((item) => {
+                if (item && item.id && !item.id.startsWith('notif-base-')) {
+                  itemMap.set(item.id, item);
+                }
+              });
+
+              localItems.forEach((item) => {
+                if (item && item.id && !item.id.startsWith('notif-base-')) {
+                  const existing = itemMap.get(item.id);
+                  if (!existing) {
+                    itemMap.set(item.id, item);
+                  } else {
+                    if (item.isRead) {
+                      itemMap.set(item.id, { ...existing, isRead: true });
+                    }
+                  }
+                }
+              });
 
               const mergedList = Array.from(itemMap.values()).sort(
                 (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()

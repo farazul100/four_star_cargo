@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import {
   MessageSquare,
   Users,
@@ -133,6 +134,21 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
       window.removeEventListener('storage', handleUpdate);
     };
   }, []);
+
+  const [searchParams] = useSearchParams();
+  const paramConvoId = searchParams.get('convoId');
+  const paramSenderId = searchParams.get('senderId');
+
+  useEffect(() => {
+    if (paramConvoId) {
+      setActiveConvoId(paramConvoId);
+    } else if (paramSenderId && allUsers.length > 0) {
+      const targetUser = allUsers.find((u) => u.id === paramSenderId);
+      if (targetUser) {
+        handleStartDirectChat(targetUser);
+      }
+    }
+  }, [paramConvoId, paramSenderId, allUsers.length]);
 
   // 2. Auto Mark as Read when viewing active conversation
   useEffect(() => {
