@@ -436,7 +436,18 @@ const pushFullDbToServer = () => {
   if (pushTimeout) clearTimeout(pushTimeout);
   pushTimeout = setTimeout(async () => {
     try {
-      const fullDb = {
+      const localApiKey = 
+        localStorage.getItem('fsc_gemini_api_key') || 
+        localStorage.getItem('gemini_api_key') || 
+        (typeof window !== 'undefined' ? (window as any).__FSC_GEMINI_KEY__ : '') || 
+        '';
+
+      const settingsObj = JSON.parse(localStorage.getItem('fsc_vps_settings') || localStorage.getItem('settings') || '{}');
+      if (localApiKey && !settingsObj.gemini_api_key) {
+        settingsObj.gemini_api_key = localApiKey;
+      }
+
+      const fullDb: any = {
         [DB_KEYS.CARTONS]: JSON.parse(localStorage.getItem(DB_KEYS.CARTONS) || '[]'),
         [DB_KEYS.PROPOSALS]: JSON.parse(localStorage.getItem(DB_KEYS.PROPOSALS) || '[]'),
         [DB_KEYS.USERS]: JSON.parse(localStorage.getItem(DB_KEYS.USERS) || '[]'),
@@ -451,8 +462,14 @@ const pushFullDbToServer = () => {
         [DB_KEYS.CALLS]: JSON.parse(localStorage.getItem(DB_KEYS.CALLS) || '[]'),
         notifications: JSON.parse(localStorage.getItem('fsc_vps_notifications') || '[]'),
         fsc_vps_notifications: JSON.parse(localStorage.getItem('fsc_vps_notifications') || '[]'),
-        settings: JSON.parse(localStorage.getItem('fsc_vps_settings') || localStorage.getItem('settings') || '{}'),
       };
+
+      if (localApiKey) {
+        fullDb.gemini_api_key = localApiKey;
+        fullDb.settings = settingsObj;
+        fullDb.fsc_vps_settings = settingsObj;
+      }
+
       const payloadStr = JSON.stringify(fullDb);
 
       for (const url of SERVER_API_ENDPOINTS) {

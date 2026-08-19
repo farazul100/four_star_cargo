@@ -35,8 +35,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $rawExisting = @file_get_contents($dataFile);
                 $existing = json_decode($rawExisting, true) ?: [];
             }
+
+            // Preserve gemini_api_key if existing has key but incoming payload has empty key
+            $existingApiKey = '';
+            if (!empty($existing['gemini_api_key'])) {
+                $existingApiKey = $existing['gemini_api_key'];
+            } else if (!empty($existing['settings']['gemini_api_key'])) {
+                $existingApiKey = $existing['settings']['gemini_api_key'];
+            } else if (!empty($existing['fsc_vps_settings']['gemini_api_key'])) {
+                $existingApiKey = $existing['fsc_vps_settings']['gemini_api_key'];
+            }
             
             $merged = array_merge($existing, $decoded);
+
+            if (!empty($existingApiKey)) {
+                if (empty($merged['gemini_api_key'])) {
+                    $merged['gemini_api_key'] = $existingApiKey;
+                }
+                if (!isset($merged['settings']) || !is_array($merged['settings'])) {
+                    $merged['settings'] = [];
+                }
+                if (empty($merged['settings']['gemini_api_key'])) {
+                    $merged['settings']['gemini_api_key'] = $existingApiKey;
+                }
+                if (!isset($merged['fsc_vps_settings']) || !is_array($merged['fsc_vps_settings'])) {
+                    $merged['fsc_vps_settings'] = [];
+                }
+                if (empty($merged['fsc_vps_settings']['gemini_api_key'])) {
+                    $merged['fsc_vps_settings']['gemini_api_key'] = $existingApiKey;
+                }
+            }
+
             @file_put_contents($dataFile, json_encode($merged, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
             echo json_encode(['status' => 'success', 'message' => 'Hostinger DB synchronized']);
             exit();
