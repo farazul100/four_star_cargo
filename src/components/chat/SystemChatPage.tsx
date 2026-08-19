@@ -10,6 +10,7 @@ import {
   Search,
   X,
   Image as ImageIcon,
+  ArrowLeft,
 } from 'lucide-react';
 import { User, ChatConversation, ChatMessage, CallSession, Language, Theme } from '../../types';
 import { DB_KEYS, getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../../lib/db';
@@ -401,7 +402,9 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
       isDark ? 'bg-[#18181B] text-white' : 'bg-white text-slate-900'
     }`}>
       {/* LEFT COLUMN: CHAT SIDEBAR (ONLINE STATUS + UNREAD COUNT + TOP RECENT SORT) */}
-      <div className={`w-80 border-r flex flex-col shrink-0 ${
+      <div className={`w-full md:w-80 border-r flex flex-col shrink-0 ${
+        activeConvoId ? 'hidden md:flex' : 'flex'
+      } ${
         isDark ? 'bg-[#121214] border-slate-800' : 'bg-slate-50 border-slate-200'
       }`}>
         
@@ -629,7 +632,9 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
       </div>
 
       {/* RIGHT COLUMN: ACTIVE THREAD OR PLACEHOLDER */}
-      <div className={`flex-1 flex flex-col ${
+      <div className={`flex-1 flex flex-col h-full min-w-0 ${
+        activeConvoId ? 'flex' : 'hidden md:flex'
+      } ${
         isDark ? 'bg-[#18181B]' : 'bg-white'
       }`}>
         {activeConvo ? (
@@ -639,6 +644,16 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
               isDark ? 'border-slate-800 bg-[#121214]' : 'border-slate-200 bg-slate-100/80'
             }`}>
               <div className="flex items-center space-x-3">
+                {/* WHATSAPP/MESSENGER STYLE MOBILE BACK BUTTON */}
+                <button
+                  type="button"
+                  onClick={() => setActiveConvoId(null)}
+                  className="p-1.5 rounded-none md:hidden text-slate-400 hover:text-white cursor-pointer transition-colors mr-0.5"
+                  title={isBn ? 'পিছনে যান' : 'Back to conversation list'}
+                >
+                  <ArrowLeft className="w-5 h-5 text-[#00897B]" />
+                </button>
+
                 <div className={`w-8 h-8 rounded-none font-bold text-xs flex items-center justify-center border ${
                   isDark 
                     ? 'bg-[#00897B]/20 text-[#26A69A] border-[#00897B]/40' 
