@@ -170,7 +170,7 @@ export const SystemChatModal: React.FC<SystemChatModalProps> = ({
     playMessageChime();
   };
 
-  // 2. Start Direct 1-on-1 Chat
+  // 2. Direct Chat with Any System User
   const handleStartDirectChat = (targetUser: User) => {
     const db = getHostingerDbData();
     const existingConvos: ChatConversation[] = db.conversations || [];
@@ -185,7 +185,7 @@ export const SystemChatModal: React.FC<SystemChatModalProps> = ({
 
     if (!existing) {
       existing = {
-        id: `convo-dir-${Date.now()}`,
+        id: `convo-dir-${Date.now()}-${targetUser.id}`,
         type: 'direct',
         participants: [currentUser.id, targetUser.id],
         created_by: currentUser.id,
@@ -259,103 +259,161 @@ export const SystemChatModal: React.FC<SystemChatModalProps> = ({
     logSystemAuditAction(currentUser, 'CALL_INITIATED', 'CALL', newCall.id, `Initiated ${type} call in conversation ${activeConvo.id}`);
   };
 
+  // Filter users by search query
+  const filteredUsers = allUsers.filter(
+    (u) =>
+      u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      u.role.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (u.email && u.email.toLowerCase().includes(searchQuery.toLowerCase()))
+  );
+
+  // Group conversations
+  const groupConvos = conversations.filter((c) => c.type === 'group');
+
   return (
     <div className="fixed inset-0 z-[999] flex items-center justify-center bg-slate-950/70 backdrop-blur-xs p-2 sm:p-4 animate-in fade-in">
-      <div className={`w-full max-w-5xl h-[85vh] rounded-2xl border shadow-2xl flex overflow-hidden ${
+      <div className={`w-full max-w-5xl h-[88vh] rounded-2xl border shadow-2xl flex overflow-hidden ${
         isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
       }`}>
         
-        {/* LEFT SIDEBAR: CONVERSATIONS LIST */}
+        {/* LEFT SIDEBAR: AUTO-POPULATED SYSTEM USERS & GROUPS */}
         <div className="w-80 border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50/50 dark:bg-slate-950/40 shrink-0">
           <div className="p-4 border-b border-slate-200 dark:border-slate-800 space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="font-bold text-sm flex items-center space-x-2">
                 <MessageSquare className="w-4 h-4 text-blue-500" />
-                <span>{isBn ? 'সিস্টেম লাইভ চ্যাট' : 'System Live Chat'}</span>
+                <span>{isBn ? 'সিস্টেম লাইভ চ্যাট ও কল' : 'System Live Chat'}</span>
               </h3>
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-white transition-colors"
+                className="p-1 rounded hover:bg-slate-200 dark:hover:bg-slate-800 text-slate-400 hover:text-white transition-colors cursor-pointer"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
-            {/* ACTION BUTTONS */}
-            <div className="flex items-center gap-2">
+            {/* SEARCH INPUT */}
+            <div className="relative">
+              <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={isBn ? 'ইউজার বা রোল খুঁজুন...' : 'Search system users...'}
+                className={`w-full pl-8 pr-3 py-1.5 rounded-lg text-xs border outline-none ${
+                  isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-300 text-slate-900'
+                }`}
+              />
+            </div>
+
+            {/* SUPER ADMIN GROUP CREATION BUTTON */}
+            {isSuperAdmin && (
               <button
                 type="button"
-                onClick={() => setShowNewDirectModal(true)}
-                className="flex-1 py-1.5 px-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs transition-all shadow-2xs flex items-center justify-center space-x-1 cursor-pointer"
+                onClick={() => setShowNewGroupModal(true)}
+                className="w-full py-1.5 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs transition-all shadow-2xs flex items-center justify-center space-x-1.5 cursor-pointer"
               >
-                <Plus className="w-3.5 h-3.5" />
-                <span>{isBn ? 'ডাইরেক্ট চ্যাট' : 'Direct Chat'}</span>
+                <Users className="w-3.5 h-3.5" />
+                <span>{isBn ? '+ নতুন চ্যাট গ্রুপ তৈরি করুন' : '+ Create Chat Group'}</span>
               </button>
-
-              {/* GROUP CREATION - RESTRICTED STRICTLY TO SUPER ADMIN */}
-              {isSuperAdmin ? (
-                <button
-                  type="button"
-                  onClick={() => setShowNewGroupModal(true)}
-                  className="py-1.5 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs transition-all shadow-2xs flex items-center justify-center space-x-1 cursor-pointer"
-                  title={isBn ? 'নতুন চ্যাট গ্রুপ তৈরি করুন (Super Admin Only)' : 'Create Chat Group'}
-                >
-                  <Users className="w-3.5 h-3.5" />
-                  <span>{isBn ? '+ গ্রুপ' : '+ Group'}</span>
-                </button>
-              ) : (
-                <div
-                  className="p-2 rounded-lg bg-slate-200 dark:bg-slate-800 text-slate-400 text-[10px] flex items-center space-x-1 cursor-not-allowed select-none"
-                  title={isBn ? 'শুধুমাত্র সুপার এডমিন নতুন গ্রুপ তৈরি করতে পারবেন' : 'Super Admin Only Group Creation'}
-                >
-                  <Lock className="w-3.5 h-3.5" />
-                </div>
-              )}
-            </div>
+            )}
           </div>
 
-          {/* CONVERSATIONS LIST */}
-          <div className="flex-1 overflow-y-auto divide-y divide-slate-100 dark:divide-slate-800/60 p-2 space-y-1">
-            {conversations.map((convo) => {
-              const isActive = convo.id === activeConvoId;
-              const title = getConvoTitle(convo);
-              return (
-                <button
-                  key={convo.id}
-                  type="button"
-                  onClick={() => setActiveConvoId(convo.id)}
-                  className={`w-full p-3 rounded-xl text-left transition-all flex items-start space-x-3 cursor-pointer ${
-                    isActive
-                      ? 'bg-blue-600 text-white shadow-md'
-                      : 'hover:bg-slate-200/60 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-200'
-                  }`}
-                >
-                  <div className={`p-2.5 rounded-full shrink-0 font-bold text-xs flex items-center justify-center ${
-                    isActive ? 'bg-white/20 text-white' : 'bg-blue-500/10 text-blue-500'
-                  }`}>
-                    {convo.type === 'group' ? <Users className="w-4 h-4" /> : <UserIcon className="w-4 h-4" />}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between">
-                      <span className="font-semibold text-xs truncate">{title}</span>
-                      {convo.type === 'group' && (
-                        <span className={`text-[9px] px-1.5 py-0.5 rounded font-mono ${isActive ? 'bg-white/20' : 'bg-slate-800 text-emerald-400'}`}>
-                          Group
-                        </span>
-                      )}
-                    </div>
-                    <p className={`text-[11px] truncate mt-0.5 font-normal ${isActive ? 'text-blue-100' : 'text-slate-400'}`}>
-                      {convo.last_message || 'Start messaging...'}
-                    </p>
-                  </div>
-                </button>
-              );
-            })}
+          {/* LIST CONTAINER */}
+          <div className="flex-1 overflow-y-auto p-2 space-y-4">
+            {/* 1. AUTO-POPULATED SYSTEM USERS SECTION */}
+            <div>
+              <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                <span>{isBn ? 'সিস্টেমের সকল ইউজার (Direct Chat)' : 'System Users'}</span>
+                <span className="bg-blue-500/20 text-blue-400 px-1.5 py-0.2 rounded font-mono">{filteredUsers.length}</span>
+              </div>
 
-            {conversations.length === 0 && (
-              <div className="p-8 text-center text-xs text-slate-400 font-normal">
-                {isBn ? 'কোনো চ্যাট কনভার্সেশন নেই! চ্যাট শুরু করতে উপরের বাটনে চাপুন।' : 'No chat conversations found.'}
+              <div className="space-y-1 mt-1">
+                {filteredUsers.map((userItem) => {
+                  // Find existing direct conversation if any
+                  const userConvo = conversations.find(
+                    (c) => c.type === 'direct' && c.participants.includes(userItem.id)
+                  );
+                  const isActive = userConvo && userConvo.id === activeConvoId;
+
+                  return (
+                    <button
+                      key={userItem.id}
+                      type="button"
+                      onClick={() => handleStartDirectChat(userItem)}
+                      className={`w-full p-2.5 rounded-xl text-left transition-all flex items-center space-x-3 cursor-pointer ${
+                        isActive
+                          ? 'bg-blue-600 text-white shadow-md'
+                          : 'hover:bg-slate-200/60 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-200 border border-transparent'
+                      }`}
+                    >
+                      <div className="relative shrink-0">
+                        <div className={`w-9 h-9 rounded-full font-bold text-xs flex items-center justify-center ${
+                          isActive ? 'bg-white/20 text-white' : 'bg-blue-600/20 text-blue-500 border border-blue-500/30'
+                        }`}>
+                          {userItem.name[0]?.toUpperCase()}
+                        </div>
+                        <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-slate-900" />
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between">
+                          <span className="font-semibold text-xs truncate">{userItem.name}</span>
+                        </div>
+                        <div className={`text-[10px] truncate capitalize mt-0.5 ${isActive ? 'text-blue-100' : 'text-slate-400'}`}>
+                          {userItem.role.replace('_', ' ')}
+                        </div>
+                      </div>
+                    </button>
+                  );
+                })}
+
+                {filteredUsers.length === 0 && (
+                  <div className="p-4 text-center text-xs text-slate-400">
+                    {isBn ? 'কোনো ইউজার পাওয়া যায়নি' : 'No users found'}
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* 2. GROUP CHATS SECTION */}
+            {groupConvos.length > 0 && (
+              <div>
+                <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between border-t border-slate-200 dark:border-slate-800 pt-3">
+                  <span>{isBn ? 'চ্যাট গ্রুপসমূহ (Groups)' : 'Group Chats'}</span>
+                  <span className="bg-emerald-500/20 text-emerald-400 px-1.5 py-0.2 rounded font-mono">{groupConvos.length}</span>
+                </div>
+
+                <div className="space-y-1 mt-1">
+                  {groupConvos.map((convo) => {
+                    const isActive = convo.id === activeConvoId;
+                    return (
+                      <button
+                        key={convo.id}
+                        type="button"
+                        onClick={() => setActiveConvoId(convo.id)}
+                        className={`w-full p-2.5 rounded-xl text-left transition-all flex items-center space-x-3 cursor-pointer ${
+                          isActive
+                            ? 'bg-emerald-600 text-white shadow-md'
+                            : 'hover:bg-slate-200/60 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-200'
+                        }`}
+                      >
+                        <div className={`w-9 h-9 rounded-full shrink-0 font-bold text-xs flex items-center justify-center ${
+                          isActive ? 'bg-white/20 text-white' : 'bg-emerald-500/20 text-emerald-500 border border-emerald-500/30'
+                        }`}>
+                          <Users className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-semibold text-xs truncate">{convo.name || 'Group Chat'}</div>
+                          <div className={`text-[10px] truncate mt-0.5 ${isActive ? 'text-emerald-100' : 'text-slate-400'}`}>
+                            {convo.last_message || 'Group Chat'}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
