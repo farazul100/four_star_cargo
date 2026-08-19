@@ -46,23 +46,20 @@ export const resetHostingerDbToDefault = () => {
 
 // Initialize Hostinger local persistence safely without wiping real data on refresh
 export const initHostingerDb = () => {
-  const existingCartons = localStorage.getItem(DB_KEYS.CARTONS);
-  if (!existingCartons || existingCartons === '[]') {
-    localStorage.setItem(DB_KEYS.CARTONS, JSON.stringify(INITIAL_CARTONS));
+  if (!localStorage.getItem(DB_KEYS.CARTONS)) {
+    localStorage.setItem(DB_KEYS.CARTONS, JSON.stringify([]));
   }
 
-  const existingProposals = localStorage.getItem(DB_KEYS.PROPOSALS);
-  if (!existingProposals || existingProposals === '[]') {
-    localStorage.setItem(DB_KEYS.PROPOSALS, JSON.stringify(INITIAL_PROPOSALS));
+  if (!localStorage.getItem(DB_KEYS.PROPOSALS)) {
+    localStorage.setItem(DB_KEYS.PROPOSALS, JSON.stringify([]));
   }
 
   if (!localStorage.getItem(DB_KEYS.CUSTOMERS)) {
     localStorage.setItem(DB_KEYS.CUSTOMERS, JSON.stringify([]));
   }
 
-  const existingCrm = localStorage.getItem(DB_KEYS.CRM_CUSTOMERS);
-  if (!existingCrm || existingCrm === '[]') {
-    localStorage.setItem(DB_KEYS.CRM_CUSTOMERS, JSON.stringify(INITIAL_CRM_CUSTOMERS));
+  if (!localStorage.getItem(DB_KEYS.CRM_CUSTOMERS)) {
+    localStorage.setItem(DB_KEYS.CRM_CUSTOMERS, JSON.stringify([]));
   }
 
   const currentUsersRaw = localStorage.getItem(DB_KEYS.USERS);
@@ -566,64 +563,10 @@ export const fetchServerDbAndSync = async () => {
           const serverData = serverDb[key];
           if (Array.isArray(serverData)) {
             const localRaw = localStorage.getItem(key);
-            let localList: any[] = [];
-            try {
-              localList = localRaw ? JSON.parse(localRaw) : [];
-            } catch {
-              localList = [];
-            }
+            const serverStr = JSON.stringify(serverData);
 
-            const itemMap = new Map<string, any>();
-            localList.forEach((item: any) => {
-              if (item) {
-                const k = (item.id || item.ctn_no || item.email || item.phone || '').toString().trim().toLowerCase();
-                if (k) itemMap.set(k, item);
-              }
-            });
-
-            serverData.forEach((item: any) => {
-              if (item) {
-                const k = (item.id || item.ctn_no || item.email || item.phone || '').toString().trim().toLowerCase();
-                if (k) {
-                  const existing = itemMap.get(k);
-                  if (existing && key === DB_KEYS.CARTONS) {
-                    const isExistingReceived = existing.status === 'received' || existing.status === 'delivered' || existing.current_warehouse_id === 'wh-bd';
-                    const isServerReceived = item.status === 'received' || item.status === 'delivered' || item.current_warehouse_id === 'wh-bd';
-
-                    const finalStatus = isExistingReceived || isServerReceived ? (existing.status === 'delivered' ? 'delivered' : 'received') : item.status || existing.status;
-                    const finalWh = isExistingReceived || isServerReceived ? 'wh-bd' : item.current_warehouse_id || existing.current_warehouse_id;
-
-                    const finalBdWeight = existing.bd_calibrated_weight !== undefined
-                      ? existing.bd_calibrated_weight
-                      : item.bd_calibrated_weight !== undefined
-                      ? item.bd_calibrated_weight
-                      : existing.gross_weight || item.gross_weight;
-
-                    itemMap.set(k, {
-                      ...item,
-                      ...existing,
-                      status: finalStatus,
-                      current_warehouse_id: finalWh,
-                      bd_calibrated_weight: finalBdWeight,
-                      gross_weight: finalBdWeight || existing.gross_weight || item.gross_weight,
-                    });
-                  } else if (existing && (key === DB_KEYS.CUSTOMERS || key === DB_KEYS.CRM_CUSTOMERS || key === DB_KEYS.LEDGER || key === 'fsc_vps_ledger_entries')) {
-                    itemMap.set(k, {
-                      ...item,
-                      ...existing,
-                    });
-                  } else {
-                    itemMap.set(k, item);
-                  }
-                }
-              }
-            });
-
-            const mergedList = Array.from(itemMap.values());
-            const mergedStr = JSON.stringify(mergedList);
-
-            if (localRaw !== mergedStr) {
-              localStorage.setItem(key, mergedStr);
+            if (localRaw !== serverStr) {
+              localStorage.setItem(key, serverStr);
               hasChanges = true;
             }
           }

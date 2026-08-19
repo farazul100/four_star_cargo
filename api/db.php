@@ -65,9 +65,7 @@ function readCurrentServerDb($pdo, $filePaths) {
                     foreach ($rows as $r) {
                         $db[$r['key_name']] = json_decode($r['data_json'], true);
                     }
-                    if (!empty($db['fsc_vps_proposals'])) {
-                        return $db;
-                    }
+                    return $db;
                 }
             }
         } catch (Throwable $t) {}
@@ -115,32 +113,7 @@ function writeServerDb($pdo, $filePaths, $data) {
     }
 }
 
-// Helper to merge array of objects by ID or key
-function smartMergeArrays($existing, $incoming) {
-    if (!is_array($existing)) $existing = [];
-    if (!is_array($incoming)) return $existing;
-
-    $map = [];
-    foreach ($existing as $item) {
-        if (is_array($item)) {
-            $key = $item['id'] ?? $item['ctn_no'] ?? $item['email'] ?? null;
-            if ($key) {
-                $map[$key] = $item;
-            }
-        }
-    }
-    foreach ($incoming as $item) {
-        if (is_array($item)) {
-            $key = $item['id'] ?? $item['ctn_no'] ?? $item['email'] ?? null;
-            if ($key) {
-                $map[$key] = $item;
-            }
-        }
-    }
-    return array_values($map);
-}
-
-// Seed initial production data if database is fresh/empty
+// Seed initial system structure if database is completely fresh
 $seedDatabase = [
     'fsc_vps_users' => [
         [
@@ -179,65 +152,13 @@ $seedDatabase = [
             'is_final_destination' => true
         ]
     ],
-    'fsc_vps_cartons' => [
-        [
-            'id' => 'ctn-seed-101',
-            'ctn_no' => 'CTN-US03-01',
-            'tracking_no' => 'FSC-2026-US03',
-            'sender' => 'Guangzhou Electronics Co.',
-            'receiver' => 'Rahim Enterprise Dhaka',
-            'origin_warehouse_id' => 'wh-china',
-            'current_warehouse_id' => 'wh-china',
-            'destination_warehouse_id' => 'wh-bd',
-            'status' => 'proposed',
-            'gross_weight' => 45.0,
-            'chargeable_weight' => 45.0,
-            'cbm' => 0.4,
-            'flight_number' => 'US-03',
-            'created_at' => date('c')
-        ],
-        [
-            'id' => 'ctn-seed-102',
-            'ctn_no' => 'CTN-US03-02',
-            'tracking_no' => 'FSC-2026-US03',
-            'sender' => 'Guangzhou Electronics Co.',
-            'receiver' => 'Rahim Enterprise Dhaka',
-            'origin_warehouse_id' => 'wh-china',
-            'current_warehouse_id' => 'wh-china',
-            'destination_warehouse_id' => 'wh-bd',
-            'status' => 'proposed',
-            'gross_weight' => 52.0,
-            'chargeable_weight' => 52.0,
-            'cbm' => 0.5,
-            'flight_number' => 'US-03',
-            'created_at' => date('c')
-        ]
-    ],
-    'fsc_vps_proposals' => [
-        [
-            'id' => 'prop-us03-master',
-            'flying_name' => 'US-03',
-            'flight_number' => 'US-03',
-            'warehouse_id' => 'wh-china',
-            'warehouse_name' => 'চীন (গুয়াংজু হাব) CN',
-            'destination_warehouse_id' => 'wh-bd',
-            'destination_warehouse_name' => 'বাংলাদেশ (ঢাকা সেন্ট্রাল হাব) BD',
-            'proposed_by' => 'usr-1',
-            'proposed_by_name' => 'তানভীর আহমেদ (China Incharge)',
-            'date' => date('Y-m-d'),
-            'status' => 'pending',
-            'carton_ids' => ['ctn-seed-101', 'ctn-seed-102'],
-            'items_count' => 6,
-            'total_weight' => 267.0,
-            'total_cbm' => 2.4,
-            'airline' => 'US-Bangla Air Cargo',
-            'notes' => 'ঢাকা সেন্ট্রাল হাবে জরুরী শিপমেন্ট পাঠাতে ফ্লাইং প্রোপোজাল সাবমিট করা হলো।'
-        ]
-    ],
+    'fsc_vps_cartons' => [],
+    'fsc_vps_proposals' => [],
     'fsc_vps_customers' => [],
     'fsc_vps_ledger' => [],
     'fsc_vps_audit' => [],
-    'fsc_vps_expenses' => []
+    'fsc_vps_expenses' => [],
+    'fsc_vps_crm_customers' => []
 ];
 
 // 1. POST Request: Save updated database state to Hostinger MySQL & disk
@@ -246,19 +167,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($input)) {
         $decoded = json_decode($input, true);
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-            $existing = readCurrentServerDb($pdo, $filePaths) ?: $seedDatabase;
+            $existing = readCurrentServerDb($pdo, $filePaths);
+            if (!is_array($existing)) {
+                $existing = $seedDatabase;
+            }
             
             $finalDb = $existing;
             foreach ($decoded as $key => $val) {
-                if (is_array($val)) {
-                    $finalDb[$key] = smartMergeArrays($existing[$key] ?? [], $val);
-                } else {
-                    $finalDb[$key] = $val;
-                }
+                $finalDb[$key] = $val;
             }
 
             writeServerDb($pdo, $filePaths, $finalDb);
-            echo json_encode(['status' => 'success', 'message' => 'Hostinger DB synchronized', 'proposals_count' => count($finalDb['fsc_vps_proposals'] ?? [])]);
+            echo json_encode(['status' => 'success', 'message' => 'Hostinger DB synchronized']);
             exit();
         }
     }
@@ -266,7 +186,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // 2. GET Request: Read latest database state from Hostinger MySQL / disk
 $currentDb = readCurrentServerDb($pdo, $filePaths);
-if (!$currentDb || !is_array($currentDb) || empty($currentDb['fsc_vps_proposals'])) {
+if (!$currentDb || !is_array($currentDb)) {
     writeServerDb($pdo, $filePaths, $seedDatabase);
     echo json_encode($seedDatabase, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
     exit();

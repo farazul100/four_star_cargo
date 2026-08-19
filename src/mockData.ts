@@ -111,65 +111,8 @@ export const INITIAL_WAREHOUSES: Warehouse[] = [
   },
 ];
 
-export const INITIAL_CARTONS: Carton[] = [
-  {
-    id: 'ctn-seed-101',
-    ctn_no: 'CTN-US03-01',
-    shipping_mark: 'FSC-2026-US03',
-    tracking_number: 'FSC-2026-US03',
-    product_name_en: 'Guangzhou Electronics',
-    quantity: 1,
-    net_weight: 45.0,
-    gross_weight: 45.0,
-    cbm: 0.4,
-    current_warehouse_id: 'wh-china',
-    destination_warehouse_id: 'wh-bd',
-    status: 'proposed',
-    flight_number: 'US-03',
-    booked_by: 'usr-1',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: 'ctn-seed-102',
-    ctn_no: 'CTN-US03-02',
-    shipping_mark: 'FSC-2026-US03',
-    tracking_number: 'FSC-2026-US03',
-    product_name_en: 'Guangzhou Electronics',
-    quantity: 1,
-    net_weight: 52.0,
-    gross_weight: 52.0,
-    cbm: 0.5,
-    current_warehouse_id: 'wh-china',
-    destination_warehouse_id: 'wh-bd',
-    status: 'proposed',
-    flight_number: 'US-03',
-    booked_by: 'usr-1',
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-];
-
-export const INITIAL_PROPOSALS: FlyingProposal[] = [
-  {
-    id: 'prop-us03-master',
-    flying_name: 'US-03',
-    flight_number: 'US-03',
-    warehouse_id: 'wh-china',
-    warehouse_name: 'চীন (গুয়াংজু হাব) CN',
-    destination_warehouse_id: 'wh-bd',
-    destination_warehouse_name: 'বাংলাদেশ (ঢাকা সেন্ট্রাল হাব) BD',
-    proposed_by: 'usr-1',
-    proposed_by_name: 'তানভীর আহমেদ (China Incharge)',
-    date: '2026-08-18',
-    status: 'pending',
-    carton_ids: ['ctn-seed-101', 'ctn-seed-102'],
-    items_count: 6,
-    total_weight: 185.0,
-    total_cbm: 2.4,
-    airline: 'US-Bangla Air Cargo',
-  },
-];
+export const INITIAL_CARTONS: Carton[] = [];
+export const INITIAL_PROPOSALS: FlyingProposal[] = [];
 export const INITIAL_CUSTOMERS: Customer[] = [];
 export const INITIAL_LEDGER: LedgerEntry[] = [];
 export const INITIAL_AUDIT_LOGS: AuditLog[] = [];
