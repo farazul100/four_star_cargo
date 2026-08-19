@@ -605,26 +605,16 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                 </div>
               </div>
 
-              {/* VOICE & VIDEO CALL BUTTONS */}
+              {/* VOICE CALL BUTTON */}
               <div className="flex items-center space-x-2">
                 <button
                   type="button"
                   onClick={() => handleInitiateCall('audio')}
-                  className="px-3 py-1.5 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer shadow-xs"
-                  title={isBn ? 'ইন-সিস্টেম অডিও কল শুরু করুন' : 'Start Voice Call'}
+                  className="px-3.5 py-1.5 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white text-xs font-bold flex items-center space-x-1.5 transition-all cursor-pointer shadow-xs"
+                  title={isBn ? 'ইন-সিস্টেম ভয়েস কল শুরু করুন' : 'Start Voice Call'}
                 >
                   <Phone className="w-3.5 h-3.5" />
                   <span>{isBn ? 'ভয়েস কল' : 'Voice Call'}</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => handleInitiateCall('video')}
-                  className="px-3 py-1.5 rounded-none bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer shadow-xs"
-                  title={isBn ? 'ইন-সিস্টেম ভিডিও কল শুরু করুন' : 'Start Video Call'}
-                >
-                  <Video className="w-3.5 h-3.5" />
-                  <span>{isBn ? 'ভিডিও কল' : 'Video Call'}</span>
                 </button>
               </div>
             </div>

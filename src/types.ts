@@ -231,5 +231,7 @@ export interface CallSession {
   status: 'ringing' | 'active' | 'ended' | 'rejected';
   sdp_offer?: string;
   sdp_answer?: string;
+  caller_candidates?: string[];
+  callee_candidates?: string[];
   created_at: string;
 }
