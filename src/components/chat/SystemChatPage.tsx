@@ -37,7 +37,7 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
 
   // Selection & Mode Filter
   const [activeConvoId, setActiveConvoId] = useState<string | null>(null);
-  const [activeTabMode, setActiveTabMode] = useState<'direct' | 'groups'>('direct');
+  const [activeTabMode, setActiveTabMode] = useState<'direct' | 'groups' | 'customer_support'>('direct');
   const [searchQuery, setSearchQuery] = useState('');
 
   // Group Modal (Super Admin Only)
@@ -400,6 +400,14 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
     return timeB - timeA;
   });
 
+  // Public Customer Support Inquiry conversations
+  const supportConvos = conversations.filter((c) => c.type === 'customer_support');
+  const sortedSupportConvos = [...supportConvos].sort((a, b) => {
+    const timeA = a.last_message_at ? new Date(a.last_message_at).getTime() : 0;
+    const timeB = b.last_message_at ? new Date(b.last_message_at).getTime() : 0;
+    return timeB - timeA;
+  });
+
   return (
     <div className={`w-full h-[calc(100vh-3.5rem)] rounded-none border-0 shadow-none flex overflow-hidden ${
       isDark ? 'bg-[#18181B] text-white' : 'bg-white text-slate-900'
@@ -436,27 +444,27 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
             />
           </div>
 
-          {/* Direct Message vs Groups Mode Tabs */}
-          <div className={`flex items-center gap-1 p-1 rounded-none text-xs font-medium border ${
+          {/* Direct Message vs Groups vs Customer Support Mode Tabs */}
+          <div className={`flex items-center gap-1 p-1 rounded-none text-[11px] font-medium border ${
             isDark ? 'bg-slate-900 border-slate-800' : 'bg-slate-200/80 border-slate-300'
           }`}>
             <button
               type="button"
               onClick={() => setActiveTabMode('direct')}
-              className={`flex-1 py-1.5 px-2 rounded-none transition-all text-[11px] flex items-center justify-center space-x-1 cursor-pointer ${
+              className={`flex-1 py-1.5 px-1.5 rounded-none transition-all flex items-center justify-center space-x-1 cursor-pointer ${
                 activeTabMode === 'direct'
                   ? 'bg-[#00897B] text-white font-bold'
                   : isDark ? 'text-slate-400 hover:text-white' : 'text-slate-700 hover:text-slate-900 font-medium'
               }`}
             >
               <UserIcon className="w-3 h-3" />
-              <span>Direct Message</span>
+              <span>Direct</span>
             </button>
 
             <button
               type="button"
               onClick={() => setActiveTabMode('groups')}
-              className={`flex-1 py-1.5 px-2 rounded-none transition-all text-[11px] flex items-center justify-center space-x-1 cursor-pointer ${
+              className={`flex-1 py-1.5 px-1.5 rounded-none transition-all flex items-center justify-center space-x-1 cursor-pointer ${
                 activeTabMode === 'groups'
                   ? 'bg-[#00897B] text-white font-bold'
                   : isDark ? 'text-slate-400 hover:text-white' : 'text-slate-700 hover:text-slate-900 font-medium'
@@ -464,6 +472,22 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
             >
               <Users className="w-3 h-3" />
               <span>Groups</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTabMode('customer_support')}
+              className={`flex-1 py-1.5 px-1.5 rounded-none transition-all flex items-center justify-center space-x-1 cursor-pointer relative ${
+                activeTabMode === 'customer_support'
+                  ? 'bg-[#00897B] text-white font-bold'
+                  : isDark ? 'text-slate-400 hover:text-white' : 'text-slate-700 hover:text-slate-900 font-medium'
+              }`}
+            >
+              <MessageSquare className="w-3 h-3 text-amber-400" />
+              <span>Customers</span>
+              {sortedSupportConvos.some((c) => getUnreadCount(c.id) > 0) && (
+                <span className="w-2 h-2 rounded-full bg-red-500 absolute -top-0.5 -right-0.5 animate-ping" />
+              )}
             </button>
           </div>
 
@@ -570,7 +594,7 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                 )}
               </div>
             </div>
-          ) : (
+          ) : activeTabMode === 'groups' ? (
             <div>
               <div className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider ${
                 isDark ? 'text-slate-400' : 'text-slate-600'
@@ -626,6 +650,64 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                 {sortedGroupConvos.length === 0 && (
                   <div className={`p-4 text-center text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
                     No groups available
+                  </div>
+                )}
+              </div>
+            </div>
+          ) : (
+            /* CUSTOMER SUPPORT INQUIRIES LIST */
+            <div>
+              <div className={`px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider flex items-center justify-between ${
+                isDark ? 'text-slate-400' : 'text-slate-600'
+              }`}>
+                <span>PUBLIC CUSTOMER INQUIRIES ({sortedSupportConvos.length})</span>
+              </div>
+
+              <div className="space-y-0.5 mt-0.5">
+                {sortedSupportConvos.map((convo) => {
+                  const isActive = convo.id === activeConvoId;
+                  const unreadCount = getUnreadCount(convo.id);
+
+                  return (
+                    <button
+                      key={convo.id}
+                      type="button"
+                      onClick={() => setActiveConvoId(convo.id)}
+                      className={`w-full p-2.5 rounded-none text-left transition-all flex items-center space-x-3 cursor-pointer border-l-4 ${
+                        isActive
+                          ? 'bg-[#00897B]/15 border-[#00897B] text-[#00897B] font-bold'
+                          : isDark
+                            ? 'hover:bg-slate-800/60 text-slate-200 border-transparent'
+                            : 'hover:bg-slate-200/60 text-slate-900 border-transparent'
+                      }`}
+                    >
+                      <div className="w-8 h-8 rounded-full shrink-0 font-bold text-xs flex items-center justify-center bg-[#00897B]/20 text-[#1FB6A8] border border-[#00897B]/40">
+                        💬
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                          {convo.name || 'Public Customer'}
+                        </div>
+                        <div className={`text-[10px] truncate ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                          {convo.last_message || 'New customer inquiry'}
+                        </div>
+                      </div>
+
+                      {/* UNREAD MESSAGE COUNT BADGE */}
+                      {unreadCount > 0 && (
+                        <div className="px-2 py-0.5 rounded-full bg-red-600 text-white font-bold text-[10px] animate-pulse shrink-0">
+                          {unreadCount}
+                        </div>
+                      )}
+                    </button>
+                  );
+                })}
+
+                {sortedSupportConvos.length === 0 && (
+                  <div className={`p-6 text-center text-xs space-y-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    <div>No customer inquiries yet</div>
+                    <div className="text-[10px] text-slate-500">Public messages will appear here live.</div>
                   </div>
                 )}
               </div>

@@ -146,12 +146,13 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
     const updatedMsgs = [...currentMsgs, newMsg];
     saveHostingerDbData('fsc_vps_messages', updatedMsgs);
 
-    // Update conversation last_message
+    // Update conversation last_message & last_message_at
     const updatedConvos = currentConvos.map((c) => {
       if (c.id === convoId) {
         return {
           ...c,
           last_message: messageInput.trim() || '📷 Photo attachment',
+          last_message_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
         };
       }
@@ -160,6 +161,12 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
 
     saveHostingerDbData('fsc_vps_conversations', updatedConvos);
     setMessageInput('');
+
+    // Trigger real-time browser event for staff tabs
+    try {
+      window.dispatchEvent(new Event('fsc_db_updated'));
+      window.dispatchEvent(new Event('storage'));
+    } catch (e) {}
   };
 
   // Handle Image Upload
