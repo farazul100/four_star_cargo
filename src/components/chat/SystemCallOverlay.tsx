@@ -308,16 +308,16 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
             }
           }
 
-          // Exchange ICE candidates
-          if (peerConnectionRef.current) {
+          // Exchange ICE candidates safely once remote description is set
+          if (peerConnectionRef.current && peerConnectionRef.current.remoteDescription) {
             const pc = peerConnectionRef.current;
             const candidatesToProcess = isCaller ? myCall.callee_candidates : myCall.caller_candidates;
 
             if (candidatesToProcess && candidatesToProcess.length > 0) {
               for (const candStr of candidatesToProcess) {
                 try {
-                  const candidate = new RTCIceCandidate(JSON.parse(candStr));
-                  await pc.addIceCandidate(candidate);
+                  const candObj = JSON.parse(candStr);
+                  await pc.addIceCandidate(new RTCIceCandidate(candObj));
                 } catch (e) {}
               }
             }
