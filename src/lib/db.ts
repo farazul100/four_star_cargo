@@ -641,6 +641,23 @@ export const fetchServerDbAndSync = async () => {
         // Ensure all CRM customers are always present in main system customers array after server sync
         syncCrmCustomersToMainCustomers();
 
+        // Sync Gemini API Key to LocalStorage for all non-admin users & guests
+        try {
+          const settingsRaw = localStorage.getItem('fsc_vps_settings') || localStorage.getItem('settings');
+          if (settingsRaw) {
+            const parsedSettings = JSON.parse(settingsRaw);
+            if (parsedSettings && parsedSettings.gemini_api_key) {
+              const cleanApiKey = parsedSettings.gemini_api_key.replace(/^["']|["']$/g, '').trim();
+              if (cleanApiKey) {
+                localStorage.setItem('fsc_gemini_api_key', cleanApiKey);
+                if (typeof window !== 'undefined') {
+                  (window as any).__FSC_GEMINI_KEY__ = cleanApiKey;
+                }
+              }
+            }
+          }
+        } catch {}
+
         if (hasChanges) {
           window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key: 'server_sync' } }));
         }

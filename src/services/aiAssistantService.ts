@@ -7,12 +7,17 @@ export interface ChatMessageItem {
 }
 
 /**
- * Sanitizes and extracts clean API key string preserving dots, dashes, underscores
+ * Sanitizes and extracts clean API key string for ALL user roles & guest sessions
  */
 export const getCleanGeminiApiKey = (): string => {
   const db = getHostingerDbData() as any;
   const settings = db.settings || {};
-  let raw = settings.gemini_api_key || localStorage.getItem('fsc_gemini_api_key') || localStorage.getItem('gemini_api_key') || '';
+  
+  let raw = 
+    settings.gemini_api_key || 
+    localStorage.getItem('fsc_gemini_api_key') || 
+    localStorage.getItem('gemini_api_key') || 
+    '';
   
   if (!raw) {
     try {
@@ -24,8 +29,20 @@ export const getCleanGeminiApiKey = (): string => {
     } catch {}
   }
 
-  // Remove surrounding quotes, whitespace
-  return (raw || '').replace(/^["']|["']$/g, '').trim();
+  if (!raw && typeof window !== 'undefined' && (window as any).__FSC_GEMINI_KEY__) {
+    raw = (window as any).__FSC_GEMINI_KEY__;
+  }
+
+  const clean = (raw || '').replace(/^["']|["']$/g, '').trim();
+
+  if (clean && typeof window !== 'undefined') {
+    (window as any).__FSC_GEMINI_KEY__ = clean;
+    try {
+      localStorage.setItem('fsc_gemini_api_key', clean);
+    } catch {}
+  }
+
+  return clean;
 };
 
 /**
@@ -126,8 +143,9 @@ export const testGeminiApiKey = async (rawKey: string): Promise<{ success: boole
 
 /**
  * Builds live system context for the active user & cargo operations
+ * Searches exact database records based on user query
  */
-export const buildCargoSystemContext = (currentUser?: User | null): string => {
+export const buildCargoSystemContext = (currentUser?: User | null, userPrompt: string = ''): string => {
   const db = getHostingerDbData() as any;
   const cartons: Carton[] = db.cartons || [];
   const proposals: FlyingProposal[] = db.proposals || [];
@@ -136,6 +154,7 @@ export const buildCargoSystemContext = (currentUser?: User | null): string => {
 
   const now = new Date();
   const todayStr = now.toISOString().split('T')[0];
+  const queryLower = (userPrompt || '').toLowerCase().trim();
 
   let context = `--- SYSTEM & USER CONTEXT ---
 System: Four Star Cargo (M/S Four Star Cargo Express Tracking & Air Freight Management System)
@@ -143,8 +162,8 @@ Today Date: ${todayStr}
 `;
 
   if (currentUser) {
-    context += `Active User: ${currentUser.name} (${currentUser.role})
-Assigned Warehouse: ${currentUser.warehouse_name || currentUser.warehouse_id || 'All Hubs'}
+    context += `Active User: ${currentUser.name} (Role: ${currentUser.role})
+Assigned Warehouse Hub: ${currentUser.warehouse_name || currentUser.warehouse_id || 'All Hubs'}
 Phone: ${currentUser.phone || 'N/A'}
 `;
   } else {
@@ -152,52 +171,89 @@ Phone: ${currentUser.phone || 'N/A'}
 `;
   }
 
-  // Cartons summary
-  const bookedCount = cartons.filter((c) => c.status === 'booked' || c.status === 'proposed').length;
-  const transitCount = cartons.filter((c) => c.status === 'in_transit').length;
-  const receivedCount = cartons.filter((c) => c.status === 'received').length;
-  const deliveredCount = cartons.filter((c) => c.status === 'delivered').length;
+  // Summary statistics
+  const bookedCartons = cartons.filter((c) => c.status === 'booked' || c.status === 'proposed');
+  const transitCartons = cartons.filter((c) => c.status === 'in_transit');
+  const receivedCartons = cartons.filter((c) => c.status === 'received');
+  const deliveredCartons = cartons.filter((c) => c.status === 'delivered');
 
-  context += `\n--- CARTON OVERVIEW SUMMARY ---
-Total Cartons in Database: ${cartons.length}
-1. Guangzhou Hub (Booked): ${bookedCount} CTNs
-2. In-Transit (Flying): ${transitCount} CTNs
-3. Dhaka Hub (Received): ${receivedCount} CTNs
-4. Delivered to Customer: ${deliveredCount} CTNs
+  context += `\n--- LIVE CARTON STATS ---
+Total Cartons in System: ${cartons.length}
+1. Booked at Guangzhou Hub (China): ${bookedCartons.length} CTNs
+2. In-Transit (Flying Air Freight): ${transitCartons.length} CTNs
+3. Received at Dhaka Hub (Uttara): ${receivedCartons.length} CTNs
+4. Delivered to Customers: ${deliveredCartons.length} CTNs
 `;
 
-  // Flight proposals summary
-  const activeFlights = proposals.filter((p) => p.status === 'in_transit' || p.status === 'approved');
-  context += `\n--- FLIGHT PROPOSALS & AIR FREIGHT ---
-Total Flights Recorded: ${proposals.length}
-Active Flights Flying/Approved: ${activeFlights.length}
-`;
-  if (activeFlights.length > 0) {
-    activeFlights.slice(0, 5).forEach((f) => {
-      context += `- Flight #${f.flight_number || f.flying_name} (${f.flying_name}): Status=${f.status}, Cartons=${f.items_count || f.carton_ids?.length || 0}, Weight=${f.total_weight || 0}kg\n`;
+  // Search matching cartons based on user prompt
+  if (queryLower) {
+    const matchedCartons = cartons.filter((c) => {
+      if (!c) return false;
+      const ctn = (c.ctn_no || '').toLowerCase();
+      const mark = (c.shipping_mark || '').toLowerCase();
+      const trk = (c.tracking_number || '').toLowerCase();
+      const cust = ((c as any).customer_name || c.recipient_name || '').toLowerCase();
+      const prod = (c.product_name_en || (c as any).product_name || '').toLowerCase();
+      return (
+        ctn.includes(queryLower) ||
+        mark.includes(queryLower) ||
+        trk.includes(queryLower) ||
+        cust.includes(queryLower) ||
+        prod.includes(queryLower) ||
+        queryLower.includes(ctn) ||
+        queryLower.includes(mark)
+      );
+    });
+
+    if (matchedCartons.length > 0) {
+      context += `\n--- SEARCH MATCHED CARTONS DETAILS (${matchedCartons.length} Found) ---\n`;
+      matchedCartons.slice(0, 15).forEach((c, idx) => {
+        const wt = c.gross_weight || c.bd_calibrated_weight || c.net_weight || c.origin_weight || 0;
+        const custName = (c as any).customer_name || c.recipient_name || 'N/A';
+        const prodName = c.product_name_en || (c as any).product_name || 'General Cargo';
+        context += `${idx + 1}. CTN No: ${c.ctn_no || 'N/A'} | Shipping Mark: ${c.shipping_mark || 'N/A'} | Master Tracking ID: ${c.tracking_number || 'N/A'} | Status: ${c.status} | Weight: ${wt}kg | CBM: ${c.cbm || 0} | Customer: ${custName} | Warehouse: ${c.current_warehouse_name || c.current_warehouse_id || 'China Hub'} | Product: ${prodName}\n`;
+      });
+    }
+  }
+
+  // Include recent live cartons list
+  if (cartons.length > 0) {
+    context += `\n--- RECENT LIVE CARTONS SAMPLE ---\n`;
+    cartons.slice(-10).forEach((c, idx) => {
+      const wt = c.gross_weight || c.bd_calibrated_weight || c.net_weight || 0;
+      const custName = (c as any).customer_name || c.recipient_name || 'N/A';
+      context += `${idx + 1}. CTN No: ${c.ctn_no} | Shipping Mark: ${c.shipping_mark || 'N/A'} | Status: ${c.status} | Weight: ${wt}kg | Customer: ${custName}\n`;
     });
   }
 
-  // Ledger / financial summary for Accountants & Super Admin
+  // Flight proposals summary
+  const activeFlights = proposals.filter((p) => p.status === 'in_transit' || p.status === 'approved' || p.status === 'pending');
+  context += `\n--- FLIGHT PROPOSALS & AIR FREIGHT (Total: ${proposals.length}, Active: ${activeFlights.length}) ---\n`;
+  proposals.slice(-8).forEach((f, idx) => {
+    context += `${idx + 1}. Flight: #${f.flight_number || f.flying_name} (${f.flying_name}) | Status: ${f.status} | Date: ${f.date} | CTNs Count: ${f.items_count || f.carton_ids?.length || 0} | Weight: ${f.total_weight || 0}kg | AWB: ${f.awb_number || 'N/A'} | Airline: ${f.airline || 'Standard Flight'}\n`;
+  });
+
+  // Ledger summary
   if (!currentUser || currentUser.role === 'super_admin' || currentUser.role === 'accountant') {
     const totalPayments = ledger.filter((l) => l.type === 'payment').reduce((acc, l) => acc + (l.amount || 0), 0);
     const totalCharges = ledger.filter((l) => l.type === 'charge').reduce((acc, l) => acc + (l.amount || 0), 0);
 
-    context += `\n--- FINANCIAL & LEDGER OVERVIEW ---
-Total Charges Billed: ৳${totalCharges.toLocaleString()}
+    context += `\n--- FINANCIAL LEDGER SUMMARY ---
+Total Billed Charges: ৳${totalCharges.toLocaleString()}
 Total Payments Collected: ৳${totalPayments.toLocaleString()}
+Current Uncollected Due Balance: ৳${(totalCharges - totalPayments).toLocaleString()}
 `;
   }
 
-  // Warehouses list
+  // Warehouse hubs list
   if (warehouses.length > 0) {
     context += `\n--- WAREHOUSE HUBS ---
 ${warehouses.map((w: any) => `- ${w.name} (${w.code}): ${w.address || 'Standard Hub'}`).join('\n')}
 `;
   } else {
     context += `\n--- WAREHOUSE HUBS ---
-1. Guangzhou Air Cargo Hub (China Hub)
-2. Dhaka Main Distribution Hub (Bangladesh)
+1. Guangzhou Air Cargo Hub (China Hub): Baiyun District, Guangzhou, Guangdong, China.
+2. Dhaka Main Distribution Hub (Bangladesh): Sector 3, Uttara, Dhaka-1230.
 `;
   }
 
@@ -233,7 +289,7 @@ export const askFourStarCargoAI = async (
     ? modelListRes.models 
     : ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
 
-  const systemContext = buildCargoSystemContext(currentUser);
+  const systemContext = buildCargoSystemContext(currentUser, userPrompt);
 
   const fullPromptText = `You are "Four Star Cargo AI" — the official intelligent operations & tracking assistant for M/S Four Star Cargo.
 
@@ -316,7 +372,7 @@ ${userPrompt}`;
   }
 
   return {
-    text: `⚠️ AI সাড়া দিতে পারেনি (${firstErrorMsg || 'Gemini API call failed'})। অনুগ্রহ করে আপনার API Key সঠিক আছে কিনা সুপার এডমিন সেটিংসে গিয়ে টেস্ট টেস্ট করুন।`,
+    text: `⚠️ AI সাড়া দিতে পারেনি (${firstErrorMsg || 'Gemini API call failed'})। অনুগ্রহ করে সুপার এডমিন সেটিংসে (System Settings) আপনার API Key চেক করে টেস্ট করুন।`,
     success: false,
   };
 };
