@@ -96,9 +96,18 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
 
     // Handle remote track received
     pc.ontrack = (event) => {
-      if (remoteAudioRef.current && event.streams[0]) {
-        remoteAudioRef.current.srcObject = event.streams[0];
-        remoteAudioRef.current.play().catch(() => {});
+      if (remoteAudioRef.current) {
+        const stream = event.streams && event.streams[0] ? event.streams[0] : new MediaStream([event.track]);
+        remoteAudioRef.current.srcObject = stream;
+        remoteAudioRef.current.volume = 1.0;
+        remoteAudioRef.current.muted = false;
+
+        const p = remoteAudioRef.current.play();
+        if (p !== undefined) {
+          p.catch((err) => {
+            console.warn('Audio play autoplay policy warning:', err);
+          });
+        }
       }
     };
 
@@ -160,7 +169,10 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
             // Caller: Create offer if not created yet
             if (!myCall.sdp_offer && !peerConnectionRef.current) {
               try {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                const stream = await navigator.mediaDevices.getUserMedia({
+                  audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+                  video: false,
+                });
                 localStreamRef.current = stream;
 
                 const pc = initPeerConnection(myCall.id, true);
@@ -190,7 +202,10 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
           if (!isCaller && myCall.sdp_offer && !myCall.sdp_answer) {
             try {
               if (!localStreamRef.current) {
-                const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+                const stream = await navigator.mediaDevices.getUserMedia({
+                  audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+                  video: false,
+                });
                 localStreamRef.current = stream;
               }
               const pc = initPeerConnection(myCall.id, false);
@@ -287,7 +302,10 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
 
     try {
       if (!localStreamRef.current) {
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+          video: false,
+        });
         localStreamRef.current = stream;
       }
       const pc = initPeerConnection(activeCall.id, false);
@@ -356,8 +374,13 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
 
   return (
     <>
-      {/* Hidden Remote Audio Player */}
-      <audio ref={remoteAudioRef} autoPlay playsInline className="hidden" />
+      {/* Hidden Remote Audio Player - Offscreen so browser does not mute media output */}
+      <audio
+        ref={remoteAudioRef}
+        autoPlay
+        playsInline
+        style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '1px', height: '1px', opacity: 0.01 }}
+      />
 
       {/* 1. INCOMING VOICE CALL MODAL */}
       {isIncoming && (
