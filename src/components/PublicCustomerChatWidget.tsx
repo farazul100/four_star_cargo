@@ -3,6 +3,7 @@ import { MessageSquare, Send, X, Image as ImageIcon, CheckCircle2, User, ShieldC
 import { ChatMessage, ChatConversation, Language } from '../types';
 import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, publishSystemNotification } from '../lib/db';
 import { compressImageFile } from '../utils/imageCompressor';
+import { Logo } from './Logo';
 
 interface PublicCustomerChatWidgetProps {
   language: Language;
@@ -53,7 +54,9 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
     const loadConvoMessages = () => {
       const db = getHostingerDbData();
       const allMsgs: ChatMessage[] = db.messages || [];
-      const filtered = allMsgs.filter((m) => m.conversation_id === convoId);
+      const filtered = allMsgs
+        .filter((m) => m && m.conversation_id === convoId)
+        .sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
 
       setMessages((prevMsgs) => {
         if (filtered.length > prevMsgs.length && prevMsgs.length > 0) {
@@ -218,8 +221,8 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
           {/* Header Bar */}
           <div className="p-4 bg-gradient-to-r from-[#0F2D52] to-[#00897B] border-b border-[#00897B]/40 flex items-center justify-between text-white shrink-0">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-2xl bg-white text-[#00897B] flex items-center justify-center font-black text-lg shadow-md border border-white/30">
-                4★
+              <div className="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center shadow-md border border-white/30 p-1 shrink-0 overflow-hidden">
+                <Logo size="sm" />
               </div>
               <div>
                 <h3 className="text-xs font-bold font-poppins flex items-center space-x-1.5">
