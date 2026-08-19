@@ -652,6 +652,14 @@ export const fetchServerDbAndSync = async () => {
                 hasChanges = true;
               }
             }
+          } else {
+            // Handle non-array server DB keys (like settings, fsc_vps_settings, gemini_api_key)
+            const serverStr = typeof serverData === 'string' ? serverData : JSON.stringify(serverData);
+            const localRaw = localStorage.getItem(key);
+            if (localRaw !== serverStr) {
+              localStorage.setItem(key, serverStr);
+              hasChanges = true;
+            }
           }
         });
 
@@ -660,16 +668,19 @@ export const fetchServerDbAndSync = async () => {
 
         // Sync Gemini API Key to LocalStorage for all non-admin users & guests
         try {
-          const settingsRaw = localStorage.getItem('fsc_vps_settings') || localStorage.getItem('settings');
-          if (settingsRaw) {
-            const parsedSettings = JSON.parse(settingsRaw);
-            if (parsedSettings && parsedSettings.gemini_api_key) {
-              const cleanApiKey = parsedSettings.gemini_api_key.replace(/^["']|["']$/g, '').trim();
-              if (cleanApiKey) {
-                localStorage.setItem('fsc_gemini_api_key', cleanApiKey);
-                if (typeof window !== 'undefined') {
-                  (window as any).__FSC_GEMINI_KEY__ = cleanApiKey;
-                }
+          const serverApiKey = 
+            (serverDb as any)?.gemini_api_key || 
+            (serverDb as any)?.settings?.gemini_api_key || 
+            (serverDb as any)?.fsc_vps_settings?.gemini_api_key || 
+            '';
+          if (serverApiKey) {
+            const cleanApiKey = serverApiKey.replace(/^["']|["']$/g, '').trim();
+            if (cleanApiKey) {
+              localStorage.setItem('fsc_gemini_api_key', cleanApiKey);
+              localStorage.setItem('fsc_vps_settings', JSON.stringify({ gemini_api_key: cleanApiKey }));
+              localStorage.setItem('settings', JSON.stringify({ gemini_api_key: cleanApiKey }));
+              if (typeof window !== 'undefined') {
+                (window as any).__FSC_GEMINI_KEY__ = cleanApiKey;
               }
             }
           }
