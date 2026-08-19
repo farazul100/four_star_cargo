@@ -64,15 +64,20 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({ language, 
 
   // Filter for active user role and assigned warehouse
   const roleNotifications = allNotifications.filter((n) => {
+    if (!n || !n.id || (!n.title && !n.message)) return false;
     if (!user) return false;
-    if (user.role === 'super_admin') return true;
-    if (n.target_user_id && n.target_user_id === user.id) return true;
-    if (n.target_role && (n.target_role === 'all' || n.target_role === user.role)) {
+    
+    if (n.target_user_id) {
+      return n.target_user_id === user.id || user.role === 'super_admin';
+    }
+
+    if (n.target_role && (n.target_role === 'all' || n.target_role === user.role || user.role === 'super_admin')) {
       if (n.target_warehouse_id) {
-        return !user.warehouse_id || user.warehouse_id === n.target_warehouse_id;
+        return !user.warehouse_id || user.warehouse_id === n.target_warehouse_id || user.role === 'super_admin';
       }
       return true;
     }
+
     return false;
   });
 

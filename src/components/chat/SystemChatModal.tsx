@@ -123,7 +123,9 @@ export const SystemChatModal: React.FC<SystemChatModalProps> = ({
   if (!isOpen) return null;
 
   const activeConvo = conversations.find((c) => c.id === activeConvoId);
-  const activeMessages = messages.filter((m) => m.conversation_id === activeConvoId);
+  const activeMessages = messages
+    .filter((m) => m && m.conversation_id === activeConvoId)
+    .sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
 
   // Helper to format conversation title
   const getConvoTitle = (convo: ChatConversation) => {

@@ -62,15 +62,21 @@ export const Header: React.FC<HeaderProps> = ({
 
   // Filter notifications for active user's role and assigned warehouse
   const roleNotifs = allNotifs.filter((n) => {
+    if (!n || !n.id || (!n.title && !n.message)) return false;
     if (!currentUser) return false;
-    if (currentUser.role === 'super_admin') return true;
-    if (n.target_user_id && n.target_user_id === currentUser.id) return true;
-    if (n.target_role && (n.target_role === 'all' || n.target_role === currentUser.role)) {
+    
+    // If target_user_id is specified, ONLY deliver to that specific target user or super admin
+    if (n.target_user_id) {
+      return n.target_user_id === currentUser.id || currentUser.role === 'super_admin';
+    }
+
+    if (n.target_role && (n.target_role === 'all' || n.target_role === currentUser.role || currentUser.role === 'super_admin')) {
       if (n.target_warehouse_id) {
-        return !currentUser.warehouse_id || currentUser.warehouse_id === n.target_warehouse_id;
+        return !currentUser.warehouse_id || currentUser.warehouse_id === n.target_warehouse_id || currentUser.role === 'super_admin';
       }
       return true;
     }
+
     return false;
   });
 
