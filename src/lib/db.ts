@@ -291,16 +291,66 @@ export const getHostingerDbData = () => {
     } catch {}
   }
 
+  let customers = JSON.parse(localStorage.getItem(DB_KEYS.CUSTOMERS) || '[]') as Customer[];
+  const crmCustomers = JSON.parse(localStorage.getItem(DB_KEYS.CRM_CUSTOMERS) || '[]') as CrmCustomer[];
+
+  // Auto-sync real CRM customers into main system customers database (fsc_vps_customers)
+  let customersUpdated = false;
+  if (Array.isArray(crmCustomers) && crmCustomers.length > 0) {
+    crmCustomers.forEach((crmCust) => {
+      if (!crmCust || !crmCust.id || /^crm-cust-10[1-9]$/.test(crmCust.id) || /^crm-cust-11[0-1]$/.test(crmCust.id)) {
+        return;
+      }
+      const cleanPhone = (crmCust.phone || '').replace(/\D/g, '');
+      const cleanName = (crmCust.name || '').trim().toLowerCase();
+
+      const exists = customers.some((c) => {
+        const existingPhone = (c.phone || '').replace(/\D/g, '');
+        const existingName = (c.name || '').trim().toLowerCase();
+        return (cleanPhone && existingPhone && cleanPhone === existingPhone) || (cleanName && existingName === cleanName);
+      });
+
+      if (!exists) {
+        const rawDigits = (crmCust.phone || '').replace(/\D/g, '');
+        const shortId = rawDigits.length >= 4 ? rawDigits.slice(-4) : Math.floor(1000 + Math.random() * 9000).toString();
+
+        const newMainCust: Customer = {
+          id: `cust-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          customer_code: `CUST-${shortId}`,
+          shipping_mark: `MAR-${shortId}`,
+          name: crmCust.name,
+          phone: crmCust.phone,
+          company_name: crmCust.company_name || '',
+          address: crmCust.address || 'Dhaka, Bangladesh',
+          total_due: 0,
+          total_paid: 0,
+          total_billed: 0,
+          status: crmCust.followup_status === 'important_regular' ? 'vip' : 'active',
+          created_at: crmCust.created_at || new Date().toISOString(),
+        };
+
+        customers = [newMainCust, ...customers];
+        customersUpdated = true;
+      }
+    });
+
+    if (customersUpdated) {
+      try {
+        localStorage.setItem(DB_KEYS.CUSTOMERS, JSON.stringify(customers));
+      } catch (e) {}
+    }
+  }
+
   return {
     users: mergedUsers,
     warehouses: warehouses,
     cartons: cartons as Carton[],
     proposals: proposals as FlyingProposal[],
-    customers: JSON.parse(localStorage.getItem(DB_KEYS.CUSTOMERS) || '[]') as Customer[],
+    customers: customers,
     ledgerEntries: JSON.parse(localStorage.getItem(DB_KEYS.LEDGER) || '[]') as LedgerEntry[],
     auditLogs: JSON.parse(localStorage.getItem(DB_KEYS.AUDIT) || '[]') as AuditLog[],
     expenses: JSON.parse(localStorage.getItem(DB_KEYS.EXPENSES) || '[]') as ExpenseItem[],
-    crmCustomers: JSON.parse(localStorage.getItem(DB_KEYS.CRM_CUSTOMERS) || '[]') as CrmCustomer[],
+    crmCustomers: crmCustomers,
     notifications: notifications,
   };
 };

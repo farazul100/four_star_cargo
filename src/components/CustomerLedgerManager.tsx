@@ -29,7 +29,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { Customer, LedgerEntry, Carton, Language, Theme } from '../types';
-import { getHostingerDbData, saveHostingerDbData } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '../lib/db';
 import { INITIAL_CUSTOMERS, INITIAL_LEDGER } from '../mockData';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
@@ -94,31 +94,36 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Load Data with Migration & Fallback Sanitation
+  // Load Data with Migration & Live Real-time Sync
   useEffect(() => {
-    const data = getHostingerDbData();
-    const rawCusts: Customer[] = data.customers && data.customers.length > 0 ? data.customers : INITIAL_CUSTOMERS;
-    const rawLedger: LedgerEntry[] = data.ledgerEntries && data.ledgerEntries.length > 0 ? data.ledgerEntries : INITIAL_LEDGER;
+    const loadDbData = () => {
+      const data = getHostingerDbData();
+      const rawCusts: Customer[] = data.customers && data.customers.length > 0 ? data.customers : INITIAL_CUSTOMERS;
+      const rawLedger: LedgerEntry[] = data.ledgerEntries && data.ledgerEntries.length > 0 ? data.ledgerEntries : INITIAL_LEDGER;
 
-    // Sanitize Customers to guarantee shipping_mark and total_billed calculations
-    const sanitizedCusts = rawCusts.map((c) => {
-      const fallbackMark =
-        c.id === 'cust-1' ? 'MAR-8801' : c.id === 'cust-2' ? 'SAY-9920' : c.id === 'cust-3' ? 'APX-7710' : `MAR-${c.customer_code.replace('CUST-', '')}`;
-      const mark = c.shipping_mark || fallbackMark;
+      // Sanitize Customers to guarantee shipping_mark and total_billed calculations
+      const sanitizedCusts = rawCusts.map((c) => {
+        const fallbackMark =
+          c.id === 'cust-1' ? 'MAR-8801' : c.id === 'cust-2' ? 'SAY-9920' : c.id === 'cust-3' ? 'APX-7710' : `MAR-${(c.customer_code || '').replace('CUST-', '')}`;
+        const mark = c.shipping_mark || fallbackMark;
 
-      const billedCalculated = (c.total_due || 0) + (c.total_paid || 0);
-      const totalBilled = c.total_billed && c.total_billed > 0 ? c.total_billed : billedCalculated;
+        const billedCalculated = (c.total_due || 0) + (c.total_paid || 0);
+        const totalBilled = c.total_billed && c.total_billed > 0 ? c.total_billed : billedCalculated;
 
-      return {
-        ...c,
-        shipping_mark: mark,
-        total_billed: totalBilled,
-      };
-    });
+        return {
+          ...c,
+          shipping_mark: mark,
+          total_billed: totalBilled,
+        };
+      });
 
-    setCustomers(sanitizedCusts);
-    setLedgerEntries(rawLedger);
-    setCartons(data.cartons || []);
+      setCustomers(sanitizedCusts);
+      setLedgerEntries(rawLedger);
+      setCartons(data.cartons || []);
+    };
+
+    loadDbData();
+    return subscribeToDbUpdates(loadDbData);
   }, []);
 
   // Sync Customers to DB
