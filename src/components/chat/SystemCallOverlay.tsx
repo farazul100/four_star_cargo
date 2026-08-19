@@ -106,21 +106,31 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
         if (!ctx || ctx.state === 'closed') return;
         if (ctx.state === 'suspended') ctx.resume();
         const now = ctx.currentTime;
-        const osc = ctx.createOscillator();
+        const osc1 = ctx.createOscillator();
+        const osc2 = ctx.createOscillator();
         const gain = ctx.createGain();
-        osc.type = 'sine';
-        osc.frequency.value = 520;
-        gain.gain.setValueAtTime(0.001, now);
-        gain.gain.exponentialRampToValueAtTime(0.2, now + 0.05);
-        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.8);
-        osc.connect(gain);
+
+        osc1.type = 'sine';
+        osc1.frequency.value = 520;
+        osc2.type = 'sine';
+        osc2.frequency.value = 660;
+
+        gain.gain.setValueAtTime(0.01, now);
+        gain.gain.linearRampToValueAtTime(0.85, now + 0.04);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.95);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
         gain.connect(ctx.destination);
-        osc.start(now);
-        osc.stop(now + 0.85);
+
+        osc1.start(now);
+        osc2.start(now);
+        osc1.stop(now + 0.98);
+        osc2.stop(now + 0.98);
       };
 
       triggerTone();
-      ringtoneIntervalRef.current = window.setInterval(triggerTone, 2000);
+      ringtoneIntervalRef.current = window.setInterval(triggerTone, 1400);
     } catch (e) {}
   };
 
@@ -349,7 +359,20 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
     if (!activeCall) return;
     stopRingtone();
 
-    // 1. Immediately get mic stream & attach tracks to PC so answer SDP includes audio
+    // 1. Mark status active in DB & state FIRST unconditionally
+    const db = getHostingerDbData();
+    const updatedCalls = (db.calls || []).map((c: CallSession) =>
+      c.id === activeCall.id ? { ...c, status: 'active' as const } : c
+    );
+    saveHostingerDbData('fsc_vps_calls', updatedCalls);
+    setActiveCall({ ...activeCall, status: 'active' });
+
+    // Immediate cross-tab/server sync dispatch
+    window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key: 'fsc_vps_calls' } }));
+
+    logSystemAuditAction(currentUser, 'CALL_ACCEPTED', 'CALL', activeCall.id, `Accepted voice call from ${activeCall.caller_name}`);
+
+    // 2. Request microphone stream & bind tracks
     try {
       if (!localStreamRef.current) {
         const stream = await getMicrophoneStream();
@@ -357,19 +380,6 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
       }
       const pc = initPeerConnection(activeCall.id, false);
       localStreamRef.current.getTracks().forEach((track) => pc.addTrack(track, localStreamRef.current!));
-
-      // 2. Mark status active in DB & notify caller instantly
-      const db = getHostingerDbData();
-      const updatedCalls = (db.calls || []).map((c: CallSession) =>
-        c.id === activeCall.id ? { ...c, status: 'active' as const } : c
-      );
-      saveHostingerDbData('fsc_vps_calls', updatedCalls);
-      setActiveCall({ ...activeCall, status: 'active' });
-
-      // Immediate cross-tab/server trigger
-      window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key: 'fsc_vps_calls' } }));
-
-      logSystemAuditAction(currentUser, 'CALL_ACCEPTED', 'CALL', activeCall.id, `Accepted voice call from ${activeCall.caller_name}`);
     } catch (err) {
       console.warn('Accept call media error:', err);
     }
