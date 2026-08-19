@@ -107,6 +107,12 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
     return getPathaoApiSettings();
   });
 
+  // Google Gemini AI Studio API Key State
+  const [geminiApiKey, setGeminiApiKey] = useState<string>(() => {
+    const db = getHostingerDbData() as any;
+    return db.settings?.gemini_api_key || localStorage.getItem('fsc_gemini_api_key') || '';
+  });
+
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const showToast = (msg: string) => {
@@ -872,6 +878,76 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
           </form>
         </div>
       )}
+
+      {/* 🤖 Google Gemini AI Studio API Configuration Card (Super Admin Only) */}
+      <div className={`p-6 border shadow-xs transition-colors rounded-2xl mt-6 ${
+        isDark ? 'bg-[#0E1B2A] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+      }`}>
+        <div className="flex items-center space-x-3 border-b dark:border-[#1E3247] pb-4 mb-4">
+          <div className="p-2.5 rounded-xl bg-[#00897B]/15 text-[#00897B]">
+            <Settings className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="text-sm font-bold font-poppins uppercase tracking-wider flex items-center space-x-2">
+              <span>🤖 Google Gemini AI API Configuration</span>
+            </h3>
+            <p className="text-[11px] text-slate-500 dark:text-slate-400">
+              {isBn
+                ? 'ফোর স্টার কার্গো এআই অ্যাসিস্ট্যান্ট চালু করতে আপনার Google AI Studio (Gemini) API Key কানেক্ট করুন।'
+                : 'Connect your Google AI Studio (Gemini) API key to power the Four Star Cargo AI Copilot.'}
+            </p>
+          </div>
+        </div>
+
+        <form onSubmit={(e) => {
+          e.preventDefault();
+          const cleanKey = (geminiApiKey || '').trim();
+          localStorage.setItem('fsc_gemini_api_key', cleanKey);
+          const dbData = getHostingerDbData() as any;
+          saveHostingerDbData('settings', { ...(dbData.settings || {}), gemini_api_key: cleanKey });
+          saveHostingerDbData('fsc_vps_settings', { ...(dbData.settings || {}), gemini_api_key: cleanKey });
+
+          logSystemAuditAction(
+            currentUser,
+            'UPDATE_GEMINI_API_KEY',
+            'system',
+            'AI_SETTINGS',
+            'Google Gemini AI API Key সেটিংস আপডেট করা হয়েছে'
+          );
+
+          showToast(isBn ? '🤖 Google Gemini AI API Key সফলভাবে সংরক্ষিত হয়েছে!' : '🤖 Google Gemini AI API Key saved successfully!');
+        }} className="space-y-4">
+          <div className="space-y-1.5">
+            <label className="text-xs text-slate-600 dark:text-slate-400 font-medium block">
+              {isBn ? 'Gemini API Key (Google AI Studio)' : 'Gemini API Key (from Google AI Studio)'}
+            </label>
+            <input
+              type="password"
+              value={geminiApiKey}
+              onChange={(e) => setGeminiApiKey(e.target.value)}
+              placeholder="AIzaSy..."
+              className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-bold outline-none transition-all ${
+                isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#00897B]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
+              }`}
+            />
+            <p className="text-[10px] text-slate-400">
+              {isBn
+                ? 'গুগল এআই স্টুডিও (aistudio.google.com) থেকে তৈরি করা আপনার ফ্রী বা পেইড Gemini API Key এখানে দিন।'
+                : 'Get your free or paid API key from Google AI Studio (aistudio.google.com) and paste here.'}
+            </p>
+          </div>
+
+          <div className="pt-2 flex justify-end">
+            <button
+              type="submit"
+              className="py-2.5 px-6 rounded-xl bg-[#00897B] hover:bg-[#00796B] text-white font-bold text-xs shadow-md flex items-center space-x-2 transition-all cursor-pointer"
+            >
+              <Save className="w-4 h-4 text-white" />
+              <span>{isBn ? 'Gemini API Key সংরক্ষণ করুন' : 'Save Gemini API Key'}</span>
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 };
