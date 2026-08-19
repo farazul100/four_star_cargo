@@ -10,6 +10,11 @@ import {
   Send,
   X,
   Star,
+  ArrowRight,
+  ChevronRight,
+  UserCheck,
+  Building2,
+  Filter,
 } from 'lucide-react';
 import { CrmCustomer, User, Language, Theme } from '../types';
 import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSystemAuditAction } from '../lib/db';
@@ -22,6 +27,8 @@ interface CrmManagementSystemProps {
   theme?: Theme;
 }
 
+type CrmStageTab = 'followup' | 'order_complete' | 'important_regular';
+
 export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
   currentUser,
   language = 'bn',
@@ -31,6 +38,9 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
   const { theme: contextTheme } = useTheme();
   const activeTheme = contextTheme || themeProp || 'light';
   const isDark = activeTheme === 'dark';
+
+  // Active Left Sub-Tab State
+  const [activeStageTab, setActiveStageTab] = useState<CrmStageTab>('followup');
 
   // Toast Alerts
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -67,10 +77,9 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [countryCategory, setCountryCategory] = useState<CrmCustomer['country_category']>('CN_New');
-  const [followupStatus, setFollowupStatus] = useState<CrmCustomer['followup_status']>('followup');
   const [notes, setNotes] = useState('');
 
-  // Handle Save New Customer
+  // Handle Save New Customer (Always starts in 'followup' stage)
   const handleCreateCustomer = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim() || !phone.trim()) return;
@@ -80,7 +89,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
       name: name.trim(),
       phone: phone.trim(),
       country_category: countryCategory,
-      followup_status: followupStatus,
+      followup_status: 'followup',
       notes: notes.trim(),
       created_by: currentUser.name,
       created_by_id: currentUser.id,
@@ -98,13 +107,13 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
       'CREATE_CRM_CUSTOMER',
       'crm',
       newCust.id,
-      `নতুন কাস্টমার ${newCust.name} (${newCust.phone}) অনবোর্ড করা হয়েছে`
+      `নতুন কাস্টমার ${newCust.name} (${newCust.phone}) ফলো আপ তালিকায় যুক্ত করা হয়েছে`
     );
 
     addToast(
       'success',
       isBn ? 'নতুন কাস্টমার তৈরি সফল!' : 'Customer Created Successfully!',
-      isBn ? `${newCust.name} সিস্টেমে যুক্ত হয়েছে` : `${newCust.name} added to CRM`
+      isBn ? `${newCust.name} ফলো আপ তালিকায় যুক্ত হয়েছে` : `${newCust.name} added to Follow-Up list`
     );
 
     setName('');
@@ -113,7 +122,61 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
     setShowAddModal(false);
   };
 
-  // Handle Hand Over Customer
+  // Stage 1 -> Stage 2: Convert Followup -> New Customer
+  const handleConvertToNewCustomer = (cust: CrmCustomer) => {
+    const updatedList = customers.map((c) => {
+      if (c.id === cust.id) {
+        return { ...c, followup_status: 'order_complete' as const };
+      }
+      return c;
+    });
+
+    setCustomers(updatedList);
+    saveHostingerDbData('fsc_vps_crm_customers', updatedList);
+
+    logSystemAuditAction(
+      currentUser,
+      'CONVERT_TO_NEW_CUSTOMER',
+      'crm',
+      cust.id,
+      `${cust.name} কাস্টমার থেকে 'নতুন কাস্টমার' তালিকায় স্থানান্তরিত করা হয়েছে`
+    );
+
+    addToast(
+      'success',
+      isBn ? 'নতুন কাস্টমারে সফল রূপান্তর!' : 'Converted to New Customer!',
+      isBn ? `${cust.name} এখন 'নতুন কাস্টমার' তালিকায় স্থানান্তরিত হয়েছে` : `${cust.name} moved to New Customer stage`
+    );
+  };
+
+  // Stage 2 -> Stage 3: Convert New Customer -> Regular Customer
+  const handleConvertToRegularCustomer = (cust: CrmCustomer) => {
+    const updatedList = customers.map((c) => {
+      if (c.id === cust.id) {
+        return { ...c, followup_status: 'important_regular' as const };
+      }
+      return c;
+    });
+
+    setCustomers(updatedList);
+    saveHostingerDbData('fsc_vps_crm_customers', updatedList);
+
+    logSystemAuditAction(
+      currentUser,
+      'CONVERT_TO_REGULAR_CUSTOMER',
+      'crm',
+      cust.id,
+      `${cust.name} কাস্টমার থেকে 'রেগুলার কাস্টমার' তালিকায় স্থানান্তরিত করা হয়েছে`
+    );
+
+    addToast(
+      'success',
+      isBn ? 'রেগুলার কাস্টমারে সফল রূপান্তর!' : 'Converted to Regular Customer!',
+      isBn ? `${cust.name} এখন 'রেগুলার কাস্টমার' তালিকায় স্থানান্তরিত হয়েছে (হ্যান্ড ওভারের জন্য প্রস্তুত)` : `${cust.name} moved to Regular Customer stage`
+    );
+  };
+
+  // Stage 3 Only: Hand Over Regular Customer
   const handleHandoverCustomer = (cust: CrmCustomer) => {
     if (cust.is_handed_over) return;
 
@@ -137,37 +200,30 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
       'HANDOVER_CRM_CUSTOMER',
       'crm',
       cust.id,
-      `কাস্টমার ${cust.name} অপারেশনে হ্যান্ড ওভার করা হয়েছে (${currentUser.name})`
+      `রেগুলার কাস্টমার ${cust.name} অপারেশনে সফলভাবে হ্যান্ড ওভার করা হয়েছে (${currentUser.name})`
     );
 
     addToast(
       'success',
       isBn ? '🤝 কাস্টমার হ্যান্ড ওভার সম্পন্ন!' : '🤝 Customer Handed Over!',
-      isBn ? `${cust.name} কাস্টমার সফলভাবে হ্যান্ড ওভার হিসেবে মার্ক করা হয়েছে` : `${cust.name} handed over successfully`
+      isBn ? `${cust.name} কাস্টমার সফলভাবে অপারেশনে হ্যান্ড ওভার করা হয়েছে` : `${cust.name} handed over successfully to operations`
     );
   };
 
-  // Handle Move Status
-  const handleShiftStatus = (cust: CrmCustomer, newStatus: CrmCustomer['followup_status']) => {
-    const updatedList = customers.map((c) => {
-      if (c.id === cust.id) {
-        return { ...c, followup_status: newStatus };
-      }
-      return c;
-    });
+  // Stage Groups Calculation
+  const followupCustomers = customers.filter((c) => c.followup_status === 'followup');
+  const newCustomers = customers.filter((c) => c.followup_status === 'order_complete');
+  const regularCustomers = customers.filter((c) => c.followup_status === 'important_regular');
 
-    setCustomers(updatedList);
-    saveHostingerDbData('fsc_vps_crm_customers', updatedList);
+  // Filtered List for Current Selected Stage Tab
+  const targetStageList =
+    activeStageTab === 'followup'
+      ? followupCustomers
+      : activeStageTab === 'order_complete'
+      ? newCustomers
+      : regularCustomers;
 
-    addToast(
-      'info',
-      isBn ? 'স্ট্যাটাস আপডেট সফল' : 'Status Shifted',
-      isBn ? `${cust.name}-এর ক্যাটাগরি আপডেট করা হয়েছে` : `${cust.name} moved to ${newStatus}`
-    );
-  };
-
-  // Filtered List based on Search, Country Sheet Tab & Executive Filter
-  const filteredCustomers = customers.filter((c) => {
+  const filteredCustomers = targetStageList.filter((c) => {
     const q = searchQuery.toLowerCase();
     const matchesSearch = !searchQuery || c.name.toLowerCase().includes(q) || c.phone.includes(q) || (c.notes && c.notes.toLowerCase().includes(q));
     const matchesCountry = selectedCountryTab === 'ALL' || c.country_category === selectedCountryTab;
@@ -175,19 +231,15 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
     return matchesSearch && matchesCountry && matchesExec;
   });
 
-  // Category Column Groups
-  const followupGroup = filteredCustomers.filter((c) => c.followup_status === 'followup');
-  const orderCompleteGroup = filteredCustomers.filter((c) => c.followup_status === 'order_complete');
-  const regularGroup = filteredCustomers.filter((c) => c.followup_status === 'important_regular');
-
   // Performance Leaderboard Calculation per Executive
-  const executiveStatsMap = new Map<string, { total: number; handedOver: number; orderComplete: number }>();
+  const executiveStatsMap = new Map<string, { total: number; handedOver: number; orderComplete: number; regular: number }>();
   customers.forEach((c) => {
     const execName = c.created_by || 'Executive';
-    const current = executiveStatsMap.get(execName) || { total: 0, handedOver: 0, orderComplete: 0 };
+    const current = executiveStatsMap.get(execName) || { total: 0, handedOver: 0, orderComplete: 0, regular: 0 };
     current.total += 1;
     if (c.is_handed_over) current.handedOver += 1;
     if (c.followup_status === 'order_complete') current.orderComplete += 1;
+    if (c.followup_status === 'important_regular') current.regular += 1;
     executiveStatsMap.set(execName, current);
   });
 
@@ -202,260 +254,365 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
     <div className="space-y-6 max-w-7xl mx-auto font-sans font-light">
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
-      {/* Action Header */}
-      <div className="flex items-center justify-between border-b pb-4 dark:border-slate-800">
+      {/* Top Action Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 dark:border-slate-800">
         <div className="flex items-center space-x-2.5">
           <Users className="w-5 h-5 text-[#00897B]" />
-          <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-            {isBn ? 'কাস্টমার রিলেশনশিপ অনবোর্ডিং, ফলোআপ ও হ্যান্ড ওভার ড্যাশবোর্ড' : 'Customer Onboarding, Follow-up & Handover Hub'}
-          </span>
+          <div>
+            <h2 className="text-sm font-semibold text-slate-800 dark:text-slate-100">
+              {isBn ? 'কাস্টমার রিলেশনশিপ ম্যানেজমেন্ট (CRM Panel)' : 'Customer Relationship Management (CRM Panel)'}
+            </h2>
+            <p className="text-xs text-slate-500 font-light mt-0.5">
+              {isBn
+                ? 'ফলোআপ ➔ নতুন কাস্টমার ➔ রেগুলার কাস্টমার পর্যায়ক্রমিক হ্যান্ড ওভার হাব'
+                : 'Follow-up ➔ New Customer ➔ Regular Customer Handover Lifecycle'}
+            </p>
+          </div>
         </div>
 
         <button
           type="button"
           onClick={() => setShowAddModal(true)}
-          className="py-2.5 px-4.5 rounded-xl bg-[#00897B] hover:bg-[#00796B] text-white font-medium text-xs shadow-xs flex items-center space-x-2 transition-all cursor-pointer"
+          className="py-2.5 px-4.5 rounded-xl bg-[#00897B] hover:bg-[#00796B] text-white font-medium text-xs shadow-xs flex items-center space-x-2 transition-all cursor-pointer self-start sm:self-auto"
         >
           <UserPlus className="w-4 h-4 text-white" />
-          <span>{isBn ? '+ নতুন কাস্টমার তৈরি করুন' : '+ Create New Customer'}</span>
+          <span>{isBn ? '+ নতুন কাস্টমার অনবোর্ড করুন' : '+ Onboard New Customer'}</span>
         </button>
       </div>
 
-      {/* Executive Performance Leaderboard (Light Balanced Colors) */}
-      <div className={`border rounded-2xl p-5 shadow-2xs space-y-4 transition-colors ${
+      {/* Executive Performance Summary Box */}
+      <div className={`border rounded-2xl p-4.5 shadow-2xs space-y-4 ${
         isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-800'
       }`}>
-        <div className="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+        <div className="flex items-center justify-between border-b pb-2.5 dark:border-slate-800">
           <h3 className="text-xs font-semibold text-slate-700 dark:text-slate-200 flex items-center space-x-2">
             <Award className="w-4 h-4 text-amber-500" />
-            <span>{isBn ? '📊 এক্সিকিউটিভ পারফরম্যান্স ও হ্যান্ড ওভার ওভারভিউ' : 'Executive Performance & Handover Overview'}</span>
+            <span>{isBn ? '📊 এক্সিকিউটিভ অনবোর্ডিং পারফরম্যান্স লিডারবোর্ড' : 'Executive Performance Leaderboard'}</span>
           </h3>
           <span className="text-xs text-slate-500 font-normal">
             {isBn ? `মোট কাস্টমার: ${customers.length} জন` : `Total Onboarded: ${customers.length}`}
           </span>
         </div>
 
-        {/* 4 Light Harmonious Stat Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
-          <div className={`p-3.5 border rounded-xl transition-all ${
-            isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-emerald-50/60 border-emerald-200/80 text-emerald-950'
-          }`}>
-            <p className="text-xs text-emerald-800 dark:text-emerald-400 font-medium">{isBn ? 'মোট অনবোর্ড কাস্টমার' : 'Total Onboarded'}</p>
-            <p className="text-xl font-mono font-semibold text-emerald-700 dark:text-emerald-300 mt-1">{customers.length} <span className="text-xs font-normal">জন</span></p>
-          </div>
-
-          <div className={`p-3.5 border rounded-xl transition-all ${
-            isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-rose-50/60 border-rose-200/80 text-rose-950'
-          }`}>
-            <p className="text-xs text-rose-800 dark:text-rose-400 font-medium">{isBn ? '🔴 ফলোআপ কাস্টমার' : 'Follow Up Pipeline'}</p>
-            <p className="text-xl font-mono font-semibold text-rose-600 dark:text-rose-300 mt-1">{customers.filter(c => c.followup_status === 'followup').length} <span className="text-xs font-normal">জন</span></p>
-          </div>
-
-          <div className={`p-3.5 border rounded-xl transition-all ${
-            isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-blue-50/60 border-blue-200/80 text-blue-950'
-          }`}>
-            <p className="text-xs text-blue-800 dark:text-blue-400 font-medium">{isBn ? '🔵 অর্ডার কমপ্লিট' : 'Order Complete'}</p>
-            <p className="text-xl font-mono font-semibold text-blue-600 dark:text-blue-300 mt-1">{customers.filter(c => c.followup_status === 'order_complete').length} <span className="text-xs font-normal">জন</span></p>
-          </div>
-
-          <div className={`p-3.5 border rounded-xl transition-all ${
-            isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-teal-50/60 border-teal-200/80 text-teal-950'
-          }`}>
-            <p className="text-xs text-teal-800 dark:text-teal-400 font-medium">{isBn ? '🤝 হ্যান্ড ওভার সম্পন্ন' : 'Handed Over'}</p>
-            <p className="text-xl font-mono font-semibold text-teal-700 dark:text-teal-300 mt-1">{customers.filter(c => c.is_handed_over).length} <span className="text-xs font-normal">জন</span></p>
-          </div>
-        </div>
-
-        {/* Executive Table */}
+        {/* Executive Leaderboard Summary Table */}
         {executiveStatsList.length > 0 && (
-          <div className="overflow-x-auto pt-1">
+          <div className="overflow-x-auto">
             <table className="w-full text-xs text-left">
               <thead className={`border-b ${isDark ? 'bg-slate-900/80 border-slate-800 text-slate-300' : 'bg-slate-100/90 border-slate-200/80 text-slate-700'}`}>
                 <tr>
-                  <th className="py-2.5 px-3 font-medium">{isBn ? 'সিআরএম এক্সিকিউটিভ (CRM Executive)' : 'Executive Name'}</th>
-                  <th className="py-2.5 px-3 font-medium">{isBn ? 'মোট তৈরি কাস্টমার' : 'Total Created'}</th>
-                  <th className="py-2.5 px-3 font-medium">{isBn ? 'অর্ডার কমপ্লিট' : 'Order Complete'}</th>
-                  <th className="py-2.5 px-3 font-medium">{isBn ? 'হ্যান্ড ওভার সম্পন্ন' : 'Handed Over'}</th>
-                  <th className="py-2.5 px-3 font-medium">{isBn ? 'কনভার্সন রেট' : 'Conversion'}</th>
+                  <th className="py-2 px-3 font-medium">{isBn ? 'সিআরএম এক্সিকিউটিভ' : 'Executive'}</th>
+                  <th className="py-2 px-3 font-medium">{isBn ? 'মোট তৈরি' : 'Total Created'}</th>
+                  <th className="py-2 px-3 font-medium">{isBn ? '🔴 ফলোআপ' : 'Followup'}</th>
+                  <th className="py-2 px-3 font-medium">{isBn ? '🔵 নতুন কাস্টমার' : 'New Customer'}</th>
+                  <th className="py-2 px-3 font-medium">{isBn ? '⚫ রেগুলার কাস্টমার' : 'Regular Customer'}</th>
+                  <th className="py-2 px-3 font-medium">{isBn ? '🤝 হ্যান্ড ওভার সম্পন্ন' : 'Handed Over'}</th>
                 </tr>
               </thead>
               <tbody className="divide-y dark:divide-slate-800">
-                {executiveStatsList.map((st, idx) => {
-                  const convRate = st.total > 0 ? ((st.handedOver / st.total) * 100).toFixed(0) : '0';
-                  return (
-                    <tr key={idx} className={isDark ? 'hover:bg-slate-900/40' : 'hover:bg-slate-50/80'}>
-                      <td className="py-2.5 px-3 font-medium text-slate-800 dark:text-slate-200 flex items-center space-x-2">
-                        <span className="w-5 h-5 rounded-full bg-[#00897B]/15 text-[#00897B] text-[10px] flex items-center justify-center font-mono font-semibold">{idx + 1}</span>
-                        <span>{st.name}</span>
-                      </td>
-                      <td className="py-2.5 px-3 font-mono font-medium text-slate-800 dark:text-slate-200">{st.total} জন</td>
-                      <td className="py-2.5 px-3 font-mono text-blue-600 dark:text-blue-400 font-medium">{st.orderComplete} জন</td>
-                      <td className="py-2.5 px-3 font-mono text-teal-700 dark:text-teal-400 font-medium">
-                        🤝 {st.handedOver} জন
-                      </td>
-                      <td className="py-2.5 px-3 font-mono text-teal-700 dark:text-teal-400 font-medium">
-                        {convRate}%
-                      </td>
-                    </tr>
-                  );
-                })}
+                {executiveStatsList.map((st, idx) => (
+                  <tr key={idx} className={isDark ? 'hover:bg-slate-900/40' : 'hover:bg-slate-50/80'}>
+                    <td className="py-2 px-3 font-medium text-slate-800 dark:text-slate-200 flex items-center space-x-2">
+                      <span className="w-4 h-4 rounded-full bg-[#00897B]/15 text-[#00897B] text-[10px] flex items-center justify-center font-mono font-semibold">{idx + 1}</span>
+                      <span>{st.name}</span>
+                    </td>
+                    <td className="py-2 px-3 font-mono font-medium text-slate-800 dark:text-slate-200">{st.total} জন</td>
+                    <td className="py-2 px-3 font-mono text-rose-600 dark:text-rose-400 font-medium">{st.total - st.orderComplete - st.regular} জন</td>
+                    <td className="py-2 px-3 font-mono text-blue-600 dark:text-blue-400 font-medium">{st.orderComplete} জন</td>
+                    <td className="py-2 px-3 font-mono text-slate-700 dark:text-slate-300 font-medium">{st.regular} জন</td>
+                    <td className="py-2 px-3 font-mono text-teal-700 dark:text-teal-400 font-medium">
+                      🤝 {st.handedOver} জন
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
         )}
       </div>
 
-      {/* Country Sheet Tabs Bar & Search Controls */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3.5 border-b pb-3.5 dark:border-slate-800">
-        {/* Country Sheet Tabs (Matching Google Sheet Style Tabs) */}
-        <div className="flex flex-wrap gap-1.5">
-          {[
-            { id: 'ALL', label: isBn ? 'সব কান্ট্রি (All)' : 'ALL' },
-            { id: 'CN_Old', label: 'CHINA Old' },
-            { id: 'KR_Old', label: 'Korea Old' },
-            { id: 'CN_New', label: 'CN New' },
-            { id: 'KR_New', label: 'KR New' },
-            { id: 'JP_New', label: 'JP New' },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setSelectedCountryTab(tab.id)}
-              className={`px-4 py-2 rounded-xl text-xs transition-all cursor-pointer ${
-                selectedCountryTab === tab.id
-                  ? 'bg-slate-900 text-white font-medium dark:bg-teal-600 shadow-2xs'
-                  : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 font-normal dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300'
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Search & Executive Filter */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={isBn ? 'নাম বা ফোন নম্বর দিয়ে খুঁজুন...' : 'Search name or phone...'}
-              className={`pl-9 pr-3.5 py-2 border rounded-xl text-xs outline-none transition-all ${
-                isDark ? 'bg-[#1E293B] border-slate-700 text-white focus:border-[#00897B]' : 'bg-white border-slate-200 text-slate-800 focus:border-[#00897B]'
-              }`}
-            />
+      {/* MAIN LAYOUT: LEFT SIDE NAVIGATION OPTIONS + RIGHT SIDE TABLE VIEW */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* LEFT SIDE SUB-MENU OPTIONS (3 OPTIONS AS REQUESTED) */}
+        <div className="lg:col-span-3 space-y-2">
+          <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-2 mb-2">
+            {isBn ? 'কাস্টমার পর্যায়ক্রমিক ফিল্টার' : 'Stage Navigation'}
           </div>
 
-          <select
-            value={executiveFilter}
-            onChange={(e) => setExecutiveFilter(e.target.value)}
-            className={`py-2 px-3 border rounded-xl text-xs outline-none cursor-pointer transition-all ${
-              isDark ? 'bg-[#1E293B] border-slate-700 text-white focus:border-[#00897B]' : 'bg-white border-slate-200 text-slate-800 focus:border-[#00897B]'
+          {/* Option 1: Follow Up Customer */}
+          <button
+            type="button"
+            onClick={() => setActiveStageTab('followup')}
+            className={`w-full p-3.5 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+              activeStageTab === 'followup'
+                ? 'bg-rose-50 border-rose-300 text-rose-950 font-medium shadow-2xs dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-200'
+                : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-50 dark:bg-[#1E293B] dark:border-slate-800 dark:text-slate-300'
             }`}
           >
-            <option value="all">{isBn ? 'সকল এক্সিকিউটিভ' : 'All Executives'}</option>
-            {uniqueExecutives.map((exec, idx) => (
-              <option key={idx} value={exec}>{exec}</option>
-            ))}
-          </select>
-        </div>
-      </div>
-
-      {/* 3-COLUMN BOARD LAYOUT WITH CRISP ELEGANT LIGHT THEMING */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {/* COLUMN 1: Follow Up Customer (Rose Header) */}
-        <div className={`border rounded-2xl shadow-2xs overflow-hidden flex flex-col transition-colors ${
-          isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-rose-50/30 border-rose-200/80'
-        }`}>
-          <div className="bg-[#EF4444] text-white px-4 py-3 font-medium text-xs uppercase tracking-wider flex items-center justify-between rounded-t-2xl">
-            <span className="flex items-center space-x-2">
-              <Clock className="w-4 h-4 text-white" />
-              <span>Follow Up Customer</span>
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-lg bg-rose-500 text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                🔴
+              </div>
+              <div>
+                <p className="text-xs font-semibold">{isBn ? 'ফলো আপ কাস্টমার' : 'Follow-Up Customers'}</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-light mt-0.5">{isBn ? 'অনবোর্ডিং ও ফলোআপ টেবিল' : 'Initial inquiry stage'}</p>
+              </div>
+            </div>
+            <span className={`px-2.5 py-1 rounded-full text-xs font-mono font-medium ${
+              activeStageTab === 'followup' ? 'bg-rose-500 text-white' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
+            }`}>
+              {followupCustomers.length}
             </span>
-            <span className="bg-white/20 px-2.5 py-0.5 rounded-full font-mono text-[11px] font-semibold">
-              {followupGroup.length}
-            </span>
-          </div>
+          </button>
 
-          <div className="p-3.5 space-y-3 flex-1 overflow-y-auto max-h-[650px]">
-            {followupGroup.length === 0 ? (
-              <p className="text-xs text-slate-400 text-center py-10 font-normal">{isBn ? 'কোনো ফলোআপ কাস্টমার নেই' : 'No follow-up customers'}</p>
-            ) : (
-              followupGroup.map((cust) => (
-                <CustomerCard
-                  key={cust.id}
-                  customer={cust}
-                  isBn={isBn}
-                  isDark={isDark}
-                  onHandover={() => handleHandoverCustomer(cust)}
-                  onShiftStatus={(st) => handleShiftStatus(cust, st)}
-                />
-              ))
-            )}
-          </div>
-        </div>
-
-        {/* COLUMN 2: New / Order Complete (Blue Header) */}
-        <div className={`border rounded-2xl shadow-2xs overflow-hidden flex flex-col transition-colors ${
-          isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-blue-50/30 border-blue-200/80'
-        }`}>
-          <div className="bg-[#2563EB] text-white px-4 py-3 font-medium text-xs uppercase tracking-wider flex items-center justify-between rounded-t-2xl">
-            <span className="flex items-center space-x-2">
-              <CheckCircle2 className="w-4 h-4 text-white" />
-              <span>New / Order Complete</span>
+          {/* Option 2: New Customer */}
+          <button
+            type="button"
+            onClick={() => setActiveStageTab('order_complete')}
+            className={`w-full p-3.5 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+              activeStageTab === 'order_complete'
+                ? 'bg-blue-50 border-blue-300 text-blue-950 font-medium shadow-2xs dark:bg-blue-950/40 dark:border-blue-800 dark:text-blue-200'
+                : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-50 dark:bg-[#1E293B] dark:border-slate-800 dark:text-slate-300'
+            }`}
+          >
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                🔵
+              </div>
+              <div>
+                <p className="text-xs font-semibold">{isBn ? 'নতুন কাস্টমার' : 'New Customers'}</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-light mt-0.5">{isBn ? 'অর্ডার কমপ্লিট টেবিল' : 'First order completed'}</p>
+              </div>
+            </div>
+            <span className={`px-2.5 py-1 rounded-full text-xs font-mono font-medium ${
+              activeStageTab === 'order_complete' ? 'bg-blue-600 text-white' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
+            }`}>
+              {newCustomers.length}
             </span>
-            <span className="bg-white/20 px-2.5 py-0.5 rounded-full font-mono text-[11px] font-semibold">
-              {orderCompleteGroup.length}
-            </span>
-          </div>
+          </button>
 
-          <div className="p-3.5 space-y-3 flex-1 overflow-y-auto max-h-[650px]">
-            {orderCompleteGroup.length === 0 ? (
-              <p className="text-xs text-slate-400 text-center py-10 font-normal">{isBn ? 'কোনো অর্ডার কমপ্লিট কাস্টমার নেই' : 'No order complete customers'}</p>
-            ) : (
-              orderCompleteGroup.map((cust) => (
-                <CustomerCard
-                  key={cust.id}
-                  customer={cust}
-                  isBn={isBn}
-                  isDark={isDark}
-                  onHandover={() => handleHandoverCustomer(cust)}
-                  onShiftStatus={(st) => handleShiftStatus(cust, st)}
-                />
-              ))
-            )}
-          </div>
+          {/* Option 3: Regular Customer */}
+          <button
+            type="button"
+            onClick={() => setActiveStageTab('important_regular')}
+            className={`w-full p-3.5 rounded-xl border text-left transition-all flex items-center justify-between cursor-pointer ${
+              activeStageTab === 'important_regular'
+                ? 'bg-emerald-50 border-emerald-300 text-emerald-950 font-medium shadow-2xs dark:bg-emerald-950/40 dark:border-emerald-800 dark:text-emerald-200'
+                : 'bg-white border-slate-200/80 text-slate-700 hover:bg-slate-50 dark:bg-[#1E293B] dark:border-slate-800 dark:text-slate-300'
+            }`}
+          >
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 rounded-lg bg-slate-700 text-white flex items-center justify-center font-bold text-xs shadow-2xs">
+                ⚫
+              </div>
+              <div>
+                <p className="text-xs font-semibold">{isBn ? 'রেগুলার কাস্টমার' : 'Regular Customers'}</p>
+                <p className="text-[11px] text-slate-500 dark:text-slate-400 font-light mt-0.5">{isBn ? 'হ্যান্ড ওভার হাব' : 'Handover Ready'}</p>
+              </div>
+            </div>
+            <span className={`px-2.5 py-1 rounded-full text-xs font-mono font-medium ${
+              activeStageTab === 'important_regular' ? 'bg-[#00897B] text-white' : 'bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300'
+            }`}>
+              {regularCustomers.length}
+            </span>
+          </button>
         </div>
 
-        {/* COLUMN 3: Important / Regular (Dark Slate Header) */}
-        <div className={`border rounded-2xl shadow-2xs overflow-hidden flex flex-col transition-colors ${
-          isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-100/60 border-slate-200/90'
-        }`}>
-          <div className="bg-[#334155] text-white px-4 py-3 font-medium text-xs uppercase tracking-wider flex items-center justify-between rounded-t-2xl">
-            <span className="flex items-center space-x-2">
-              <Star className="w-4 h-4 text-amber-300" />
-              <span>Important / Regular</span>
-            </span>
-            <span className="bg-white/20 px-2.5 py-0.5 rounded-full font-mono text-[11px] font-semibold">
-              {regularGroup.length}
-            </span>
+        {/* RIGHT SIDE CUSTOMER DETAILS TABLE VIEW */}
+        <div className="lg:col-span-9 space-y-4">
+          {/* Header Info & Country Filters */}
+          <div className={`border rounded-2xl p-4 shadow-2xs space-y-3 ${
+            isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-800'
+          }`}>
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3 dark:border-slate-800">
+              <div>
+                <h3 className="text-sm font-semibold text-slate-800 dark:text-slate-100 flex items-center space-x-2">
+                  <span>
+                    {activeStageTab === 'followup' && '🔴 ফলো আপ কাস্টমারদের তালিকা (Follow-Up)'}
+                    {activeStageTab === 'order_complete' && '🔵 নতুন কাস্টমারদের তালিকা (New Customer)'}
+                    {activeStageTab === 'important_regular' && '⚫ রেগুলার কাস্টমার হাব (Regular Customer & Handover)'}
+                  </span>
+                </h3>
+                <p className="text-xs text-slate-500 font-light mt-0.5">
+                  {activeStageTab === 'followup' && (isBn ? 'ফলো আপ থেকে কনভার্ট করে "নতুন কাস্টমার" তৈরি করা যাবে' : 'Convert to New Customer upon first order')}
+                  {activeStageTab === 'order_complete' && (isBn ? 'নতুন কাস্টমার থেকে কনভার্ট করে "রেগুলার কাস্টমার" তৈরি করা যাবে' : 'Convert to Regular Customer upon repeated shipments')}
+                  {activeStageTab === 'important_regular' && (isBn ? 'এখানে রেগুলার কাস্টমার হিসেবে হ্যান্ড ওভার সম্পন্ন করা যাবে' : 'Handover customer to operations management')}
+                </p>
+              </div>
+
+              <span className="text-xs font-mono px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-lg border border-slate-200 dark:border-slate-700 self-start sm:self-auto">
+                {filteredCustomers.length} জন কাস্টমার
+              </span>
+            </div>
+
+            {/* Country Sheet Tabs Bar & Search Controls */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 pt-1">
+              {/* Country Sheet Tabs */}
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { id: 'ALL', label: isBn ? 'সব কান্ট্রি (All)' : 'ALL' },
+                  { id: 'CN_Old', label: 'CHINA Old' },
+                  { id: 'KR_Old', label: 'Korea Old' },
+                  { id: 'CN_New', label: 'CN New' },
+                  { id: 'KR_New', label: 'KR New' },
+                  { id: 'JP_New', label: 'JP New' },
+                ].map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setSelectedCountryTab(tab.id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs transition-all cursor-pointer ${
+                      selectedCountryTab === tab.id
+                        ? 'bg-slate-900 text-white font-medium dark:bg-teal-600 shadow-2xs'
+                        : 'bg-slate-50 border border-slate-200 text-slate-600 hover:bg-slate-100 font-normal dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300'
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Search & Executive Filter */}
+              <div className="flex flex-wrap items-center gap-2">
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-slate-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={isBn ? 'নাম বা ফোন নম্বর...' : 'Search name/phone...'}
+                    className={`pl-8 pr-3 py-1.5 border rounded-lg text-xs outline-none transition-all ${
+                      isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-[#00897B] focus:bg-white'
+                    }`}
+                  />
+                </div>
+
+                <select
+                  value={executiveFilter}
+                  onChange={(e) => setExecutiveFilter(e.target.value)}
+                  className={`py-1.5 px-2.5 border rounded-lg text-xs outline-none cursor-pointer ${
+                    isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-[#00897B]'
+                  }`}
+                >
+                  <option value="all">{isBn ? 'সকল এক্সিকিউটিভ' : 'All Executives'}</option>
+                  {uniqueExecutives.map((exec, idx) => (
+                    <option key={idx} value={exec}>{exec}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
           </div>
 
-          <div className="p-3.5 space-y-3 flex-1 overflow-y-auto max-h-[650px]">
-            {regularGroup.length === 0 ? (
-              <p className="text-xs text-slate-400 text-center py-10 font-normal">{isBn ? 'কোনো ইম্পরট্যান্ট/রেগুলার কাস্টমার নেই' : 'No regular customers'}</p>
+          {/* DETAILED CUSTOMER TABLE VIEW */}
+          <div className={`border rounded-2xl shadow-2xs overflow-hidden ${
+            isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-800'
+          }`}>
+            {filteredCustomers.length === 0 ? (
+              <div className="text-center py-16 px-4">
+                <Users className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
+                <h4 className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                  {isBn ? 'এই ট্যাবে কোনো কাস্টমার তথ্য পাওয়া যায়নি' : 'No customer records in this section'}
+                </h4>
+                <p className="text-xs text-slate-400 font-light mt-1">
+                  {isBn ? 'উপরের "+ নতুন কাস্টমার অনবোর্ড করুন" বাটনে ক্লিক করে তথ্য যুক্ত করুন' : 'Click "+ Onboard New Customer" above to add clients'}
+                </p>
+              </div>
             ) : (
-              regularGroup.map((cust) => (
-                <CustomerCard
-                  key={cust.id}
-                  customer={cust}
-                  isBn={isBn}
-                  isDark={isDark}
-                  onHandover={() => handleHandoverCustomer(cust)}
-                  onShiftStatus={(st) => handleShiftStatus(cust, st)}
-                />
-              ))
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs text-left border-collapse">
+                  <thead className={`border-b ${isDark ? 'bg-slate-900/90 border-slate-800 text-slate-300' : 'bg-slate-100/90 border-slate-200/90 text-slate-700'}`}>
+                    <tr>
+                      <th className="py-3 px-3.5 font-semibold">#</th>
+                      <th className="py-3 px-3.5 font-semibold">{isBn ? 'কাস্টমার নাম ও ফোন' : 'Customer & Phone'}</th>
+                      <th className="py-3 px-3.5 font-semibold">{isBn ? 'অনবোর্ডিং ক্যাটাগরি' : 'Sheet Category'}</th>
+                      <th className="py-3 px-3.5 font-semibold">{isBn ? 'ইনকোয়ারি নোটস' : 'Inquiry Notes'}</th>
+                      <th className="py-3 px-3.5 font-semibold">{isBn ? 'অনবোর্ডার এক্সিকিউটিভ' : 'CRM Executive'}</th>
+                      <th className="py-3 px-3.5 font-semibold text-right">{isBn ? 'স্টেজ রূপান্তর ও হ্যান্ড ওভার' : 'Action / Handover'}</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y border-slate-100 dark:divide-slate-800">
+                    {filteredCustomers.map((cust, idx) => (
+                      <tr key={cust.id} className={isDark ? 'hover:bg-slate-900/50 transition-colors' : 'hover:bg-slate-50/70 transition-colors'}>
+                        <td className="py-3 px-3.5 font-mono text-slate-400 font-normal">
+                          {idx + 1}
+                        </td>
+                        <td className="py-3 px-3.5">
+                          <p className="font-semibold text-slate-800 dark:text-white text-xs">{cust.name}</p>
+                          <p className="text-[11px] font-mono text-teal-700 dark:text-teal-400 font-medium flex items-center space-x-1 mt-0.5">
+                            <Phone className="w-3 h-3" />
+                            <span>{cust.phone}</span>
+                          </p>
+                        </td>
+                        <td className="py-3 px-3.5">
+                          <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-medium rounded-lg border border-slate-200 dark:border-slate-700 text-[11px]">
+                            🏷️ {cust.country_category}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3.5 max-w-xs">
+                          {cust.notes ? (
+                            <p className="text-[11px] text-slate-600 dark:text-slate-300 font-normal bg-slate-50 dark:bg-slate-900/80 p-2 rounded-lg border border-slate-200/70 dark:border-slate-800 leading-relaxed truncate">
+                              {cust.notes}
+                            </p>
+                          ) : (
+                            <span className="text-slate-400 italic text-[11px]">নির্ধারিত নোট নেই</span>
+                          )}
+                        </td>
+                        <td className="py-3 px-3.5 text-slate-600 dark:text-slate-300 font-normal">
+                          <p className="flex items-center space-x-1">
+                            <span>👤</span>
+                            <span>{cust.created_by}</span>
+                          </p>
+                          <p className="text-[10px] font-mono text-slate-400 mt-0.5">{cust.date || '15.08.26'}</p>
+                        </td>
+                        <td className="py-3 px-3.5 text-right space-y-1.5">
+                          {/* ACTION ACCORDING TO USER'S STAGE STACK */}
+                          {/* STAGE 1: FOLLOW UP -> CONVERT TO NEW CUSTOMER */}
+                          {cust.followup_status === 'followup' && (
+                            <button
+                              type="button"
+                              onClick={() => handleConvertToNewCustomer(cust)}
+                              className="py-1.5 px-3 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg shadow-2xs inline-flex items-center space-x-1.5 transition-all cursor-pointer"
+                            >
+                              <span>{isBn ? '➔ কনভার্ট টু কাস্টমার' : '➔ Convert to New Customer'}</span>
+                            </button>
+                          )}
+
+                          {/* STAGE 2: NEW CUSTOMER -> CONVERT TO REGULAR CUSTOMER */}
+                          {cust.followup_status === 'order_complete' && (
+                            <button
+                              type="button"
+                              onClick={() => handleConvertToRegularCustomer(cust)}
+                              className="py-1.5 px-3 bg-slate-700 hover:bg-slate-800 text-white text-xs font-medium rounded-lg shadow-2xs inline-flex items-center space-x-1.5 transition-all cursor-pointer"
+                            >
+                              <span>{isBn ? '➔ কনভার্ট টু রেগুলার' : '➔ Convert to Regular'}</span>
+                            </button>
+                          )}
+
+                          {/* STAGE 3: REGULAR CUSTOMER -> HANDOVER BUTTON AVAILABLE HERE ONLY */}
+                          {cust.followup_status === 'important_regular' && (
+                            <div>
+                              {cust.is_handed_over ? (
+                                <span className="py-1 px-3 bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 rounded-lg border border-emerald-200 dark:border-emerald-800 text-xs font-medium inline-flex items-center space-x-1">
+                                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                  <span>{isBn ? 'হ্যান্ড ওভার সম্পন্ন' : 'Handed Over'}</span>
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  onClick={() => handleHandoverCustomer(cust)}
+                                  className="py-1.5 px-3 bg-[#00897B] hover:bg-[#00796B] text-white text-xs font-medium rounded-lg shadow-2xs inline-flex items-center space-x-1.5 transition-all cursor-pointer"
+                                >
+                                  <Send className="w-3.5 h-3.5 text-white" />
+                                  <span>{isBn ? '🤝 হ্যান্ড ওভার করুন' : '🤝 Hand Over'}</span>
+                                </button>
+                              )}
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
         </div>
@@ -470,7 +627,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
             <div className="flex items-center justify-between border-b pb-3 dark:border-slate-800">
               <h3 className="text-sm font-semibold text-slate-800 dark:text-white flex items-center space-x-2">
                 <UserPlus className="w-4 h-4 text-[#00897B]" />
-                <span>{isBn ? 'নতুন কাস্টমার অনবোর্ড করুন' : 'Add New CRM Customer'}</span>
+                <span>{isBn ? 'নতুন কাস্টমার অনবোর্ড করুন (ফলো আপ পর্যায়)' : 'Add New Follow-Up Customer'}</span>
               </h3>
               <button onClick={() => setShowAddModal(false)} className="text-slate-400 hover:text-slate-600 cursor-pointer">
                 <X className="w-5 h-5" />
@@ -506,48 +663,31 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1">
-                  <label className="text-xs text-slate-600 dark:text-slate-300 font-medium block">{isBn ? 'কান্ট্রি ক্যাটাগরি' : 'Country Sheet'}</label>
-                  <select
-                    value={countryCategory}
-                    onChange={(e) => setCountryCategory(e.target.value as any)}
-                    className={`w-full border rounded-xl py-2.5 px-3 text-xs outline-none cursor-pointer ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800 focus:bg-white'
-                    }`}
-                  >
-                    <option value="CN_New">CN New</option>
-                    <option value="CN_Old">CHINA Old</option>
-                    <option value="KR_New">KR New</option>
-                    <option value="KR_Old">Korea Old</option>
-                    <option value="JP_New">JP New</option>
-                    <option value="Other">Other</option>
-                  </select>
-                </div>
-
-                <div className="space-y-1">
-                  <label className="text-xs text-slate-600 dark:text-slate-300 font-medium block">{isBn ? 'ইনপুট স্ট্যাটাস' : 'Column Status'}</label>
-                  <select
-                    value={followupStatus}
-                    onChange={(e) => setFollowupStatus(e.target.value as any)}
-                    className={`w-full border rounded-xl py-2.5 px-3 text-xs outline-none cursor-pointer ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800 focus:bg-white'
-                    }`}
-                  >
-                    <option value="followup">🔴 Follow Up Customer</option>
-                    <option value="order_complete">🔵 New / Order Complete</option>
-                    <option value="important_regular">⚫ Important / Regular</option>
-                  </select>
-                </div>
+              <div className="space-y-1">
+                <label className="text-xs text-slate-600 dark:text-slate-300 font-medium block">{isBn ? 'কান্ট্রি অনবোর্ডিং ক্যাটাগরি' : 'Country Sheet'}</label>
+                <select
+                  value={countryCategory}
+                  onChange={(e) => setCountryCategory(e.target.value as any)}
+                  className={`w-full border rounded-xl py-2.5 px-3 text-xs outline-none cursor-pointer ${
+                    isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-800 focus:bg-white'
+                  }`}
+                >
+                  <option value="CN_New">CN New</option>
+                  <option value="CN_Old">CHINA Old</option>
+                  <option value="KR_New">KR New</option>
+                  <option value="KR_Old">Korea Old</option>
+                  <option value="JP_New">JP New</option>
+                  <option value="Other">Other</option>
+                </select>
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs text-slate-600 dark:text-slate-300 font-medium block">{isBn ? 'নোট বা মন্তব্য' : 'Notes / Inquiry'}</label>
+                <label className="text-xs text-slate-600 dark:text-slate-300 font-medium block">{isBn ? 'নোট বা ইনকোয়ারি তথ্য' : 'Notes / Inquiry'}</label>
                 <textarea
                   rows={2}
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Inquired about air freight rates..."
+                  placeholder="Air shipping rates inquired..."
                   className={`w-full border rounded-xl py-2.5 px-3.5 text-xs outline-none transition-all ${
                     isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-slate-50 border-slate-200 text-slate-800 focus:border-[#00897B] focus:bg-white'
                   }`}
@@ -566,100 +706,13 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                   type="submit"
                   className="py-2 px-5 rounded-xl bg-[#00897B] hover:bg-[#00796B] text-white font-medium text-xs shadow-xs cursor-pointer"
                 >
-                  {isBn ? 'কাস্টমার সেভ করুন' : 'Save Customer'}
+                  {isBn ? 'অনবোর্ড করুন (Save)' : 'Save Customer'}
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
-    </div>
-  );
-};
-
-// Sub-Component for Individual Customer Cards (Clean Soft Light Design)
-interface CustomerCardProps {
-  customer: CrmCustomer;
-  isBn: boolean;
-  isDark: boolean;
-  onHandover: () => void;
-  onShiftStatus: (newStatus: CrmCustomer['followup_status']) => void;
-}
-
-const CustomerCard: React.FC<CustomerCardProps> = ({
-  customer,
-  isBn,
-  isDark,
-  onHandover,
-  onShiftStatus,
-}) => {
-  return (
-    <div className={`p-3.5 border rounded-xl shadow-2xs space-y-2.5 transition-all ${
-      isDark ? 'bg-[#1E293B] border-slate-700/80 text-white' : 'bg-white border-slate-200/90 hover:border-slate-300'
-    }`}>
-      {/* Customer Name & Phone */}
-      <div className="flex items-start justify-between gap-2">
-        <div>
-          <h4 className="text-xs font-semibold text-slate-800 dark:text-white leading-tight">{customer.name}</h4>
-          <p className="text-[11px] font-mono text-emerald-700 dark:text-emerald-400 mt-1 flex items-center space-x-1 font-medium">
-            <Phone className="w-3 h-3" />
-            <span>{customer.phone}</span>
-          </p>
-        </div>
-        <span className="text-[10px] font-mono px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 rounded-md border border-slate-200/60 dark:border-slate-700">
-          {customer.date || '15.08.26'}
-        </span>
-      </div>
-
-      {/* Sheet Category & Creator Tag */}
-      <div className="flex flex-wrap items-center gap-1.5 text-[10px]">
-        <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono font-medium rounded-md border border-slate-200 dark:border-slate-700">
-          🏷️ {customer.country_category}
-        </span>
-        <span className="text-slate-500 dark:text-slate-400 font-normal truncate">
-          👤 {customer.created_by}
-        </span>
-      </div>
-
-      {/* Notes (Crisp Light Pastel Background - NO BLACK!) */}
-      {customer.notes && (
-        <p className="text-[11px] text-slate-600 dark:text-slate-300 font-normal bg-slate-50 dark:bg-slate-900/80 p-2.5 rounded-lg border border-slate-200/70 dark:border-slate-800 leading-relaxed">
-          {customer.notes}
-        </p>
-      )}
-
-      {/* Hand Over Button & Status Shift Bar */}
-      <div className="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between gap-2">
-        {/* Hand Over Action Button */}
-        {customer.is_handed_over ? (
-          <span className="px-2.5 py-1 text-[11px] font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 rounded-lg border border-emerald-200 dark:border-emerald-800 flex items-center space-x-1">
-            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-            <span>{isBn ? 'হ্যান্ড ওভার সম্পন্ন' : 'Handed Over'}</span>
-          </span>
-        ) : (
-          <button
-            type="button"
-            onClick={onHandover}
-            className="py-1.5 px-3 bg-[#00897B] hover:bg-[#00796B] text-white text-[11px] font-medium rounded-lg shadow-2xs flex items-center space-x-1.5 transition-all cursor-pointer"
-          >
-            <Send className="w-3 h-3 text-white" />
-            <span>{isBn ? '🤝 হ্যান্ড ওভার' : '🤝 Hand Over'}</span>
-          </button>
-        )}
-
-        {/* Quick Shift Dropdown */}
-        <select
-          value={customer.followup_status}
-          onChange={(e) => onShiftStatus(e.target.value as any)}
-          className={`py-1 px-2 border rounded-lg text-[10px] font-normal outline-none cursor-pointer transition-colors ${
-            isDark ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-          }`}
-        >
-          <option value="followup">🔴 Follow Up</option>
-          <option value="order_complete">🔵 Complete</option>
-          <option value="important_regular">⚫ Regular</option>
-        </select>
-      </div>
     </div>
   );
 };
