@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Phone, PhoneOff, Mic, MicOff, ShieldCheck } from 'lucide-react';
+import Peer, { MediaConnection } from 'peerjs';
 import { User, CallSession, Language, ChatMessage, ChatConversation } from '../../types';
 import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../../lib/db';
 
@@ -18,20 +19,18 @@ const ICE_SERVERS: RTCConfiguration = {
   ],
 };
 
-// Helper for crystal-clear microphone audio stream
-const getMicrophoneStream = async () => {
-  return await navigator.mediaDevices.getUserMedia({
-    audio: {
-      echoCancellation: true,
-      noiseSuppression: true,
-      autoGainControl: true,
-    },
-    video: false,
-  });
+// Helper to sanitize peer ID string
+const getPeerIdForUser = (userId: string) => {
+  return `fsc-user-${userId.replace(/[^a-zA-Z0-9_-]/g, '')}`;
 };
 
 // Record Call History System Message into Chat Thread
-const recordCallHistoryMessage = (call: CallSession, isBn: boolean, durationSecs: number = 0, type: 'ended' | 'missed' | 'rejected' = 'ended') => {
+const recordCallHistoryMessage = (
+  call: CallSession,
+  isBn: boolean,
+  durationSecs: number = 0,
+  type: 'ended' | 'missed' | 'rejected' = 'ended'
+) => {
   try {
     const db = getHostingerDbData();
     const messages: ChatMessage[] = db.messages || [];
@@ -85,11 +84,15 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
   const [callDuration, setCallDuration] = useState(0);
   const [isMuted, setIsMuted] = useState(false);
 
-  // WebRTC & Audio Element Refs
-  const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
+  // PeerJS & Audio Element Refs
+  const peerRef = useRef<Peer | null>(null);
+  const mediaConnectionRef = useRef<MediaConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
   const endedCallIdsRef = useRef<Set<string>>(new Set());
+
+  // Pending incoming PeerJS call reference
+  const incomingMediaConnectionRef = useRef<MediaConnection | null>(null);
 
   // Sound generator for incoming call ringtone chime
   const ringtoneAudioCtxRef = useRef<AudioContext | null>(null);
@@ -152,70 +155,67 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
       localStreamRef.current.getTracks().forEach((track) => track.stop());
       localStreamRef.current = null;
     }
-    if (peerConnectionRef.current) {
+    if (mediaConnectionRef.current) {
       try {
-        peerConnectionRef.current.close();
+        mediaConnectionRef.current.close();
       } catch (e) {}
-      peerConnectionRef.current = null;
+      mediaConnectionRef.current = null;
+    }
+    if (incomingMediaConnectionRef.current) {
+      try {
+        incomingMediaConnectionRef.current.close();
+      } catch (e) {}
+      incomingMediaConnectionRef.current = null;
     }
   };
 
-  // Helper to initialize PeerConnection
-  const initPeerConnection = (callId: string, isCaller: boolean) => {
-    if (peerConnectionRef.current) return peerConnectionRef.current;
-
-    const pc = new RTCPeerConnection(ICE_SERVERS);
-    peerConnectionRef.current = pc;
-
-    // Handle remote track received
-    pc.ontrack = (event) => {
-      if (remoteAudioRef.current) {
-        const stream = event.streams && event.streams[0] ? event.streams[0] : new MediaStream([event.track]);
-        remoteAudioRef.current.srcObject = stream;
-        remoteAudioRef.current.volume = 1.0;
-        remoteAudioRef.current.muted = false;
-
-        const p = remoteAudioRef.current.play();
-        if (p !== undefined) {
-          p.catch((err) => {
-            console.warn('Audio play autoplay policy warning:', err);
-          });
-        }
-      }
-    };
-
-    // Handle ICE candidates
-    pc.onicecandidate = (event) => {
-      if (event.candidate) {
-        const db = getHostingerDbData();
-        const calls: CallSession[] = db.calls || [];
-        const candStr = JSON.stringify(event.candidate);
-
-        const updatedCalls = calls.map((c) => {
-          if (c.id === callId) {
-            if (isCaller) {
-              const currentCands = c.caller_candidates || [];
-              if (!currentCands.includes(candStr)) {
-                return { ...c, caller_candidates: [...currentCands, candStr] };
-              }
-            } else {
-              const currentCands = c.callee_candidates || [];
-              if (!currentCands.includes(candStr)) {
-                return { ...c, callee_candidates: [...currentCands, candStr] };
-              }
-            }
-          }
-          return c;
-        });
-
-        saveHostingerDbData('fsc_vps_calls', updatedCalls);
-      }
-    };
-
-    return pc;
+  // Attach remote stream to audio player element
+  const attachRemoteAudioStream = (stream: MediaStream) => {
+    if (remoteAudioRef.current) {
+      remoteAudioRef.current.srcObject = stream;
+      remoteAudioRef.current.volume = 1.0;
+      remoteAudioRef.current.muted = false;
+      remoteAudioRef.current.play().catch((err) => {
+        console.warn('Audio play warning:', err);
+      });
+    }
   };
 
-  // Poll call queue and synchronize WebRTC SDP & ICE signals
+  // 1. Initialize PeerJS engine for current user
+  useEffect(() => {
+    const myPeerId = getPeerIdForUser(currentUser.id);
+    const peer = new Peer(myPeerId, {
+      config: ICE_SERVERS,
+      debug: 1,
+    });
+
+    peerRef.current = peer;
+
+    // Listen for incoming call via PeerJS cloud
+    peer.on('call', (incomingCall) => {
+      incomingMediaConnectionRef.current = incomingCall;
+
+      incomingCall.on('stream', (remoteStream) => {
+        attachRemoteAudioStream(remoteStream);
+      });
+
+      incomingCall.on('close', () => {
+        stopRingtone();
+        stopWebRTC();
+        setActiveCall(null);
+      });
+    });
+
+    return () => {
+      stopRingtone();
+      stopWebRTC();
+      try {
+        peer.destroy();
+      } catch (e) {}
+    };
+  }, [currentUser.id]);
+
+  // 2. Poll DB for call session changes (Initiate call & Sync active status)
   useEffect(() => {
     const checkCalls = async () => {
       const db = getHostingerDbData();
@@ -234,94 +234,43 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
 
         const isCaller = myCall.caller_id === currentUser.id;
 
-        // 1. Ringing State Logic
+        // CALLER LOGIC
         if (myCall.status === 'ringing') {
           if (!isCaller) {
             playRingtone();
           } else {
-            // Caller: Create offer if not created yet
-            if (!myCall.sdp_offer && !peerConnectionRef.current) {
+            // Caller starts PeerJS call to Target User
+            if (!mediaConnectionRef.current && peerRef.current && myCall.target_user_id) {
               try {
-                const stream = await getMicrophoneStream();
+                const stream = await navigator.mediaDevices.getUserMedia({
+                  audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+                  video: false,
+                });
                 localStreamRef.current = stream;
 
-                const pc = initPeerConnection(myCall.id, true);
-                stream.getTracks().forEach((track) => pc.addTrack(track, stream));
+                const targetPeerId = getPeerIdForUser(myCall.target_user_id);
+                const call = peerRef.current.call(targetPeerId, stream);
+                mediaConnectionRef.current = call;
 
-                const offer = await pc.createOffer();
-                await pc.setLocalDescription(offer);
+                call.on('stream', (remoteStream) => {
+                  attachRemoteAudioStream(remoteStream);
+                });
 
-                const currentDb = getHostingerDbData();
-                const latestCalls: CallSession[] = currentDb.calls || [];
-                const updated = latestCalls.map((c) =>
-                  c.id === myCall.id ? { ...c, sdp_offer: JSON.stringify(offer) } : c
-                );
-                saveHostingerDbData('fsc_vps_calls', updated);
+                call.on('close', () => {
+                  stopRingtone();
+                  stopWebRTC();
+                  setActiveCall(null);
+                });
               } catch (err) {
-                console.warn('Caller WebRTC offer creation error:', err);
+                console.warn('Caller mic access warning:', err);
               }
             }
           }
         }
 
-        // 2. Active State Logic
+        // ACTIVE STATE LOGIC
         if (myCall.status === 'active') {
           stopRingtone();
-
-          // Callee process SDP Offer and send SDP Answer if not sent yet
-          if (!isCaller && myCall.sdp_offer && !myCall.sdp_answer) {
-            try {
-              if (!localStreamRef.current) {
-                const stream = await getMicrophoneStream();
-                localStreamRef.current = stream;
-              }
-              const pc = initPeerConnection(myCall.id, false);
-              localStreamRef.current.getTracks().forEach((track) => pc.addTrack(track, localStreamRef.current!));
-
-              if (!pc.remoteDescription) {
-                const offerDesc = new RTCSessionDescription(JSON.parse(myCall.sdp_offer));
-                await pc.setRemoteDescription(offerDesc);
-
-                const answer = await pc.createAnswer();
-                await pc.setLocalDescription(answer);
-
-                const currentDb = getHostingerDbData();
-                const latestCalls: CallSession[] = currentDb.calls || [];
-                const updated = latestCalls.map((c) =>
-                  c.id === myCall.id ? { ...c, sdp_answer: JSON.stringify(answer) } : c
-                );
-                saveHostingerDbData('fsc_vps_calls', updated);
-              }
-            } catch (err) {
-              console.warn('Callee SDP answer error:', err);
-            }
-          }
-
-          // Caller process SDP Answer from Callee
-          if (isCaller && myCall.sdp_answer && peerConnectionRef.current) {
-            const pc = peerConnectionRef.current;
-            if (!pc.remoteDescription) {
-              try {
-                const answerDesc = new RTCSessionDescription(JSON.parse(myCall.sdp_answer));
-                await pc.setRemoteDescription(answerDesc);
-              } catch (e) {}
-            }
-          }
-
-          // Exchange ICE candidates safely once remote description is set
-          if (peerConnectionRef.current && peerConnectionRef.current.remoteDescription) {
-            const pc = peerConnectionRef.current;
-            const candidatesToProcess = isCaller ? myCall.callee_candidates : myCall.caller_candidates;
-
-            if (candidatesToProcess && candidatesToProcess.length > 0) {
-              for (const candStr of candidatesToProcess) {
-                try {
-                  const candObj = JSON.parse(candStr);
-                  await pc.addIceCandidate(new RTCIceCandidate(candObj));
-                } catch (e) {}
-              }
-            }
-          }
         }
       } else {
         stopRingtone();
@@ -367,21 +316,25 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
     saveHostingerDbData('fsc_vps_calls', updatedCalls);
     setActiveCall({ ...activeCall, status: 'active' });
 
-    // Immediate cross-tab/server sync dispatch
+    // Immediate cross-tab/server trigger
     window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key: 'fsc_vps_calls' } }));
 
     logSystemAuditAction(currentUser, 'CALL_ACCEPTED', 'CALL', activeCall.id, `Accepted voice call from ${activeCall.caller_name}`);
 
-    // 2. Request microphone stream & bind tracks
+    // 2. Answer incoming PeerJS call with local mic stream
     try {
-      if (!localStreamRef.current) {
-        const stream = await getMicrophoneStream();
-        localStreamRef.current = stream;
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
+        video: false,
+      });
+      localStreamRef.current = stream;
+
+      if (incomingMediaConnectionRef.current) {
+        incomingMediaConnectionRef.current.answer(stream);
+        mediaConnectionRef.current = incomingMediaConnectionRef.current;
       }
-      const pc = initPeerConnection(activeCall.id, false);
-      localStreamRef.current.getTracks().forEach((track) => pc.addTrack(track, localStreamRef.current!));
     } catch (err) {
-      console.warn('Accept call media error:', err);
+      console.warn('Accept call mic error:', err);
     }
   };
 
