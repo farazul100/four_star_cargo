@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Phone, PhoneOff, Mic, MicOff, ShieldCheck, Volume2 } from 'lucide-react';
+import { Phone, PhoneOff, Mic, MicOff, ShieldCheck, Volume2, Radio } from 'lucide-react';
 import { User, CallSession, Language } from '../../types';
 import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../../lib/db';
 
@@ -17,6 +17,29 @@ const ICE_SERVERS: RTCConfiguration = {
   ],
 };
 
+// SDP Optimization helper for 128kbps Opus High-Definition Voice Audio
+const optimizeSdpOpusBitrate = (sdp: string) => {
+  if (!sdp) return sdp;
+  return sdp.replace(
+    /a=fmtp:111 (.*)/g,
+    'a=fmtp:111 $1;maxaveragebitrate=128000;stereo=0;sprop-stereo=0;cbr=1;useinbandfec=1'
+  );
+};
+
+// Helper for high-definition 48kHz microphone audio stream
+const getHdMicrophoneStream = async () => {
+  return await navigator.mediaDevices.getUserMedia({
+    audio: {
+      echoCancellation: true,
+      noiseSuppression: true,
+      autoGainControl: true,
+      sampleRate: 48000,
+      channelCount: 1,
+    },
+    video: false,
+  });
+};
+
 export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUser, language }) => {
   const isBn = language === 'bn';
   const [activeCall, setActiveCall] = useState<CallSession | null>(null);
@@ -28,10 +51,11 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
   const localStreamRef = useRef<MediaStream | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
   const endedCallIdsRef = useRef<Set<string>>(new Set());
+
+  // Sound generator for incoming call ringtone chime
   const ringtoneAudioCtxRef = useRef<AudioContext | null>(null);
   const ringtoneIntervalRef = useRef<number | null>(null);
 
-  // Sound generator for incoming call ringtone chime
   const playRingtone = () => {
     try {
       if (ringtoneIntervalRef.current) return;
@@ -169,16 +193,15 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
             // Caller: Create offer if not created yet
             if (!myCall.sdp_offer && !peerConnectionRef.current) {
               try {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                  audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-                  video: false,
-                });
+                const stream = await getHdMicrophoneStream();
                 localStreamRef.current = stream;
 
                 const pc = initPeerConnection(myCall.id, true);
                 stream.getTracks().forEach((track) => pc.addTrack(track, stream));
 
-                const offer = await pc.createOffer();
+                const rawOffer = await pc.createOffer();
+                const optimizedSdp = optimizeSdpOpusBitrate(rawOffer.sdp || '');
+                const offer = new RTCSessionDescription({ type: rawOffer.type, sdp: optimizedSdp });
                 await pc.setLocalDescription(offer);
 
                 const currentDb = getHostingerDbData();
@@ -202,10 +225,7 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
           if (!isCaller && myCall.sdp_offer && !myCall.sdp_answer) {
             try {
               if (!localStreamRef.current) {
-                const stream = await navigator.mediaDevices.getUserMedia({
-                  audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-                  video: false,
-                });
+                const stream = await getHdMicrophoneStream();
                 localStreamRef.current = stream;
               }
               const pc = initPeerConnection(myCall.id, false);
@@ -215,7 +235,9 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
                 const offerDesc = new RTCSessionDescription(JSON.parse(myCall.sdp_offer));
                 await pc.setRemoteDescription(offerDesc);
 
-                const answer = await pc.createAnswer();
+                const rawAnswer = await pc.createAnswer();
+                const optimizedSdp = optimizeSdpOpusBitrate(rawAnswer.sdp || '');
+                const answer = new RTCSessionDescription({ type: rawAnswer.type, sdp: optimizedSdp });
                 await pc.setLocalDescription(answer);
 
                 const currentDb = getHostingerDbData();
@@ -302,10 +324,7 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
 
     try {
       if (!localStreamRef.current) {
-        const stream = await navigator.mediaDevices.getUserMedia({
-          audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-          video: false,
-        });
+        const stream = await getHdMicrophoneStream();
         localStreamRef.current = stream;
       }
       const pc = initPeerConnection(activeCall.id, false);
@@ -382,27 +401,32 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
         style={{ position: 'fixed', top: '-9999px', left: '-9999px', width: '1px', height: '1px', opacity: 0.01 }}
       />
 
-      {/* 1. INCOMING VOICE CALL MODAL */}
+      {/* 1. INCOMING VOICE CALL MODAL (CENTERED) */}
       {isIncoming && (
-        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/80 backdrop-blur-sm p-4 animate-in fade-in">
-          <div className="w-full max-w-sm bg-[#1C1C1E] border border-slate-800 rounded-none p-6 shadow-2xl text-center space-y-5 text-white">
-            <div className="w-16 h-16 rounded-full bg-[#00897B]/20 text-[#00897B] font-bold text-lg flex items-center justify-center mx-auto ring-4 ring-[#00897B]/30 animate-bounce">
-              <Phone className="w-8 h-8" />
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 animate-in fade-in">
+          <div className="w-full max-w-sm bg-[#121214] border-2 border-[#00897B]/50 rounded-none p-6 shadow-2xl text-center space-y-5 text-white relative overflow-hidden">
+            <div className="absolute -top-16 -left-16 w-32 h-32 bg-[#00897B]/20 rounded-full blur-2xl pointer-events-none"></div>
+
+            <div className="relative w-20 h-20 mx-auto flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full bg-[#00897B]/30 animate-ping opacity-75"></div>
+              <div className="w-16 h-16 rounded-full bg-[#00897B]/20 text-[#00897B] font-bold text-lg flex items-center justify-center border border-[#00897B] relative z-10 shadow-lg">
+                <Phone className="w-8 h-8 text-[#26A69A] animate-bounce" />
+              </div>
             </div>
 
             <div>
-              <span className="px-2.5 py-0.5 rounded-none bg-[#00897B]/20 text-[#26A69A] border border-[#00897B]/40 text-[10px] font-bold uppercase tracking-wider">
-                {isBn ? 'ইনকামিং ভয়েস কল' : 'Incoming Voice Call'}
+              <span className="px-3 py-1 rounded-none bg-[#00897B]/20 text-[#26A69A] border border-[#00897B]/40 text-[10px] font-bold uppercase tracking-widest">
+                {isBn ? 'ইনকামিং ভয়েস কল (HD)' : 'Incoming Voice Call (HD)'}
               </span>
-              <h3 className="text-base font-bold text-white mt-2">{activeCall.caller_name}</h3>
+              <h3 className="text-lg font-extrabold text-white mt-2.5">{activeCall.caller_name}</h3>
               <p className="text-xs text-slate-400 capitalize">{activeCall.caller_role?.replace('_', ' ')}</p>
             </div>
 
-            <div className="flex items-center justify-center space-x-4 pt-2">
+            <div className="flex items-center justify-center space-x-4 pt-3 border-t border-slate-800">
               <button
                 type="button"
                 onClick={handleRejectCall}
-                className="flex-1 py-2.5 rounded-none bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center justify-center space-x-1.5 transition-all shadow-md cursor-pointer"
+                className="flex-1 py-3 rounded-none bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all shadow-md cursor-pointer ring-2 ring-red-500/50"
               >
                 <PhoneOff className="w-4 h-4" />
                 <span>{isBn ? 'প্রত্যাখ্যান' : 'Decline'}</span>
@@ -411,7 +435,7 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
               <button
                 type="button"
                 onClick={handleAcceptCall}
-                className="flex-1 py-2.5 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-bold text-xs flex items-center justify-center space-x-1.5 transition-all shadow-md cursor-pointer animate-pulse"
+                className="flex-1 py-3 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-extrabold text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all shadow-md cursor-pointer animate-pulse ring-2 ring-[#00897B]/50"
               >
                 <Phone className="w-4 h-4" />
                 <span>{isBn ? 'রিসিভ করুন' : 'Accept'}</span>
@@ -421,61 +445,71 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
         </div>
       )}
 
-      {/* 2. OUTGOING OR ACTIVE VOICE CALL OVERLAY */}
+      {/* 2. OUTGOING OR ACTIVE VOICE CALL MODAL (CENTERED ON SCREEN) */}
       {(isOutgoing || isConnected) && (
-        <div className="fixed top-4 right-4 z-[2000] w-80 bg-[#1C1C1E] border border-slate-800 rounded-none p-4 shadow-2xl text-white space-y-4 animate-in slide-in-from-top-4">
-          <div className="flex items-center justify-between border-b pb-2 border-slate-800">
-            <div className="flex items-center space-x-2">
-              <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
-              <span className="text-xs font-bold uppercase tracking-wider text-slate-200">
-                {isConnected ? (isBn ? 'ভয়েস কল চলছে' : 'Voice Call Active') : (isBn ? 'কল করা হচ্ছে...' : 'Calling...')}
+        <div className="fixed inset-0 z-[2000] flex items-center justify-center bg-slate-950/85 backdrop-blur-md p-4 animate-in fade-in">
+          <div className="w-full max-w-md bg-[#121214] border-2 border-[#00897B]/50 rounded-none p-6 sm:p-8 shadow-2xl text-center space-y-6 text-white relative overflow-hidden">
+            {/* Ambient Teal Glow */}
+            <div className="absolute -top-24 -left-24 w-48 h-48 bg-[#00897B]/20 rounded-full blur-3xl pointer-events-none"></div>
+            <div className="absolute -bottom-24 -right-24 w-48 h-48 bg-[#00897B]/20 rounded-full blur-3xl pointer-events-none"></div>
+
+            {/* Top Status Header Badge */}
+            <div className="flex items-center justify-center space-x-2">
+              <span className={`w-2.5 h-2.5 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-amber-500 animate-ping'}`}></span>
+              <span className="px-3 py-1 bg-[#00897B]/20 border border-[#00897B]/40 text-[#26A69A] font-bold text-xs uppercase tracking-widest rounded-none">
+                {isConnected ? (isBn ? 'ভয়েস কল চলছে (HD Voice)' : 'Active Voice Call (HD)') : (isBn ? 'কল করা হচ্ছে...' : 'Calling Target User...')}
               </span>
             </div>
-            {isConnected && (
-              <span className="text-xs font-mono font-bold text-[#26A69A]">
-                {formatTime(callDuration)}
-              </span>
-            )}
-          </div>
 
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-none bg-[#00897B]/20 text-[#00897B] font-bold text-xs flex items-center justify-center border border-[#00897B]/40 shrink-0">
-              <Phone className="w-5 h-5 text-[#26A69A]" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <div className="text-xs font-bold text-white truncate">
-                {isOutgoing ? (isBn ? 'কল নেওয়া পর্যন্ত অপেক্ষা করুন' : 'Calling Target User') : activeCall.caller_name}
-              </div>
-              <div className="text-[10px] text-slate-400 font-mono flex items-center space-x-1">
-                <ShieldCheck className="w-3 h-3 text-[#26A69A]" />
-                <span>End-to-End Encrypted Voice</span>
+            {/* Avatar Ring with Pulsing Wave */}
+            <div className="relative w-24 h-24 mx-auto flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full bg-[#00897B]/20 animate-ping opacity-75"></div>
+              <div className="w-20 h-20 rounded-full bg-[#00897B]/30 text-[#00897B] font-bold text-2xl flex items-center justify-center border-2 border-[#00897B] shadow-lg relative z-10">
+                {activeCall.caller_name ? activeCall.caller_name[0].toUpperCase() : 'U'}
               </div>
             </div>
-          </div>
 
-          {/* Voice Action Controls */}
-          <div className="flex items-center justify-between pt-1 gap-2">
-            <button
-              type="button"
-              onClick={toggleMute}
-              className={`flex-1 py-2 rounded-none font-bold text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer ${
-                isMuted
-                  ? 'bg-amber-600 text-white'
-                  : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
-              }`}
-            >
-              {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-              <span>{isMuted ? (isBn ? 'আনমিউট' : 'Unmute') : (isBn ? 'মিউট' : 'Mute')}</span>
-            </button>
+            {/* User Info & Live Duration Timer */}
+            <div className="space-y-1">
+              <h2 className="text-xl font-extrabold text-white tracking-wide">
+                {isOutgoing ? (isBn ? 'ইউজার উত্তর দেওয়ার জন্য অপেক্ষা করা হচ্ছে' : 'Waiting for answer...') : activeCall.caller_name}
+              </h2>
+              <p className="text-xs text-slate-400 font-mono flex items-center justify-center space-x-1.5">
+                <ShieldCheck className="w-4 h-4 text-[#26A69A]" />
+                <span>End-to-End Encrypted 128kbps HD Voice</span>
+              </p>
 
-            <button
-              type="button"
-              onClick={handleEndCall}
-              className="flex-1 py-2 rounded-none bg-red-600 hover:bg-red-700 text-white font-bold text-xs flex items-center justify-center space-x-1.5 transition-all cursor-pointer shadow-md"
-            >
-              <PhoneOff className="w-4 h-4" />
-              <span>{isBn ? 'কল কাটুন' : 'End Call'}</span>
-            </button>
+              {isConnected && (
+                <div className="pt-2 text-3xl font-mono font-black text-[#26A69A] tracking-wider animate-pulse">
+                  {formatTime(callDuration)}
+                </div>
+              )}
+            </div>
+
+            {/* Action Buttons: Mute & End Call */}
+            <div className="flex items-center justify-center space-x-4 pt-4 border-t border-slate-800">
+              <button
+                type="button"
+                onClick={toggleMute}
+                className={`flex-1 py-3 rounded-none font-bold text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-md ${
+                  isMuted
+                    ? 'bg-amber-600 hover:bg-amber-700 text-white ring-2 ring-amber-400/50'
+                    : 'bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700'
+                }`}
+              >
+                {isMuted ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4 text-emerald-400" />}
+                <span>{isMuted ? (isBn ? 'আনমিউট' : 'Unmute') : (isBn ? 'মাইক্রোফোন মিউট' : 'Mute Mic')}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleEndCall}
+                className="flex-1 py-3 rounded-none bg-red-600 hover:bg-red-700 text-white font-extrabold text-xs sm:text-sm flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-xl ring-2 ring-red-500/50"
+              >
+                <PhoneOff className="w-4 h-4" />
+                <span>{isBn ? 'কল কাটুন' : 'End Call'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
