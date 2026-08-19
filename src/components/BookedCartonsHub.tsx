@@ -192,7 +192,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       {/* KPI METRICS & VIEW MODE HEADER CONTROLS */}
       {/* ------------------------------------------------------------- */}
       <div
-        className={`p-5 rounded-2xl border transition-all shadow-xs space-y-4 ${
+        className={`p-5 rounded-none-none border transition-all shadow-xs space-y-4 ${
           isDark
             ? 'bg-[#1C1C1E] border-slate-800 text-white'
             : 'bg-white border-slate-200/90 text-slate-900'
@@ -216,20 +216,20 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             {/* GROUP BY TOGGLE */}
             {/* GROUP BY BADGE (Tracking ID Only) */}
             {viewMode === 'cards' && (
-              <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-800 text-xs">
+              <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-slate-900 px-3 py-1.5 rounded-none-none border border-slate-200 dark:border-slate-800 text-xs">
                 <span className="text-[10px] text-slate-500 font-mono">{isBn ? 'গ্রুপ:' : 'Group:'}</span>
-                <span className="px-2.5 py-0.5 rounded-lg text-[11px] font-semibold bg-emerald-600 text-white shadow-2xs">
+                <span className="px-2.5 py-0.5 rounded-none-none text-[11px] font-semibold bg-emerald-600 text-white shadow-2xs">
                   {isBn ? '📦 ট্র্যাকিং ID' : 'Tracking ID'}
                 </span>
               </div>
             )}
 
             {/* VIEW MODE TOGGLE */}
-            <div className="flex items-center space-x-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-xl border border-slate-200 dark:border-slate-800">
+            <div className="flex items-center space-x-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-none-none border border-slate-200 dark:border-slate-800">
               <button
                 type="button"
                 onClick={() => setViewMode('cards')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center space-x-1.5 transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-none-none text-xs font-medium flex items-center space-x-1.5 transition-all cursor-pointer ${
                   viewMode === 'cards'
                     ? 'bg-blue-600 text-white shadow-xs'
                     : isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
@@ -242,7 +242,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               <button
                 type="button"
                 onClick={() => setViewMode('list')}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium flex items-center space-x-1.5 transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-none-none text-xs font-medium flex items-center space-x-1.5 transition-all cursor-pointer ${
                   viewMode === 'list'
                     ? 'bg-blue-600 text-white shadow-xs'
                     : isDark ? 'text-slate-400 hover:text-white' : 'text-slate-600 hover:text-slate-900'
@@ -257,22 +257,22 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
         {/* TOP SUMMARY KPIS */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className={`p-3 rounded-xl border ${isDark ? 'bg-slate-900/70 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+          <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900/70 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
             <div className="text-[10px] text-slate-500 font-mono uppercase">{isBn ? 'মোট কাস্টমার' : 'Total Customers'}</div>
             <div className="text-sm font-bold text-blue-600 dark:text-blue-400 mt-0.5 font-mono">{customerGroupKeys.length} জন</div>
           </div>
 
-          <div className={`p-3 rounded-xl border ${isDark ? 'bg-slate-900/70 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+          <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900/70 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
             <div className="text-[10px] text-slate-500 font-mono uppercase">{isBn ? 'মোট কার্টুন সংখ্যা' : 'Total Cartons'}</div>
             <div className={`text-sm font-bold mt-0.5 font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>{totalCartonCount} টি</div>
           </div>
 
-          <div className={`p-3 rounded-xl border ${isDark ? 'bg-slate-900/70 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+          <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900/70 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
             <div className="text-[10px] text-slate-500 font-mono uppercase">{isBn ? 'মোট গ্রস ওজন' : 'Total Gross Weight'}</div>
             <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 font-mono">{totalGrossWeight.toFixed(1)} KG</div>
           </div>
 
-          <div className={`p-3 rounded-xl border ${isDark ? 'bg-slate-900/70 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+          <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900/70 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
             <div className="text-[10px] text-slate-500 font-mono uppercase">{isBn ? 'মোট সিবিএম ভলিউম' : 'Total CBM Volume'}</div>
             <div className="text-sm font-bold text-purple-600 dark:text-purple-400 mt-0.5 font-mono">{totalCbmVolume.toFixed(2)} CBM</div>
           </div>
@@ -289,7 +289,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={isBn ? 'খুঁজুন: শিপিং মার্ক, কার্টুন নং, ট্র্যাকিং বা পণ্য...' : 'Search mark, CTN, tracking...'}
-              className={`w-full pl-9 pr-3 py-2 rounded-xl border text-xs font-normal focus:ring-2 focus:ring-blue-500 ${
+              className={`w-full pl-9 pr-3 py-2 rounded-none-none border text-xs font-normal focus:ring-2 focus:ring-blue-500 ${
                 isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
               }`}
             />
@@ -306,7 +306,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 }
               }}
               disabled={isWarehouseIncharge}
-              className={`w-full px-3 py-2 rounded-xl border text-xs font-medium focus:ring-2 focus:ring-blue-500 cursor-pointer ${
+              className={`w-full px-3 py-2 rounded-none-none border text-xs font-medium focus:ring-2 focus:ring-blue-500 cursor-pointer ${
                 isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
               } ${isWarehouseIncharge ? 'opacity-90 cursor-not-allowed bg-slate-100 dark:bg-slate-800' : ''}`}
             >
@@ -333,7 +333,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             <select
               value={selectedDestinationFilter}
               onChange={(e) => setSelectedDestinationFilter(e.target.value)}
-              className={`w-full px-3 py-2 rounded-xl border text-xs font-medium focus:ring-2 focus:ring-blue-500 cursor-pointer ${
+              className={`w-full px-3 py-2 rounded-none-none border text-xs font-medium focus:ring-2 focus:ring-blue-500 cursor-pointer ${
                 isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
               }`}
             >
@@ -362,7 +362,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             <select
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
-              className={`w-full px-3 py-2 rounded-xl border text-xs font-mono focus:ring-2 focus:ring-blue-500 cursor-pointer ${
+              className={`w-full px-3 py-2 rounded-none-none border text-xs font-mono focus:ring-2 focus:ring-blue-500 cursor-pointer ${
                 isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
               }`}
             >
@@ -395,7 +395,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 return (
                   <div
                     key={mark}
-                    className={`p-5 rounded-2xl border transition-all shadow-xs flex flex-col justify-between space-y-4 hover:shadow-md cursor-pointer ${
+                    className={`p-5 rounded-none-none border transition-all shadow-xs flex flex-col justify-between space-y-4 hover:shadow-md cursor-pointer ${
                       isDark
                         ? 'bg-[#1C1C1E] border-slate-800 hover:border-blue-500/50'
                         : 'bg-white border-slate-200 hover:border-blue-400'
@@ -414,7 +414,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           </h3>
                         </div>
 
-                        <span className="px-2.5 py-1 rounded-full text-[10px] font-mono font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                        <span className="px-2.5 py-1 rounded-none-none text-[10px] font-mono font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                           {groupCartons.length} Cartons
                         </span>
                       </div>
@@ -458,7 +458,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               })}
             </div>
           ) : (
-            <div className={`p-10 rounded-2xl border text-center space-y-3 ${
+            <div className={`p-10 rounded-none-none border text-center space-y-3 ${
               isDark ? 'bg-[#1C1C1E] border-slate-800 text-slate-400' : 'bg-white border-slate-200 text-slate-500'
             }`}>
               <Box className="w-10 h-10 text-slate-400 mx-auto opacity-40" />
@@ -476,7 +476,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       {/* ------------------------------------------------------------- */}
       {viewMode === 'list' && (
         <div
-          className={`rounded-2xl border transition-all shadow-xs overflow-hidden ${
+          className={`rounded-none-none border transition-all shadow-xs overflow-hidden ${
             isDark
               ? 'bg-[#1C1C1E] border-slate-800 text-white'
               : 'bg-white border-slate-200 text-slate-900'
@@ -572,7 +572,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                     </td>
 
                     <td className="p-3 text-center border border-slate-200 dark:border-slate-800">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase font-mono ${
+                      <span className={`px-2 py-0.5 rounded-none text-[10px] font-bold uppercase font-mono ${
                         c.status === 'booked'
                           ? 'bg-blue-500/10 text-blue-600 dark:text-blue-300 border border-blue-500/20'
                           : c.status === 'in_transit'
@@ -630,7 +630,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       {/* ------------------------------------------------------------- */}
       {activeCustomerModalMark && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className={`rounded-2xl max-w-4xl w-full p-6 space-y-5 border shadow-2xl ${
+          <div className={`rounded-none-none max-w-4xl w-full p-6 space-y-5 border shadow-2xl ${
             isDark ? 'bg-slate-900 text-white border-slate-800' : 'bg-white text-slate-900 border-slate-200'
           }`}>
             <div className="flex items-center justify-between border-b pb-4 border-slate-200 dark:border-slate-800">
@@ -638,7 +638,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 <div className="text-xs font-mono text-blue-600 dark:text-blue-400 font-bold uppercase flex items-center space-x-2">
                   <span>Tracking ID: {activeCustomerCartons[0]?.tracking_number || activeCustomerModalMark}</span>
                   {activeCustomerCartons[0]?.shipping_mark && (
-                    <span className="px-2 py-0.5 rounded text-[10px] bg-blue-500/10 text-blue-500 border border-blue-500/20 font-normal">
+                    <span className="px-2 py-0.5 rounded-none text-[10px] bg-blue-500/10 text-blue-500 border border-blue-500/20 font-normal">
                       Mark: {activeCustomerCartons[0]?.shipping_mark}
                     </span>
                   )}
@@ -651,7 +651,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveCustomerModalMark(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer"
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-none-none cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -659,19 +659,19 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
             {/* Customer Batch Summary Badges */}
             <div className="grid grid-cols-3 gap-3">
-              <div className={`p-3 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="text-[10px] text-slate-500 font-mono">মোট কার্টুন সংখ্যা</div>
                 <div className="text-sm font-bold text-blue-600 dark:text-blue-400 font-mono">{activeCustomerCartons.length} টি</div>
               </div>
 
-              <div className={`p-3 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="text-[10px] text-slate-500 font-mono">মোট ও গ্রস ওজন</div>
                 <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 font-mono">
                   {activeCustomerCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0).toFixed(1)} KG
                 </div>
               </div>
 
-              <div className={`p-3 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="text-[10px] text-slate-500 font-mono">মোট ভলিউম CBM</div>
                 <div className="text-sm font-bold text-purple-600 dark:text-purple-400 font-mono">
                   {activeCustomerCartons.reduce((sum, c) => sum + (c.cbm || 0), 0).toFixed(2)} CBM
@@ -680,7 +680,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             </div>
 
             {/* Customer Cartons Detailed Table */}
-            <div className="max-h-[50vh] overflow-y-auto border border-slate-200 dark:border-slate-800 rounded-xl">
+            <div className="max-h-[50vh] overflow-y-auto border border-slate-200 dark:border-slate-800 rounded-none-none">
               <table className="w-full text-left text-xs border-collapse min-w-[700px]">
                 <thead className={`uppercase text-[10px] tracking-wider border-b font-medium ${
                   isDark ? 'bg-slate-950 text-slate-300 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200'
@@ -716,7 +716,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           <button
                             type="button"
                             onClick={() => setPreviewPhotoUrl(c.photo_url!)}
-                            className="px-2 py-1 rounded text-[10px] font-mono bg-blue-500/10 text-blue-500 hover:underline cursor-pointer"
+                            className="px-2 py-1 rounded-none text-[10px] font-mono bg-blue-500/10 text-blue-500 hover:underline cursor-pointer"
                           >
                             View Photo
                           </button>
@@ -734,7 +734,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               <button
                 type="button"
                 onClick={() => setActiveCustomerModalMark(null)}
-                className={`px-4 py-2 rounded-xl text-xs font-normal cursor-pointer ${
+                className={`px-4 py-2 rounded-none-none text-xs font-normal cursor-pointer ${
                   isDark ? 'bg-slate-800 text-slate-200 hover:bg-slate-700' : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
                 }`}
               >
@@ -748,15 +748,15 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       {/* PHOTO PREVIEW MODAL */}
       {previewPhotoUrl && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 text-white rounded-2xl max-w-xl w-full p-4 space-y-3 border border-slate-800">
+          <div className="bg-slate-900 text-white rounded-none-none max-w-xl w-full p-4 space-y-3 border border-slate-800">
             <div className="flex items-center justify-between border-b pb-2 border-slate-800">
               <span className="text-xs font-semibold">Proof Photo</span>
               <button onClick={() => setPreviewPhotoUrl(null)} className="p-1 text-slate-400 hover:text-white cursor-pointer">
                 <X className="w-5 h-5" />
               </button>
             </div>
-            <div className="flex items-center justify-center bg-black rounded-xl p-2 max-h-[60vh]">
-              <img src={previewPhotoUrl} alt="Proof" className="max-h-[55vh] object-contain rounded-lg" />
+            <div className="flex items-center justify-center bg-black rounded-none-none p-2 max-h-[60vh]">
+              <img src={previewPhotoUrl} alt="Proof" className="max-h-[55vh] object-contain rounded-none-none" />
             </div>
           </div>
         </div>
@@ -765,7 +765,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       {/* EDIT CARTON MODAL */}
       {editingCarton && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <form onSubmit={handleSaveEditedCarton} className={`rounded-2xl max-w-md w-full p-6 space-y-4 border shadow-2xl ${
+          <form onSubmit={handleSaveEditedCarton} className={`rounded-none-none max-w-md w-full p-6 space-y-4 border shadow-2xl ${
             isDark ? 'bg-slate-900 text-white border-slate-800' : 'bg-white text-slate-900 border-slate-200'
           }`}>
             <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
@@ -783,7 +783,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                   step="0.1"
                   value={editingCarton.gross_weight}
                   onChange={(e) => setEditingCarton({ ...editingCarton, gross_weight: parseFloat(e.target.value) || 0 })}
-                  className={`w-full px-3 py-2 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-300'}`}
+                  className={`w-full px-3 py-2 rounded-none-none border ${isDark ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-300'}`}
                 />
               </div>
 
@@ -794,7 +794,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                   step="0.01"
                   value={editingCarton.cbm}
                   onChange={(e) => setEditingCarton({ ...editingCarton, cbm: parseFloat(e.target.value) || 0 })}
-                  className={`w-full px-3 py-2 rounded-xl border ${isDark ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-300'}`}
+                  className={`w-full px-3 py-2 rounded-none-none border ${isDark ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-300'}`}
                 />
               </div>
             </div>
@@ -803,13 +803,13 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               <button
                 type="button"
                 onClick={() => setEditingCarton(null)}
-                className={`px-4 py-2 rounded-xl text-xs ${isDark ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-700'}`}
+                className={`px-4 py-2 rounded-none-none text-xs ${isDark ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-700'}`}
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 rounded-xl text-xs bg-blue-600 text-white font-medium hover:bg-blue-700"
+                className="px-4 py-2 rounded-none-none text-xs bg-blue-600 text-white font-medium hover:bg-blue-700"
               >
                 Save Changes
               </button>
