@@ -625,6 +625,26 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
             }`}>
               {activeMessages.map((msg) => {
                 const isMe = msg.sender_id === currentUser.id;
+                const isCallHistory = msg.content.startsWith('📞');
+
+                if (isCallHistory) {
+                  return (
+                    <div key={msg.id} className="w-full flex justify-center my-2">
+                      <div className={`px-4 py-2 rounded-none text-xs font-bold flex items-center space-x-2 border shadow-xs ${
+                        isDark
+                          ? 'bg-slate-900/90 border-[#00897B]/40 text-slate-200'
+                          : 'bg-slate-100 border-[#00897B]/30 text-slate-800'
+                      }`}>
+                        <Phone className="w-3.5 h-3.5 text-[#00897B]" />
+                        <span>{msg.content}</span>
+                        <span className="text-[10px] text-slate-400 font-mono">
+                          ({new Date(msg.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })})
+                        </span>
+                      </div>
+                    </div>
+                  );
+                }
+
                 return (
                   <div
                     key={msg.id}

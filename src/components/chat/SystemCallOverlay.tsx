@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Phone, PhoneOff, Mic, MicOff, ShieldCheck } from 'lucide-react';
-import { User, CallSession, Language } from '../../types';
+import { User, CallSession, Language, ChatMessage, ChatConversation } from '../../types';
 import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../../lib/db';
 
 interface SystemCallOverlayProps {
@@ -28,6 +28,54 @@ const getMicrophoneStream = async () => {
     },
     video: false,
   });
+};
+
+// Record Call History System Message into Chat Thread
+const recordCallHistoryMessage = (call: CallSession, isBn: boolean, durationSecs: number = 0, type: 'ended' | 'missed' | 'rejected' = 'ended') => {
+  try {
+    const db = getHostingerDbData();
+    const messages: ChatMessage[] = db.messages || [];
+
+    const formatTimeStr = (secs: number) => {
+      const m = Math.floor(secs / 60);
+      const s = secs % 60;
+      return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    };
+
+    let contentText = '';
+    if (type === 'ended') {
+      contentText = isBn
+        ? `📞 ভয়েস কল সম্পন্ন (সময়কাল: ${formatTimeStr(durationSecs)})`
+        : `📞 Voice call ended (Duration: ${formatTimeStr(durationSecs)})`;
+    } else if (type === 'rejected') {
+      contentText = isBn ? `📞 প্রত্যাখ্যানকৃত ভয়েস কল` : `📞 Voice call declined`;
+    } else {
+      contentText = isBn ? `📞 মিসড ভয়েস কল` : `📞 Missed voice call`;
+    }
+
+    const callMsg: ChatMessage = {
+      id: `msg-call-${Date.now()}`,
+      conversation_id: call.conversation_id,
+      sender_id: call.caller_id,
+      sender_name: call.caller_name,
+      sender_role: call.caller_role || 'operation_director',
+      content: contentText,
+      created_at: new Date().toISOString(),
+      read_by: [call.caller_id],
+    };
+
+    saveHostingerDbData('fsc_vps_messages', [...messages, callMsg]);
+
+    const conversations: ChatConversation[] = db.conversations || [];
+    const updatedConvos = conversations.map((c) =>
+      c.id === call.conversation_id
+        ? { ...c, last_message: contentText, last_message_at: callMsg.created_at }
+        : c
+    );
+    saveHostingerDbData('fsc_vps_conversations', updatedConvos);
+  } catch (e) {
+    console.warn('Call history record warning:', e);
+  }
 };
 
 export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUser, language, theme = 'dark' }) => {
@@ -301,14 +349,7 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
     if (!activeCall) return;
     stopRingtone();
 
-    const db = getHostingerDbData();
-    const updatedCalls = (db.calls || []).map((c: CallSession) =>
-      c.id === activeCall.id ? { ...c, status: 'active' as const } : c
-    );
-    saveHostingerDbData('fsc_vps_calls', updatedCalls);
-    setActiveCall({ ...activeCall, status: 'active' });
-    logSystemAuditAction(currentUser, 'CALL_ACCEPTED', 'CALL', activeCall.id, `Accepted voice call from ${activeCall.caller_name}`);
-
+    // 1. Immediately get mic stream & attach tracks to PC so answer SDP includes audio
     try {
       if (!localStreamRef.current) {
         const stream = await getMicrophoneStream();
@@ -316,6 +357,19 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
       }
       const pc = initPeerConnection(activeCall.id, false);
       localStreamRef.current.getTracks().forEach((track) => pc.addTrack(track, localStreamRef.current!));
+
+      // 2. Mark status active in DB & notify caller instantly
+      const db = getHostingerDbData();
+      const updatedCalls = (db.calls || []).map((c: CallSession) =>
+        c.id === activeCall.id ? { ...c, status: 'active' as const } : c
+      );
+      saveHostingerDbData('fsc_vps_calls', updatedCalls);
+      setActiveCall({ ...activeCall, status: 'active' });
+
+      // Immediate cross-tab/server trigger
+      window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key: 'fsc_vps_calls' } }));
+
+      logSystemAuditAction(currentUser, 'CALL_ACCEPTED', 'CALL', activeCall.id, `Accepted voice call from ${activeCall.caller_name}`);
     } catch (err) {
       console.warn('Accept call media error:', err);
     }
@@ -333,6 +387,10 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
       c.id === activeCall.id ? { ...c, status: 'rejected' as const } : c
     );
     saveHostingerDbData('fsc_vps_calls', updatedCalls);
+
+    // Record Call History in Chat Thread
+    recordCallHistoryMessage(activeCall, isBn, 0, 'rejected');
+
     setActiveCall(null);
     setCallDuration(0);
     logSystemAuditAction(currentUser, 'CALL_REJECTED', 'CALL', activeCall.id, `Declined voice call from ${activeCall.caller_name}`);
@@ -350,6 +408,10 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
       c.id === activeCall.id ? { ...c, status: 'ended' as const } : c
     );
     saveHostingerDbData('fsc_vps_calls', updatedCalls);
+
+    // Record Call History in Chat Thread
+    recordCallHistoryMessage(activeCall, isBn, callDuration, callDuration > 0 ? 'ended' : 'missed');
+
     setActiveCall(null);
     setCallDuration(0);
     logSystemAuditAction(currentUser, 'CALL_ENDED', 'CALL', activeCall.id, `Ended voice call. Duration: ${callDuration}s`);
