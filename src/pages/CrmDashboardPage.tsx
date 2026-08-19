@@ -20,7 +20,10 @@ export const CrmDashboardPage: React.FC = () => {
     if (path.includes('/profile')) return 'profile';
     if (path.includes('/notifications')) return 'notifications';
     if (path.includes('/search') || path.includes('/cargo-search') || path.includes('/tracking')) return 'cargo_search';
-    return 'dashboard';
+    if (path.includes('/followup')) return 'followup';
+    if (path.includes('/new-customers')) return 'order_complete';
+    if (path.includes('/regular-customers')) return 'important_regular';
+    return 'followup';
   };
 
   const activeTab = getTabIdFromPath(location.pathname);
@@ -37,6 +40,15 @@ export const CrmDashboardPage: React.FC = () => {
       case 'public_track':
         navigate('/crm/search');
         break;
+      case 'followup':
+        navigate('/crm/followup');
+        break;
+      case 'order_complete':
+        navigate('/crm/new-customers');
+        break;
+      case 'important_regular':
+        navigate('/crm/regular-customers');
+        break;
       default:
         navigate('/crm/dashboard');
         break;
@@ -44,6 +56,9 @@ export const CrmDashboardPage: React.FC = () => {
   };
 
   if (!user) return null;
+
+  const currentStage: 'followup' | 'order_complete' | 'important_regular' =
+    activeTab === 'order_complete' ? 'order_complete' : activeTab === 'important_regular' ? 'important_regular' : 'followup';
 
   return (
     <DashboardLayout
@@ -57,7 +72,7 @@ export const CrmDashboardPage: React.FC = () => {
       ) : activeTab === 'cargo_search' ? (
         <CargoSearchTracker cartons={getHostingerDbData().cartons} proposals={getHostingerDbData().proposals} language={lang} />
       ) : (
-        <CrmManagementSystem currentUser={user} language={lang} />
+        <CrmManagementSystem currentUser={user} language={lang} initialStageTab={currentStage} />
       )}
     </DashboardLayout>
   );

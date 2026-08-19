@@ -18,6 +18,8 @@ import {
   Settings,
   BarChart3,
   Send,
+  Clock,
+  Star,
 } from 'lucide-react';
 import { User, Language, Theme } from '../types';
 
@@ -94,6 +96,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             section: isBn ? 'ব্যবস্থাপনা' : 'MANAGEMENT',
             items: [
               { id: 'crm', label: isBn ? '👥 কাস্টমার রিলেশনশিপ (CRM)' : '👥 CRM Management', icon: Users },
+              { id: 'crm_followup', label: isBn ? '🔴 ফলো আপ কাস্টমার' : '🔴 Follow-Up Customers', icon: Clock },
+              { id: 'crm_new', label: isBn ? '🔵 নতুন কাস্টমার' : '🔵 New Customers', icon: CheckCircle2 },
+              { id: 'crm_regular', label: isBn ? '⚫ রেগুলার কাস্টমার' : '⚫ Regular Customers', icon: Star },
               { id: 'warehouses', label: isBn ? 'ওয়্যারহাউজ ম্যানেজমেন্ট' : 'Warehouse Setup', icon: Building2 },
               { id: 'users', label: isBn ? 'ইউজার ও রোলস' : 'User Accounts', icon: Users },
               { id: 'ledger', label: isBn ? 'কাস্টমার লেজার ওভারভিউ' : 'Customer Dues Ledger', icon: FileSpreadsheet },
@@ -116,6 +121,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
             items: [
               { id: 'dashboard', label: isBn ? 'অপারেশনস ড্যাশবোর্ড' : 'Operations Dashboard', icon: LayoutDashboard },
               { id: 'crm', label: isBn ? '👥 কাস্টমার রিলেশনশিপ (CRM)' : '👥 CRM Management', icon: Users },
+              { id: 'crm_followup', label: isBn ? '🔴 ফলো আপ কাস্টমার' : '🔴 Follow-Up Customers', icon: Clock },
+              { id: 'crm_new', label: isBn ? '🔵 নতুন কাস্টমার' : '🔵 New Customers', icon: CheckCircle2 },
+              { id: 'crm_regular', label: isBn ? '⚫ রেগুলার কাস্টমার' : '⚫ Regular Customers', icon: Star },
               { id: 'live_lifecycle', label: isBn ? '⚡ কার্গো লাইফসাইকেল মনিটর' : '⚡ Cargo Live Lifecycle', icon: Activity },
               { id: 'cargo_search', label: isBn ? '🔍 কার্গো ট্র্যাকিং সার্চ' : '🔍 Cargo Tracking Search', icon: Search },
               { id: 'notifications', label: isBn ? 'নোটিফিকেশন' : 'Notifications', icon: Bell },
@@ -178,9 +186,16 @@ export const Sidebar: React.FC<SidebarProps> = ({
       case 'crm_executive':
         return [
           {
-            section: isBn ? 'প্রধান' : 'MAIN',
+            section: isBn ? 'কাস্টমার রিলেশনশিপ (CRM)' : 'CRM MANAGEMENT',
             items: [
-              { id: 'dashboard', label: isBn ? 'সিআরএম কাস্টমার বোর্ড' : 'CRM Customer Board', icon: Users },
+              { id: 'followup', label: isBn ? '🔴 ফলো আপ কাস্টমার' : '🔴 Follow-Up Customers', icon: Clock },
+              { id: 'order_complete', label: isBn ? '🔵 নতুন কাস্টমার' : '🔵 New Customers', icon: CheckCircle2 },
+              { id: 'important_regular', label: isBn ? '⚫ রেগুলার কাস্টমার' : '⚫ Regular Customers', icon: Star },
+            ],
+          },
+          {
+            section: isBn ? 'অন্যান্য' : 'OTHER',
+            items: [
               { id: 'cargo_search', label: isBn ? '🔍 কার্গো ট্র্যাকিং সার্চ' : '🔍 Cargo Tracking Search', icon: Search },
               { id: 'notifications', label: isBn ? 'নোটিফিকেশন' : 'Notifications', icon: Bell },
             ],
