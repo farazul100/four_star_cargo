@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { MessageSquare } from 'lucide-react';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { NotificationsPage } from './NotificationsPage';
@@ -30,9 +31,17 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [isChatOpen, setIsChatOpen] = useState(false);
 
+  // Auto-open chat modal if user clicks 'system_chat' tab in sidebar
+  useEffect(() => {
+    if (activeTab === 'system_chat') {
+      setIsChatOpen(true);
+    }
+  }, [activeTab]);
+
   if (!user) return null;
 
   const isDark = theme === 'dark';
+  const isBn = lang === 'bn';
 
   return (
     <div
@@ -59,6 +68,20 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
       {/* Global In-System Calling Overlay & Chat Modal */}
       <SystemCallOverlay currentUser={user} language={lang} />
       <SystemChatModal currentUser={user} language={lang} isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
+
+      {/* FLOATING CHAT WIDGET BUTTON (BOTTOM-RIGHT CORNER) */}
+      <button
+        type="button"
+        onClick={() => setIsChatOpen(true)}
+        className="fixed bottom-6 right-6 z-[888] px-4 py-3 rounded-full bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs shadow-2xl transition-all duration-200 flex items-center space-x-2.5 cursor-pointer hover:scale-105 active:scale-95 border-2 border-white/20 group"
+        title={isBn ? 'ইন-সিস্টেম লাইভ চ্যাট ও ভয়েস/ভিডিও কল' : 'Live System Chat & Calls'}
+      >
+        <div className="relative">
+          <MessageSquare className="w-5 h-5 group-hover:animate-bounce-short" />
+          <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 border-2 border-blue-600 animate-pulse" />
+        </div>
+        <span className="font-semibold">{isBn ? 'লাইভ চ্যাট ও কল' : 'Live Chat & Call'}</span>
+      </button>
 
       {/* Main Body */}
       <div className="flex flex-1 min-h-0 relative">

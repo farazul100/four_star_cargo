@@ -21,6 +21,7 @@ import {
   Clock,
   Star,
   UserPlus,
+  MessageSquare,
 } from 'lucide-react';
 import { User, Language, Theme } from '../types';
 
@@ -83,6 +84,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             section: isBn ? 'প্রধান' : 'MAIN',
             items: [
               { id: 'dashboard', label: isBn ? 'কোম্পানি অ্যানালিটিক্স' : 'Company Analytics', icon: LayoutDashboard },
+              { id: 'system_chat', label: isBn ? 'লাইভ চ্যাট ও ভিডিও কল' : 'Live System Chat & Calls', icon: MessageSquare },
               { id: 'live_lifecycle', label: isBn ? 'কার্গো লাইফসাইকেল মনিটর' : 'Cargo Live Lifecycle', icon: Activity },
               { id: 'cargo_search', label: isBn ? 'কার্গো ট্র্যাকিং সার্চ' : 'Cargo Tracking Search', icon: Search },
               { id: 'notifications', label: isBn ? 'নোটিফিকেশন' : 'Notifications', icon: Bell },
@@ -121,6 +123,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             section: isBn ? 'প্রধান' : 'MAIN',
             items: [
               { id: 'dashboard', label: isBn ? 'অপারেশনস ড্যাশবোর্ড' : 'Operations Dashboard', icon: LayoutDashboard },
+              { id: 'system_chat', label: isBn ? 'লাইভ চ্যাট ও ভিডিও কল' : 'Live System Chat & Calls', icon: MessageSquare },
               { id: 'crm_create', label: isBn ? 'নতুন কাস্টমার তৈরি' : 'Create Customer', icon: UserPlus },
               { id: 'crm_followup', label: isBn ? 'ফলো আপ কাস্টমার' : 'Follow-Up Customers', icon: Clock },
               { id: 'crm_new', label: isBn ? 'নতুন কাস্টমার' : 'New Customers', icon: CheckCircle2 },
@@ -149,6 +152,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             section: isBn ? 'প্রধান' : 'MAIN',
             items: [
               { id: 'dashboard', label: isBn ? 'ওয়্যারহাউজ ড্যাশবোর্ড' : 'Warehouse Dashboard', icon: LayoutDashboard },
+              { id: 'system_chat', label: isBn ? 'লাইভ চ্যাট ও ভিডিও কল' : 'Live System Chat & Calls', icon: MessageSquare },
               { id: 'cargo_search', label: isBn ? 'কার্গো ট্র্যাকিং সার্চ' : 'Cargo Tracking Search', icon: Search },
               { id: 'notifications', label: isBn ? 'নোটিফিকেশন' : 'Notifications', icon: Bell },
               { id: 'booking_entry', label: isBn ? 'নতুন কার্টুন এন্ট্রি' : 'New Carton Booking', icon: PlusCircle },
@@ -174,6 +178,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             section: isBn ? 'প্রধান' : 'MAIN',
             items: [
               { id: 'dashboard', label: isBn ? 'অ্যাকাউন্টস ড্যাশবোর্ড' : 'Accounts Dashboard', icon: LayoutDashboard },
+              { id: 'system_chat', label: isBn ? 'লাইভ চ্যাট ও ভিডিও কল' : 'Live System Chat & Calls', icon: MessageSquare },
               { id: 'cargo_search', label: isBn ? 'কার্গো ট্র্যাকিং সার্চ' : 'Cargo Tracking Search', icon: Search },
               { id: 'notifications', label: isBn ? 'নোটিফিকেশন' : 'Notifications', icon: Bell },
               { id: 'customer_ledger', label: isBn ? 'কাস্টমার লেজার' : 'Customer Ledger', icon: FileSpreadsheet },
@@ -198,6 +203,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {
             section: isBn ? 'অন্যান্য' : 'OTHER',
             items: [
+              { id: 'system_chat', label: isBn ? 'লাইভ চ্যাট ও ভিডিও কল' : 'Live System Chat & Calls', icon: MessageSquare },
               { id: 'cargo_search', label: isBn ? 'কার্গো ট্র্যাকিং সার্চ' : 'Cargo Tracking Search', icon: Search },
               { id: 'notifications', label: isBn ? 'নোটিফিকেশন' : 'Notifications', icon: Bell },
             ],
