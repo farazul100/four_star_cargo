@@ -27,8 +27,7 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
   const peerConnectionRef = useRef<RTCPeerConnection | null>(null);
   const localStreamRef = useRef<MediaStream | null>(null);
   const remoteAudioRef = useRef<HTMLAudioElement | null>(null);
-
-  // Ringtone Audio Context
+  const endedCallIdsRef = useRef<Set<string>>(new Set());
   const ringtoneAudioCtxRef = useRef<AudioContext | null>(null);
   const ringtoneIntervalRef = useRef<number | null>(null);
 
@@ -141,7 +140,11 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
       const calls: CallSession[] = db.calls || [];
 
       const myCall = calls.find(
-        (c) => (c.target_user_id === currentUser.id || c.caller_id === currentUser.id) && c.status !== 'ended' && c.status !== 'rejected'
+        (c) =>
+          (c.target_user_id === currentUser.id || c.caller_id === currentUser.id) &&
+          c.status !== 'ended' &&
+          c.status !== 'rejected' &&
+          !endedCallIdsRef.current.has(c.id)
       );
 
       if (myCall) {
@@ -211,16 +214,10 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
         }
       } else {
         stopRingtone();
-        // Check if active call is explicitly ended or rejected in DB, or timed out (60s ringing)
+        stopWebRTC();
         if (activeCall) {
-          const endedCall = calls.find((c) => c.id === activeCall.id && (c.status === 'ended' || c.status === 'rejected'));
-          const callAgeSec = (Date.now() - new Date(activeCall.created_at).getTime()) / 1000;
-
-          if (endedCall || callAgeSec > 60) {
-            stopWebRTC();
-            setActiveCall(null);
-            setCallDuration(0);
-          }
+          setActiveCall(null);
+          setCallDuration(0);
         }
       }
     };
@@ -272,6 +269,7 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
             : c
         );
         saveHostingerDbData('fsc_vps_calls', updatedCalls);
+        setActiveCall({ ...activeCall, status: 'active' });
         logSystemAuditAction(currentUser, 'CALL_ACCEPTED', 'CALL', activeCall.id, `Accepted voice call from ${activeCall.caller_name}`);
       }
     } catch (err) {
@@ -282,6 +280,7 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
   // Decline/Reject Call
   const handleRejectCall = () => {
     if (!activeCall) return;
+    endedCallIdsRef.current.add(activeCall.id);
     stopRingtone();
     stopWebRTC();
 
@@ -298,6 +297,7 @@ export const SystemCallOverlay: React.FC<SystemCallOverlayProps> = ({ currentUse
   // End Active Call
   const handleEndCall = () => {
     if (!activeCall) return;
+    endedCallIdsRef.current.add(activeCall.id);
     stopRingtone();
     stopWebRTC();
 

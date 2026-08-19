@@ -576,14 +576,37 @@ export const fetchServerDbAndSync = async () => {
               const serverCalls: any[] = serverData;
               const callMap = new Map<string, any>();
 
-              serverCalls.forEach((c) => { if (c && c.id) callMap.set(c.id, c); });
+              // Priority: ended/rejected (3) > active (2) > ringing (1)
+              const getPriority = (st: string) => {
+                if (st === 'ended' || st === 'rejected') return 3;
+                if (st === 'active') return 2;
+                return 1;
+              };
 
-              localCalls.forEach((c) => {
-                if (c && c.id) {
-                  const existing = callMap.get(c.id);
-                  const isFresh = Date.now() - new Date(c.created_at || 0).getTime() < 60000;
-                  if (!existing || c.status === 'ringing' || c.status === 'active' || isFresh) {
-                    callMap.set(c.id, { ...existing, ...c });
+              const allCalls = [...serverCalls, ...localCalls];
+              allCalls.forEach((call) => {
+                if (call && call.id) {
+                  const existing = callMap.get(call.id);
+                  if (!existing) {
+                    callMap.set(call.id, call);
+                  } else {
+                    const existingPrio = getPriority(existing.status);
+                    const callPrio = getPriority(call.status);
+
+                    if (callPrio > existingPrio) {
+                      callMap.set(call.id, { ...existing, ...call });
+                    } else if (callPrio === existingPrio) {
+                      const mergedCallerCand = Array.from(new Set([...(existing.caller_candidates || []), ...(call.caller_candidates || [])]));
+                      const mergedCalleeCand = Array.from(new Set([...(existing.callee_candidates || []), ...(call.callee_candidates || [])]));
+                      callMap.set(call.id, {
+                        ...existing,
+                        ...call,
+                        sdp_offer: call.sdp_offer || existing.sdp_offer,
+                        sdp_answer: call.sdp_answer || existing.sdp_answer,
+                        caller_candidates: mergedCallerCand,
+                        callee_candidates: mergedCalleeCand,
+                      });
+                    }
                   }
                 }
               });
