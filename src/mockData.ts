@@ -24,18 +24,8 @@ export const INITIAL_WAREHOUSES: Warehouse[] = [
     city: 'Guangzhou',
     phone: '+86 20 8899-7711',
     status: 'active',
-    total_cartons: 420,
-    incharge_staff: [
-      {
-        id: 'usr-3',
-        name: 'চেন ওয়েই (Chen Wei)',
-        email: 'china@fourstarcargo.com',
-        phone: '+86 138-0013-8000',
-        role: 'warehouse_incharge',
-        status: 'active',
-        created_at: '2026-01-10T00:00:00Z',
-      },
-    ],
+    total_cartons: 0,
+    incharge_staff: [],
   },
   {
     id: 'wh-hk',
@@ -48,18 +38,8 @@ export const INITIAL_WAREHOUSES: Warehouse[] = [
     city: 'Hong Kong',
     phone: '+852 2388-9900',
     status: 'active',
-    total_cartons: 185,
-    incharge_staff: [
-      {
-        id: 'usr-4',
-        name: 'লি কা-শিং (Li Ka-shing)',
-        email: 'hk@fourstarcargo.com',
-        phone: '+852 9123-4567',
-        role: 'warehouse_incharge',
-        status: 'active',
-        created_at: '2026-01-12T00:00:00Z',
-      },
-    ],
+    total_cartons: 0,
+    incharge_staff: [],
   },
   {
     id: 'wh-dubai',
@@ -72,18 +52,8 @@ export const INITIAL_WAREHOUSES: Warehouse[] = [
     city: 'Dubai',
     phone: '+971 4 299-8800',
     status: 'active',
-    total_cartons: 140,
-    incharge_staff: [
-      {
-        id: 'usr-4b',
-        name: 'তারিক মানসুর (Tariq Mansoor)',
-        email: 'dubai@fourstarcargo.com',
-        phone: '+971 50 123-4567',
-        role: 'warehouse_incharge',
-        status: 'active',
-        created_at: '2026-02-01T00:00:00Z',
-      },
-    ],
+    total_cartons: 0,
+    incharge_staff: [],
   },
   {
     id: 'wh-bd',
@@ -96,18 +66,8 @@ export const INITIAL_WAREHOUSES: Warehouse[] = [
     city: 'Dhaka',
     phone: '+880 1711-009988',
     status: 'active',
-    total_cartons: 310,
-    incharge_staff: [
-      {
-        id: 'usr-5',
-        name: 'রফিকুল ইসলাম (Rafiqul Islam)',
-        email: 'bd@fourstarcargo.com',
-        phone: '+880 1819-445566',
-        role: 'warehouse_incharge',
-        status: 'active',
-        created_at: '2026-01-15T00:00:00Z',
-      },
-    ],
+    total_cartons: 0,
+    incharge_staff: [],
   },
 ];
 

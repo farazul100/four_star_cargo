@@ -215,31 +215,6 @@ export const getHostingerDbData = () => {
     });
   }
 
-  // 3. Automatically extract and merge incharge staff from all warehouses so they are ALWAYS valid login accounts
-  if (Array.isArray(warehouses)) {
-    warehouses.forEach((wh) => {
-      if (wh && Array.isArray(wh.incharge_staff)) {
-        wh.incharge_staff.forEach((stf) => {
-          if (stf && stf.email) {
-            const emailKey = stf.email.toLowerCase();
-            const existing = userMap.get(emailKey);
-            userMap.set(emailKey, {
-              id: stf.id || `usr-${Date.now()}`,
-              name: stf.name,
-              email: stf.email,
-              password: existing?.password || 'Cargo@2026',
-              role: 'warehouse_incharge',
-              warehouse_id: wh.id,
-              warehouse_name: wh.name,
-              status: stf.status || 'active',
-              created_at: stf.created_at || new Date().toISOString(),
-            });
-          }
-        });
-      }
-    });
-  }
-
   const mergedUsers = Array.from(userMap.values());
   try {
     localStorage.setItem(DB_KEYS.USERS, JSON.stringify(mergedUsers));

@@ -48,6 +48,7 @@ import {
   CreditCard,
   Target,
   Scale,
+  Trash2,
 } from 'lucide-react';
 import { Warehouse, User as UserType, Carton, AuditLog, Language, LedgerEntry, FlyingProposal, Theme } from '../types';
 import { ToastContainer, ToastMessage } from './Toast';
@@ -914,9 +915,23 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
               }`}
             />
           </div>
-          <span className="text-[11px] text-slate-400 font-normal">
-            {isBn ? `সর্বমোট ${filteredAuditLogs.length} টি সিস্টেম এক্টিভিটি রেকর্ড পাওয়া গেছে` : `Total ${filteredAuditLogs.length} audit logs`}
-          </span>
+          <div className="flex items-center space-x-3">
+            <span className="text-[11px] text-slate-400 font-normal">
+              {isBn ? `সর্বমোট ${filteredAuditLogs.length} টি সিস্টেম এক্টিভিটি রেকর্ড পাওয়া গেছে` : `Total ${filteredAuditLogs.length} audit logs`}
+            </span>
+            <button
+              onClick={() => {
+                if (window.confirm(isBn ? 'আপনি কি সকল অডিট লগ রেকর্ড স্থায়ীভাবে মুছে ফেলতে চান?' : 'Are you sure you want to permanently clear all audit logs?')) {
+                  saveHostingerDbData('fsc_vps_audit', []);
+                  addToast('success', isBn ? 'অডিট লগ মুছে ফেলা হয়েছে' : 'Audit Logs Cleared', isBn ? 'সকল হিস্টোরি রেকর্ড ক্লিয়ার করা হয়েছে।' : 'All history records have been cleared.');
+                }
+              }}
+              className="px-2.5 py-1 text-[11px] font-medium bg-red-500/10 text-red-500 hover:bg-red-500/20 border border-red-500/20 rounded-lg transition-colors flex items-center space-x-1"
+            >
+              <Trash2 className="w-3 h-3" />
+              <span>{isBn ? 'লগ ক্লিয়ার করুন' : 'Clear Logs'}</span>
+            </button>
+          </div>
         </div>
 
         {/* Audit Logs Table */}
