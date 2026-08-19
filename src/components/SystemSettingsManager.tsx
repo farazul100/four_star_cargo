@@ -907,9 +907,30 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
           const cleanKey = (geminiApiKey || '').replace(/^["']|["']$/g, '').trim();
           setGeminiApiKey(cleanKey);
           localStorage.setItem('fsc_gemini_api_key', cleanKey);
+          localStorage.setItem('fsc_vps_settings', JSON.stringify({ gemini_api_key: cleanKey }));
+          localStorage.setItem('settings', JSON.stringify({ gemini_api_key: cleanKey }));
           const dbData = getHostingerDbData() as any;
           saveHostingerDbData('settings', { ...(dbData.settings || {}), gemini_api_key: cleanKey });
           saveHostingerDbData('fsc_vps_settings', { ...(dbData.settings || {}), gemini_api_key: cleanKey });
+
+          // Direct instant POST to Hostinger server DB file
+          try {
+            const syncPayload = JSON.stringify({
+              settings: { gemini_api_key: cleanKey },
+              fsc_vps_settings: { gemini_api_key: cleanKey },
+              gemini_api_key: cleanKey,
+            });
+            const syncEndpoints = ['/api/db.php', '/api/db', 'https://four.kee2mart.com/api/db.php'];
+            syncEndpoints.forEach((url) => {
+              try {
+                fetch(url, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: syncPayload,
+                });
+              } catch {}
+            });
+          } catch {}
 
           logSystemAuditAction(
             currentUser,

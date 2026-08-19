@@ -53,7 +53,12 @@ export const getCleanGeminiApiKeyAsync = async (): Promise<string> => {
   if (key) return key;
 
   try {
-    const endpoints = ['https://four.kee2mart.com/api/db.php', 'https://four.kee2mart.com/api/db'];
+    const endpoints = [
+      '/api/db.php',
+      '/api/db',
+      'https://four.kee2mart.com/api/db.php',
+      'https://four.kee2mart.com/api/db',
+    ];
     for (const url of endpoints) {
       try {
         const res = await fetch(url, { headers: { Accept: 'application/json' } });
@@ -68,6 +73,7 @@ export const getCleanGeminiApiKeyAsync = async (): Promise<string> => {
             const clean = apiK.replace(/^["']|["']$/g, '').trim();
             if (clean) {
               localStorage.setItem('fsc_gemini_api_key', clean);
+              localStorage.setItem('fsc_vps_settings', JSON.stringify({ gemini_api_key: clean }));
               if (typeof window !== 'undefined') (window as any).__FSC_GEMINI_KEY__ = clean;
               return clean;
             }
