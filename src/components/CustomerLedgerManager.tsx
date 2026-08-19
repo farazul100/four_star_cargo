@@ -339,7 +339,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
         <div className="flex items-center justify-between">
           <button
             onClick={() => setSelectedCustomer(null)}
-            className={`px-4 py-2 rounded-xl text-xs font-normal border transition-all cursor-pointer flex items-center space-x-2 shadow-2xs ${
+            className={`px-4 py-2 rounded-none-none text-xs font-normal border transition-all cursor-pointer flex items-center space-x-2 shadow-2xs ${
               isDark
                 ? 'bg-[#1C1C1E] border-slate-700/80 text-slate-200 hover:bg-slate-800'
                 : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
@@ -352,7 +352,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
           <div className="flex items-center space-x-2.5">
             <button
               onClick={() => setCustomerForPayment(selectedCustomer)}
-              className="px-4 py-2 rounded-xl text-xs font-normal bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer flex items-center space-x-1.5 shadow-2xs"
+              className="px-4 py-2 rounded-none-none text-xs font-normal bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer flex items-center space-x-1.5 shadow-2xs"
             >
               <DollarSign className="w-4 h-4" />
               <span>{isBn ? '💰 টাকা জমা নিন (Collect Payment)' : 'Record Payment'}</span>
@@ -360,7 +360,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
 
             <button
               onClick={handlePrintReport}
-              className={`px-4 py-2 rounded-xl text-xs font-normal border transition-all cursor-pointer flex items-center space-x-1.5 shadow-2xs ${
+              className={`px-4 py-2 rounded-none-none text-xs font-normal border transition-all cursor-pointer flex items-center space-x-1.5 shadow-2xs ${
                 isDark ? 'bg-[#121214] border-slate-700/80 text-slate-300 hover:text-white' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
               }`}
             >
@@ -371,12 +371,12 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
         </div>
 
         {/* Customer Profile Header Banner */}
-        <div className={`p-6 rounded-2xl border space-y-6 shadow-2xs ${
+        <div className={`p-6 rounded-none-none border space-y-6 shadow-2xs ${
           isDark ? 'bg-[#1C1C1E] border-slate-800/80 text-white' : 'bg-white border-slate-200/80 text-slate-900'
         }`}>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center space-x-4">
-              <div className={`w-14 h-14 rounded-2xl border flex items-center justify-center font-semibold text-lg shadow-2xs ${
+              <div className={`w-14 h-14 rounded-none-none border flex items-center justify-center font-semibold text-lg shadow-2xs ${
                 isDark ? 'bg-teal-950/40 border-teal-800/60 text-teal-300' : 'bg-teal-50/80 border-teal-200/70 text-[#00897B]'
               }`}>
                 {selectedCustomer.name.charAt(0)}
@@ -385,11 +385,11 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
               <div className="space-y-1">
                 <div className="flex items-center space-x-2.5 flex-wrap gap-1.5">
                   <h2 className={`text-base font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{selectedCustomer.name}</h2>
-                  <span className="px-2.5 py-0.5 rounded-full text-xs font-mono font-medium bg-[#00897B]/10 text-[#00897B] border border-[#00897B]/20">
+                  <span className="px-2.5 py-0.5 rounded-none-none text-xs font-mono font-medium bg-[#00897B]/10 text-[#00897B] border border-[#00897B]/20">
                     🏷️ {selectedCustomer.shipping_mark || 'MAR-8801'}
                   </span>
                   {selectedCustomer.status === 'vip' && (
-                    <span className="px-2.5 py-0.5 rounded-full text-[11px] font-normal bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800/50">
+                    <span className="px-2.5 py-0.5 rounded-none-none text-[11px] font-normal bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800/50">
                       ⭐ VIP Client
                     </span>
                   )}
@@ -419,7 +419,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
             </div>
 
             {/* Financial Dues Summary Cards */}
-            <div className={`p-4 rounded-xl border grid grid-cols-3 gap-4 text-xs min-w-[320px] ${
+            <div className={`p-4 rounded-none-none border grid grid-cols-3 gap-4 text-xs min-w-[320px] ${
               isDark ? 'bg-[#121214] border-slate-800/80' : 'bg-slate-50/70 border-slate-200/70'
             }`}>
               <div>
@@ -462,7 +462,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
         <div className="flex items-center space-x-2 border-b dark:border-slate-800/80 pb-2">
           <button
             onClick={() => setCustomerActiveTab('products')}
-            className={`px-4 py-2 rounded-xl text-xs font-normal transition-all cursor-pointer flex items-center space-x-2 ${
+            className={`px-4 py-2 rounded-none-none text-xs font-normal transition-all cursor-pointer flex items-center space-x-2 ${
               customerActiveTab === 'products'
                 ? 'bg-[#00897B] text-white shadow-2xs'
                 : isDark
@@ -476,7 +476,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
 
           <button
             onClick={() => setCustomerActiveTab('transactions')}
-            className={`px-4 py-2 rounded-xl text-xs font-normal transition-all cursor-pointer flex items-center space-x-2 ${
+            className={`px-4 py-2 rounded-none-none text-xs font-normal transition-all cursor-pointer flex items-center space-x-2 ${
               customerActiveTab === 'transactions'
                 ? 'bg-[#00897B] text-white shadow-2xs'
                 : isDark
@@ -491,7 +491,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
 
         {/* TAB 1: PRODUCT CARTONS HISTORY */}
         {customerActiveTab === 'products' && (
-          <div className={`border rounded-2xl overflow-hidden shadow-2xs ${
+          <div className={`border rounded-none-none overflow-hidden shadow-2xs ${
             isDark ? 'bg-[#1C1C1E] border-slate-800/80 text-white' : 'bg-white border-slate-200/80 text-slate-900'
           }`}>
             <div className="p-4 border-b dark:border-slate-800/80 flex items-center justify-between">
@@ -535,7 +535,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                           {ctn.ctn_no}
                         </td>
                         <td className="p-3.5">
-                          <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-md text-[11px] font-mono font-medium bg-[#00897B]/10 text-[#00897B] border border-[#00897B]/20">
+                          <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-none-none text-[11px] font-mono font-medium bg-[#00897B]/10 text-[#00897B] border border-[#00897B]/20">
                             <Tag className="w-3 h-3" />
                             <span>{ctn.shipping_mark || `${selectedCustomer.shipping_mark || 'MAR-8801'}/${ctn.ctn_no}`}</span>
                           </span>
@@ -557,7 +557,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                           </span>
                         </td>
                         <td className="p-3.5 text-center">
-                          <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-normal border ${
+                          <span className={`px-2.5 py-0.5 rounded-none-none text-[10px] font-normal border ${
                             ctn.status === 'delivered'
                               ? 'bg-emerald-50 text-emerald-800 border-emerald-200/60 dark:bg-emerald-950/40 dark:text-emerald-300'
                               : ctn.status === 'in_transit'
@@ -578,7 +578,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
 
         {/* TAB 2: FINANCIAL TRANSACTIONS LEDGER */}
         {customerActiveTab === 'transactions' && (
-          <div className={`border rounded-2xl overflow-hidden shadow-2xs ${
+          <div className={`border rounded-none-none overflow-hidden shadow-2xs ${
             isDark ? 'bg-[#1C1C1E] border-slate-800/80 text-white' : 'bg-white border-slate-200/80 text-slate-900'
           }`}>
             <div className="p-4 border-b dark:border-slate-800/80 flex items-center justify-between">
@@ -622,7 +622,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                           {new Date(entry.created_at).toLocaleString()}
                         </td>
                         <td className="p-3.5">
-                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-normal border ${
+                          <span className={`px-2 py-0.5 rounded-none-none text-[10px] font-normal border ${
                             entry.type === 'payment'
                               ? 'bg-emerald-50 text-emerald-800 border-emerald-200/60 dark:bg-emerald-950/40 dark:text-emerald-300'
                               : 'bg-amber-50 text-amber-800 border-amber-200/60 dark:bg-amber-950/40 dark:text-amber-300'
@@ -669,12 +669,12 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
       {/* 1. Header & Executive Metrics Overview */}
-      <div className={`p-5 rounded-2xl border space-y-4 shadow-2xs ${
+      <div className={`p-5 rounded-none-none border space-y-4 shadow-2xs ${
         isDark ? 'bg-[#1C1C1E] border-slate-800/80 text-white' : 'bg-white border-slate-200/80 text-slate-900'
       }`}>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center space-x-3">
-            <div className={`w-10 h-10 rounded-xl border flex items-center justify-center font-normal ${
+            <div className={`w-10 h-10 rounded-none-none border flex items-center justify-center font-normal ${
               isDark ? 'bg-teal-950/40 border-teal-800/60 text-teal-300' : 'bg-teal-50/80 border-teal-200/70 text-[#00897B]'
             }`}>
               <Users className="w-5 h-5" />
@@ -693,7 +693,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
 
           <button
             onClick={() => setShowAddCustomerModal(true)}
-            className="px-3.5 py-2 rounded-xl text-xs font-normal bg-[#00897B] hover:bg-[#00796B] text-white transition-all cursor-pointer flex items-center space-x-2 shadow-2xs"
+            className="px-3.5 py-2 rounded-none-none text-xs font-normal bg-[#00897B] hover:bg-[#00796B] text-white transition-all cursor-pointer flex items-center space-x-2 shadow-2xs"
           >
             <UserPlus className="w-4 h-4" />
             <span>{isBn ? '+ নতুন কাস্টমার রেজিস্ট্রেশন' : '+ Add New Customer'}</span>
@@ -703,7 +703,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
         {/* 4 Refined Financial Summary KPI Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-4 gap-3.5 pt-2">
           {/* Total Customers */}
-          <div className={`p-4 rounded-xl border space-y-1.5 ${
+          <div className={`p-4 rounded-none-none border space-y-1.5 ${
             isDark ? 'bg-[#121214] border-slate-800/80' : 'bg-teal-50/30 border-teal-100/80'
           }`}>
             <span className="text-[11px] font-normal text-slate-500 flex items-center justify-between">
@@ -716,7 +716,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
           </div>
 
           {/* Total Billed */}
-          <div className={`p-4 rounded-xl border space-y-1.5 ${
+          <div className={`p-4 rounded-none-none border space-y-1.5 ${
             isDark ? 'bg-[#121214] border-slate-800/80' : 'bg-amber-50/40 border-amber-100/80'
           }`}>
             <span className="text-[11px] font-normal text-slate-500 flex items-center justify-between">
@@ -727,7 +727,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
           </div>
 
           {/* Total Paid */}
-          <div className={`p-4 rounded-xl border space-y-1.5 ${
+          <div className={`p-4 rounded-none-none border space-y-1.5 ${
             isDark ? 'bg-[#121214] border-slate-800/80' : 'bg-emerald-50/40 border-emerald-100/80'
           }`}>
             <span className="text-[11px] font-normal text-emerald-700 dark:text-emerald-400 flex items-center justify-between">
@@ -738,7 +738,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
           </div>
 
           {/* Total Due */}
-          <div className={`p-4 rounded-xl border space-y-1.5 ${
+          <div className={`p-4 rounded-none-none border space-y-1.5 ${
             isDark ? 'bg-[#121214] border-slate-800/80' : 'bg-rose-50/40 border-rose-100/80'
           }`}>
             <span className="text-[11px] font-normal text-rose-700 dark:text-rose-400 flex items-center justify-between">
@@ -751,7 +751,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
       </div>
 
       {/* 2. Smart System Explanation Alert Banner */}
-      <div className={`p-4 rounded-2xl border flex items-start space-x-3 text-xs ${
+      <div className={`p-4 rounded-none-none border flex items-start space-x-3 text-xs ${
         isDark ? 'bg-teal-950/30 border-teal-800/50 text-teal-200' : 'bg-teal-50/60 border-teal-200/60 text-[#00695C]'
       }`}>
         <Tag className="w-4 h-4 text-[#00897B] shrink-0 mt-0.5" />
@@ -768,14 +768,14 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
       </div>
 
       {/* 3. Search & Filter Bar */}
-      <div className={`p-3 rounded-2xl border flex flex-wrap items-center justify-between gap-3 text-xs ${
+      <div className={`p-3 rounded-none-none border flex flex-wrap items-center justify-between gap-3 text-xs ${
         isDark ? 'bg-[#1C1C1E] border-slate-800/80 text-white' : 'bg-white border-slate-200/80 text-slate-900 shadow-2xs'
       }`}>
         {/* Status Filter Tabs */}
         <div className="flex items-center space-x-1.5 flex-wrap gap-1 font-normal">
           <button
             onClick={() => setStatusFilter('all')}
-            className={`px-3 py-1.5 rounded-xl text-xs transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-none-none text-xs transition-all cursor-pointer ${
               statusFilter === 'all'
                 ? 'bg-[#00897B] text-white shadow-2xs'
                 : isDark
@@ -788,7 +788,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
 
           <button
             onClick={() => setStatusFilter('due')}
-            className={`px-3 py-1.5 rounded-xl text-xs transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-none-none text-xs transition-all cursor-pointer ${
               statusFilter === 'due'
                 ? 'bg-[#00897B] text-white shadow-2xs'
                 : isDark
@@ -801,7 +801,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
 
           <button
             onClick={() => setStatusFilter('vip')}
-            className={`px-3 py-1.5 rounded-xl text-xs transition-all cursor-pointer ${
+            className={`px-3 py-1.5 rounded-none-none text-xs transition-all cursor-pointer ${
               statusFilter === 'vip'
                 ? 'bg-[#00897B] text-white shadow-2xs'
                 : isDark
@@ -821,7 +821,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={isBn ? 'নাম, শিপিং মার্ক (MAR-8801), মোবাইল...' : 'Search Name, Mark (MAR-8801), Phone...'}
-            className={`w-full border rounded-xl py-1.5 pl-8 pr-3 text-xs outline-none font-normal ${
+            className={`w-full border rounded-none-none py-1.5 pl-8 pr-3 text-xs outline-none font-normal ${
               isDark ? 'bg-[#121214] border-slate-700/80 text-white placeholder-slate-400' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
             }`}
           />
@@ -834,7 +834,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
       </div>
 
       {/* 4. Main Customer Directory Table */}
-      <div className={`border rounded-2xl overflow-hidden shadow-2xs ${
+      <div className={`border rounded-none-none overflow-hidden shadow-2xs ${
         isDark ? 'bg-[#1C1C1E] border-slate-800/80 text-white' : 'bg-white border-slate-200/80 text-slate-900'
       }`}>
         <div className="overflow-x-auto">
@@ -870,7 +870,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                       {/* Customer Identity */}
                       <td className="p-3.5">
                         <div className="flex items-center space-x-2.5">
-                          <div className={`w-8 h-8 rounded-xl border flex items-center justify-center font-medium text-xs ${
+                          <div className={`w-8 h-8 rounded-none-none border flex items-center justify-center font-medium text-xs ${
                             isDark ? 'bg-teal-950/40 border-teal-800/60 text-teal-300' : 'bg-teal-50/80 border-teal-200/70 text-[#00897B]'
                           }`}>
                             {cust.name.charAt(0)}
@@ -884,7 +884,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
 
                       {/* Shipping Mark Column with Carton Count Sub-Badge */}
                       <td className="p-3.5 space-y-1">
-                        <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-md text-xs font-mono font-medium bg-[#00897B]/10 text-[#00897B] border border-[#00897B]/20">
+                        <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-none-none text-xs font-mono font-medium bg-[#00897B]/10 text-[#00897B] border border-[#00897B]/20">
                           <Tag className="w-3 h-3 text-[#00897B]" />
                           <span>{displayMark}</span>
                         </span>
@@ -928,7 +928,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                         <div className="flex items-center justify-end space-x-2">
                           <button
                             onClick={() => setCustomerForPayment(cust)}
-                            className="px-3 py-1.5 rounded-xl text-xs font-normal bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer flex items-center space-x-1 shadow-2xs"
+                            className="px-3 py-1.5 rounded-none-none text-xs font-normal bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer flex items-center space-x-1 shadow-2xs"
                             title={isBn ? 'টাকা জমা রিসিভ করুন' : 'Collect Payment'}
                           >
                             <DollarSign className="w-3.5 h-3.5" />
@@ -937,7 +937,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
 
                           <button
                             onClick={() => setSelectedCustomer(cust)}
-                            className={`px-3 py-1.5 rounded-xl text-xs font-normal border transition-all cursor-pointer flex items-center space-x-1.5 shadow-2xs ${
+                            className={`px-3 py-1.5 rounded-none-none text-xs font-normal border transition-all cursor-pointer flex items-center space-x-1.5 shadow-2xs ${
                               isDark
                                 ? 'bg-teal-950/30 border-teal-800/60 text-teal-300 hover:bg-teal-900/40'
                                 : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
@@ -962,12 +962,12 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
       {/* ========================================================================= */}
       {showAddCustomerModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-backdrop-blur-fade">
-          <div className={`w-full max-w-lg rounded-2xl border p-6 space-y-5 shadow-2xl animate-modal-pop-bounce ${
+          <div className={`w-full max-w-lg rounded-none-none border p-6 space-y-5 shadow-2xl animate-modal-pop-bounce ${
             isDark ? 'bg-[#1C1C1E] border-slate-800/80 text-white' : 'bg-white border-slate-200/80 text-slate-900'
           }`}>
             <div className={`flex items-center justify-between border-b pb-4 ${isDark ? 'border-slate-800/80' : 'border-slate-100'}`}>
               <div className="flex items-center space-x-3">
-                <div className={`w-10 h-10 rounded-xl border flex items-center justify-center ${
+                <div className={`w-10 h-10 rounded-none-none border flex items-center justify-center ${
                   isDark ? 'bg-teal-950/40 border-teal-800/60 text-teal-300' : 'bg-teal-50/80 border-teal-200/70 text-[#00897B]'
                 }`}>
                   <UserPlus className="w-5 h-5" />
@@ -984,7 +984,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
 
               <button
                 onClick={() => setShowAddCustomerModal(false)}
-                className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                className={`p-1.5 rounded-none-none transition-all cursor-pointer ${
                   isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-400 hover:text-slate-800 hover:bg-slate-100'
                 }`}
               >
@@ -1003,7 +1003,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                   value={newCustShippingMark}
                   onChange={(e) => setNewCustShippingMark(e.target.value)}
                   placeholder={isBn ? 'যেমন: MAR-8801, SAY-9920' : 'e.g. MAR-8801'}
-                  className={`w-full border rounded-xl py-2.5 px-3.5 outline-none font-mono font-medium uppercase transition-all ${
+                  className={`w-full border rounded-none-none py-2.5 px-3.5 outline-none font-mono font-medium uppercase transition-all ${
                     isDark
                       ? 'bg-[#121214] border-slate-700 text-teal-300 focus:border-teal-500'
                       : 'bg-teal-50/40 border-teal-200/80 text-[#00897B] focus:bg-white focus:border-[#00897B]'
@@ -1024,7 +1024,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                   value={newCustName}
                   onChange={(e) => setNewCustName(e.target.value)}
                   placeholder={isBn ? 'যেমন: মাসুম বিল্লাহ' : 'e.g. Masum Billah'}
-                  className={`w-full border rounded-xl py-2.5 px-3.5 outline-none transition-all ${
+                  className={`w-full border rounded-none-none py-2.5 px-3.5 outline-none transition-all ${
                     isDark
                       ? 'bg-[#121214] border-slate-700 text-white'
                       : 'bg-slate-50/60 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
@@ -1043,7 +1043,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                     value={newCustPhone}
                     onChange={(e) => setNewCustPhone(e.target.value)}
                     placeholder="+880 1700-000000"
-                    className={`w-full border rounded-xl py-2.5 px-3.5 outline-none font-mono transition-all ${
+                    className={`w-full border rounded-none-none py-2.5 px-3.5 outline-none font-mono transition-all ${
                       isDark
                         ? 'bg-[#121214] border-slate-700 text-white'
                         : 'bg-slate-50/60 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
@@ -1060,7 +1060,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                     value={newCustCompany}
                     onChange={(e) => setNewCustCompany(e.target.value)}
                     placeholder={isBn ? 'যেমন: গ্লোবাল ট্রেডিং' : 'e.g. Global Traders'}
-                    className={`w-full border rounded-xl py-2.5 px-3.5 outline-none transition-all ${
+                    className={`w-full border rounded-none-none py-2.5 px-3.5 outline-none transition-all ${
                       isDark
                         ? 'bg-[#121214] border-slate-700 text-white'
                         : 'bg-slate-50/60 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
@@ -1078,7 +1078,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                   value={newCustAddress}
                   onChange={(e) => setNewCustAddress(e.target.value)}
                   placeholder={isBn ? 'যেমন: নওয়াবপুর রোড, ঢাকা' : 'e.g. Nawabpur, Dhaka'}
-                  className={`w-full border rounded-xl py-2.5 px-3.5 outline-none transition-all ${
+                  className={`w-full border rounded-none-none py-2.5 px-3.5 outline-none transition-all ${
                     isDark
                       ? 'bg-[#121214] border-slate-700 text-white'
                       : 'bg-slate-50/60 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
@@ -1090,7 +1090,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                 <button
                   type="button"
                   onClick={() => setShowAddCustomerModal(false)}
-                  className={`px-4 py-2 rounded-xl text-xs font-normal border transition-all cursor-pointer ${
+                  className={`px-4 py-2 rounded-none-none text-xs font-normal border transition-all cursor-pointer ${
                     isDark
                       ? 'bg-[#121214] border-slate-700 text-slate-300 hover:bg-slate-800'
                       : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700'
@@ -1101,7 +1101,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
 
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl text-xs font-normal bg-[#00897B] hover:bg-[#00796B] text-white shadow-2xs hover:shadow transition-all cursor-pointer"
+                  className="px-5 py-2 rounded-none-none text-xs font-normal bg-[#00897B] hover:bg-[#00796B] text-white shadow-2xs hover:shadow transition-all cursor-pointer"
                 >
                   {isBn ? 'নিবন্ধন সম্পন্ন করুন' : 'Register Customer'}
                 </button>
@@ -1116,12 +1116,12 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
       {/* ========================================================================= */}
       {customerForPayment && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-backdrop-blur-fade">
-          <div className={`w-full max-w-md rounded-2xl border p-6 space-y-5 shadow-2xl animate-modal-pop-bounce ${
+          <div className={`w-full max-w-md rounded-none-none border p-6 space-y-5 shadow-2xl animate-modal-pop-bounce ${
             isDark ? 'bg-[#1C1C1E] border-slate-800/80 text-white' : 'bg-white border-slate-200/80 text-slate-900'
           }`}>
             <div className={`flex items-center justify-between border-b pb-4 ${isDark ? 'border-slate-800/80' : 'border-slate-100'}`}>
               <div className="flex items-center space-x-3">
-                <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-200/80 dark:bg-emerald-950/40 dark:border-emerald-800/60 flex items-center justify-center">
+                <div className="w-10 h-10 rounded-none-none bg-emerald-50 border border-emerald-200/80 dark:bg-emerald-950/40 dark:border-emerald-800/60 flex items-center justify-center">
                   <DollarSign className="w-5 h-5 text-emerald-600" />
                 </div>
                 <div>
@@ -1136,7 +1136,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
 
               <button
                 onClick={() => setCustomerForPayment(null)}
-                className={`p-1.5 rounded-full transition-all cursor-pointer ${
+                className={`p-1.5 rounded-none-none transition-all cursor-pointer ${
                   isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-400 hover:text-slate-800 hover:bg-slate-100'
                 }`}
               >
@@ -1144,7 +1144,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
               </button>
             </div>
 
-            <div className={`p-3 rounded-xl border flex items-center justify-between text-xs font-normal ${
+            <div className={`p-3 rounded-none-none border flex items-center justify-between text-xs font-normal ${
               isDark ? 'bg-[#121214] border-slate-800/80' : 'bg-slate-50/70 border-slate-200/70'
             }`}>
               <span className="text-slate-500">{isBn ? 'বর্তমান বকেয়া (Due):' : 'Current Due:'}</span>
@@ -1163,7 +1163,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                   value={payAmount}
                   onChange={(e) => setPayAmount(e.target.value)}
                   placeholder="e.g. 50000"
-                  className={`w-full border rounded-xl py-2.5 px-3.5 outline-none font-mono font-semibold text-sm transition-all ${
+                  className={`w-full border rounded-none-none py-2.5 px-3.5 outline-none font-mono font-semibold text-sm transition-all ${
                     isDark
                       ? 'bg-[#121214] border-slate-700 text-emerald-400 focus:border-emerald-500'
                       : 'bg-emerald-50/40 border-emerald-200/80 text-emerald-800 focus:bg-white focus:border-emerald-600'
@@ -1178,7 +1178,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                 <select
                   value={payMethod}
                   onChange={(e) => setPayMethod(e.target.value as any)}
-                  className={`w-full border rounded-xl py-2.5 px-3.5 outline-none cursor-pointer transition-all ${
+                  className={`w-full border rounded-none-none py-2.5 px-3.5 outline-none cursor-pointer transition-all ${
                     isDark
                       ? 'bg-[#121214] border-slate-700 text-white'
                       : 'bg-slate-50/60 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
@@ -1201,7 +1201,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                   value={payRefNo}
                   onChange={(e) => setPayRefNo(e.target.value)}
                   placeholder="e.g. bKash Trx 99A8X10"
-                  className={`w-full border rounded-xl py-2.5 px-3.5 outline-none font-mono transition-all ${
+                  className={`w-full border rounded-none-none py-2.5 px-3.5 outline-none font-mono transition-all ${
                     isDark
                       ? 'bg-[#121214] border-slate-700 text-white'
                       : 'bg-slate-50/60 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
@@ -1218,7 +1218,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                   value={payNote}
                   onChange={(e) => setPayNote(e.target.value)}
                   placeholder={isBn ? 'যেমন: ঢাকা ওয়্যারহাউজে ক্যাশ রিসিভ' : 'e.g. Received at Tejgaon Hub'}
-                  className={`w-full border rounded-xl py-2.5 px-3.5 outline-none transition-all ${
+                  className={`w-full border rounded-none-none py-2.5 px-3.5 outline-none transition-all ${
                     isDark
                       ? 'bg-[#121214] border-slate-700 text-white'
                       : 'bg-slate-50/60 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
@@ -1230,7 +1230,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                 <button
                   type="button"
                   onClick={() => setCustomerForPayment(null)}
-                  className={`px-4 py-2 rounded-xl text-xs font-normal border transition-all cursor-pointer ${
+                  className={`px-4 py-2 rounded-none-none text-xs font-normal border transition-all cursor-pointer ${
                     isDark
                       ? 'bg-[#121214] border-slate-700 text-slate-300 hover:bg-slate-800'
                       : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700'
@@ -1241,7 +1241,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
 
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl text-xs font-normal bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs hover:shadow transition-all cursor-pointer flex items-center space-x-1"
+                  className="px-5 py-2 rounded-none-none text-xs font-normal bg-emerald-600 hover:bg-emerald-700 text-white shadow-2xs hover:shadow transition-all cursor-pointer flex items-center space-x-1"
                 >
                   <CheckCircle className="w-4 h-4" />
                   <span>{isBn ? 'পেমেন্ট রিসিভ সম্পন্ন করুন' : 'Confirm Payment'}</span>
