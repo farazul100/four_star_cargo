@@ -13,7 +13,7 @@ export interface ChatMessageItem {
 }
 
 /**
- * Sanitizes and extracts clean API key string
+ * Sanitizes and extracts clean API key string preserving dots, dashes, underscores
  */
 export const getCleanGeminiApiKey = (): string => {
   const db = getHostingerDbData() as any;
@@ -30,22 +30,22 @@ export const getCleanGeminiApiKey = (): string => {
     } catch {}
   }
 
-  // Remove any surrounding quotes, whitespace, or copy-paste artifacts
-  return (raw || '').replace(/^["']|["']$/g, '').replace(/[^a-zA-Z0-9_\-]/g, '').trim();
+  // Remove surrounding quotes, whitespace, preserving dot (.), dash (-), underscore (_)
+  return (raw || '').replace(/^["']|["']$/g, '').trim();
 };
 
 /**
  * Real-time API Key Validator to test connectivity with Google AI Studio
  */
 export const testGeminiApiKey = async (rawKey: string): Promise<{ success: boolean; message: string; modelUsed?: string }> => {
-  const cleanKey = (rawKey || '').replace(/^["']|["']$/g, '').replace(/[^a-zA-Z0-9_\-]/g, '').trim();
+  const cleanKey = (rawKey || '').replace(/^["']|["']$/g, '').trim();
   
   if (!cleanKey) {
     return { success: false, message: 'API Key ফাকা! অনুগ্রহ করে সঠিক API Key প্রদান করুন।' };
   }
 
-  if (cleanKey.length < 20 || !cleanKey.startsWith('AIza')) {
-    return { success: false, message: '⚠️ দেওয়া API Key-টির ফরম্যাট সঠিক নয় (গুগল এআই স্টুডিওর এপিআই কী সাধারণত "AIza" দিয়ে শুরু হয়)।' };
+  if (cleanKey.length < 15) {
+    return { success: false, message: '⚠️ দেওয়া API Key-টি খুবই ছোট, দয়া করে সম্পূর্ণ API Key কপি করুন।' };
   }
 
   let lastErr = '';

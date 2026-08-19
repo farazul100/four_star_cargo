@@ -904,7 +904,7 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
 
         <form onSubmit={async (e) => {
           e.preventDefault();
-          const cleanKey = (geminiApiKey || '').replace(/^["']|["']$/g, '').replace(/[^a-zA-Z0-9_\-]/g, '').trim();
+          const cleanKey = (geminiApiKey || '').replace(/^["']|["']$/g, '').trim();
           setGeminiApiKey(cleanKey);
           localStorage.setItem('fsc_gemini_api_key', cleanKey);
           const dbData = getHostingerDbData() as any;
