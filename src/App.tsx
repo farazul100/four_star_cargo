@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { LandingPage } from './pages/LandingPage';
 import { LoginPage } from './pages/LoginPage';
@@ -12,10 +12,16 @@ import { ProtectedRoute } from './components/ProtectedRoute';
 import { AiAssistantFloatingWidget } from './components/AiAssistantFloatingWidget';
 import { useAuthContext } from './context/AuthContext';
 import { useTranslation } from './hooks/useTranslation';
+import { initHostingerDb, fetchServerDbAndSync } from './lib/db';
 
 export function App() {
   const { user } = useAuthContext();
   const { lang } = useTranslation();
+
+  useEffect(() => {
+    initHostingerDb();
+    fetchServerDbAndSync();
+  }, []);
 
   return (
     <>

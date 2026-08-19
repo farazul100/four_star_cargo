@@ -102,6 +102,13 @@ echo json_encode([
     'fsc_vps_ledger' => [],
     'fsc_vps_audit' => [],
     'fsc_vps_expenses' => [],
-    'fsc_vps_crm_customers' => []
+    'fsc_vps_crm_customers' => [],
+    'settings' => [
+        'gemini_api_key' => ''
+    ],
+    'fsc_vps_settings' => [
+        'gemini_api_key' => ''
+    ],
+    'gemini_api_key' => ''
 ]);
 ?>

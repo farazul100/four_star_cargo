@@ -909,6 +909,9 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
           localStorage.setItem('fsc_gemini_api_key', cleanKey);
           localStorage.setItem('fsc_vps_settings', JSON.stringify({ gemini_api_key: cleanKey }));
           localStorage.setItem('settings', JSON.stringify({ gemini_api_key: cleanKey }));
+          if (typeof window !== 'undefined') {
+            (window as any).__FSC_GEMINI_KEY__ = cleanKey;
+          }
           const dbData = getHostingerDbData() as any;
           saveHostingerDbData('settings', { ...(dbData.settings || {}), gemini_api_key: cleanKey });
           saveHostingerDbData('fsc_vps_settings', { ...(dbData.settings || {}), gemini_api_key: cleanKey });
