@@ -6,6 +6,8 @@ export interface ChatMessageItem {
   content: string;
 }
 
+let cachedFastModel = '';
+
 /**
  * Sanitizes and extracts clean API key string for ALL user roles & guest sessions
  */
@@ -17,6 +19,7 @@ export const getCleanGeminiApiKey = (): string => {
     settings.gemini_api_key || 
     localStorage.getItem('fsc_gemini_api_key') || 
     localStorage.getItem('gemini_api_key') || 
+    (typeof window !== 'undefined' && (window as any).__FSC_GEMINI_KEY__) || 
     '';
   
   if (!raw) {
@@ -29,8 +32,8 @@ export const getCleanGeminiApiKey = (): string => {
     } catch {}
   }
 
-  if (!raw && typeof window !== 'undefined' && (window as any).__FSC_GEMINI_KEY__) {
-    raw = (window as any).__FSC_GEMINI_KEY__;
+  if (!raw && typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_GEMINI_API_KEY) {
+    raw = import.meta.env.VITE_GEMINI_API_KEY;
   }
 
   const clean = (raw || '').replace(/^["']|["']$/g, '').trim();
@@ -74,6 +77,7 @@ export const getCleanGeminiApiKeyAsync = async (): Promise<string> => {
             if (clean) {
               localStorage.setItem('fsc_gemini_api_key', clean);
               localStorage.setItem('fsc_vps_settings', JSON.stringify({ gemini_api_key: clean }));
+              localStorage.setItem('settings', JSON.stringify({ gemini_api_key: clean }));
               if (typeof window !== 'undefined') (window as any).__FSC_GEMINI_KEY__ = clean;
               return clean;
             }
@@ -135,7 +139,6 @@ export const testGeminiApiKey = async (rawKey: string): Promise<{ success: boole
     return { success: false, message: '⚠️ দেওয়া API Key-টি খুবই ছোট, দয়া করে সম্পূর্ণ API Key কপি করুন।' };
   }
 
-  // First query ModelService.ListModels
   const modelListRes = await getAvailableGeminiModels(cleanKey);
   if (modelListRes.error) {
     if (modelListRes.error.includes('API key not valid') || modelListRes.error.includes('API_KEY_INVALID')) {
@@ -168,6 +171,7 @@ export const testGeminiApiKey = async (rawKey: string): Promise<{ success: boole
       const data = await response.json();
 
       if (response.ok && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+        cachedFastModel = model;
         return { success: true, message: `✅ Gemini API Key সফলভাবে কানেক্ট হয়েছে! (Active Model: ${model})`, modelUsed: model };
       }
 
@@ -257,7 +261,7 @@ Total Cartons in System: ${cartons.length}
     }
   }
 
-  // Include recent live cartons list
+  // Include recent live cartons sample
   if (cartons.length > 0) {
     context += `\n--- RECENT LIVE CARTONS SAMPLE ---\n`;
     cartons.slice(-10).forEach((c, idx) => {
@@ -309,6 +313,7 @@ ${warehouses.map((w: any) => `- ${w.name} (${w.code}): ${w.address || 'Standard 
 
 /**
  * Main Gemini AI Call Service using Google AI Studio REST API
+ * Optimized for sub-second response times and clean human responses
  */
 export const askFourStarCargoAI = async (
   userPrompt: string,
@@ -324,11 +329,13 @@ export const askFourStarCargoAI = async (
     };
   }
 
-  // Dynamically discover valid models for this API key
-  const modelListRes = await getAvailableGeminiModels(apiKey);
-  const modelCandidates = modelListRes.models.length > 0 
-    ? modelListRes.models 
-    : ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+  // Fast model resolution without blocking network delays
+  let modelCandidates: string[] = [];
+  if (cachedFastModel) {
+    modelCandidates = [cachedFastModel, 'gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+  } else {
+    modelCandidates = ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+  }
 
   const systemContext = buildCargoSystemContext(currentUser, userPrompt);
 
@@ -344,6 +351,7 @@ RULES & GUIDELINES FOR AI RESPONSES:
 5. Use live context data provided above to answer questions about carton locations, flying status, warehouses, or collections.
 6. If asked about how to track or book, explain the exact Four Star Cargo procedure briefly.
 7. Be polite, friendly, and helpful as an AI copilot.
+8. CRITICAL: Output ONLY your final, polished response to the user. NEVER include internal reasoning steps, prompt reflection notes, checklists, or meta-comments in your output.
 
 ---
 USER QUESTION:
@@ -367,7 +375,7 @@ ${userPrompt}`;
 
   let firstErrorMsg = '';
 
-  // Try model candidates dynamically retrieved from Google AI Studio
+  // Try model candidates with fast execution
   for (const model of modelCandidates) {
     try {
       const response = await fetch(
@@ -381,8 +389,8 @@ ${userPrompt}`;
           body: JSON.stringify({
             contents: contentsPayload,
             generationConfig: {
-              temperature: 0.7,
-              maxOutputTokens: 1500,
+              temperature: 0.3,
+              maxOutputTokens: 1000,
             },
           }),
         }
@@ -391,7 +399,29 @@ ${userPrompt}`;
       const data = await response.json();
 
       if (response.ok && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-        const aiText = data.candidates[0].content.parts[0].text.trim();
+        let aiText = data.candidates[0].content.parts[0].text.trim();
+        cachedFastModel = model;
+
+        // Clean out any accidental prompt reflection / reasoning notes if present
+        aiText = aiText
+          .replace(/^(\*|\s|-)*User Identity:.*$/gm, '')
+          .replace(/^(\*|\s|-)*Current Date:.*$/gm, '')
+          .replace(/^(\*|\s|-)*System Name:.*$/gm, '')
+          .replace(/^(\*|\s|-)*User Input:.*$/gm, '')
+          .replace(/^(\*|\s|-)*Context:.*$/gm, '')
+          .replace(/^(\*|\s|-)*Role:.*$/gm, '')
+          .replace(/^(\*|\s|-)*Tone:.*$/gm, '')
+          .replace(/^(\*|\s|-)*Language:.*$/gm, '')
+          .replace(/^(\*|\s|-)*Format:.*$/gm, '')
+          .replace(/^(\*|\s|-)*Acknowledge.*$/gm, '')
+          .replace(/^(\*|\s|-)*Identify.*$/gm, '')
+          .replace(/^(\*|\s|-)*Offer assistance.*$/gm, '')
+          .replace(/^(\*|\s|-)*Same language.*$/gm, '')
+          .replace(/^(\*|\s|-)*Concise.*$/gm, '')
+          .replace(/^(\*|\s|-)*Emojis used.*$/gm, '')
+          .replace(/^(\*|\s|-)*Professional.*$/gm, '')
+          .trim();
+
         return {
           text: aiText,
           success: true,
