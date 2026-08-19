@@ -1,12 +1,6 @@
 import { User, Carton, FlyingProposal, LedgerEntry } from '../types';
 import { getHostingerDbData } from '../lib/db';
 
-const GOOGLE_MODEL_CANDIDATES = [
-  'gemini-1.5-flash',
-  'gemini-2.0-flash',
-  'gemini-1.5-pro',
-];
-
 export interface ChatMessageItem {
   role: 'user' | 'model' | 'assistant';
   content: string;
@@ -30,8 +24,43 @@ export const getCleanGeminiApiKey = (): string => {
     } catch {}
   }
 
-  // Remove surrounding quotes, whitespace, preserving dot (.), dash (-), underscore (_)
+  // Remove surrounding quotes, whitespace
   return (raw || '').replace(/^["']|["']$/g, '').trim();
+};
+
+/**
+ * Dynamically queries Google AI Studio ModelService.ListModels to get available models for this specific key
+ */
+export const getAvailableGeminiModels = async (apiKey: string): Promise<{ models: string[]; error?: string }> => {
+  try {
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`,
+      {
+        method: 'GET',
+        headers: { 'Content-Type': 'application/json' },
+      }
+    );
+
+    const data = await response.json();
+
+    if (response.ok && Array.isArray(data.models)) {
+      const validModels = data.models
+        .filter((m: any) => m.supportedGenerationMethods?.includes('generateContent'))
+        .map((m: any) => (m.name || '').replace('models/', ''));
+
+      if (validModels.length > 0) {
+        return { models: validModels };
+      }
+    }
+
+    if (data.error && data.error.message) {
+      return { models: [], error: data.error.message };
+    }
+  } catch (err: any) {
+    return { models: [], error: err.message || 'Network error listing models' };
+  }
+
+  return { models: ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'] };
 };
 
 /**
@@ -48,17 +77,32 @@ export const testGeminiApiKey = async (rawKey: string): Promise<{ success: boole
     return { success: false, message: '⚠️ দেওয়া API Key-টি খুবই ছোট, দয়া করে সম্পূর্ণ API Key কপি করুন।' };
   }
 
+  // First query ModelService.ListModels
+  const modelListRes = await getAvailableGeminiModels(cleanKey);
+  if (modelListRes.error) {
+    if (modelListRes.error.includes('API key not valid') || modelListRes.error.includes('API_KEY_INVALID')) {
+      return { success: false, message: `⚠️ দেওয়া API Key-টি অকার্যকর বা ভুল (API Key Invalid: ${modelListRes.error})` };
+    }
+  }
+
+  const modelCandidates = modelListRes.models.length > 0 
+    ? modelListRes.models 
+    : ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+
   let lastErr = '';
 
-  for (const model of GOOGLE_MODEL_CANDIDATES) {
+  for (const model of modelCandidates) {
     try {
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${cleanKey}`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: {
+            'Content-Type': 'application/json',
+            'x-goog-api-key': cleanKey,
+          },
           body: JSON.stringify({
-            contents: [{ role: 'user', parts: [{ text: 'Ping' }] }],
+            contents: [{ role: 'user', parts: [{ text: 'Hello' }] }],
           }),
         }
       );
@@ -66,21 +110,18 @@ export const testGeminiApiKey = async (rawKey: string): Promise<{ success: boole
       const data = await response.json();
 
       if (response.ok && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-        return { success: true, message: `✅ Gemini API Key সফলভাবে টেস্ট করা হয়েছে এবং সচল রয়েছে! (Model: ${model})`, modelUsed: model };
+        return { success: true, message: `✅ Gemini API Key সফলভাবে কানেক্ট হয়েছে! (Active Model: ${model})`, modelUsed: model };
       }
 
       if (data.error && data.error.message) {
         lastErr = data.error.message;
-        if (data.error.message.includes('API key not valid') || data.error.message.includes('API_KEY_INVALID') || response.status === 400) {
-          return { success: false, message: `⚠️ দেওয়া API Key-টি অকার্যকর বা বাতিল (Invalid API Key: ${data.error.message})` };
-        }
       }
     } catch (err: any) {
       lastErr = err.message || 'Network error connecting to Google AI Studio';
     }
   }
 
-  return { success: false, message: `⚠️ এপিআই টেস্ট সফল হয়নি: ${lastErr || 'Unknown error'}` };
+  return { success: false, message: `⚠️ এপিআই কানেকশন সফল হয়নি: ${lastErr || 'Unknown error'}` };
 };
 
 /**
@@ -186,6 +227,12 @@ export const askFourStarCargoAI = async (
     };
   }
 
+  // Dynamically discover valid models for this API key
+  const modelListRes = await getAvailableGeminiModels(apiKey);
+  const modelCandidates = modelListRes.models.length > 0 
+    ? modelListRes.models 
+    : ['gemini-1.5-flash', 'gemini-2.0-flash', 'gemini-1.5-pro'];
+
   const systemContext = buildCargoSystemContext(currentUser);
 
   const fullPromptText = `You are "Four Star Cargo AI" — the official intelligent operations & tracking assistant for M/S Four Star Cargo.
@@ -223,8 +270,8 @@ ${userPrompt}`;
 
   let firstErrorMsg = '';
 
-  // Try model candidates in order
-  for (const model of GOOGLE_MODEL_CANDIDATES) {
+  // Try model candidates dynamically retrieved from Google AI Studio
+  for (const model of modelCandidates) {
     try {
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
@@ -232,6 +279,7 @@ ${userPrompt}`;
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey,
           },
           body: JSON.stringify({
             contents: contentsPayload,
@@ -259,12 +307,6 @@ ${userPrompt}`;
         if (!firstErrorMsg) {
           firstErrorMsg = `${model}: ${msg}`;
         }
-        if (msg.includes('API key not valid') || msg.includes('API_KEY_INVALID') || (response.status === 400 && msg.toLowerCase().includes('key'))) {
-          return {
-            text: '⚠️ দেওয়া Gemini API Key-টি অকার্যকর বা ভুল (API Key Invalid)। অনুগ্রহ করে Google AI Studio (aistudio.google.com) থেকে নতুন একটি সঠিক API Key নিয়ে সুপার এডমিন সেটিংসে রি-সেভ করুন।',
-            success: false,
-          };
-        }
       }
     } catch (err: any) {
       if (!firstErrorMsg) {
@@ -274,7 +316,7 @@ ${userPrompt}`;
   }
 
   return {
-    text: `⚠️ AI সাড়া দিতে পারেনি (${firstErrorMsg || 'Gemini API call failed'})। অনুগ্রহ করে সুপার এডমিন সেটিংসে (System Settings) আপনার API Key চেক করে টেস্ট করুন।`,
+    text: `⚠️ AI সাড়া দিতে পারেনি (${firstErrorMsg || 'Gemini API call failed'})। অনুগ্রহ করে আপনার API Key সঠিক আছে কিনা সুপার এডমিন সেটিংসে গিয়ে টেস্ট টেস্ট করুন।`,
     success: false,
   };
 };
