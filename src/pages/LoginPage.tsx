@@ -254,12 +254,12 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
             </div>
 
             {/* Login Title */}
-            <h2 className="text-xl font-bold text-white font-poppins mb-1">
+            <h2 className={`text-xl font-bold font-poppins mb-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               {currentConfig.title}
             </h2>
 
             {/* Subtitle */}
-            <p className="text-xs text-[#9E9E9E] mb-6 font-light">
+            <p className={`text-xs mb-6 font-light ${isDark ? 'text-[#9E9E9E]' : 'text-slate-600'}`}>
               {currentConfig.desc}
             </p>
 
@@ -274,7 +274,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
             {/* Login Form */}
             <form onSubmit={handleLoginSubmit} className="space-y-5">
               <div>
-                <label className="text-xs font-normal text-[#9E9E9E] block mb-2">
+                <label className={`text-xs font-normal block mb-2 ${isDark ? 'text-[#9E9E9E]' : 'text-slate-600'}`}>
                   Email
                 </label>
                 <input
@@ -293,7 +293,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
 
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-normal text-[#9E9E9E]">
+                  <label className={`text-xs font-normal ${isDark ? 'text-[#9E9E9E]' : 'text-slate-600'}`}>
                     Password
                   </label>
                 </div>
@@ -313,7 +313,9 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
                   <button
                     type="button"
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-3 text-[#9E9E9E] hover:text-white transition-colors cursor-pointer"
+                    className={`absolute right-3.5 top-3 transition-colors cursor-pointer ${
+                      isDark ? 'text-[#9E9E9E] hover:text-white' : 'text-slate-500 hover:text-slate-900'
+                    }`}
                   >
                     {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                   </button>
