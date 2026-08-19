@@ -20,6 +20,7 @@ import {
   Send,
   Clock,
   Star,
+  UserPlus,
 } from 'lucide-react';
 import { User, Language, Theme } from '../types';
 
@@ -95,7 +96,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {
             section: isBn ? 'ব্যবস্থাপনা' : 'MANAGEMENT',
             items: [
-              { id: 'crm', label: isBn ? '👥 কাস্টমার রিলেশনশিপ (CRM)' : '👥 CRM Management', icon: Users },
+              { id: 'crm_create', label: isBn ? '➕ নতুন কাস্টমার তৈরি' : '➕ Create Customer', icon: UserPlus },
               { id: 'crm_followup', label: isBn ? '🔴 ফলো আপ কাস্টমার' : '🔴 Follow-Up Customers', icon: Clock },
               { id: 'crm_new', label: isBn ? '🔵 নতুন কাস্টমার' : '🔵 New Customers', icon: CheckCircle2 },
               { id: 'crm_regular', label: isBn ? '⚫ রেগুলার কাস্টমার' : '⚫ Regular Customers', icon: Star },
@@ -120,7 +121,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             section: isBn ? 'প্রধান' : 'MAIN',
             items: [
               { id: 'dashboard', label: isBn ? 'অপারেশনস ড্যাশবোর্ড' : 'Operations Dashboard', icon: LayoutDashboard },
-              { id: 'crm', label: isBn ? '👥 কাস্টমার রিলেশনশিপ (CRM)' : '👥 CRM Management', icon: Users },
+              { id: 'crm_create', label: isBn ? '➕ নতুন কাস্টমার তৈরি' : '➕ Create Customer', icon: UserPlus },
               { id: 'crm_followup', label: isBn ? '🔴 ফলো আপ কাস্টমার' : '🔴 Follow-Up Customers', icon: Clock },
               { id: 'crm_new', label: isBn ? '🔵 নতুন কাস্টমার' : '🔵 New Customers', icon: CheckCircle2 },
               { id: 'crm_regular', label: isBn ? '⚫ রেগুলার কাস্টমার' : '⚫ Regular Customers', icon: Star },
@@ -188,6 +189,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {
             section: isBn ? 'কাস্টমার রিলেশনশিপ (CRM)' : 'CRM MANAGEMENT',
             items: [
+              { id: 'create_customer', label: isBn ? '➕ নতুন কাস্টমার তৈরি' : '➕ Create Customer', icon: UserPlus },
               { id: 'followup', label: isBn ? '🔴 ফলো আপ কাস্টমার' : '🔴 Follow-Up Customers', icon: Clock },
               { id: 'order_complete', label: isBn ? '🔵 নতুন কাস্টমার' : '🔵 New Customers', icon: CheckCircle2 },
               { id: 'important_regular', label: isBn ? '⚫ রেগুলার কাস্টমার' : '⚫ Regular Customers', icon: Star },

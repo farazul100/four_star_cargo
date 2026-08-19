@@ -345,9 +345,15 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
     );
   }
 
-  if (activeTab === 'crm' || activeTab === 'crm_followup' || activeTab === 'crm_new' || activeTab === 'crm_regular') {
-    const stage: 'followup' | 'order_complete' | 'important_regular' =
-      activeTab === 'crm_new' ? 'order_complete' : activeTab === 'crm_regular' ? 'important_regular' : 'followup';
+  if (activeTab === 'crm' || activeTab === 'crm_create' || activeTab === 'crm_followup' || activeTab === 'crm_new' || activeTab === 'crm_regular') {
+    const stage: 'create_customer' | 'followup' | 'order_complete' | 'important_regular' =
+      activeTab === 'crm_create'
+        ? 'create_customer'
+        : activeTab === 'crm_new'
+        ? 'order_complete'
+        : activeTab === 'crm_regular'
+        ? 'important_regular'
+        : 'followup';
     return <CrmManagementSystem currentUser={user || { name: 'Super Admin', role: 'super_admin' } as any} language={language} initialStageTab={stage} />;
   }
 
