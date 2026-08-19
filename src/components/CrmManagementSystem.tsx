@@ -663,11 +663,17 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                           </span>
                         </td>
 
-                        {/* INQUIRY NOTES COLUMN (FIXED LIGHT GREY BACKGROUND WITH SOFT BORDER) */}
+                        {/* INQUIRY NOTES COLUMN (100% EXPLICIT LIGHT/DARK STYLING) */}
                         <td className="py-3 px-3.5 max-w-xs">
-                          <div className="bg-slate-50/90 dark:bg-slate-800/80 p-2 rounded-lg border border-slate-200/80 dark:border-slate-700 space-y-1">
+                          <div className={`p-2.5 rounded-lg border space-y-1 ${
+                            isDark
+                              ? 'bg-slate-800/90 border-slate-700 text-slate-100'
+                              : 'bg-slate-100/70 border-slate-200/80 text-slate-800'
+                          }`}>
                             {cust.notes ? (
-                              <p className="text-[11px] text-slate-700 dark:text-slate-200 font-light leading-relaxed">
+                              <p className={`text-[11px] font-light leading-relaxed ${
+                                isDark ? 'text-slate-100' : 'text-slate-800'
+                              }`}>
                                 {cust.notes}
                               </p>
                             ) : (
@@ -675,14 +681,24 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                             )}
 
                             {(cust.product_type || cust.est_weight) && (
-                              <div className="flex flex-wrap gap-1 pt-1 border-t border-slate-200/60 dark:border-slate-700/60">
+                              <div className={`flex flex-wrap gap-1 pt-1 border-t ${
+                                isDark ? 'border-slate-700' : 'border-slate-200'
+                              }`}>
                                 {cust.product_type && (
-                                  <span className="text-[10px] text-teal-700 dark:text-teal-300 bg-teal-50 dark:bg-teal-950/60 px-1.5 py-0.2 rounded border border-teal-200 dark:border-teal-800 font-light">
+                                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-light ${
+                                    isDark
+                                      ? 'bg-teal-950/80 text-teal-300 border border-teal-800'
+                                      : 'bg-teal-50 text-teal-800 border border-teal-200'
+                                  }`}>
                                     📦 {cust.product_type}
                                   </span>
                                 )}
                                 {cust.est_weight && (
-                                  <span className="text-[10px] text-amber-700 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/60 px-1.5 py-0.2 rounded border border-amber-200 dark:border-amber-800 font-light">
+                                  <span className={`text-[10px] px-1.5 py-0.2 rounded font-light ${
+                                    isDark
+                                      ? 'bg-amber-950/80 text-amber-300 border border-amber-800'
+                                      : 'bg-amber-50 text-amber-800 border border-amber-200'
+                                  }`}>
                                     ⚖️ {cust.est_weight}
                                   </span>
                                 )}
