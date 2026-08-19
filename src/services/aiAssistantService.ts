@@ -3,8 +3,8 @@ import { getHostingerDbData } from '../lib/db';
 
 const GOOGLE_MODEL_CANDIDATES = [
   'gemini-1.5-flash',
-  'gemini-2.0-flash',
-  'gemini-1.5-pro',
+  'gemini-1.5-flash-latest',
+  'gemini-2.0-flash-exp',
 ];
 
 export interface ChatMessageItem {
@@ -110,7 +110,7 @@ export const askFourStarCargoAI = async (
   const settings = db.settings || {};
   
   // Try reading Gemini API key from settings or localStorage
-  const apiKey = settings.gemini_api_key || localStorage.getItem('fsc_gemini_api_key') || '';
+  const apiKey = (settings.gemini_api_key || localStorage.getItem('fsc_gemini_api_key') || '').trim();
 
   if (!apiKey) {
     return {
@@ -121,7 +121,7 @@ export const askFourStarCargoAI = async (
 
   const systemContext = buildCargoSystemContext(currentUser);
 
-  const systemPromptText = `You are "Four Star Cargo AI" — the official intelligent operations & tracking assistant for M/S Four Star Cargo.
+  const fullPromptText = `You are "Four Star Cargo AI" — the official intelligent operations & tracking assistant for M/S Four Star Cargo.
 
 ${systemContext}
 
@@ -132,68 +132,79 @@ RULES & GUIDELINES FOR AI RESPONSES:
 4. For amounts in BDT currency, format with ৳ symbol (e.g. ৳50,000).
 5. Use live context data provided above to answer questions about carton locations, flying status, warehouses, or collections.
 6. If asked about how to track or book, explain the exact Four Star Cargo procedure briefly.
-7. Be polite, friendly, and helpful as an AI copilot.`;
+7. Be polite, friendly, and helpful as an AI copilot.
+
+---
+USER QUESTION:
+${userPrompt}`;
 
   // Format message history for Gemini REST API
   const formattedContents = [
-    ...history.slice(-8).map((h) => ({
+    {
+      role: 'user',
+      parts: [{ text: fullPromptText }],
+    },
+    ...history.slice(-6).map((h) => ({
       role: h.role === 'user' ? 'user' : 'model',
       parts: [{ text: h.content }],
     })),
-    {
-      role: 'user',
-      parts: [{ text: userPrompt }],
-    },
   ];
 
   let lastError = '';
 
   // Try model candidates in order
   for (const model of GOOGLE_MODEL_CANDIDATES) {
-    try {
-      const response = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
-        {
+    // Try v1beta and v1 endpoints
+    const endpoints = [
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1/models/${model}:generateContent?key=${apiKey}`,
+    ];
+
+    for (const endpointUrl of endpoints) {
+      try {
+        const response = await fetch(endpointUrl, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'x-goog-api-key': apiKey,
           },
           body: JSON.stringify({
-            system_instruction: {
-              parts: [{ text: systemPromptText }],
-            },
             contents: formattedContents,
             generationConfig: {
               temperature: 0.7,
               maxOutputTokens: 1500,
             },
           }),
+        });
+
+        const data = await response.json();
+
+        if (response.ok && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
+          const aiText = data.candidates[0].content.parts[0].text.trim();
+          return {
+            text: aiText,
+            success: true,
+            modelUsed: model,
+          };
         }
-      );
 
-      const data = await response.json();
-
-      if (response.ok && data.candidates && data.candidates[0]?.content?.parts?.[0]?.text) {
-        const aiText = data.candidates[0].content.parts[0].text.trim();
-        return {
-          text: aiText,
-          success: true,
-          modelUsed: model,
-        };
+        if (data.error) {
+          const msg = data.error.message || '';
+          if (msg.includes('API key not valid') || msg.includes('API_KEY_INVALID') || (response.status === 400 && msg.toLowerCase().includes('key'))) {
+            return {
+              text: '⚠️ দেওয়া Gemini API Key-টি অকার্যকর বা ভুল (API Key Invalid)। অনুগ্রহ করে Google AI Studio (aistudio.google.com) থেকে নতুন একটি সঠিক API Key নিয়ে সুপার এডমিন সেটিংসে সেট করুন।',
+              success: false,
+            };
+          }
+          lastError = msg;
+        }
+      } catch (err: any) {
+        lastError = err.message || 'Network connection failed';
       }
-
-      if (data.error && data.error.message) {
-        console.warn(`Gemini model ${model} error:`, data.error.message);
-        lastError = `${model}: ${data.error.message}`;
-      }
-    } catch (err: any) {
-      lastError = err.message || 'Network error connecting to Gemini API';
     }
   }
 
   return {
-    text: `⚠️ AI সাড়া দিতে পারেনি (${lastError || 'Gemini API call failed'})। অনুগ্রহ করে আপনার API Key সঠিকভাবে Google AI Studio (aistudio.google.com) থেকে সংগৃহীত হয়েছে কিনা চেক করুন।`,
+    text: `⚠️ AI সাড়া দিতে পারেনি (${lastError || 'Gemini API call failed'})। আপনার দেওয়া API Key টি Google AI Studio (aistudio.google.com) থেকে নতুন করে তৈরি করে সেটিংস-এ রি-সেভ করুন।`,
     success: false,
   };
 };
