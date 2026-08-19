@@ -202,6 +202,7 @@ export interface ChatMessage {
   sender_role: UserRole;
   sender_avatar?: string;
   content: string;
+  image_url?: string;
   created_at: string;
   read_by?: string[];
   reactions?: Record<string, string[]>;

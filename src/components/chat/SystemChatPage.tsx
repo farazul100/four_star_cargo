@@ -9,10 +9,12 @@ import {
   Video,
   Search,
   X,
+  Image as ImageIcon,
 } from 'lucide-react';
 import { User, ChatConversation, ChatMessage, CallSession, Language, Theme } from '../../types';
 import { DB_KEYS, getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../../lib/db';
 import { useTheme } from '../../context/ThemeContext';
+import { compressImageFile } from '../../utils/imageCompressor';
 
 interface SystemChatPageProps {
   currentUser: User;
@@ -42,9 +44,11 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
   const [groupNameInput, setGroupNameInput] = useState('');
   const [selectedUserIdsForGroup, setSelectedUserIdsForGroup] = useState<string[]>([]);
 
-  // Input
+  // Input & Image Upload State
   const [messageInput, setMessageInput] = useState('');
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
   const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
 
   // 1. Presence Heartbeat: Update currentUser's last_active_at timestamp every 10 seconds
   useEffect(() => {
@@ -224,6 +228,56 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
     setMessages(updatedMsgs);
     setMessageInput('');
     playMessageChime();
+  };
+
+  // Image Upload & Compression Handler
+  const handleImageSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !activeConvoId) return;
+
+    try {
+      // Auto-compress any image file (down to ~20KB - 80KB WebP)
+      const compressedBase64 = await compressImageFile(file, {
+        maxWidth: 800,
+        maxHeight: 800,
+        quality: 0.7,
+      });
+
+      const db = getHostingerDbData();
+      const newMsg: ChatMessage = {
+        id: `msg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+        conversation_id: activeConvoId,
+        sender_id: currentUser.id,
+        sender_name: currentUser.name,
+        sender_role: currentUser.role,
+        content: messageInput.trim() || (isBn ? '📷 ছবি' : '📷 Image'),
+        image_url: compressedBase64,
+        read_by: [currentUser.id],
+        created_at: new Date().toISOString(),
+      };
+
+      const updatedMsgs = [...(db.messages || []), newMsg];
+      const updatedConvos = (db.conversations || []).map((c: ChatConversation) =>
+        c.id === activeConvoId
+          ? {
+              ...c,
+              last_message: isBn ? '📷 ছবি' : '📷 Image',
+              last_message_at: newMsg.created_at,
+            }
+          : c
+      );
+
+      saveHostingerDbData('fsc_vps_messages', updatedMsgs);
+      saveHostingerDbData('fsc_vps_conversations', updatedConvos);
+
+      setMessages(updatedMsgs);
+      setMessageInput('');
+      playMessageChime();
+    } catch (err) {
+      console.warn('Image upload error:', err);
+    } finally {
+      if (e.target) e.target.value = '';
+    }
   };
 
   // Direct Chat with Any System User
@@ -669,6 +723,22 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                       }`}
                     >
                       {msg.content}
+                      {msg.image_url && (
+                        <div className="mt-2 relative group overflow-hidden border border-slate-700/50 rounded-none shadow-sm cursor-pointer">
+                          <img
+                            src={msg.image_url}
+                            alt="Attached image"
+                            onClick={() => setPreviewImageUrl(msg.image_url!)}
+                            className="max-h-60 w-full object-cover transition-transform duration-200 group-hover:scale-105"
+                          />
+                          <div
+                            onClick={() => setPreviewImageUrl(msg.image_url!)}
+                            className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-white text-xs font-bold"
+                          >
+                            🔍 {isBn ? 'বড় করে দেখুন' : 'Click to View'}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -692,6 +762,28 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                       : 'bg-white border-slate-300 text-slate-900 placeholder:text-slate-400'
                   }`}
                 />
+
+                {/* IMAGE ATTACHMENT BUTTON */}
+                <button
+                  type="button"
+                  onClick={() => imageInputRef.current?.click()}
+                  className={`p-2.5 rounded-none border transition-colors cursor-pointer flex items-center justify-center ${
+                    isDark
+                      ? 'bg-slate-800 border-slate-700 text-slate-300 hover:text-white hover:bg-slate-700'
+                      : 'bg-white border-slate-300 text-slate-700 hover:text-slate-900 hover:bg-slate-50'
+                  }`}
+                  title={isBn ? 'ছবি আপলোড করুন' : 'Attach Image'}
+                >
+                  <ImageIcon className="w-4 h-4 text-[#00897B]" />
+                </button>
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={handleImageSelect}
+                />
+
                 <button
                   type="submit"
                   className="px-5 py-2.5 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-bold text-xs transition-all shadow-md flex items-center justify-center space-x-1.5 cursor-pointer"
@@ -717,6 +809,29 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
               <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                 বা নতুন message শুরু করুন
               </p>
+            </div>
+          </div>
+        )}
+
+        {/* LIGHTBOX FULL IMAGE PREVIEW MODAL */}
+        {previewImageUrl && (
+          <div
+            onClick={() => setPreviewImageUrl(null)}
+            className="fixed inset-0 z-[3000] bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4 cursor-zoom-out animate-in fade-in"
+          >
+            <div className="relative max-w-4xl max-h-[90vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                onClick={() => setPreviewImageUrl(null)}
+                className="absolute top-3 right-3 p-2 bg-slate-900/80 text-white rounded-full hover:bg-red-600 transition-colors shadow-lg cursor-pointer z-10"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              <img
+                src={previewImageUrl}
+                alt="Full Preview"
+                className="max-w-full max-h-[85vh] object-contain shadow-2xl border-2 border-[#00897B]"
+              />
             </div>
           </div>
         )}

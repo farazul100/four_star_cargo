@@ -15,6 +15,7 @@ import {
   savePathaoApiSettings,
   testPathaoConnection,
 } from '../lib/pathaoApi';
+import { compressImageFile } from '../utils/imageCompressor';
 
 interface SystemSettingsManagerProps {
   currentUser: User;
@@ -154,32 +155,28 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
   };
 
   // Logo Upload Handler
-  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        if (uploadEvent.target?.result) {
-          setSettings((prev) => ({ ...prev, companyLogoUrl: uploadEvent.target!.result as string }));
-          showToast(isBn ? 'কোম্পানি লোগো সফলভাবে আপলোড হয়েছে!' : 'Company logo uploaded successfully!');
-        }
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressedBase64 = await compressImageFile(e.target.files[0], { maxWidth: 400, maxHeight: 400, quality: 0.8 });
+        setSettings((prev) => ({ ...prev, companyLogoUrl: compressedBase64 }));
+        showToast(isBn ? 'কোম্পানি লোগো সফলভাবে অটো-কমপ্রেস হয়ে আপলোড হয়েছে!' : 'Company logo compressed & uploaded successfully!');
+      } catch (err) {
+        showToast(isBn ? 'লোগো ফাইল প্রক্রিয়াকরণে সমস্যা হয়েছে' : 'Failed to process logo image');
+      }
     }
   };
 
   // Favicon Upload Handler
-  const handleFaviconUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFaviconUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      const reader = new FileReader();
-      reader.onload = (uploadEvent) => {
-        if (uploadEvent.target?.result) {
-          setSettings((prev) => ({ ...prev, faviconUrl: uploadEvent.target!.result as string }));
-          showToast(isBn ? 'Favicon সফলভাবে আপলোড হয়েছে!' : 'Favicon uploaded successfully!');
-        }
-      };
-      reader.readAsDataURL(file);
+      try {
+        const compressedBase64 = await compressImageFile(e.target.files[0], { maxWidth: 128, maxHeight: 128, quality: 0.8 });
+        setSettings((prev) => ({ ...prev, faviconUrl: compressedBase64 }));
+        showToast(isBn ? 'Favicon সফলভাবে অটো-কমপ্রেস হয়ে আপলোড হয়েছে!' : 'Favicon compressed & uploaded successfully!');
+      } catch (err) {
+        showToast(isBn ? 'Favicon ফাইল প্রক্রিয়াকরণে সমস্যা হয়েছে' : 'Failed to process favicon image');
+      }
     }
   };
 
