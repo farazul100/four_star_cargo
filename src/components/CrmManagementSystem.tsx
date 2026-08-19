@@ -60,10 +60,23 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
+  // Helper function to identify real user-created customers
+  const isRealCustomer = (c: CrmCustomer) => {
+    if (!c || !c.id) return false;
+    // Exclude legacy hardcoded demo IDs (crm-cust-101 through crm-cust-111)
+    if (/^crm-cust-10[1-9]$/.test(c.id) || /^crm-cust-11[0-1]$/.test(c.id)) return false;
+    return true;
+  };
+
   // Main CRM Customers State live synced with Hostinger DB
   const [customers, setCustomers] = useState<CrmCustomer[]>(() => {
     const dbData = getHostingerDbData();
-    return dbData.crmCustomers || [];
+    const rawList = dbData.crmCustomers || [];
+    const realList = rawList.filter(isRealCustomer);
+    if (rawList.length !== realList.length) {
+      saveHostingerDbData('fsc_vps_crm_customers', realList);
+    }
+    return realList;
   });
 
   // Real-time DB Sync
@@ -71,7 +84,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
     return subscribeToDbUpdates(() => {
       const dbData = getHostingerDbData();
       if (dbData.crmCustomers) {
-        setCustomers(dbData.crmCustomers);
+        setCustomers(dbData.crmCustomers.filter(isRealCustomer));
       }
     });
   }, []);
