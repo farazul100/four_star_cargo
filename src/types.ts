@@ -192,3 +192,42 @@ export interface ExpenseItem {
   created_by: string;
   created_at: string;
 }
+
+export interface ChatMessage {
+  id: string;
+  conversation_id: string;
+  sender_id: string;
+  sender_name: string;
+  sender_role: UserRole;
+  sender_avatar?: string;
+  content: string;
+  created_at: string;
+  reactions?: Record<string, string[]>;
+  attachments?: { name: string; url: string; type: string }[];
+  reply_to_id?: string;
+}
+
+export interface ChatConversation {
+  id: string;
+  name?: string;
+  type: 'direct' | 'group';
+  participants: string[]; // user IDs
+  created_by: string;
+  created_at: string;
+  last_message?: string;
+  last_message_at?: string;
+}
+
+export interface CallSession {
+  id: string;
+  conversation_id: string;
+  caller_id: string;
+  caller_name: string;
+  caller_role?: UserRole;
+  target_user_id?: string;
+  type: 'audio' | 'video';
+  status: 'ringing' | 'active' | 'ended' | 'rejected';
+  sdp_offer?: string;
+  sdp_answer?: string;
+  created_at: string;
+}

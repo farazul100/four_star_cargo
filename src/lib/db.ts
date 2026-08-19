@@ -26,6 +26,9 @@ const DB_KEYS = {
   AUDIT: 'fsc_vps_audit',
   EXPENSES: 'fsc_vps_expenses',
   CRM_CUSTOMERS: 'fsc_vps_crm_customers',
+  CONVERSATIONS: 'fsc_vps_conversations',
+  MESSAGES: 'fsc_vps_messages',
+  CALLS: 'fsc_vps_calls',
 };
 
 // Reset DB helper for live testing - Clears all demo cartons & proposals completely
@@ -347,6 +350,9 @@ export const getHostingerDbData = () => {
     expenses: JSON.parse(localStorage.getItem(DB_KEYS.EXPENSES) || '[]') as ExpenseItem[],
     crmCustomers: crmCustomers,
     notifications: notifications,
+    conversations: JSON.parse(localStorage.getItem(DB_KEYS.CONVERSATIONS) || '[]'),
+    messages: JSON.parse(localStorage.getItem(DB_KEYS.MESSAGES) || '[]'),
+    calls: JSON.parse(localStorage.getItem(DB_KEYS.CALLS) || '[]'),
   };
 };
 

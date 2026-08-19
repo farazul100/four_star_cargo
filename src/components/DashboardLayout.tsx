@@ -3,6 +3,8 @@ import { Header } from './Header';
 import { Sidebar } from './Sidebar';
 import { NotificationsPage } from './NotificationsPage';
 import { UserProfileSettings } from './UserProfileSettings';
+import { SystemChatModal } from './chat/SystemChatModal';
+import { SystemCallOverlay } from './chat/SystemCallOverlay';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
 import { useTheme } from '../context/ThemeContext';
@@ -26,6 +28,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   const { lang, setLang } = useTranslation();
   const { theme, setTheme } = useTheme();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(false);
 
   if (!user) return null;
 
@@ -49,8 +52,13 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           toggleSidebarMobile={() => setSidebarOpen(!sidebarOpen)}
           onOpenNotifications={() => setActiveTab('notifications')}
           onOpenProfile={() => setActiveTab('profile')}
+          onOpenChat={() => setIsChatOpen(true)}
         />
       </div>
+
+      {/* Global In-System Calling Overlay & Chat Modal */}
+      <SystemCallOverlay currentUser={user} language={lang} />
+      <SystemChatModal currentUser={user} language={lang} isOpen={isChatOpen} onClose={() => setIsChatOpen(false)} />
 
       {/* Main Body */}
       <div className="flex flex-1 min-h-0 relative">

@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Menu, Bell, Sun, Moon, LogOut, Check, Info, AlertTriangle, CheckCircle2, ShieldAlert } from 'lucide-react';
+import { Menu, Bell, Sun, Moon, LogOut, Check, Info, AlertTriangle, CheckCircle2, ShieldAlert, MessageSquare } from 'lucide-react';
 import { User, Language, Theme } from '../types';
 import { LanguageSelector } from './LanguageSelector';
 import { resetHostingerDbToDefault, getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSystemAuditAction } from '../lib/db';
@@ -14,6 +14,7 @@ interface HeaderProps {
   toggleSidebarMobile?: () => void;
   onOpenNotifications?: () => void;
   onOpenProfile?: () => void;
+  onOpenChat?: () => void;
 }
 
 interface NotificationItem {
@@ -36,6 +37,7 @@ export const Header: React.FC<HeaderProps> = ({
   toggleSidebarMobile,
   onOpenNotifications,
   onOpenProfile,
+  onOpenChat,
 }) => {
   const isBn = language === 'bn';
   const isDark = theme === 'dark';
