@@ -18,6 +18,7 @@ export const CrmDashboardPage: React.FC = () => {
 
   const getTabIdFromPath = (path: string): string => {
     if (path.includes('/profile')) return 'profile';
+    if (path.includes('/chat') || path.includes('/system-chat')) return 'system_chat';
     if (path.includes('/notifications')) return 'notifications';
     if (path.includes('/search') || path.includes('/cargo-search') || path.includes('/tracking')) return 'cargo_search';
     if (path.includes('/create')) return 'create_customer';
@@ -33,6 +34,9 @@ export const CrmDashboardPage: React.FC = () => {
     switch (tabId) {
       case 'profile':
         navigate('/crm/profile');
+        break;
+      case 'system_chat':
+        navigate('/crm/chat');
         break;
       case 'notifications':
         navigate('/crm/notifications');

@@ -14,6 +14,7 @@ export const AccountsDashboardPage: React.FC = () => {
 
   const getTabIdFromPath = (path: string): string => {
     if (path.includes('/profile')) return 'profile';
+    if (path.includes('/chat') || path.includes('/system-chat')) return 'system_chat';
     if (path.includes('/notifications')) return 'notifications';
     if (path.includes('/ledger') || path.includes('/customer_ledger')) return 'ledger';
     if (path.includes('/budget') || path.includes('/expenses')) return 'expenses';
@@ -29,6 +30,9 @@ export const AccountsDashboardPage: React.FC = () => {
     switch (tabId) {
       case 'profile':
         navigate('/accounts/profile');
+        break;
+      case 'system_chat':
+        navigate('/accounts/chat');
         break;
       case 'ledger':
       case 'customer_ledger':

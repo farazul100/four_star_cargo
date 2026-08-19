@@ -14,6 +14,7 @@ export const OperationsDashboardPage: React.FC = () => {
 
   const getTabIdFromPath = (path: string): string => {
     if (path.includes('/profile')) return 'profile';
+    if (path.includes('/chat') || path.includes('/system-chat')) return 'system_chat';
     if (path.includes('/live-lifecycle')) return 'live_lifecycle';
     if (path.includes('/data-tracker')) return 'data_tracker';
     if (path.includes('/notifications')) return 'notifications';
@@ -38,6 +39,9 @@ export const OperationsDashboardPage: React.FC = () => {
     switch (tabId) {
       case 'profile':
         navigate('/operations/profile');
+        break;
+      case 'system_chat':
+        navigate('/operations/chat');
         break;
       case 'live_lifecycle':
         navigate('/operations/live-lifecycle');

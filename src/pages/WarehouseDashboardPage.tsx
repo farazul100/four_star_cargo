@@ -14,6 +14,7 @@ export const WarehouseDashboardPage: React.FC = () => {
 
   const getTabIdFromPath = (path: string): string => {
     if (path.includes('/profile')) return 'profile';
+    if (path.includes('/chat') || path.includes('/system-chat')) return 'system_chat';
     if (path.includes('/notifications')) return 'notifications';
     if (path.includes('/booking')) return 'booking_entry';
     if (path.includes('/inventory')) return 'inventory';
@@ -34,6 +35,9 @@ export const WarehouseDashboardPage: React.FC = () => {
     switch (tabId) {
       case 'profile':
         navigate('/warehouse/profile');
+        break;
+      case 'system_chat':
+        navigate('/warehouse/chat');
         break;
       case 'dashboard':
         navigate('/warehouse/dashboard');

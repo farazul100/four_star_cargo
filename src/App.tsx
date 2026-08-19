@@ -50,6 +50,7 @@ export function App() {
       {/* Protected Super Admin Role Dashboards with Dedicated Slugs */}
       <Route element={<ProtectedRoute allowedRole="super_admin" loginPath="/admin/login" />}>
         <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+        <Route path="/admin/chat" element={<AdminDashboardPage />} />
         <Route path="/admin/live-lifecycle" element={<AdminDashboardPage />} />
         <Route path="/admin/data-tracker" element={<AdminDashboardPage />} />
         <Route path="/admin/notifications" element={<AdminDashboardPage />} />
@@ -79,6 +80,7 @@ export function App() {
         }
       >
         <Route path="/operations/dashboard" element={<OperationsDashboardPage />} />
+        <Route path="/operations/chat" element={<OperationsDashboardPage />} />
         <Route path="/operations/live-lifecycle" element={<OperationsDashboardPage />} />
         <Route path="/operations/data-tracker" element={<OperationsDashboardPage />} />
         <Route path="/operations/notifications" element={<OperationsDashboardPage />} />
@@ -102,6 +104,7 @@ export function App() {
         }
       >
         <Route path="/warehouse/dashboard" element={<WarehouseDashboardPage />} />
+        <Route path="/warehouse/chat" element={<WarehouseDashboardPage />} />
         <Route path="/warehouse/booking" element={<WarehouseDashboardPage />} />
         <Route path="/warehouse/inventory" element={<WarehouseDashboardPage />} />
         <Route path="/warehouse/notifications" element={<WarehouseDashboardPage />} />
@@ -114,6 +117,7 @@ export function App() {
       {/* Protected Accountant Role Dashboards with Dedicated Slugs */}
       <Route element={<ProtectedRoute allowedRole="accountant" loginPath="/accounts/login" />}>
         <Route path="/accounts/dashboard" element={<AccountsDashboardPage />} />
+        <Route path="/accounts/chat" element={<AccountsDashboardPage />} />
         <Route path="/accounts/ledger" element={<AccountsDashboardPage />} />
         <Route path="/accounts/budget" element={<AccountsDashboardPage />} />
         <Route path="/accounts/reports" element={<AccountsDashboardPage />} />
@@ -127,6 +131,7 @@ export function App() {
       {/* Protected CRM Executive Role Dashboards with Dedicated Slugs */}
       <Route element={<ProtectedRoute allowedRole="crm_executive" loginPath="/operations/login" />}>
         <Route path="/crm/dashboard" element={<CrmDashboardPage />} />
+        <Route path="/crm/chat" element={<CrmDashboardPage />} />
         <Route path="/crm/profile" element={<CrmDashboardPage />} />
         <Route path="/crm/search" element={<CrmDashboardPage />} />
         <Route path="/crm/notifications" element={<CrmDashboardPage />} />

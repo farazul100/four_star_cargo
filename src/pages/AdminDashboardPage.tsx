@@ -14,6 +14,7 @@ export const AdminDashboardPage: React.FC = () => {
   const getTabIdFromPath = (path: string): string => {
     if (path.includes('/profile')) return 'profile';
     if (path.includes('/settings')) return 'settings';
+    if (path.includes('/chat') || path.includes('/system-chat')) return 'system_chat';
     if (path.includes('/live-lifecycle')) return 'live_lifecycle';
     if (path.includes('/data-tracker')) return 'data_tracker';
     if (path.includes('/notifications')) return 'notifications';
@@ -44,6 +45,9 @@ export const AdminDashboardPage: React.FC = () => {
         break;
       case 'settings':
         navigate('/admin/settings');
+        break;
+      case 'system_chat':
+        navigate('/admin/chat');
         break;
       case 'live_lifecycle':
         navigate('/admin/live-lifecycle');
