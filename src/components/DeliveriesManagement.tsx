@@ -50,10 +50,15 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
   // Customers State (with inline quick-add support)
   const [customersList, setCustomersList] = useState<Customer[]>(INITIAL_CUSTOMERS);
 
-  // Cartons ready for delivery at BD warehouse (ONLY cartons received at BD stock)
-  const readyCartons = cartons.filter(
-    (c) => c.status === 'received' || (c.current_warehouse_id === 'wh-bd' && c.status !== 'delivered' && c.status !== 'in_transit' && c.status !== 'booked')
-  );
+  // Cartons ready for delivery at BD warehouse (Scoped by assigned warehouse)
+  const userWhId = currentUser?.warehouse_id || 'wh-bd';
+  const isBdHub = currentUser?.role === 'super_admin' || userWhId === 'wh-bd';
+
+  const readyCartons = cartons.filter((c) => {
+    const isReady = c.status === 'received' || (c.current_warehouse_id === 'wh-bd' && c.status !== 'delivered' && c.status !== 'in_transit' && c.status !== 'booked');
+    if (isBdHub) return isReady;
+    return isReady && (c.current_warehouse_id === userWhId || (c as any).origin_warehouse_id === userWhId || c.booked_by === currentUser.id);
+  });
 
   // Payment Type Filter Pill ('all' | 'with_pay' | 'without_pay')
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'with_pay' | 'without_pay'>('all');

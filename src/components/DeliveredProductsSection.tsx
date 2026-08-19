@@ -258,10 +258,27 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Filter cartons that have been received / calibrated at BD Warehouse (status === 'received' or 'delivered' or current_warehouse_id === 'wh-bd')
+  // User Warehouse Context Resolution
+  const userWhId = currentUser?.warehouse_id || 'wh-china';
+  const dbWarehouses = dbData.warehouses || [];
+  const userWh = dbWarehouses.find((w: any) => w.id === userWhId);
+  const isBdHub = currentUser?.role === 'super_admin' || userWhId === 'wh-bd' || userWh?.is_final_destination;
+
+  // Filter cartons strictly by assigned warehouse
   const deliveredCartons = allCartons.filter((c) => {
-    const isBdStock = c.current_warehouse_id === 'wh-bd' || c.status === 'received' || c.status === 'delivered';
-    return isBdStock;
+    if (isBdHub) {
+      // BD Hub / Admin sees cartons received or delivered at BD
+      return c.current_warehouse_id === 'wh-bd' || c.destination_warehouse_id === 'wh-bd' || c.status === 'received' || c.status === 'delivered';
+    } else {
+      // Origin Hub (e.g. Guangzhou / Yiwu): ONLY show cartons originating from or booked at this specific origin warehouse!
+      const isOriginCarton =
+        c.current_warehouse_id === userWhId ||
+        (c as any).origin_warehouse_id === userWhId ||
+        c.booked_by === currentUser.id ||
+        (userWh && c.current_warehouse_name === userWh.name);
+
+      return isOriginCarton && (c.status === 'received' || c.status === 'delivered');
+    }
   });
 
   // Apply search & origin filter
@@ -341,12 +358,24 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
             <div className="p-2 rounded-none bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
               <PackageCheck className="w-5 h-5" />
             </div>
-            <span>{isBn ? 'বিলিকৃত প্রোডাক্ট (BD Received & Calibrated Stock)' : 'Delivered Products Stock'}</span>
+            <span>
+              {isBn
+                ? isBdHub
+                  ? 'বিলিকৃত প্রোডাক্ট (BD Received & Calibrated Stock)'
+                  : `${userWh?.name || 'অরিজিন ওয়্যারহাউজ'} - কার্টুন রিসিভড ও বিলিকৃত স্থিতি`
+                : isBdHub
+                ? 'Delivered Products Stock (BD Hub)'
+                : `${userWh?.name || 'Origin Hub'} - Delivered & Received Stock Status`}
+            </span>
           </h2>
           <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-normal">
             {isBn
-              ? 'অপারেশনস এয়ারপোর্টে রিসিভ করার পর বাংলাদেশ ওয়্যারহাউজ ইনচার্জ কর্তৃক মেপে পাওয়া চূড়ান্ত ওজনে রিসিভকৃত বিলিকৃত প্রোডাক্টের তালিকা।'
-              : 'Official billable inventory received & calibrated by BD Warehouse Incharge after airport arrival.'}
+              ? isBdHub
+                ? 'অপারেশনস এয়ারপোর্টে রিসিভ করার পর বাংলাদেশ ওয়্যারহাউজ ইনচার্জ কর্তৃক মেপে পাওয়া চূড়ান্ত ওজনে রিসিভকৃত বিলিকৃত প্রোডাক্টের তালিকা।'
+                : `আপনার ওয়্যারহাউজ (${userWh?.name || 'অরিজিন হাব'}) থেকে বুকিংকৃত পণ্যসমূহ গন্তব্য হাবে পৌছে রিসিভড/বিলিকৃত হওয়ার লাইভ তথ্য।`
+              : isBdHub
+              ? 'Official billable inventory received & calibrated by BD Warehouse Incharge after airport arrival.'
+              : `Live delivery & receiving status of cartons originating from your hub (${userWh?.name || 'Origin Hub'}).`}
           </p>
         </div>
 
