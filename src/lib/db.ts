@@ -391,6 +391,63 @@ const dbBroadcastChannel =
 // Helper to sync state to server disk DB (/api/db) for 100% reliable cross-browser (Chrome <-> Edge) persistence
 let pushTimeout: any = null;
 
+// Standalone auto-sync of CRM customers into main system customers list (fsc_vps_customers)
+export const syncCrmCustomersToMainCustomers = () => {
+  try {
+    const rawCrm = localStorage.getItem(DB_KEYS.CRM_CUSTOMERS);
+    const crmList: CrmCustomer[] = rawCrm ? JSON.parse(rawCrm) : [];
+    if (!Array.isArray(crmList) || crmList.length === 0) return;
+
+    const rawMain = localStorage.getItem(DB_KEYS.CUSTOMERS);
+    let mainList: Customer[] = rawMain ? JSON.parse(rawMain) : [];
+    let updated = false;
+
+    crmList.forEach((crmCust) => {
+      if (!crmCust || !crmCust.name || !crmCust.phone) return;
+      // Exclude legacy hardcoded demo IDs
+      if (/^crm-cust-10[1-9]$/.test(crmCust.id) || /^crm-cust-11[0-1]$/.test(crmCust.id)) return;
+
+      const cleanPhone = (crmCust.phone || '').replace(/\D/g, '');
+      const cleanName = (crmCust.name || '').trim().toLowerCase();
+
+      const exists = mainList.some((c) => {
+        const existingPhone = (c.phone || '').replace(/\D/g, '');
+        const existingName = (c.name || '').trim().toLowerCase();
+        return (cleanPhone && existingPhone && cleanPhone === existingPhone) || (cleanName && existingName === cleanName);
+      });
+
+      if (!exists) {
+        const rawDigits = (crmCust.phone || '').replace(/\D/g, '');
+        const shortId = rawDigits.length >= 4 ? rawDigits.slice(-4) : Math.floor(1000 + Math.random() * 9000).toString();
+
+        const newMainCust: Customer = {
+          id: `cust-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          customer_code: `CUST-${shortId}`,
+          shipping_mark: `MAR-${shortId}`,
+          name: crmCust.name,
+          phone: crmCust.phone,
+          company_name: crmCust.company_name || '',
+          address: crmCust.address || 'Dhaka, Bangladesh',
+          total_due: 0,
+          total_paid: 0,
+          total_billed: 0,
+          status: crmCust.followup_status === 'important_regular' ? 'vip' : 'active',
+          created_at: crmCust.created_at || new Date().toISOString(),
+        };
+
+        mainList = [newMainCust, ...mainList];
+        updated = true;
+      }
+    });
+
+    if (updated) {
+      localStorage.setItem(DB_KEYS.CUSTOMERS, JSON.stringify(mainList));
+    }
+  } catch (err) {
+    console.error('Error in syncCrmCustomersToMainCustomers:', err);
+  }
+};
+
 const pushFullDbToServer = () => {
   if (typeof window === 'undefined') return;
   if (pushTimeout) clearTimeout(pushTimeout);
@@ -405,6 +462,7 @@ const pushFullDbToServer = () => {
         [DB_KEYS.LEDGER]: JSON.parse(localStorage.getItem(DB_KEYS.LEDGER) || '[]'),
         [DB_KEYS.AUDIT]: JSON.parse(localStorage.getItem(DB_KEYS.AUDIT) || '[]'),
         [DB_KEYS.EXPENSES]: JSON.parse(localStorage.getItem(DB_KEYS.EXPENSES) || '[]'),
+        [DB_KEYS.CRM_CUSTOMERS]: JSON.parse(localStorage.getItem(DB_KEYS.CRM_CUSTOMERS) || '[]'),
       };
       const payloadStr = JSON.stringify(fullDb);
 
@@ -460,6 +518,10 @@ export const saveHostingerDbData = (key: string, data: any) => {
     if (key === DB_KEYS.LEDGER || key === 'fsc_vps_ledger_entries') {
       localStorage.setItem('fsc_vps_ledger', JSON.stringify(data));
       localStorage.setItem('fsc_vps_ledger_entries', JSON.stringify(data));
+    }
+    // If saving CRM customers, trigger immediate sync to main customers database
+    if (key === DB_KEYS.CRM_CUSTOMERS) {
+      syncCrmCustomersToMainCustomers();
     }
   } catch (e) {
     console.warn(`LocalStorage setItem warning for key "${key}":`, e);
@@ -537,7 +599,7 @@ export const fetchServerDbAndSync = async () => {
                       bd_calibrated_weight: finalBdWeight,
                       gross_weight: finalBdWeight || existing.gross_weight || item.gross_weight,
                     });
-                  } else if (existing && (key === DB_KEYS.CUSTOMERS || key === DB_KEYS.LEDGER || key === 'fsc_vps_ledger_entries')) {
+                  } else if (existing && (key === DB_KEYS.CUSTOMERS || key === DB_KEYS.CRM_CUSTOMERS || key === DB_KEYS.LEDGER || key === 'fsc_vps_ledger_entries')) {
                     itemMap.set(k, {
                       ...item,
                       ...existing,
@@ -558,6 +620,9 @@ export const fetchServerDbAndSync = async () => {
             }
           }
         });
+
+        // Ensure all CRM customers are always present in main system customers array after server sync
+        syncCrmCustomersToMainCustomers();
 
         if (hasChanges) {
           window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key: 'server_sync' } }));

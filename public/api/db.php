@@ -70,6 +70,7 @@ echo json_encode([
     'fsc_vps_customers' => [],
     'fsc_vps_ledger' => [],
     'fsc_vps_audit' => [],
-    'fsc_vps_expenses' => []
+    'fsc_vps_expenses' => [],
+    'fsc_vps_crm_customers' => []
 ]);
 ?>
