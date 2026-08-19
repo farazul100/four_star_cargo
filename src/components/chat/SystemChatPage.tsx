@@ -106,9 +106,12 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
     const msgs: ChatMessage[] = db.messages || [];
     const usersList: User[] = db.users || [];
 
-    // Filter conversations where current user is a participant
+    // Filter conversations where current user is a participant or it's a customer support inquiry
     const myConvos = convos.filter(
-      (c) => Array.isArray(c.participants) && c.participants.includes(currentUser.id)
+      (c) =>
+        (Array.isArray(c.participants) && c.participants.includes(currentUser.id)) ||
+        c.type === 'customer_support' ||
+        (Array.isArray(c.participants) && c.participants.includes('all_staff'))
     );
 
     setConversations(myConvos);

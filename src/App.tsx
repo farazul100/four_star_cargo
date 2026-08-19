@@ -16,8 +16,12 @@ export function App() {
       {/* Public Landing & Role Selection */}
       <Route path="/" element={<LandingPage />} />
 
-      {/* Public Customer Shipment Tracking */}
+      {/* Public Customer Shipment Tracking (Unauthenticated Public Portal) */}
       <Route path="/track" element={<PublicTrackingPage />} />
+      <Route path="/tracking" element={<PublicTrackingPage />} />
+      <Route path="/cargo-track" element={<PublicTrackingPage />} />
+      <Route path="/search" element={<PublicTrackingPage />} />
+      <Route path="/crm/search" element={<PublicTrackingPage />} />
 
       {/* Dedicated Role Login Screens */}
       <Route

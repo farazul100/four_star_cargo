@@ -5,6 +5,7 @@ import { useTranslation } from '../hooks/useTranslation';
 import { useTheme } from '../context/ThemeContext';
 import { Logo } from './Logo';
 import { LiveCargoTrackingMap } from './LiveCargoTrackingMap';
+import { PublicCustomerChatWidget } from './PublicCustomerChatWidget';
 
 interface PublicTrackingProps {
   cartons: Carton[];
@@ -324,6 +325,9 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
       <footer className="max-w-4xl mx-auto w-full text-center text-xs text-[#8FA3AD] py-4 z-10 border-t border-[#1E3247]">
         M/S Four Star Cargo Tracking System — Powered by Hostinger VPS
       </footer>
+
+      {/* Floating Public Customer Live Support Chat Widget */}
+      <PublicCustomerChatWidget language={language} />
     </div>
   );
 };

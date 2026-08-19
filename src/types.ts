@@ -213,7 +213,7 @@ export interface ChatMessage {
 export interface ChatConversation {
   id: string;
   name?: string;
-  type: 'direct' | 'group';
+  type: 'direct' | 'group' | 'customer_support';
   participants: string[]; // user IDs
   created_by: string;
   created_at: string;
