@@ -10,8 +10,12 @@ export interface CrmCustomer {
   id: string;
   name: string;
   phone: string;
+  company_name?: string;
   email?: string;
   address?: string;
+  product_type?: string;
+  est_weight?: string;
+  social_link?: string;
   country_category: 'CN_New' | 'CN_Old' | 'KR_New' | 'KR_Old' | 'JP_New' | 'Other';
   followup_status: 'followup' | 'order_complete' | 'important_regular';
   notes?: string;
