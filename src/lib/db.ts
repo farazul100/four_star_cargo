@@ -448,6 +448,13 @@ export const syncCrmCustomersToMainCustomers = () => {
   }
 };
 
+const SERVER_API_ENDPOINTS = [
+  '/api/db.php',
+  'https://four.kee2mart.com/api/db.php',
+  '/api/db',
+  'https://four.kee2mart.com/api/db',
+];
+
 const pushFullDbToServer = () => {
   if (typeof window === 'undefined') return;
   if (pushTimeout) clearTimeout(pushTimeout);
@@ -466,21 +473,15 @@ const pushFullDbToServer = () => {
       };
       const payloadStr = JSON.stringify(fullDb);
 
-      try {
-        await fetch('/api/db', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: payloadStr,
-        });
-      } catch {}
-
-      try {
-        await fetch('/api/db.php', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: payloadStr,
-        });
-      } catch {}
+      for (const url of SERVER_API_ENDPOINTS) {
+        try {
+          await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payloadStr,
+          });
+        } catch {}
+      }
     } catch {}
   }, 100);
 };
@@ -540,16 +541,23 @@ export const saveHostingerDbData = (key: string, data: any) => {
 export const fetchServerDbAndSync = async () => {
   if (typeof window === 'undefined') return;
   try {
-    let res = await fetch('/api/db.php', {
-      headers: { Accept: 'application/json' },
-    });
-    if (!res.ok) {
-      res = await fetch('/api/db');
+    let res: Response | null = null;
+    for (const url of SERVER_API_ENDPOINTS) {
+      try {
+        const r = await fetch(url, {
+          headers: { Accept: 'application/json' },
+        });
+        if (r.ok) {
+          const contentType = r.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            res = r;
+            break;
+          }
+        }
+      } catch {}
     }
-    if (res.ok) {
-      const contentType = res.headers.get('content-type') || '';
-      if (!contentType.includes('application/json')) return;
 
+    if (res && res.ok) {
       const serverDb = await res.json();
       if (serverDb && typeof serverDb === 'object') {
         let hasChanges = false;
@@ -568,14 +576,14 @@ export const fetchServerDbAndSync = async () => {
             const itemMap = new Map<string, any>();
             localList.forEach((item: any) => {
               if (item) {
-                const k = (item.id || item.ctn_no || item.email || '').toString().trim().toLowerCase();
+                const k = (item.id || item.ctn_no || item.email || item.phone || '').toString().trim().toLowerCase();
                 if (k) itemMap.set(k, item);
               }
             });
 
             serverData.forEach((item: any) => {
               if (item) {
-                const k = (item.id || item.ctn_no || item.email || '').toString().trim().toLowerCase();
+                const k = (item.id || item.ctn_no || item.email || item.phone || '').toString().trim().toLowerCase();
                 if (k) {
                   const existing = itemMap.get(k);
                   if (existing && key === DB_KEYS.CARTONS) {

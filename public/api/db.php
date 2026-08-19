@@ -15,11 +15,13 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 $dbDir = __DIR__ . '/../../database';
-$dataFile = $dbDir . '/db.json';
-
-if (!file_exists($dbDir)) {
-    @mkdir($dbDir, 0777, true);
+if (!file_exists($dbDir) && !@mkdir($dbDir, 0777, true)) {
+    $dbDir = __DIR__ . '/data';
+    if (!file_exists($dbDir)) {
+        @mkdir($dbDir, 0777, true);
+    }
 }
+$dataFile = $dbDir . '/db.json';
 
 // 1. POST Request: Save updated database state to Hostinger disk
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
