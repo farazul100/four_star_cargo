@@ -249,16 +249,16 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
   const groupConvos = conversations.filter((c) => c.type === 'group');
 
   return (
-    <div className={`w-full h-[calc(100vh-6.5rem)] rounded-2xl border shadow-xl flex overflow-hidden ${
-      isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+    <div className={`w-full h-[calc(100vh-3.5rem)] rounded-none border-0 shadow-none flex overflow-hidden ${
+      isDark ? 'bg-[#18181B] text-white' : 'bg-white text-slate-900'
     }`}>
-      {/* LEFT COLUMN: CHAT SIDEBAR (MATCHES BRANDQORE USER SCREENSHOT) */}
-      <div className="w-80 border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-50/60 dark:bg-slate-950/40 shrink-0">
+      {/* LEFT COLUMN: CHAT SIDEBAR (FULL HEIGHT & ZERO BORDER RADIUS) */}
+      <div className="w-80 border-r border-slate-200 dark:border-slate-800 flex flex-col bg-slate-100/70 dark:bg-[#121214] shrink-0">
         
         {/* Header Title & Search */}
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800 space-y-3">
+        <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 space-y-3">
           <div className="flex items-center space-x-2">
-            <MessageSquare className="w-4 h-4 text-amber-500" />
+            <MessageSquare className="w-4 h-4 text-[#00897B]" />
             <h2 className="font-bold text-sm text-slate-900 dark:text-white">Chat</h2>
           </div>
 
@@ -270,21 +270,21 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder="Search..."
-              className={`w-full pl-8 pr-3 py-1.5 rounded-lg text-xs border outline-none ${
-                isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-300 text-slate-900'
+              className={`w-full pl-8 pr-3 py-1.5 rounded-none text-xs border outline-none ${
+                isDark ? 'bg-slate-900 border-slate-800 text-white focus:border-[#00897B]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
               }`}
             />
           </div>
 
           {/* Direct Message vs Groups Mode Tabs */}
-          <div className="flex items-center gap-1 bg-slate-200/60 dark:bg-slate-900 p-1 rounded-lg text-xs font-medium">
+          <div className="flex items-center gap-1 bg-slate-200/80 dark:bg-slate-900 p-1 rounded-none text-xs font-medium border border-slate-300 dark:border-slate-800">
             <button
               type="button"
               onClick={() => setActiveTabMode('direct')}
-              className={`flex-1 py-1 px-2 rounded-md transition-all text-[11px] flex items-center justify-center space-x-1 cursor-pointer ${
+              className={`flex-1 py-1.5 px-2 rounded-none transition-all text-[11px] flex items-center justify-center space-x-1 cursor-pointer ${
                 activeTabMode === 'direct'
-                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs font-semibold'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#00897B] text-white font-bold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <UserIcon className="w-3 h-3" />
@@ -294,10 +294,10 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
             <button
               type="button"
               onClick={() => setActiveTabMode('groups')}
-              className={`flex-1 py-1 px-2 rounded-md transition-all text-[11px] flex items-center justify-center space-x-1 cursor-pointer ${
+              className={`flex-1 py-1.5 px-2 rounded-none transition-all text-[11px] flex items-center justify-center space-x-1 cursor-pointer ${
                 activeTabMode === 'groups'
-                  ? 'bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-xs font-semibold'
-                  : 'text-slate-500 hover:text-slate-900 dark:hover:text-white'
+                  ? 'bg-[#00897B] text-white font-bold'
+                  : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
               }`}
             >
               <Users className="w-3 h-3" />
@@ -310,7 +310,7 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
             <button
               type="button"
               onClick={() => setShowNewGroupModal(true)}
-              className="w-full py-1.5 px-2.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs transition-all shadow-2xs flex items-center justify-center space-x-1.5 cursor-pointer"
+              className="w-full py-1.5 px-2.5 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-medium text-xs transition-all flex items-center justify-center space-x-1.5 cursor-pointer shadow-xs"
             >
               <Plus className="w-3.5 h-3.5" />
               <span>{isBn ? '+ নতুন চ্যাট গ্রুপ তৈরি করুন' : '+ Create Group'}</span>
@@ -319,14 +319,14 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
         </div>
 
         {/* USERS LIST CONTENT */}
-        <div className="flex-1 overflow-y-auto p-2 space-y-3">
+        <div className="flex-1 overflow-y-auto p-1 space-y-3">
           {activeTabMode === 'direct' ? (
             <div>
-              <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <div className="px-3 py-1.5 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 ALL USERS ({filteredUsers.length})
               </div>
 
-              <div className="space-y-1 mt-1">
+              <div className="space-y-0.5 mt-0.5">
                 {filteredUsers.map((userItem) => {
                   const userConvo = conversations.find(
                     (c) => c.type === 'direct' && c.participants.includes(userItem.id)
@@ -341,13 +341,13 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                       key={userItem.id}
                       type="button"
                       onClick={() => handleStartDirectChat(userItem)}
-                      className={`w-full p-2.5 rounded-xl text-left transition-all flex items-center space-x-3 cursor-pointer ${
+                      className={`w-full p-2.5 rounded-none text-left transition-all flex items-center space-x-3 cursor-pointer border-l-4 ${
                         isActive
-                          ? 'bg-amber-500/10 border border-amber-500/30 text-amber-600 dark:text-amber-400 font-semibold'
-                          : 'hover:bg-slate-200/60 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-200'
+                          ? 'bg-[#00897B]/15 border-[#00897B] text-[#00897B] dark:text-[#26A69A] font-semibold'
+                          : 'hover:bg-slate-200/60 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-200 border-transparent'
                       }`}
                     >
-                      <div className="w-9 h-9 rounded-full bg-amber-500/20 text-amber-600 dark:text-amber-400 font-bold text-xs flex items-center justify-center shrink-0">
+                      <div className="w-8 h-8 rounded-none bg-[#00897B]/20 text-[#00897B] dark:text-[#26A69A] font-bold text-xs flex items-center justify-center shrink-0 border border-[#00897B]/30">
                         {initials}
                       </div>
                       <div className="flex-1 min-w-0">
@@ -371,11 +371,11 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
             </div>
           ) : (
             <div>
-              <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <div className="px-3 py-1.5 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                 GROUPS ({groupConvos.length})
               </div>
 
-              <div className="space-y-1 mt-1">
+              <div className="space-y-0.5 mt-0.5">
                 {groupConvos.map((convo) => {
                   const isActive = convo.id === activeConvoId;
                   return (
@@ -383,20 +383,18 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                       key={convo.id}
                       type="button"
                       onClick={() => setActiveConvoId(convo.id)}
-                      className={`w-full p-2.5 rounded-xl text-left transition-all flex items-center space-x-3 cursor-pointer ${
+                      className={`w-full p-2.5 rounded-none text-left transition-all flex items-center space-x-3 cursor-pointer border-l-4 ${
                         isActive
-                          ? 'bg-emerald-600 text-white shadow-md'
-                          : 'hover:bg-slate-200/60 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-200'
+                          ? 'bg-[#00897B]/15 border-[#00897B] text-[#00897B] dark:text-[#26A69A] font-semibold'
+                          : 'hover:bg-slate-200/60 dark:hover:bg-slate-800/60 text-slate-700 dark:text-slate-200 border-transparent'
                       }`}
                     >
-                      <div className={`w-9 h-9 rounded-full shrink-0 font-bold text-xs flex items-center justify-center ${
-                        isActive ? 'bg-white/20 text-white' : 'bg-emerald-500/20 text-emerald-500'
-                      }`}>
+                      <div className="w-8 h-8 rounded-none shrink-0 font-bold text-xs flex items-center justify-center bg-[#00897B]/20 text-[#00897B] border border-[#00897B]/30">
                         <Users className="w-4 h-4" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="text-xs font-semibold truncate">{convo.name || 'Group Chat'}</div>
-                        <div className={`text-[10px] truncate ${isActive ? 'text-emerald-100' : 'text-slate-400'}`}>
+                        <div className="text-xs font-semibold truncate text-slate-900 dark:text-white">{convo.name || 'Group Chat'}</div>
+                        <div className="text-[10px] truncate text-slate-400">
                           {convo.last_message || 'Group Chat'}
                         </div>
                       </div>
@@ -415,14 +413,14 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
         </div>
       </div>
 
-      {/* RIGHT COLUMN: ACTIVE THREAD OR PLACEHOLDER (MATCHES BRANDQORE USER SCREENSHOT) */}
-      <div className="flex-1 flex flex-col bg-white dark:bg-[#1C1C1E]">
+      {/* RIGHT COLUMN: ACTIVE THREAD OR PLACEHOLDER */}
+      <div className="flex-1 flex flex-col bg-white dark:bg-[#18181B]">
         {activeConvo ? (
           <>
             {/* CHAT THREAD HEADER BAR */}
-            <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/40">
+            <div className="p-3.5 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/70 dark:bg-[#121214]">
               <div className="flex items-center space-x-3">
-                <div className="w-9 h-9 rounded-full bg-amber-500/20 text-amber-500 font-bold text-xs flex items-center justify-center">
+                <div className="w-8 h-8 rounded-none bg-[#00897B]/20 text-[#00897B] font-bold text-xs flex items-center justify-center border border-[#00897B]/30">
                   {activeConvo.type === 'group' ? <Users className="w-4 h-4" /> : <UserIcon className="w-4 h-4" />}
                 </div>
                 <div>
@@ -431,7 +429,7 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                   </h3>
                   <span className="text-[10px] text-emerald-500 font-mono flex items-center space-x-1">
                     <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span>Hostinger Live Realtime Connected</span>
+                    <span>Hostinger VPS Realtime Connected</span>
                   </span>
                 </div>
               </div>
@@ -441,25 +439,27 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                 <button
                   type="button"
                   onClick={() => handleInitiateCall('audio')}
-                  className="p-2 rounded-xl bg-emerald-600/10 hover:bg-emerald-600/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 transition-all cursor-pointer hover:scale-105 active:scale-95"
+                  className="px-3 py-1.5 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer shadow-xs"
                   title={isBn ? 'ইন-সিস্টেম অডিও কল শুরু করুন' : 'Start Voice Call'}
                 >
-                  <Phone className="w-4 h-4" />
+                  <Phone className="w-3.5 h-3.5" />
+                  <span>{isBn ? 'ভয়েস কল' : 'Voice Call'}</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={() => handleInitiateCall('video')}
-                  className="p-2 rounded-xl bg-blue-600/10 hover:bg-blue-600/20 text-blue-600 dark:text-blue-400 border border-blue-500/30 transition-all cursor-pointer hover:scale-105 active:scale-95"
+                  className="px-3 py-1.5 rounded-none bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center space-x-1.5 transition-all cursor-pointer shadow-xs"
                   title={isBn ? 'ইন-সিস্টেম ভিডিও কল শুরু করুন' : 'Start Video Call'}
                 >
-                  <Video className="w-4 h-4" />
+                  <Video className="w-3.5 h-3.5" />
+                  <span>{isBn ? 'ভিডিও কল' : 'Video Call'}</span>
                 </button>
               </div>
             </div>
 
             {/* MESSAGES THREAD CONTAINER */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-4">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3.5">
               {activeMessages.map((msg) => {
                 const isMe = msg.sender_id === currentUser.id;
                 return (
@@ -475,10 +475,10 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                     </div>
 
                     <div
-                      className={`max-w-md p-3.5 rounded-2xl text-xs leading-relaxed shadow-xs ${
+                      className={`max-w-md p-3 rounded-none text-xs leading-relaxed ${
                         isMe
-                          ? 'bg-blue-600 text-white rounded-tr-none'
-                          : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 rounded-tl-none border border-slate-200 dark:border-slate-700'
+                          ? 'bg-[#00897B] text-white font-medium shadow-xs'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-slate-100 border border-slate-300 dark:border-slate-700'
                       }`}
                     >
                       {msg.content}
@@ -490,34 +490,35 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
             </div>
 
             {/* MESSAGE INPUT FORM */}
-            <form onSubmit={handleSendMessage} className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/40">
+            <form onSubmit={handleSendMessage} className="p-3 border-t border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-[#121214]">
               <div className="flex items-center gap-2">
                 <input
                   type="text"
                   value={messageInput}
                   onChange={(e) => setMessageInput(e.target.value)}
                   placeholder={isBn ? 'আপনার মেসেজ লিখুন...' : 'Type your message...'}
-                  className={`flex-1 px-4 py-2.5 rounded-xl border text-xs font-normal focus:ring-2 focus:ring-blue-500 outline-none ${
+                  className={`flex-1 px-4 py-2.5 rounded-none border text-xs font-normal focus:ring-2 focus:ring-[#00897B] outline-none ${
                     isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-300 text-slate-900'
                   }`}
                 />
                 <button
                   type="submit"
-                  className="p-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs transition-all shadow-md flex items-center justify-center cursor-pointer hover:scale-105 active:scale-95"
+                  className="px-5 py-2.5 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-semibold text-xs transition-all shadow-md flex items-center justify-center space-x-1.5 cursor-pointer"
                 >
                   <Send className="w-4 h-4" />
+                  <span>{isBn ? 'পাঠান' : 'Send'}</span>
                 </button>
               </div>
             </form>
           </>
         ) : (
-          /* PLACEHOLDER WHEN NO CONVERSATION SELECTED (EXACT MATCH TO BRANDQORE USER SCREENSHOT) */
+          /* PLACEHOLDER WHEN NO CONVERSATION SELECTED */
           <div className="flex-1 flex flex-col items-center justify-center text-center p-8 text-slate-400 space-y-4">
-            <div className="w-20 h-20 rounded-3xl bg-slate-100 dark:bg-slate-900 flex items-center justify-center border border-slate-200 dark:border-slate-800 shadow-inner">
-              <MessageSquare className="w-10 h-10 text-slate-300 dark:text-slate-600" />
+            <div className="w-16 h-16 rounded-none bg-slate-100 dark:bg-slate-900 flex items-center justify-center border border-slate-200 dark:border-slate-800 shadow-inner">
+              <MessageSquare className="w-8 h-8 text-[#00897B]" />
             </div>
             <div className="space-y-1">
-              <p className="text-sm font-medium text-slate-700 dark:text-slate-300">
+              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 একটি conversation select করুন
               </p>
               <p className="text-xs text-slate-400">
@@ -531,10 +532,10 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
       {/* SUPER ADMIN GROUP CREATION MODAL */}
       {showNewGroupModal && isSuperAdmin && (
         <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-slate-950/80 backdrop-blur-xs p-4 animate-in fade-in">
-          <div className="w-full max-w-md bg-[#1C1C1E] border border-slate-800 rounded-2xl p-6 shadow-2xl space-y-5">
+          <div className="w-full max-w-md bg-[#1C1C1E] border border-slate-800 rounded-none p-6 shadow-2xl space-y-5">
             <div className="flex items-center justify-between border-b pb-3 border-slate-800">
               <h3 className="text-sm font-bold text-white flex items-center space-x-2">
-                <Users className="w-4 h-4 text-emerald-400" />
+                <Users className="w-4 h-4 text-[#00897B]" />
                 <span>{isBn ? 'নতুন চ্যাট গ্রুপ তৈরি করুন (Super Admin Only)' : 'Create New Group'}</span>
               </h3>
               <button type="button" onClick={() => setShowNewGroupModal(false)} className="text-slate-400 hover:text-white">
@@ -553,7 +554,7 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                   value={groupNameInput}
                   onChange={(e) => setGroupNameInput(e.target.value)}
                   placeholder="e.g. Operation Management"
-                  className="w-full px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                  className="w-full px-3 py-2 rounded-none bg-slate-900 border border-slate-800 text-xs text-white outline-none focus:ring-2 focus:ring-[#00897B]"
                 />
               </div>
 
@@ -561,11 +562,11 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                 <label className="text-xs text-slate-300 font-medium block mb-1">
                   {isBn ? 'সদস্য নির্বাচন করুন (Select Members)' : 'Select Members'}
                 </label>
-                <div className="max-h-48 overflow-y-auto space-y-2 border border-slate-800 rounded-xl p-3 bg-slate-950">
+                <div className="max-h-48 overflow-y-auto space-y-2 border border-slate-800 rounded-none p-3 bg-slate-950">
                   {allUsers.map((u) => {
                     const isChecked = selectedUserIdsForGroup.includes(u.id);
                     return (
-                      <label key={u.id} className="flex items-center space-x-3 p-2 rounded hover:bg-slate-900 cursor-pointer">
+                      <label key={u.id} className="flex items-center space-x-3 p-2 rounded-none hover:bg-slate-900 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={isChecked}
@@ -576,7 +577,7 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                               setSelectedUserIdsForGroup((prev) => prev.filter((id) => id !== u.id));
                             }
                           }}
-                          className="rounded text-emerald-600 focus:ring-emerald-500"
+                          className="rounded-none text-[#00897B] focus:ring-[#00897B]"
                         />
                         <div className="text-xs">
                           <div className="font-semibold text-white">{u.name}</div>
@@ -592,13 +593,13 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                 <button
                   type="button"
                   onClick={() => setShowNewGroupModal(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300"
+                  className="px-4 py-2 rounded-none bg-slate-800 hover:bg-slate-700 text-xs font-medium text-slate-300"
                 >
                   {isBn ? 'বাতিল' : 'Cancel'}
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-medium text-white shadow-md cursor-pointer"
+                  className="px-4 py-2 rounded-none bg-[#00897B] hover:bg-[#00796B] text-xs font-semibold text-white shadow-md cursor-pointer"
                 >
                   {isBn ? 'গ্রুপ তৈরি করুন' : 'Create Group'}
                 </button>
