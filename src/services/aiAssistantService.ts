@@ -5,7 +5,6 @@ const GOOGLE_MODEL_CANDIDATES = [
   'gemini-1.5-flash',
   'gemini-2.0-flash',
   'gemini-1.5-pro',
-  'gemini-2.0-flash-lite',
 ];
 
 export interface ChatMessageItem {
@@ -158,6 +157,7 @@ RULES & GUIDELINES FOR AI RESPONSES:
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'x-goog-api-key': apiKey,
           },
           body: JSON.stringify({
             system_instruction: {
@@ -184,7 +184,8 @@ RULES & GUIDELINES FOR AI RESPONSES:
       }
 
       if (data.error && data.error.message) {
-        lastError = data.error.message;
+        console.warn(`Gemini model ${model} error:`, data.error.message);
+        lastError = `${model}: ${data.error.message}`;
       }
     } catch (err: any) {
       lastError = err.message || 'Network error connecting to Gemini API';
@@ -192,7 +193,7 @@ RULES & GUIDELINES FOR AI RESPONSES:
   }
 
   return {
-    text: `⚠️ AI সাড়া দিতে পারেনি (${lastError || 'Gemini API call failed'})। অনুগ্রহ করে সুপার এডমিন সেটিংসে আপনার API Key চেক করুন।`,
+    text: `⚠️ AI সাড়া দিতে পারেনি (${lastError || 'Gemini API call failed'})। অনুগ্রহ করে আপনার API Key সঠিকভাবে Google AI Studio (aistudio.google.com) থেকে সংগৃহীত হয়েছে কিনা চেক করুন।`,
     success: false,
   };
 };
