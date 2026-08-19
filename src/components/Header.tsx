@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Menu, Bell, Sun, Moon, LogOut, Check, Info, AlertTriangle, CheckCircle2, ShieldAlert, MessageSquare } from 'lucide-react';
 import { User, Language, Theme } from '../types';
 import { LanguageSelector } from './LanguageSelector';
 import { resetHostingerDbToDefault, getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSystemAuditAction } from '../lib/db';
+import { getNotificationTargetUrl } from '../utils/notificationNavigator';
 
 interface HeaderProps {
   currentUser: User | null;
@@ -41,6 +43,7 @@ export const Header: React.FC<HeaderProps> = ({
 }) => {
   const isBn = language === 'bn';
   const isDark = theme === 'dark';
+  const navigate = useNavigate();
 
   const [showNotifications, setShowNotifications] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
@@ -94,6 +97,13 @@ export const Header: React.FC<HeaderProps> = ({
     const updated = allNotifs.map((n) => (n.id === id ? { ...n, isRead: true } : n));
     setAllNotifs(updated);
     saveHostingerDbData('notifications', updated);
+  };
+
+  const handleNotifClick = (ntf: any) => {
+    markOneRead(ntf.id);
+    setShowNotifications(false);
+    const targetUrl = getNotificationTargetUrl(ntf, currentUser?.role);
+    navigate(targetUrl);
   };
 
   const getRoleBadge = (role?: string) => {
@@ -165,7 +175,10 @@ export const Header: React.FC<HeaderProps> = ({
           >
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1.5 min-w-[18px] h-[18px] px-1 bg-red-600 text-white font-black text-[10px] leading-none flex items-center justify-center rounded-full border-2 border-white dark:border-[#141414] shadow-md z-10 pointer-events-none select-none">
+              <span
+                style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}
+                className="absolute -top-1.5 -right-2 min-w-[20px] h-[20px] px-1 text-[11px] font-black leading-none flex items-center justify-center rounded-full border-2 border-white dark:border-[#141414] shadow-lg z-20 pointer-events-none select-none"
+              >
                 {unreadCount > 99 ? '99+' : unreadCount}
               </span>
             )}
@@ -215,7 +228,7 @@ export const Header: React.FC<HeaderProps> = ({
                   roleNotifs.map((ntf) => (
                     <div
                       key={ntf.id}
-                      onClick={() => markOneRead(ntf.id)}
+                      onClick={() => handleNotifClick(ntf)}
                       className={`p-3.5 flex space-x-3 cursor-pointer transition-colors ${
                         !ntf.isRead
                           ? isDark

@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Check, Filter, Bell, AlertTriangle, ShieldAlert, CheckCircle2, Info, Copy } from 'lucide-react';
 import { Language, Theme } from '../types';
 import { useAuth } from '../hooks/useAuth';
 import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '../lib/db';
+import { getNotificationTargetUrl } from '../utils/notificationNavigator';
 
 interface NotificationsPageProps {
   language: Language;
@@ -27,6 +29,7 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({ language, 
   const isBn = language === 'bn';
   const isDark = theme === 'dark';
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   const [typeFilter, setTypeFilter] = useState<string>('all');
   const [readFilter, setReadFilter] = useState<string>('all');
@@ -51,6 +54,12 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({ language, 
     const updated = allNotifications.map((n) => (n.id === id ? { ...n, isRead: true } : n));
     setAllNotifications(updated);
     saveHostingerDbData('fsc_vps_notifications', updated);
+  };
+
+  const handleNotifItemClick = (n: NotificationItem) => {
+    markOneRead(n.id);
+    const targetUrl = getNotificationTargetUrl(n, user?.role);
+    navigate(targetUrl);
   };
 
   // Filter for active user role and assigned warehouse
@@ -174,7 +183,7 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({ language, 
             {filteredNotifications.map((n) => (
               <div
                 key={n.id}
-                onClick={() => markOneRead(n.id)}
+                onClick={() => handleNotifItemClick(n)}
                 className={`p-4 flex space-x-3.5 transition-colors cursor-pointer ${
                   !n.isRead
                     ? isDark

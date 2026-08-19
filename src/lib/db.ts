@@ -254,36 +254,8 @@ export const getHostingerDbData = () => {
     notifications = [];
   }
 
-  if (!notifications || notifications.length === 0) {
-    notifications = [
-      {
-        id: 'notif-base-1',
-        title: 'সিস্টেম অ্যাক্টিভেশন সম্পন্ন',
-        message: 'M/S Four Star Cargo রিয়েল-টাইম অপারেশনস সিঙ্ক চালু হয়েছে।',
-        type: 'info',
-        target_role: 'all',
-        isRead: false,
-        created_at: new Date(Date.now() - 5 * 60000).toISOString(),
-      },
-      {
-        id: 'notif-base-2',
-        title: 'ওয়্যারহাউজ বাউন্ডারি সিকিউরিটি',
-        message: 'ওয়্যারহাউজ ইনচার্জদের জন্য সুনির্দিষ্ট স্টক ভিউ ও বাউন্ডারি কন্ট্রোল সক্রিয়।',
-        type: 'success',
-        target_role: 'warehouse_incharge',
-        isRead: false,
-        created_at: new Date(Date.now() - 15 * 60000).toISOString(),
-      },
-      {
-        id: 'notif-base-3',
-        title: 'ফ্লাইট প্রপোজাল সিস্টেম',
-        message: 'অপারেশন ডিরেক্টর ও সুপার এডমিন প্যানেল সরাসরি প্রপোজাল রিভিউ করতে পারবেন।',
-        type: 'warning',
-        target_role: 'operation_director',
-        isRead: false,
-        created_at: new Date(Date.now() - 30 * 60000).toISOString(),
-      },
-    ];
+  if (!notifications) {
+    notifications = [];
     try {
       localStorage.setItem('fsc_vps_notifications', JSON.stringify(notifications));
     } catch {}
