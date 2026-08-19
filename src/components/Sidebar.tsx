@@ -230,7 +230,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Sidebar Navigation Panel */}
       <aside
         className={`w-64 border-r flex flex-col font-sans shrink-0 overflow-y-auto h-full z-40 transition-all duration-200 ${
-          isOpenMobile ? 'fixed inset-y-0 left-0 md:static' : 'hidden md:flex'
+          isOpenMobile
+            ? 'fixed inset-y-0 left-0 md:static md:flex'
+            : 'hidden md:hidden'
         } ${
           isDark
             ? 'bg-[#121214] border-[#2C2C2E]/60 text-white'
