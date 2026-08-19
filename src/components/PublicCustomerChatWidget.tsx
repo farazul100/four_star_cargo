@@ -132,13 +132,15 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
     const currentMsgs: ChatMessage[] = db.messages || [];
     const currentConvos: ChatConversation[] = db.conversations || [];
 
+    const textContent = imageUrl ? '' : messageInput.trim();
+
     const newMsg: ChatMessage = {
       id: `msg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
       conversation_id: convoId,
       sender_id: 'guest-user',
       sender_name: guestName || 'Customer',
       sender_role: 'crm_executive', // generic role signature for DB schema compatibility
-      content: messageInput.trim(),
+      content: textContent,
       image_url: imageUrl,
       created_at: new Date().toISOString(),
     };
@@ -313,14 +315,16 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
                               : 'bg-slate-800 text-slate-100 rounded-tl-none border border-slate-700'
                           }`}
                         >
-                          {m.image_url && (
+                          {(m.image_url || m.content?.startsWith('data:image/')) && (
                             <img
-                              src={m.image_url}
+                              src={m.image_url || m.content}
                               alt="Attachment"
-                              className="max-h-40 rounded-xl object-cover border border-white/20"
+                              className="max-h-48 w-full object-cover rounded-xl border border-white/20 shadow-md"
                             />
                           )}
-                          {m.content && <p className="whitespace-pre-wrap">{m.content}</p>}
+                          {m.content && !m.content.startsWith('data:image/') && (
+                            <p className="whitespace-pre-wrap">{m.content}</p>
+                          )}
                         </div>
 
                         <span className="text-[9px] text-slate-500 font-mono">
