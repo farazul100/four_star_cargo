@@ -17,7 +17,7 @@ import {
   Globe,
   FileText,
 } from 'lucide-react';
-import { CrmCustomer, User, Language, Theme } from '../types';
+import { CrmCustomer, Customer, User, Language, Theme } from '../types';
 import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSystemAuditAction } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
@@ -60,6 +60,48 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
+  // System-wide Customer Database Sync Helper (fsc_vps_customers)
+  const syncCrmCustomerToMainDatabase = (crmCust: CrmCustomer) => {
+    try {
+      const dbData = getHostingerDbData();
+      const mainCustomers: Customer[] = dbData.customers || [];
+
+      const cleanPhone = (crmCust.phone || '').replace(/\D/g, '');
+      const cleanName = (crmCust.name || '').trim().toLowerCase();
+
+      const exists = mainCustomers.some((c) => {
+        const existingPhone = (c.phone || '').replace(/\D/g, '');
+        const existingName = (c.name || '').trim().toLowerCase();
+        return (cleanPhone && existingPhone && cleanPhone === existingPhone) || (cleanName && existingName === cleanName);
+      });
+
+      if (!exists) {
+        const rawDigits = crmCust.phone.replace(/\D/g, '');
+        const shortId = rawDigits.length >= 4 ? rawDigits.slice(-4) : Math.floor(1000 + Math.random() * 9000).toString();
+
+        const newMainCust: Customer = {
+          id: `cust-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          customer_code: `CUST-${shortId}`,
+          shipping_mark: `MAR-${shortId}`,
+          name: crmCust.name,
+          phone: crmCust.phone,
+          company_name: crmCust.company_name || '',
+          address: crmCust.address || 'Dhaka, Bangladesh',
+          total_due: 0,
+          total_paid: 0,
+          total_billed: 0,
+          status: crmCust.followup_status === 'important_regular' ? 'vip' : 'active',
+          created_at: crmCust.created_at || new Date().toISOString(),
+        };
+
+        const updatedMain = [newMainCust, ...mainCustomers];
+        saveHostingerDbData('fsc_vps_customers', updatedMain);
+      }
+    } catch (err) {
+      console.error('Error syncing CRM customer to main database:', err);
+    }
+  };
+
   // Helper function to identify real user-created customers
   const isRealCustomer = (c: CrmCustomer) => {
     if (!c || !c.id) return false;
@@ -79,12 +121,24 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
     return realList;
   });
 
-  // Real-time DB Sync
+  // Real-time DB Sync & System-wide Customer Sync
   useEffect(() => {
+    // Initial sync of existing CRM customers into main system database
+    const dbData = getHostingerDbData();
+    if (dbData.crmCustomers && dbData.crmCustomers.length > 0) {
+      dbData.crmCustomers.forEach((c) => {
+        if (isRealCustomer(c)) {
+          syncCrmCustomerToMainDatabase(c);
+        }
+      });
+    }
+
     return subscribeToDbUpdates(() => {
-      const dbData = getHostingerDbData();
-      if (dbData.crmCustomers) {
-        setCustomers(dbData.crmCustomers.filter(isRealCustomer));
+      const updatedData = getHostingerDbData();
+      if (updatedData.crmCustomers) {
+        const cleanList = updatedData.crmCustomers.filter(isRealCustomer);
+        setCustomers(cleanList);
+        cleanList.forEach(syncCrmCustomerToMainDatabase);
       }
     });
   }, []);
@@ -135,6 +189,9 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
     setCustomers(updatedList);
     saveHostingerDbData('fsc_vps_crm_customers', updatedList);
 
+    // Sync CRM Customer into Main System Database (fsc_vps_customers)
+    syncCrmCustomerToMainDatabase(newCust);
+
     logSystemAuditAction(
       currentUser,
       'CREATE_CRM_CUSTOMER',
@@ -153,7 +210,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
     addToast(
       'success',
       isBn ? 'কাস্টমার তৈরি সফল!' : 'Customer Created Successfully!',
-      isBn ? `${newCust.name} সফলভাবে ${categoryLabel} টেবিলে যুক্ত হয়েছে` : `${newCust.name} added to ${categoryLabel} table`
+      isBn ? `${newCust.name} সফলভাবে ${categoryLabel} টেবিলে ও সিস্টেমে যুক্ত হয়েছে` : `${newCust.name} added to ${categoryLabel} table & system`
     );
 
     // Switch view to match newly created category tab
@@ -183,6 +240,9 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
     setCustomers(updatedList);
     saveHostingerDbData('fsc_vps_crm_customers', updatedList);
 
+    // Sync CRM Customer into Main System Database
+    syncCrmCustomerToMainDatabase(cust);
+
     logSystemAuditAction(
       currentUser,
       'CONVERT_TO_NEW_CUSTOMER',
@@ -209,6 +269,9 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
 
     setCustomers(updatedList);
     saveHostingerDbData('fsc_vps_crm_customers', updatedList);
+
+    // Sync CRM Customer into Main System Database
+    syncCrmCustomerToMainDatabase({ ...cust, followup_status: 'important_regular' });
 
     logSystemAuditAction(
       currentUser,
@@ -243,6 +306,9 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
 
     setCustomers(updatedList);
     saveHostingerDbData('fsc_vps_crm_customers', updatedList);
+
+    // Sync CRM Customer into Main System Database for Warehouse & Super Admin
+    syncCrmCustomerToMainDatabase(cust);
 
     logSystemAuditAction(
       currentUser,
