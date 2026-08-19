@@ -111,21 +111,9 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
     saveHostingerDbData(DB_KEYS.USERS, updatedUsers);
 
     if (auditMsg) {
+      logSystemAuditAction(null, 'user_management', 'user', 'user-management-sync', auditMsg);
       const data = getHostingerDbData();
-      const newAudit: AuditLog = {
-        id: `log-${Date.now()}`,
-        user_id: 'usr-1',
-        user_name: 'তানভীর আহমেদ (Super Admin)',
-        user_role: 'super_admin',
-        action: 'user_management',
-        entity_type: 'user',
-        entity_id: 'user-sync',
-        details: auditMsg,
-        created_at: new Date().toISOString(),
-      };
-      const newLogs = [newAudit, ...(data.auditLogs || [])];
-      setAuditLogs(newLogs);
-      saveHostingerDbData(DB_KEYS.AUDIT, newLogs);
+      setAuditLogs(data.auditLogs || []);
     }
   };
 

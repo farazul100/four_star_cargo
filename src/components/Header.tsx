@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Menu, Bell, Sun, Moon, LogOut, Check, Info, AlertTriangle, CheckCircle2, ShieldAlert } from 'lucide-react';
 import { User, Language, Theme } from '../types';
 import { LanguageSelector } from './LanguageSelector';
-import { resetHostingerDbToDefault, getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '../lib/db';
+import { resetHostingerDbToDefault, getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSystemAuditAction } from '../lib/db';
 
 interface HeaderProps {
   currentUser: User | null;
@@ -352,6 +352,15 @@ export const Header: React.FC<HeaderProps> = ({
                   <button
                     onClick={() => {
                       setShowProfileMenu(false);
+                      if (currentUser) {
+                        logSystemAuditAction(
+                          currentUser,
+                          'USER_LOGOUT',
+                          'auth',
+                          currentUser.id,
+                          `ইউজার ${currentUser.name} (${currentUser.email}) সিস্টেম থেকে লগআউট করেছেন।`
+                        );
+                      }
                       onLogout();
                     }}
                     className={`w-full px-4 py-2.5 text-xs text-left font-normal flex items-center space-x-2.5 text-red-500 hover:text-red-600 transition-colors cursor-pointer ${

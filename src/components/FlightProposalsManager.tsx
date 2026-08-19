@@ -24,7 +24,7 @@ import {
   Scale,
 } from 'lucide-react';
 import { FlyingProposal, Carton, Language, Theme, AuditLog } from '../types';
-import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSystemAuditAction } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
 
@@ -105,20 +105,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
     saveHostingerDbData(DB_KEYS.CARTONS, updatedCartons);
 
     if (auditMsg) {
-      const data = getHostingerDbData();
-      const newAudit: AuditLog = {
-        id: `log-${Date.now()}`,
-        user_id: 'usr-1',
-        user_name: 'তানভীর আহমেদ (Super Admin)',
-        user_role: 'super_admin',
-        action: 'proposal_update',
-        entity_type: 'flying_proposal',
-        entity_id: 'prop-sync',
-        details: auditMsg,
-        created_at: new Date().toISOString(),
-      };
-      const newAuditLogs = [newAudit, ...(data.auditLogs || [])];
-      saveHostingerDbData(DB_KEYS.AUDIT, newAuditLogs);
+      logSystemAuditAction(null, 'proposal_update', 'flying_proposal', 'prop-sync', auditMsg);
     }
   };
 

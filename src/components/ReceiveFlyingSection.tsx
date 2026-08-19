@@ -90,6 +90,14 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
     saveHostingerDbData('fsc_vps_proposals', updatedProposals);
     saveHostingerDbData('fsc_vps_cartons', updatedCartons);
 
+    logSystemAuditAction(
+      currentUser,
+      'RECEIVE_FLYING_FLIGHT',
+      'flying_proposal',
+      flightNo || 'flight-batch',
+      `ফ্লাইট ${flightNo || ''} বাংলাদেশ ওয়্যারহাউজে রিসিভ সম্পন্ন (${cartonIds.length}টি কার্টন রিসিভড)`
+    );
+
     // 4. Success Feedback
     addToast(
       isBn

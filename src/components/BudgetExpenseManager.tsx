@@ -17,7 +17,7 @@ import {
 import { ExpenseItem, Language, Theme, LedgerEntry } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
-import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSystemAuditAction } from '../lib/db';
 
 interface BudgetExpenseManagerProps {
   language?: Language;
@@ -215,6 +215,14 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
     const updatedExpenses = [newExpense, ...expenses];
     setExpenses(updatedExpenses);
     saveHostingerDbData('fsc_vps_expenses', updatedExpenses);
+
+    logSystemAuditAction(
+      null,
+      'CREATE_EXPENSE_VOUCHER',
+      'expense',
+      newExpense.id,
+      `নতুন খরচ ভাউচার তৈরি: ${newExpense.title} (৳${newExpense.amount.toLocaleString()}, মেথড: ${newExpense.payment_method}, ভাউচার: ${newExpense.voucher_no})`
+    );
 
     addToast('success', isBn ? 'নতুন খরচ ভাউচার যোগ সফল!' : 'Expense Voucher Recorded!', isBn ? `৳${parseFloat(expAmount).toLocaleString()} একাউন্টস প্যানেলে সিঙ্ক করা হয়েছে` : `Voucher of ৳${parseFloat(expAmount).toLocaleString()} synced to Accounts`);
 

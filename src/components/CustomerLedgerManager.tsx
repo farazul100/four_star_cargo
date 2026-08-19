@@ -29,7 +29,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { Customer, LedgerEntry, Carton, Language, Theme } from '../types';
-import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSystemAuditAction } from '../lib/db';
 import { INITIAL_CUSTOMERS, INITIAL_LEDGER } from '../mockData';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
@@ -132,20 +132,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
     saveHostingerDbData(DB_KEYS.CUSTOMERS, updatedCusts);
 
     if (auditMsg) {
-      const data = getHostingerDbData();
-      const newAudit = {
-        id: `log-${Date.now()}`,
-        user_id: 'usr-1',
-        user_name: 'তানভীর আহমেদ (Super Admin)',
-        user_role: 'super_admin' as const,
-        action: 'customer_management',
-        entity_type: 'customer',
-        entity_id: 'cust-sync',
-        details: auditMsg,
-        created_at: new Date().toISOString(),
-      };
-      const newLogs = [newAudit, ...(data.auditLogs || [])];
-      saveHostingerDbData(DB_KEYS.AUDIT, newLogs);
+      logSystemAuditAction(null, 'customer_management', 'customer', 'cust-sync', auditMsg);
     }
   };
 

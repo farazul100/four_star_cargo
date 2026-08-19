@@ -20,7 +20,7 @@ import {
   Check,
 } from 'lucide-react';
 import { Warehouse, User, Language, Theme, WarehouseInchargeStaff, AuditLog } from '../types';
-import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, publishSystemNotification } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, publishSystemNotification, logSystemAuditAction } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
 
@@ -100,20 +100,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
     saveHostingerDbData(DB_KEYS.WAREHOUSES, updatedWhs);
 
     if (auditMsg) {
-      const data = getHostingerDbData();
-      const newAudit: AuditLog = {
-        id: `log-${Date.now()}`,
-        user_id: 'usr-1',
-        user_name: 'তানভীর আহমেদ (Super Admin)',
-        user_role: 'super_admin',
-        action: 'warehouse_update',
-        entity_type: 'warehouse',
-        entity_id: 'wh-sync',
-        details: auditMsg,
-        created_at: new Date().toISOString(),
-      };
-      const newAuditLogs = [newAudit, ...(data.auditLogs || [])];
-      saveHostingerDbData(DB_KEYS.AUDIT, newAuditLogs);
+      logSystemAuditAction(null, 'warehouse_update', 'warehouse', 'wh-sync', auditMsg);
     }
   };
 

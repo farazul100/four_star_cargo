@@ -113,11 +113,25 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
       : foundUser.role === expectedRole;
 
     if (!isUserAllowedOnPortal) {
+      logSystemAuditAction(
+        foundUser,
+        'LOGIN_FAILED',
+        'auth',
+        foundUser.id,
+        `পোর্টালে লগইন ব্যর্থ (অনুমতি নেই): ${foundUser.name} (${foundUser.email})`
+      );
       setError(lang === 'bn' ? 'এই পোর্টালের জন্য আপনার অনুমতি নেই!' : 'Role mismatch! You do not have access to this portal.');
       return;
     }
 
     if (foundUser.status === 'inactive' || foundUser.status === 'suspended') {
+      logSystemAuditAction(
+        foundUser,
+        'LOGIN_FAILED',
+        'auth',
+        foundUser.id,
+        `পোর্টালে লগইন ব্যর্থ (একাউন্ট স্থগিত/নিষ্ক্রিয়): ${foundUser.name} (${foundUser.email})`
+      );
       setError(lang === 'bn' ? 'আপনার অ্যাকাউন্টটি নিষ্ক্রিয় বা স্থগিত করা হয়েছে।' : 'Account is inactive or suspended.');
       return;
     }
@@ -126,6 +140,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
     const enteredPassword = password.trim();
 
     if (storedPassword && enteredPassword !== storedPassword && enteredPassword !== 'Cargo@2026') {
+      logSystemAuditAction(
+        foundUser,
+        'LOGIN_FAILED',
+        'auth',
+        foundUser.id,
+        `পোর্টালে লগইন ব্যর্থ (ভুল পাসওয়ার্ড): ${foundUser.name} (${foundUser.email})`
+      );
       setError(lang === 'bn' ? 'ভুল পাসওয়ার্ড! সঠিক পাসওয়ার্ড প্রদান করুন।' : 'Invalid password! Please check your credentials.');
       return;
     }
