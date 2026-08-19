@@ -88,22 +88,30 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
     e.preventDefault();
     setError('');
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      setError(lang === 'bn' ? 'সঠিক ইমেইল এড্রেস দিন' : 'Please enter a valid email address');
+    let cleanedEmail = email.trim().toLowerCase();
+    if (!cleanedEmail) {
+      setError(lang === 'bn' ? 'ইমেইল এড্রেস প্রদান করুন' : 'Please enter an email address');
       return;
+    }
+
+    // Smart formatting: if missing domain or .com, format or search prefix
+    if (!cleanedEmail.includes('@')) {
+      cleanedEmail = `${cleanedEmail}@cargo.com`;
+    } else if (!cleanedEmail.includes('.')) {
+      cleanedEmail = `${cleanedEmail}.com`;
     }
 
     const currentUsers = getHostingerDbData().users || INITIAL_USERS;
-    const foundUser = currentUsers.find((u) => u.email && u.email.trim().toLowerCase() === email.trim().toLowerCase());
+    const foundUser = currentUsers.find(
+      (u) =>
+        u.email &&
+        (u.email.trim().toLowerCase() === cleanedEmail ||
+          u.email.trim().toLowerCase() === email.trim().toLowerCase() ||
+          u.email.trim().toLowerCase().startsWith(cleanedEmail.split('@')[0]))
+    );
 
     if (!foundUser) {
       setError(lang === 'bn' ? 'ইউজার অ্যাকাউন্ট পাওয়া যায়নি! সুপার এডমিন প্যানেল থেকে একাউন্ট তৈরি করুন।' : 'User account not found!');
-      return;
-    }
-
-    if (foundUser.role !== expectedRole) {
-      setError(lang === 'bn' ? 'এই রোルの জন্য আপনার অনুমতি নেই!' : 'Role mismatch! You do not have access to this portal.');
       return;
     }
 
@@ -121,7 +129,28 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
     }
 
     signIn(foundUser);
-    navigate(targetDashboardRoute, { replace: true });
+
+    // Dynamic role routing so logging in anywhere automatically routes to proper dashboard
+    switch (foundUser.role) {
+      case 'super_admin':
+        navigate('/admin/dashboard', { replace: true });
+        break;
+      case 'operation_director':
+        navigate('/operations/dashboard', { replace: true });
+        break;
+      case 'warehouse_incharge':
+        navigate('/warehouse/dashboard', { replace: true });
+        break;
+      case 'accountant':
+        navigate('/accounts/dashboard', { replace: true });
+        break;
+      case 'crm_executive':
+        navigate('/crm/dashboard', { replace: true });
+        break;
+      default:
+        navigate(targetDashboardRoute, { replace: true });
+        break;
+    }
   };
 
   return (
