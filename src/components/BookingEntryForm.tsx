@@ -15,11 +15,13 @@ import {
   Building2,
   ListPlus,
   AlertTriangle,
+  Printer,
 } from 'lucide-react';
 import { Carton, Warehouse, User, Language, Customer, LedgerEntry } from '../types';
 import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction, publishSystemNotification } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { BookedCartonsHub } from './BookedCartonsHub';
+import { CartonInvoicesModal } from './CartonInvoicesModal';
 
 interface BookingEntryFormProps {
   warehouses: Warehouse[];
@@ -99,6 +101,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
   // Shared Batch Proof Photo Attachment
   const [batchPhotoUrl, setBatchPhotoUrl] = useState<string>('');
   const [previewPhotoModalUrl, setPreviewPhotoModalUrl] = useState<string | null>(null);
+  const [printedInvoicesCartons, setPrintedInvoicesCartons] = useState<Carton[] | null>(null);
 
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -520,6 +523,9 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
     onSaveCartons(newCartonObjects);
     setAllSavedCartons(fullUpdatedCartons);
+
+    // Open Carton Invoices & Print Modal automatically for all booked cartons
+    setPrintedInvoicesCartons(newCartonObjects);
 
     logSystemAuditAction(
       currentUser,
@@ -1453,6 +1459,16 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
             </div>
           </div>
         </div>
+      )}
+
+      {/* AUTOMATIC / MANUAL CARTON INVOICES PRINT MODAL */}
+      {printedInvoicesCartons && (
+        <CartonInvoicesModal
+          cartons={printedInvoicesCartons}
+          onClose={() => setPrintedInvoicesCartons(null)}
+          language={language}
+          currentUser={currentUser}
+        />
       )}
     </form>
   );

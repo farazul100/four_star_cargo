@@ -20,10 +20,12 @@ import {
   CheckCircle2,
   ListFilter,
   LayoutGrid,
+  Printer,
 } from 'lucide-react';
 import { Carton, Warehouse, User as UserType, Language, Customer } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction, subscribeToDbUpdates } from '../lib/db';
+import { CartonInvoicesModal } from './CartonInvoicesModal';
 
 interface BookedCartonsHubProps {
   cartons: Carton[];
@@ -62,6 +64,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
   // Photo Preview Modal View
   const [previewPhotoUrl, setPreviewPhotoUrl] = useState<string | null>(null);
+  const [selectedCartonsForInvoiceModal, setSelectedCartonsForInvoiceModal] = useState<Carton[] | null>(null);
 
   // Edit Carton Row Modal
   const [editingCarton, setEditingCarton] = useState<Carton | null>(null);
@@ -445,9 +448,17 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
                     {/* Card Action Footer */}
                     <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
-                      <span className="text-slate-500 text-[11px]">
-                        {isBn ? 'কার্টুন বিস্তারিত দেখুন' : 'Click to view cartons'}
-                      </span>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedCartonsForInvoiceModal(groupCartons);
+                        }}
+                        className="px-2.5 py-1 bg-[#00897B] hover:bg-[#00796B] text-white text-[11px] font-bold rounded-none flex items-center space-x-1 cursor-pointer transition-all shadow-xs"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                        <span>{isBn ? 'ইনভয়েস প্রিন্ট' : 'Print Invoices'}</span>
+                      </button>
                       <div className="flex items-center space-x-1 text-blue-600 dark:text-blue-400 font-medium">
                         <span>{isBn ? 'বিস্তারিত' : 'View Details'}</span>
                         <ChevronRight className="w-4 h-4" />
@@ -587,6 +598,14 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
                     <td className="p-3 text-center border border-slate-200 dark:border-slate-800">
                       <div className="flex items-center justify-center space-x-1">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedCartonsForInvoiceModal([c])}
+                          className="p-1 text-[#00897B] hover:text-[#26A69A] cursor-pointer"
+                          title={isBn ? 'কার্টুন ইনভয়েস প্রিন্ট করুন' : 'Print Carton Invoice'}
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                        </button>
                         {c.photo_url && (
                           <button
                             type="button"
@@ -816,6 +835,16 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             </div>
           </form>
         </div>
+      )}
+
+      {/* CARTON INVOICES & PRINT MODAL */}
+      {selectedCartonsForInvoiceModal && (
+        <CartonInvoicesModal
+          cartons={selectedCartonsForInvoiceModal}
+          onClose={() => setSelectedCartonsForInvoiceModal(null)}
+          language={language}
+          currentUser={currentUser}
+        />
       )}
     </div>
   );
