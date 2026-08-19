@@ -3,7 +3,7 @@
  * Provides direct database persistence & Role-Based Access Control (RBAC)
  */
 
-import { User, Warehouse, Carton, FlyingProposal, Customer, LedgerEntry, AuditLog, ExpenseItem } from '../types';
+import { User, Warehouse, Carton, FlyingProposal, Customer, LedgerEntry, AuditLog, ExpenseItem, CrmCustomer } from '../types';
 import {
   INITIAL_USERS,
   INITIAL_WAREHOUSES,
@@ -13,6 +13,7 @@ import {
   INITIAL_LEDGER,
   INITIAL_AUDIT_LOGS,
   INITIAL_EXPENSES,
+  INITIAL_CRM_CUSTOMERS,
 } from '../mockData';
 
 const DB_KEYS = {
@@ -24,6 +25,7 @@ const DB_KEYS = {
   LEDGER: 'fsc_vps_ledger',
   AUDIT: 'fsc_vps_audit',
   EXPENSES: 'fsc_vps_expenses',
+  CRM_CUSTOMERS: 'fsc_vps_crm_customers',
 };
 
 // Reset DB helper for live testing - Clears all demo cartons & proposals completely
@@ -56,6 +58,11 @@ export const initHostingerDb = () => {
 
   if (!localStorage.getItem(DB_KEYS.CUSTOMERS)) {
     localStorage.setItem(DB_KEYS.CUSTOMERS, JSON.stringify([]));
+  }
+
+  const existingCrm = localStorage.getItem(DB_KEYS.CRM_CUSTOMERS);
+  if (!existingCrm || existingCrm === '[]') {
+    localStorage.setItem(DB_KEYS.CRM_CUSTOMERS, JSON.stringify(INITIAL_CRM_CUSTOMERS));
   }
 
   const currentUsersRaw = localStorage.getItem(DB_KEYS.USERS);
@@ -293,6 +300,7 @@ export const getHostingerDbData = () => {
     ledgerEntries: JSON.parse(localStorage.getItem(DB_KEYS.LEDGER) || '[]') as LedgerEntry[],
     auditLogs: JSON.parse(localStorage.getItem(DB_KEYS.AUDIT) || '[]') as AuditLog[],
     expenses: JSON.parse(localStorage.getItem(DB_KEYS.EXPENSES) || '[]') as ExpenseItem[],
+    crmCustomers: JSON.parse(localStorage.getItem(DB_KEYS.CRM_CUSTOMERS) || '[]') as CrmCustomer[],
     notifications: notifications,
   };
 };

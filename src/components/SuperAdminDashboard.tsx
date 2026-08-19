@@ -56,6 +56,7 @@ import { getHostingerDbData, saveHostingerDbData } from '../lib/db';
 import { useAuth } from '../hooks/useAuth';
 
 import { CargoSearchTracker } from './CargoSearchTracker';
+import { CrmManagementSystem } from './CrmManagementSystem';
 
 interface SuperAdminDashboardProps {
   activeTab: string;
@@ -342,6 +343,13 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
         language={language}
       />
     );
+  }
+
+  // --------------------------------------------------------------------------
+  // TAB: CUSTOMER RELATIONSHIP MANAGEMENT (CRM) VIEW
+  // --------------------------------------------------------------------------
+  if (activeTab === 'crm') {
+    return <CrmManagementSystem currentUser={user || { name: 'Super Admin', role: 'super_admin' } as any} language={language} />;
   }
 
   // --------------------------------------------------------------------------

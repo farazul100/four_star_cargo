@@ -1,10 +1,28 @@
-export type UserRole = 'super_admin' | 'operation_director' | 'warehouse_incharge' | 'accountant';
+export type UserRole = 'super_admin' | 'operation_director' | 'warehouse_incharge' | 'accountant' | 'crm_executive';
 
 export type CartonStatus = 'booked' | 'proposed' | 'in_transit' | 'received' | 'delivered';
 
 export type Language = 'bn' | 'en' | 'cn' | 'ar' | 'hi' | 'ur';
 
 export type Theme = 'dark' | 'light';
+
+export interface CrmCustomer {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string;
+  address?: string;
+  country_category: 'CN_New' | 'CN_Old' | 'KR_New' | 'KR_Old' | 'JP_New' | 'Other';
+  followup_status: 'followup' | 'order_complete' | 'important_regular';
+  notes?: string;
+  created_by: string;
+  created_by_id?: string;
+  created_at: string;
+  date: string;
+  is_handed_over: boolean;
+  handed_over_at?: string;
+  handed_over_by?: string;
+}
 
 export interface User {
   id: string;

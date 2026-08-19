@@ -39,6 +39,7 @@ import { ReceiveFlyingSection } from './ReceiveFlyingSection';
 import { BookedCartonsHub } from './BookedCartonsHub';
 import { PublicTracking } from './PublicTracking';
 import { CargoSearchTracker } from './CargoSearchTracker';
+import { CrmManagementSystem } from './CrmManagementSystem';
 
 interface OperationDirectorDashboardProps {
   activeTab: string;
@@ -324,6 +325,10 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
         theme={theme}
       />
     );
+  }
+
+  if (activeTab === 'crm') {
+    return <CrmManagementSystem currentUser={currentUser} language={language} />;
   }
 
   // --------------------------------------------------------------------------

@@ -53,6 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       case 'operation_director': return isBn ? 'অপারেশনস ডিরেক্টর' : 'Operation Director Panel';
       case 'warehouse_incharge': return isBn ? 'ওয়্যারহাউস ইনচার্জ' : 'Warehouse Incharge Panel';
       case 'accountant': return isBn ? 'অ্যাকাউন্টেন্ট প্যানেল' : 'Accountant Panel';
+      case 'crm_executive': return isBn ? 'কাস্টমার রিলেশনশিপ (CRM)' : 'CRM Executive Panel';
       default: return 'User Panel';
     }
   };
@@ -63,6 +64,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       case 'operation_director': return '#1E88E5';
       case 'warehouse_incharge': return '#8E24AA';
       case 'accountant': return '#F57C00';
+      case 'crm_executive': return '#00897B';
       default: return '#00897B';
     }
   };
@@ -91,6 +93,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           {
             section: isBn ? 'ব্যবস্থাপনা' : 'MANAGEMENT',
             items: [
+              { id: 'crm', label: isBn ? '👥 কাস্টমার রিলেশনশিপ (CRM)' : '👥 CRM Management', icon: Users },
               { id: 'warehouses', label: isBn ? 'ওয়্যারহাউজ ম্যানেজমেন্ট' : 'Warehouse Setup', icon: Building2 },
               { id: 'users', label: isBn ? 'ইউজার ও রোলস' : 'User Accounts', icon: Users },
               { id: 'ledger', label: isBn ? 'কাস্টমার লেজার ওভারভিউ' : 'Customer Dues Ledger', icon: FileSpreadsheet },
@@ -112,6 +115,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             section: isBn ? 'প্রধান' : 'MAIN',
             items: [
               { id: 'dashboard', label: isBn ? 'অপারেশনস ড্যাশবোর্ড' : 'Operations Dashboard', icon: LayoutDashboard },
+              { id: 'crm', label: isBn ? '👥 কাস্টমার রিলেশনশিপ (CRM)' : '👥 CRM Management', icon: Users },
               { id: 'live_lifecycle', label: isBn ? '⚡ কার্গো লাইফসাইকেল মনিটর' : '⚡ Cargo Live Lifecycle', icon: Activity },
               { id: 'cargo_search', label: isBn ? '🔍 কার্গো ট্র্যাকিং সার্চ' : '🔍 Cargo Tracking Search', icon: Search },
               { id: 'notifications', label: isBn ? 'নোটিফিকেশন' : 'Notifications', icon: Bell },
@@ -167,6 +171,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
               { id: 'budget', label: isBn ? 'বাজেট ও খরচ (Super Admin)' : 'Budget & Expenses', icon: Wallet },
               { id: 'cash_collections', label: isBn ? 'ক্যাশ কালেকশন সিঙ্ক' : 'Cash Collection Sync', icon: CheckCircle2 },
               { id: 'reports', label: isBn ? 'ফাইনান্সিয়াল রিপোর্টস' : 'Financial Reports', icon: FileSpreadsheet },
+            ],
+          },
+        ];
+
+      case 'crm_executive':
+        return [
+          {
+            section: isBn ? 'প্রধান' : 'MAIN',
+            items: [
+              { id: 'dashboard', label: isBn ? 'সিআরএম কাস্টমার বোর্ড' : 'CRM Customer Board', icon: Users },
+              { id: 'cargo_search', label: isBn ? '🔍 কার্গো ট্র্যাকিং সার্চ' : '🔍 Cargo Tracking Search', icon: Search },
+              { id: 'notifications', label: isBn ? 'নোটিফিকেশন' : 'Notifications', icon: Bell },
             ],
           },
         ];

@@ -30,6 +30,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
     operation_director: { bn: 'অপারেশন ডিরেক্টর প্যানেল লগইন', en: 'Operation Director Panel Login' },
     warehouse_incharge: { bn: 'ওয়্যারহাউজ ইনচার্জ প্যানেল লগইন', en: 'Warehouse Incharge Panel Login' },
     accountant: { bn: 'অ্যাকাউন্টেন্ট প্যানেল লগইন', en: 'Accountant Panel Login' },
+    crm_executive: { bn: 'কাস্টমার রিলেশনশিপ (CRM) প্যানেল লগইন', en: 'CRM Executive Panel Login' },
   };
 
   const handleSelectUser = (uId: string) => {

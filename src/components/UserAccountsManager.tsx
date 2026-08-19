@@ -299,7 +299,15 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
           <span className={`px-2.5 py-0.5 rounded-md text-[11px] font-medium border ${
             isDark ? 'bg-amber-950/60 text-amber-300 border-amber-800' : 'bg-amber-50 text-amber-800 border-amber-200'
           }`}>
-            💰 Chief Accountant
+            💰 Accountant
+          </span>
+        );
+      case 'crm_executive':
+        return (
+          <span className={`px-2.5 py-0.5 rounded-md text-[11px] font-medium border ${
+            isDark ? 'bg-emerald-950/60 text-emerald-300 border-emerald-800' : 'bg-teal-50 text-[#00897B] border-teal-200'
+          }`}>
+            👥 CRM Executive
           </span>
         );
       default:
@@ -923,6 +931,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
                       : 'bg-slate-50/70 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
                   }`}
                 >
+                  <option value="crm_executive">👥 CRM Executive (কাস্টমার রিলেশনশিপ কর্মকর্তা)</option>
                   <option value="warehouse_incharge">📦 Warehouse Incharge (ওয়্যারহাউজ কর্মকর্তা)</option>
                   <option value="operation_director">🎯 Operation Director (অপারেশন ডিরেক্টর)</option>
                   <option value="accountant">💰 Chief Accountant (চিফ একাউন্টেন্ট)</option>

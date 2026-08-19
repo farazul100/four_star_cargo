@@ -64,6 +64,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
       badgeBg: 'bg-[#0099FF]',
       btnBg: 'bg-[#0099FF] hover:bg-[#0077CC]',
     },
+    crm_executive: {
+      title: lang === 'bn' ? 'কাস্টমার রিলেশনশিপ (CRM) প্যানেল লগইন' : 'CRM Executive Panel Login',
+      desc: lang === 'bn' ? 'কাস্টমার অনবোর্ডিং, ফলোআপ ও হ্যান্ড ওভার' : 'Access CRM executive customer management',
+      icon: User,
+      badgeBg: 'bg-[#00897B]',
+      btnBg: 'bg-[#00897B] hover:bg-[#00796B]',
+    },
   };
 
   const currentConfig = roleConfigs[expectedRole];

@@ -26,6 +26,8 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ allowedRole, log
         return <Navigate to="/warehouse/dashboard" replace />;
       case 'accountant':
         return <Navigate to="/accounts/dashboard" replace />;
+      case 'crm_executive':
+        return <Navigate to="/crm/dashboard" replace />;
       default:
         return <Navigate to="/" replace />;
     }

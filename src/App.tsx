@@ -6,6 +6,7 @@ import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { OperationsDashboardPage } from './pages/OperationsDashboardPage';
 import { WarehouseDashboardPage } from './pages/WarehouseDashboardPage';
 import { AccountsDashboardPage } from './pages/AccountsDashboardPage';
+import { CrmDashboardPage } from './pages/CrmDashboardPage';
 import { PublicTrackingPage } from './pages/PublicTrackingPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 
@@ -111,6 +112,15 @@ export function App() {
         <Route path="/accounts/search" element={<AccountsDashboardPage />} />
         <Route path="/accounts/cargo-search" element={<AccountsDashboardPage />} />
         <Route path="/accounts/*" element={<AccountsDashboardPage />} />
+      </Route>
+
+      {/* Protected CRM Executive Role Dashboards with Dedicated Slugs */}
+      <Route element={<ProtectedRoute allowedRole="crm_executive" loginPath="/operations/login" />}>
+        <Route path="/crm/dashboard" element={<CrmDashboardPage />} />
+        <Route path="/crm/profile" element={<CrmDashboardPage />} />
+        <Route path="/crm/search" element={<CrmDashboardPage />} />
+        <Route path="/crm/notifications" element={<CrmDashboardPage />} />
+        <Route path="/crm/*" element={<CrmDashboardPage />} />
       </Route>
 
       {/* Fallback redirect */}
