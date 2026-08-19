@@ -44,8 +44,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
       btnBg: 'bg-[#00897B] hover:bg-[#00695C]',
     },
     operation_director: {
-      title: lang === 'bn' ? 'অপারেশন ডিরেক্টর প্যানেল লগইন' : 'Operation Director Panel Login',
-      desc: lang === 'bn' ? 'ফ্লাইট প্রপোজাল ও অপারেশনস ম্যানেজমেন্ট' : 'Access operation director panel management',
+      title: lang === 'bn' ? 'অপারেশনস ও সিআরএম প্যানেল লগইন' : 'Operations & CRM Panel Login',
+      desc: lang === 'bn' ? 'ফ্লাইট প্রপোজাল, কাস্টমার অনবোর্ডিং ও অপারেশনস ম্যানেজমেন্ট' : 'Access Operations Director & CRM management',
       icon: Users,
       badgeBg: 'bg-[#1E88E5]',
       btnBg: 'bg-[#1E88E5] hover:bg-[#1565C0]',
@@ -88,30 +88,32 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
     e.preventDefault();
     setError('');
 
-    let cleanedEmail = email.trim().toLowerCase();
-    if (!cleanedEmail) {
-      setError(lang === 'bn' ? 'ইমেইল এড্রেস প্রদান করুন' : 'Please enter an email address');
-      return;
-    }
+    const inputEmail = email.trim().toLowerCase();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Smart formatting: if missing domain or .com, format or search prefix
-    if (!cleanedEmail.includes('@')) {
-      cleanedEmail = `${cleanedEmail}@cargo.com`;
-    } else if (!cleanedEmail.includes('.')) {
-      cleanedEmail = `${cleanedEmail}.com`;
+    if (!inputEmail || !emailRegex.test(inputEmail)) {
+      setError(lang === 'bn' ? 'সঠিক ইমেইল এড্রেস দিন (যেমন: user@cargo.com)' : 'Please enter a valid email address (e.g. user@cargo.com)');
+      return;
     }
 
     const currentUsers = getHostingerDbData().users || INITIAL_USERS;
     const foundUser = currentUsers.find(
-      (u) =>
-        u.email &&
-        (u.email.trim().toLowerCase() === cleanedEmail ||
-          u.email.trim().toLowerCase() === email.trim().toLowerCase() ||
-          u.email.trim().toLowerCase().startsWith(cleanedEmail.split('@')[0]))
+      (u) => u.email && u.email.trim().toLowerCase() === inputEmail
     );
 
     if (!foundUser) {
       setError(lang === 'bn' ? 'ইউজার অ্যাকাউন্ট পাওয়া যায়নি! সুপার এডমিন প্যানেল থেকে একাউন্ট তৈরি করুন।' : 'User account not found!');
+      return;
+    }
+
+    // Portal Access Restrictions: Operations Portal allows BOTH Operation Director & CRM Executive
+    const isOperationsPortal = expectedRole === 'operation_director' || expectedRole === 'crm_executive';
+    const isUserAllowedOnPortal = isOperationsPortal
+      ? foundUser.role === 'operation_director' || foundUser.role === 'crm_executive'
+      : foundUser.role === expectedRole;
+
+    if (!isUserAllowedOnPortal) {
+      setError(lang === 'bn' ? 'এই পোর্টালের জন্য আপনার অনুমতি নেই!' : 'Role mismatch! You do not have access to this portal.');
       return;
     }
 
@@ -130,26 +132,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
 
     signIn(foundUser);
 
-    // Dynamic role routing so logging in anywhere automatically routes to proper dashboard
-    switch (foundUser.role) {
-      case 'super_admin':
-        navigate('/admin/dashboard', { replace: true });
-        break;
-      case 'operation_director':
-        navigate('/operations/dashboard', { replace: true });
-        break;
-      case 'warehouse_incharge':
-        navigate('/warehouse/dashboard', { replace: true });
-        break;
-      case 'accountant':
-        navigate('/accounts/dashboard', { replace: true });
-        break;
-      case 'crm_executive':
-        navigate('/crm/dashboard', { replace: true });
-        break;
-      default:
-        navigate(targetDashboardRoute, { replace: true });
-        break;
+    // Route user to their specific dashboard
+    if (foundUser.role === 'crm_executive') {
+      navigate('/crm/dashboard', { replace: true });
+    } else if (foundUser.role === 'operation_director') {
+      navigate('/operations/dashboard', { replace: true });
+    } else if (foundUser.role === 'super_admin') {
+      navigate('/admin/dashboard', { replace: true });
+    } else if (foundUser.role === 'warehouse_incharge') {
+      navigate('/warehouse/dashboard', { replace: true });
+    } else if (foundUser.role === 'accountant') {
+      navigate('/accounts/dashboard', { replace: true });
+    } else {
+      navigate(targetDashboardRoute, { replace: true });
     }
   };
 
