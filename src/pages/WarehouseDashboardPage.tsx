@@ -98,6 +98,10 @@ export const WarehouseDashboardPage: React.FC = () => {
   const myWh = warehouses.find((w) => w.id === user.warehouse_id);
 
   const titles: Record<string, { title: string; subtitle: string }> = {
+    dashboard: {
+      title: '',
+      subtitle: '',
+    },
     inventory: {
       title: lang === 'bn' ? `${myWh?.name || 'ওয়্যারহাউজ'} ইনভেন্টরি পণ্য` : 'Warehouse Inventory Stock',
       subtitle: lang === 'bn' ? 'শুধুমাত্র আপনার ওয়্যারহাউজের স্টক ও কার্টুন ডাটা' : 'Live inventory stock scoped strictly to your assigned warehouse',
@@ -124,7 +128,7 @@ export const WarehouseDashboardPage: React.FC = () => {
     },
   };
 
-  const currentHeader = titles[activeTab] || titles.inventory;
+  const currentHeader = titles[activeTab] || { title: '', subtitle: '' };
 
   return (
     <DashboardLayout
