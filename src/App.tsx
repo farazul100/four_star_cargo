@@ -63,6 +63,11 @@ export function App() {
         <Route path="/admin/audit-logs" element={<AdminDashboardPage />} />
         <Route path="/admin/public-track" element={<AdminDashboardPage />} />
         <Route path="/admin/cargo-search" element={<AdminDashboardPage />} />
+        <Route path="/admin/crm-create" element={<AdminDashboardPage />} />
+        <Route path="/admin/crm-followup" element={<AdminDashboardPage />} />
+        <Route path="/admin/crm-new" element={<AdminDashboardPage />} />
+        <Route path="/admin/crm-regular" element={<AdminDashboardPage />} />
+        <Route path="/admin/crm" element={<AdminDashboardPage />} />
         <Route path="/admin/search" element={<AdminDashboardPage />} />
         <Route path="/admin/*" element={<AdminDashboardPage />} />
       </Route>
@@ -81,6 +86,11 @@ export function App() {
         <Route path="/operations/final-flying-list" element={<OperationsDashboardPage />} />
         <Route path="/operations/cartons" element={<OperationsDashboardPage />} />
         <Route path="/operations/cargo-search" element={<OperationsDashboardPage />} />
+        <Route path="/operations/crm-create" element={<OperationsDashboardPage />} />
+        <Route path="/operations/crm-followup" element={<OperationsDashboardPage />} />
+        <Route path="/operations/crm-new" element={<OperationsDashboardPage />} />
+        <Route path="/operations/crm-regular" element={<OperationsDashboardPage />} />
+        <Route path="/operations/crm" element={<OperationsDashboardPage />} />
         <Route path="/operations/search" element={<OperationsDashboardPage />} />
         <Route path="/operations/*" element={<OperationsDashboardPage />} />
       </Route>

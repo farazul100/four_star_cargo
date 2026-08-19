@@ -23,6 +23,11 @@ export const OperationsDashboardPage: React.FC = () => {
     if (path.includes('/history')) return 'history';
     if (path.includes('/analytics')) return 'analytics';
     if (path.includes('/cargo-search')) return 'cargo_search';
+    if (path.includes('/crm-create')) return 'crm_create';
+    if (path.includes('/crm-followup')) return 'crm_followup';
+    if (path.includes('/crm-new')) return 'crm_new';
+    if (path.includes('/crm-regular')) return 'crm_regular';
+    if (path.includes('/crm')) return 'crm';
     if (path.includes('/tracking') || path.includes('/public-track')) return 'public_track';
     return 'dashboard';
   };
@@ -63,6 +68,21 @@ export const OperationsDashboardPage: React.FC = () => {
         break;
       case 'cargo_search':
         navigate('/operations/cargo-search');
+        break;
+      case 'crm_create':
+        navigate('/operations/crm-create');
+        break;
+      case 'crm_followup':
+        navigate('/operations/crm-followup');
+        break;
+      case 'crm_new':
+        navigate('/operations/crm-new');
+        break;
+      case 'crm_regular':
+        navigate('/operations/crm-regular');
+        break;
+      case 'crm':
+        navigate('/operations/crm');
         break;
       case 'public_track':
       case 'tracking':

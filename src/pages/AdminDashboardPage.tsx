@@ -26,6 +26,11 @@ export const AdminDashboardPage: React.FC = () => {
     if (path.includes('/ledger')) return 'ledger';
     if (path.includes('/audit-logs')) return 'audit_logs';
     if (path.includes('/cargo-search')) return 'cargo_search';
+    if (path.includes('/crm-create')) return 'crm_create';
+    if (path.includes('/crm-followup')) return 'crm_followup';
+    if (path.includes('/crm-new')) return 'crm_new';
+    if (path.includes('/crm-regular')) return 'crm_regular';
+    if (path.includes('/crm')) return 'crm';
     if (path.includes('/public-track') || path.includes('/tracking')) return 'public_track';
     return 'dashboard';
   };
@@ -78,6 +83,21 @@ export const AdminDashboardPage: React.FC = () => {
         break;
       case 'cargo_search':
         navigate('/admin/cargo-search');
+        break;
+      case 'crm_create':
+        navigate('/admin/crm-create');
+        break;
+      case 'crm_followup':
+        navigate('/admin/crm-followup');
+        break;
+      case 'crm_new':
+        navigate('/admin/crm-new');
+        break;
+      case 'crm_regular':
+        navigate('/admin/crm-regular');
+        break;
+      case 'crm':
+        navigate('/admin/crm');
         break;
       case 'public_track':
       case 'tracking':
