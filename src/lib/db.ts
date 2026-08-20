@@ -424,17 +424,21 @@ export const syncCrmCustomersToMainCustomers = () => {
   }
 };
 
-const SERVER_API_ENDPOINTS = [
-  '/api/db.php',
-  'https://four.kee2mart.com/api/db.php',
-  '/api/db',
-  'https://four.kee2mart.com/api/db',
-];
+const getPrimaryServerEndpoint = () => {
+  if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    return 'https://four.kee2mart.com/api/db.php';
+  }
+  return '/api/db.php';
+};
+
+let isPushing = false;
 
 const pushFullDbToServer = () => {
   if (typeof window === 'undefined') return;
   if (pushTimeout) clearTimeout(pushTimeout);
   pushTimeout = setTimeout(async () => {
+    if (isPushing) return;
+    isPushing = true;
     try {
       const localApiKey = 
         localStorage.getItem('fsc_gemini_api_key') || 
@@ -471,18 +475,17 @@ const pushFullDbToServer = () => {
       }
 
       const payloadStr = JSON.stringify(fullDb);
+      const endpoint = getPrimaryServerEndpoint();
 
-      for (const url of SERVER_API_ENDPOINTS) {
-        try {
-          await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: payloadStr,
-          });
-        } catch {}
-      }
-    } catch {}
-  }, 100);
+      await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payloadStr,
+      });
+    } catch {} finally {
+      isPushing = false;
+    }
+  }, 150);
 };
 
 export const saveHostingerDbData = (key: string, data: any) => {
@@ -527,176 +530,176 @@ export const saveHostingerDbData = (key: string, data: any) => {
     console.warn(`LocalStorage setItem warning for key "${key}":`, e);
   }
 
-  // Push full DB snapshot to server file DB for cross-browser (Chrome <-> Edge <-> Incognito) sync
-  pushFullDbToServer();
-
+  // Instant local UI notification
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key, data } }));
     dbBroadcastChannel?.postMessage({ key, timestamp: Date.now() });
   }
+
+  // Push full DB snapshot to server file DB asynchronously
+  pushFullDbToServer();
 };
 
-// Helper to fetch latest server disk DB (/api/db & /api/db.php) and sync to LocalStorage across different browsers
+let isFetchingSync = false;
+
+// Helper to fetch latest server disk DB (/api/db.php) and sync to LocalStorage across different browsers
 export const fetchServerDbAndSync = async () => {
-  if (typeof window === 'undefined') return;
+  if (typeof window === 'undefined' || isFetchingSync) return;
+  isFetchingSync = true;
   try {
-    let res: Response | null = null;
-    for (const url of SERVER_API_ENDPOINTS) {
-      try {
-        const r = await fetch(url, {
-          headers: { Accept: 'application/json' },
-        });
-        if (r.ok) {
-          const contentType = r.headers.get('content-type') || '';
-          if (contentType.includes('application/json')) {
-            res = r;
-            break;
-          }
-        }
-      } catch {}
-    }
+    const endpoint = getPrimaryServerEndpoint();
+    const res = await fetch(endpoint, {
+      headers: { Accept: 'application/json' },
+    });
 
     if (res && res.ok) {
-      const serverDb = await res.json();
-      if (serverDb && typeof serverDb === 'object') {
-        let hasChanges = false;
+      const contentType = res.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const serverDb = await res.json();
+        if (serverDb && typeof serverDb === 'object') {
+          let hasChanges = false;
 
-        Object.keys(serverDb).forEach((key) => {
-          const serverData = serverDb[key];
-          if (Array.isArray(serverData)) {
-            const localRaw = localStorage.getItem(key);
+          Object.keys(serverDb).forEach((key) => {
+            const serverData = serverDb[key];
+            if (!serverData) return;
 
-            if (key === DB_KEYS.CALLS) {
-              const localCalls: any[] = localRaw ? JSON.parse(localRaw) : [];
-              const serverCalls: any[] = serverData;
-              const callMap = new Map<string, any>();
+            if (Array.isArray(serverData)) {
+              const localRaw = localStorage.getItem(key);
 
-              // Priority: ended/rejected (3) > active (2) > ringing (1)
-              const getPriority = (st: string) => {
-                if (st === 'ended' || st === 'rejected') return 3;
-                if (st === 'active') return 2;
-                return 1;
-              };
+              if (key === DB_KEYS.CALLS) {
+                const localCalls: any[] = localRaw ? JSON.parse(localRaw) : [];
+                const serverCalls: any[] = serverData;
+                const callMap = new Map<string, any>();
 
-              const allCalls = [...serverCalls, ...localCalls];
-              allCalls.forEach((call) => {
-                if (call && call.id) {
-                  const existing = callMap.get(call.id);
-                  if (!existing) {
-                    callMap.set(call.id, call);
-                  } else {
-                    const existingPrio = getPriority(existing.status);
-                    const callPrio = getPriority(call.status);
+                // Priority: ended/rejected (3) > active (2) > ringing (1)
+                const getPriority = (st: string) => {
+                  if (st === 'ended' || st === 'rejected') return 3;
+                  if (st === 'active') return 2;
+                  return 1;
+                };
 
-                    if (callPrio > existingPrio) {
-                      callMap.set(call.id, { ...existing, ...call });
-                    } else if (callPrio === existingPrio) {
-                      const mergedCallerCand = Array.from(new Set([...(existing.caller_candidates || []), ...(call.caller_candidates || [])]));
-                      const mergedCalleeCand = Array.from(new Set([...(existing.callee_candidates || []), ...(call.callee_candidates || [])]));
-                      callMap.set(call.id, {
-                        ...existing,
-                        ...call,
-                        sdp_offer: call.sdp_offer || existing.sdp_offer,
-                        sdp_answer: call.sdp_answer || existing.sdp_answer,
-                        caller_candidates: mergedCallerCand,
-                        callee_candidates: mergedCalleeCand,
-                      });
+                const allCalls = [...serverCalls, ...localCalls];
+                allCalls.forEach((call) => {
+                  if (call && call.id) {
+                    const existing = callMap.get(call.id);
+                    if (!existing) {
+                      callMap.set(call.id, call);
+                    } else {
+                      const existingPrio = getPriority(existing.status);
+                      const callPrio = getPriority(call.status);
+
+                      if (callPrio > existingPrio) {
+                        callMap.set(call.id, { ...existing, ...call });
+                      } else if (callPrio === existingPrio) {
+                        const mergedCallerCand = Array.from(new Set([...(existing.caller_candidates || []), ...(call.caller_candidates || [])]));
+                        const mergedCalleeCand = Array.from(new Set([...(existing.callee_candidates || []), ...(call.callee_candidates || [])]));
+                        callMap.set(call.id, {
+                          ...existing,
+                          ...call,
+                          sdp_offer: call.sdp_offer || existing.sdp_offer,
+                          sdp_answer: call.sdp_answer || existing.sdp_answer,
+                          caller_candidates: mergedCallerCand,
+                          callee_candidates: mergedCalleeCand,
+                        });
+                      }
                     }
                   }
+                });
+
+                const mergedStr = JSON.stringify(Array.from(callMap.values()));
+                if (localRaw !== mergedStr) {
+                  localStorage.setItem(key, mergedStr);
+                  hasChanges = true;
                 }
-              });
+              } else if (key === DB_KEYS.MESSAGES || key === DB_KEYS.CONVERSATIONS || key === 'notifications' || key === 'fsc_vps_notifications') {
+                const localItems: any[] = localRaw ? JSON.parse(localRaw) : [];
+                const serverItems: any[] = serverData;
+                const itemMap = new Map<string, any>();
 
-              const mergedStr = JSON.stringify(Array.from(callMap.values()));
-              if (localRaw !== mergedStr) {
-                localStorage.setItem(key, mergedStr);
-                hasChanges = true;
-              }
-            } else if (key === DB_KEYS.MESSAGES || key === DB_KEYS.CONVERSATIONS || key === 'notifications' || key === 'fsc_vps_notifications') {
-              const localItems: any[] = localRaw ? JSON.parse(localRaw) : [];
-              const serverItems: any[] = serverData;
-              const itemMap = new Map<string, any>();
-
-              serverItems.forEach((item) => {
-                if (item && item.id && !item.id.startsWith('notif-base-')) {
-                  itemMap.set(item.id, item);
-                }
-              });
-
-              localItems.forEach((item) => {
-                if (item && item.id && !item.id.startsWith('notif-base-')) {
-                  const existing = itemMap.get(item.id);
-                  if (!existing) {
+                serverItems.forEach((item) => {
+                  if (item && item.id && !item.id.startsWith('notif-base-')) {
                     itemMap.set(item.id, item);
-                  } else {
-                    if (item.isRead) {
-                      itemMap.set(item.id, { ...existing, isRead: true });
+                  }
+                });
+
+                localItems.forEach((item) => {
+                  if (item && item.id && !item.id.startsWith('notif-base-')) {
+                    const existing = itemMap.get(item.id);
+                    if (!existing) {
+                      itemMap.set(item.id, item);
+                    } else {
+                      if (item.isRead) {
+                        itemMap.set(item.id, { ...existing, isRead: true });
+                      }
                     }
                   }
+                });
+
+                const mergedList = Array.from(itemMap.values()).sort(
+                  (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
+                );
+
+                const mergedStr = JSON.stringify(mergedList);
+                if (localRaw !== mergedStr) {
+                  localStorage.setItem(key, mergedStr);
+                  localStorage.setItem('fsc_vps_notifications', mergedStr);
+                  hasChanges = true;
                 }
-              });
-
-              const mergedList = Array.from(itemMap.values()).sort(
-                (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
-              );
-
-              const mergedStr = JSON.stringify(mergedList);
-              if (localRaw !== mergedStr) {
-                localStorage.setItem(key, mergedStr);
-                localStorage.setItem('fsc_vps_notifications', mergedStr);
-                hasChanges = true;
+              } else {
+                const serverStr = JSON.stringify(serverData);
+                if (localRaw !== serverStr) {
+                  localStorage.setItem(key, serverStr);
+                  hasChanges = true;
+                }
               }
             } else {
-              const serverStr = JSON.stringify(serverData);
+              // Handle non-array server DB keys (like settings, fsc_vps_settings, gemini_api_key)
+              const serverStr = typeof serverData === 'string' ? serverData : JSON.stringify(serverData);
+              const localRaw = localStorage.getItem(key);
               if (localRaw !== serverStr) {
                 localStorage.setItem(key, serverStr);
                 hasChanges = true;
               }
             }
-          } else {
-            // Handle non-array server DB keys (like settings, fsc_vps_settings, gemini_api_key)
-            const serverStr = typeof serverData === 'string' ? serverData : JSON.stringify(serverData);
-            const localRaw = localStorage.getItem(key);
-            if (localRaw !== serverStr) {
-              localStorage.setItem(key, serverStr);
-              hasChanges = true;
-            }
-          }
-        });
+          });
 
-        // Ensure all CRM customers are always present in main system customers array after server sync
-        syncCrmCustomersToMainCustomers();
+          // Ensure all CRM customers are always present in main system customers array after server sync
+          syncCrmCustomersToMainCustomers();
 
-        // Sync Gemini API Key to LocalStorage for all non-admin users & guests
-        try {
-          const serverApiKey = 
-            (serverDb as any)?.gemini_api_key || 
-            (serverDb as any)?.settings?.gemini_api_key || 
-            (serverDb as any)?.fsc_vps_settings?.gemini_api_key || 
-            '';
-          if (serverApiKey) {
-            const cleanApiKey = serverApiKey.replace(/^["']|["']$/g, '').trim();
-            if (cleanApiKey) {
-              localStorage.setItem('fsc_gemini_api_key', cleanApiKey);
-              localStorage.setItem('fsc_vps_settings', JSON.stringify({ gemini_api_key: cleanApiKey }));
-              localStorage.setItem('settings', JSON.stringify({ gemini_api_key: cleanApiKey }));
-              if (typeof window !== 'undefined') {
-                (window as any).__FSC_GEMINI_KEY__ = cleanApiKey;
+          // Sync Gemini API Key to LocalStorage for all non-admin users & guests
+          try {
+            const serverApiKey = 
+              (serverDb as any)?.gemini_api_key || 
+              (serverDb as any)?.settings?.gemini_api_key || 
+              (serverDb as any)?.fsc_vps_settings?.gemini_api_key || 
+              '';
+            if (serverApiKey) {
+              const cleanApiKey = serverApiKey.replace(/^["']|["']$/g, '').trim();
+              if (cleanApiKey) {
+                localStorage.setItem('fsc_gemini_api_key', cleanApiKey);
+                localStorage.setItem('fsc_vps_settings', JSON.stringify({ gemini_api_key: cleanApiKey }));
+                localStorage.setItem('settings', JSON.stringify({ gemini_api_key: cleanApiKey }));
+                if (typeof window !== 'undefined') {
+                  (window as any).__FSC_GEMINI_KEY__ = cleanApiKey;
+                }
               }
             }
-          }
-        } catch {}
+          } catch {}
 
-        if (hasChanges) {
-          window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key: 'server_sync' } }));
+          if (hasChanges) {
+            window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key: 'server_sync' } }));
+          }
         }
       }
     }
   } catch (e) {
     console.warn('Error fetching server DB:', e);
+  } finally {
+    isFetchingSync = false;
   }
 };
 
-export const subscribeToDbUpdates = (callback: () => void) => {
+export const subscribeHostingerDbChanges = (callback: () => void) => {
   if (typeof window === 'undefined') return () => {};
 
   const handleEvent = () => {
@@ -718,10 +721,12 @@ export const subscribeToDbUpdates = (callback: () => void) => {
   // Sync with server DB immediately on subscribe
   fetchServerDbAndSync().then(() => callback());
 
-  // Poll server DB every 1.5s for instant multi-browser cross-sync (Chrome <-> Edge <-> Incognito)
+  // Poll server DB every 4s when tab is active for instant multi-browser cross-sync
   const pollInterval = setInterval(async () => {
-    await fetchServerDbAndSync();
-  }, 1500);
+    if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+      await fetchServerDbAndSync();
+    }
+  }, 4000);
 
   return () => {
     clearInterval(pollInterval);
@@ -735,6 +740,8 @@ export const subscribeToDbUpdates = (callback: () => void) => {
     }
   };
 };
+
+export const subscribeToDbUpdates = subscribeHostingerDbChanges;
 
 export const getActiveSystemUser = (): { id: string; name: string; role: any } => {
   try {
