@@ -26,7 +26,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
 
   const [selectedFlightId, setSelectedFlightId] = useState<string>('all');
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const [animProgress, setAnimProgress] = useState<number>(0.50); // 0.20 to 0.80 along flight arc
+  const [animProgress, setAnimProgress] = useState<number>(0.50); // 0.22 to 0.78 along flight arc
 
   // Map active database proposals
   const activeProposals = useMemo(() => {
@@ -161,7 +161,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
           className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         />
 
-        {/* SVG Overlay for Dynamic Flight Arc, Pins, and Animated Plane */}
+        {/* SVG Overlay for Dynamic Flight Arc & Destination Pins */}
         <svg
           viewBox="0 0 1024 682"
           className="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"
@@ -212,26 +212,27 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             <circle r="4.5" fill="#FFFFFF" />
           </g>
 
-          {/* ANIMATED AIRPLANE FLYING ALONG THE ARC (HD Large Scale with Contour Highlight Glow) */}
-          <g transform={`translate(${planePos.x}, ${planePos.y}) rotate(${planePos.angle + 180})`}>
-            {/* Soft Glowing Aura Base */}
-            <circle r="42" fill="#FFFFFF" fillOpacity="0.25" className="animate-pulse" />
-            <circle r="26" fill="#F59E0B" fillOpacity="0.4" />
-
-            {/* User's Exact Transparent PNG Commercial Airplane Photo - HD Large Scale */}
-            <image
-              href={CARGO_PLANE_BASE64}
-              xlinkHref={CARGO_PLANE_BASE64}
-              x="-90"
-              y="-30"
-              width="180"
-              height="60"
-              style={{
-                filter: 'drop-shadow(0px 0px 10px rgba(255, 255, 255, 0.95)) drop-shadow(0px 8px 18px rgba(0, 0, 0, 0.95))'
-              }}
-            />
+          {/* Glowing Radar Beacon Underneath Plane */}
+          <g transform={`translate(${planePos.x}, ${planePos.y})`}>
+            <circle r="36" fill="#F59E0B" fillOpacity="0.3" className="animate-ping" />
           </g>
         </svg>
+
+        {/* NATIVE HARDWARE-ACCELERATED HTML PNG AIRPLANE FLOATING ON TOP AT Z-30 */}
+        <div
+          className="absolute z-30 pointer-events-none transition-transform duration-75 ease-linear flex items-center justify-center"
+          style={{
+            left: `${(planePos.x / 1024) * 100}%`,
+            top: `${(planePos.y / 682) * 100}%`,
+            transform: `translate(-50%, -50%) rotate(${planePos.angle + 180}deg)`,
+          }}
+        >
+          <img
+            src={CARGO_PLANE_BASE64}
+            alt="User Cargo Plane"
+            className="w-28 sm:w-36 md:w-48 h-auto object-contain filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)] brightness-110"
+          />
+        </div>
 
         {/* FLOATING DETAIL CARD 1: ORIGIN CHINA (Top Right Overlay) */}
         <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 w-52 sm:w-60 bg-slate-900/85 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3 shadow-2xl text-white">
