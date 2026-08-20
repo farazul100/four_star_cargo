@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plane, RefreshCw, Layers, MapPin, CheckCircle2, PackageCheck, AlertCircle, ArrowRight } from 'lucide-react';
+import { Plane, RefreshCw, Layers, MapPin, CheckCircle2, PackageCheck, ArrowRight } from 'lucide-react';
 import { Carton, FlyingProposal, Language, Theme } from '../types';
 import { useTheme } from '../context/ThemeContext';
 
@@ -54,11 +54,11 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
   // Animate plane along curve when in-transit
   useEffect(() => {
     if (flightStatus === 'proposed') {
-      setAnimProgress(0.08); // At China hub
+      setAnimProgress(0.12); // At China hub
       return;
     }
     if (flightStatus === 'received') {
-      setAnimProgress(0.92); // Landed at DAC Hub
+      setAnimProgress(0.88); // Landed at DAC Hub
       return;
     }
 
@@ -77,13 +77,13 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
     }, 700);
   };
 
-  // Coordinates on 1000x520 World Satellite View
-  // China (Guangzhou / Shanghai): x=780, y=230
-  // Bangladesh (Dhaka DAC): x=280, y=310
-  // Curve control point: x=510, y=120
-  const originPos = { x: 780, y: 230 };
-  const destPos = { x: 280, y: 310 };
-  const controlPos = { x: 510, y: 120 };
+  // Coordinates mapped over the custom China-Bangladesh route background image (1000x520)
+  // China (Red region): x=240, y=200
+  // Bangladesh (Green region): x=780, y=240
+  // Heart/Arc control point: x=510, y=100
+  const originPos = { x: 240, y: 200 };
+  const destPos = { x: 780, y: 240 };
+  const controlPos = { x: 510, y: 100 };
 
   // Calculate quadratic Bezier point at ratio t (0 <= t <= 1)
   const getBezierPoint = (t: number) => {
@@ -160,37 +160,30 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
       </div>
 
       {/* Main Map Container */}
-      <div className="relative w-full aspect-[16/9] min-h-[380px] md:min-h-[480px] bg-[#091526] overflow-hidden select-none">
-        {/* World Map Satellite Graphic Canvas/SVG */}
+      <div className="relative w-full aspect-[16/9] min-h-[380px] md:min-h-[480px] bg-slate-950 overflow-hidden select-none">
+        {/* Background Custom China-Bangladesh Route Image */}
+        <img
+          src="/images/china_bd_map_bg.png"
+          alt="China to Bangladesh Air Cargo Map"
+          className="absolute inset-0 w-full h-full object-cover opacity-90"
+          onError={(e) => {
+            // Fallback display handling
+            (e.target as HTMLElement).style.opacity = '0.4';
+          }}
+        />
+
+        {/* SVG Overlay for Dynamic Flight Arc, Pins, and Animated Plane */}
         <svg
           viewBox="0 0 1000 520"
-          className="w-full h-full object-cover"
+          className="absolute inset-0 w-full h-full object-cover z-10"
           preserveAspectRatio="xMidYMid slice"
         >
           <defs>
-            {/* Satellite Map Gradient Patterns */}
-            <linearGradient id="oceanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#0B1A30" />
-              <stop offset="50%" stopColor="#091526" />
-              <stop offset="100%" stopColor="#050C18" />
-            </linearGradient>
-
             <linearGradient id="flightArcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#EF4444" />
               <stop offset="50%" stopColor="#F59E0B" />
               <stop offset="100%" stopColor="#10B981" />
             </linearGradient>
-
-            {/* Glowing filter effects */}
-            <filter id="glowRed" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="8" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-
-            <filter id="glowGreen" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="8" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
 
             <filter id="arcGlow" x="-10%" y="-10%" width="120%" height="120%">
               <feGaussianBlur stdDeviation="4" result="blur" />
@@ -198,68 +191,8 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             </filter>
           </defs>
 
-          {/* Ocean Base */}
-          <rect width="1000" height="520" fill="url(#oceanGrad)" />
-
-          {/* Grid Gridlines (Subtle Radar Coordinate Lines) */}
-          <g opacity="0.12" stroke="#38BDF8" strokeWidth="0.5" strokeDasharray="4 6">
-            <line x1="0" y1="130" x2="1000" y2="130" />
-            <line x1="0" y1="260" x2="1000" y2="260" />
-            <line x1="0" y1="390" x2="1000" y2="390" />
-            <line x1="250" y1="0" x2="250" y2="520" />
-            <line x1="500" y1="0" x2="500" y2="520" />
-            <line x1="750" y1="0" x2="750" y2="520" />
-          </g>
-
-          {/* World Continents Rough SVG Paths (Detailed Realistic Satellite Outline) */}
-          <g fill="#1E293B" stroke="#334155" strokeWidth="0.8" opacity="0.6">
-            {/* Africa */}
-            <path d="M 120 220 Q 150 250 170 320 Q 150 380 120 420 Q 90 350 70 280 Z" />
-            {/* Europe */}
-            <path d="M 100 80 Q 180 90 220 120 Q 160 140 100 80 Z" />
-            {/* Middle East & Central Asia */}
-            <path d="M 230 140 Q 340 120 440 150 Q 380 200 230 180 Z" stroke="#475569" />
-            {/* India Subcontinent */}
-            <path d="M 240 210 Q 300 220 320 290 Q 260 320 220 260 Z" fill="#1E293B" />
-            {/* Southeast Asia */}
-            <path d="M 720 270 Q 780 290 820 350 Q 740 370 700 300 Z" />
-            {/* Russia / North Asia */}
-            <path d="M 380 40 Q 700 30 920 60 Q 800 120 380 100 Z" opacity="0.4" />
-          </g>
-
-          {/* 🇨🇳 CHINA REGION HIGHLIGHT (Vibrant Red Overlay matching Screenshot 1) */}
-          <g filter="url(#glowRed)">
-            {/* China Territory Shape */}
-            <path
-              d="M 680 130 Q 780 120 890 160 Q 880 250 760 270 Q 720 210 680 130 Z"
-              fill="#EF4444"
-              fillOpacity="0.75"
-              stroke="#F87171"
-              strokeWidth="2"
-            />
-            <text x="785" y="185" fill="#FFFFFF" fontSize="22" fontWeight="900" textAnchor="middle" letterSpacing="2">
-              CHINA
-            </text>
-          </g>
-
-          {/* 🇧🇩 BANGLADESH REGION HIGHLIGHT (Vibrant Green Overlay matching Screenshot 1) */}
-          <g filter="url(#glowGreen)">
-            {/* Bangladesh Territory Shape */}
-            <path
-              d="M 265 285 Q 295 275 305 315 Q 285 335 260 320 Z"
-              fill="#10B981"
-              fillOpacity="0.85"
-              stroke="#34D399"
-              strokeWidth="2.5"
-            />
-            <text x="275" y="260" fill="#FFFFFF" fontSize="16" fontWeight="900" textAnchor="middle" letterSpacing="1.5">
-              BANGLADESH
-            </text>
-          </g>
-
-          {/* CURVED FLIGHT TRAJECTORY ARC (China -> Bangladesh Curved Line) */}
+          {/* CURVED FLIGHT TRAJECTORY ARC */}
           <g filter="url(#arcGlow)">
-            {/* Background Glow Arc */}
             <path
               d={`M ${originPos.x} ${originPos.y} Q ${controlPos.x} ${controlPos.y} ${destPos.x} ${destPos.y}`}
               fill="none"
@@ -268,7 +201,6 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
               strokeDasharray="8 6"
               opacity="0.8"
             />
-            {/* Animated Solid Dash Pulse Arc */}
             <path
               d={`M ${originPos.x} ${originPos.y} Q ${controlPos.x} ${controlPos.y} ${destPos.x} ${destPos.y}`}
               fill="none"
@@ -292,19 +224,9 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
           </g>
 
           {/* ANIMATED AIRPLANE FLYING ALONG THE ARC */}
-          <g transform={`translate(${planePos.x}, ${planePos.y}) rotate(${planePos.angle + 180})`}>
-            {/* Airplane Shadow */}
-            <g transform="translate(0, 12) scale(0.9)" opacity="0.3">
-              <path
-                d="M 0 -18 L 8 4 L 20 10 L 8 12 L 5 20 L 0 17 L -5 20 L -8 12 L -20 10 L -8 4 Z"
-                fill="#000000"
-              />
-            </g>
-
-            {/* Glowing Airplane Icon */}
+          <g transform={`translate(${planePos.x}, ${planePos.y}) rotate(${planePos.angle})`}>
             <g transform="scale(1.35)">
               <circle r="18" fill="#F59E0B" fillOpacity="0.25" className="animate-pulse" />
-              {/* Custom High-Res Vector Airplane */}
               <path
                 d="M 0 -16 L 6 4 L 18 10 L 6 12 L 4 19 L 0 16 L -4 19 L -6 12 L -18 10 L -6 4 Z"
                 fill="#FFFFFF"
@@ -315,8 +237,8 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
           </g>
         </svg>
 
-        {/* FLOATING DETAIL CARD 1: ORIGIN CHINA (Top Right matching Screenshot 1) */}
-        <div className="absolute top-4 right-4 md:top-6 md:right-6 w-64 md:w-72 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-4 shadow-2xl text-white">
+        {/* FLOATING DETAIL CARD 1: ORIGIN CHINA (Top Left / Overlay) */}
+        <div className="absolute top-4 left-4 md:top-6 md:left-6 z-20 w-60 md:w-68 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-4 shadow-2xl text-white">
           <div className="flex items-center justify-between pb-2 border-b border-slate-800">
             <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
               Origin
@@ -349,8 +271,8 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
           </div>
         </div>
 
-        {/* FLOATING DETAIL CARD 2: DESTINATION BANGLADESH (Bottom Left matching Screenshot 1) */}
-        <div className="absolute bottom-20 left-4 md:bottom-24 md:left-6 w-64 md:w-72 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-4 shadow-2xl text-white">
+        {/* FLOATING DETAIL CARD 2: DESTINATION BANGLADESH (Top Right / Overlay) */}
+        <div className="absolute top-4 right-4 md:top-6 md:right-6 z-20 w-60 md:w-68 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-4 shadow-2xl text-white">
           <div className="flex items-center justify-between pb-2 border-b border-slate-800">
             <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
               Destination
@@ -386,7 +308,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
         </div>
       </div>
 
-      {/* BOTTOM SECTION: SHIPMENT FLOW BY AIR (6-Step Flow matching Screenshot 1) */}
+      {/* BOTTOM SECTION: SHIPMENT FLOW BY AIR (6-Step Flow Bar) */}
       <div className="p-5 md:p-6 bg-slate-900/95 border-t border-slate-800 backdrop-blur-md">
         <div className="text-center mb-4">
           <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">
