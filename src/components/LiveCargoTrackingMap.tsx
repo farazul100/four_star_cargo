@@ -213,19 +213,19 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
           </g>
         </svg>
 
-        {/* NATIVE 100% SOLID HIGH-RESOLUTION PNG AIRPLANE FLOATING ON TOP AT Z-30 */}
+        {/* NATIVE 100% PERFECT HIGH-RESOLUTION PNG AIRPLANE FLOATING ON TOP AT Z-30 */}
         <div
           className="absolute z-30 pointer-events-none transition-transform duration-75 ease-linear flex items-center justify-center"
           style={{
             left: `${(planePos.x / 1024) * 100}%`,
             top: `${(planePos.y / 682) * 100}%`,
-            transform: `translate(-50%, -50%) rotate(${planePos.angle + 180}deg)`,
+            transform: `translate(-50%, -50%) rotate(${planePos.angle - 180}deg)`,
           }}
         >
           <img
             src={CARGO_PLANE_BASE64}
             alt="Four Star Cargo Aircraft"
-            className="w-36 sm:w-48 md:w-60 h-auto object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.95)]"
+            className="w-32 sm:w-44 md:w-56 h-auto object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)]"
           />
         </div>
 
