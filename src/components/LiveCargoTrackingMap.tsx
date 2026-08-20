@@ -77,13 +77,13 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
     }, 700);
   };
 
-  // Exact coordinates matching the user's satellite map background image (1000x550)
-  // China (Red country pin on right): x=770, y=420
-  // Bangladesh (Green country pin on left): x=260, y=500
-  // Quadratic Bezier Arc Control Point: x=510, y=200
-  const originPos = { x: 770, y: 420 };
-  const destPos = { x: 260, y: 500 };
-  const controlPos = { x: 510, y: 200 };
+  // Exact coordinates aligned 1-to-1 over satellite_china_bd_map.png pins (viewBox: 0 0 1000 550)
+  // China Red Pin on satellite map: x=770, y=230
+  // Bangladesh Green Pin on satellite map: x=415, y=270
+  // Bezier Arc Control Point (Arcing upwards over Asia): x=590, y=130
+  const originPos = { x: 770, y: 230 };
+  const destPos = { x: 415, y: 270 };
+  const controlPos = { x: 590, y: 130 };
 
   // Calculate quadratic Bezier point at ratio t (0 <= t <= 1)
   const getBezierPoint = (t: number) => {
@@ -158,23 +158,20 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
         </div>
       </div>
 
-      {/* Main Map Container using User's Satellite Map Background (Natural Scaling, No Over-Zoom) */}
-      <div className="relative w-full aspect-[16/9.5] min-h-[360px] md:min-h-[460px] bg-[#071526] overflow-hidden select-none flex items-center justify-center">
+      {/* Main Map Container aligned 1-to-1 with Satellite Background */}
+      <div className="relative w-full aspect-[1000/550] min-h-[360px] md:min-h-[460px] bg-[#071526] overflow-hidden select-none">
         {/* User's Exact Satellite Map Background Image */}
         <img
           src="/images/satellite_china_bd_map.png"
           alt="Satellite China to Bangladesh Air Cargo Map"
-          className="absolute inset-0 w-full h-full object-contain pointer-events-none transition-all duration-300"
-          onError={(e) => {
-            (e.target as HTMLElement).style.opacity = '0.5';
-          }}
+          className="absolute inset-0 w-full h-full object-cover pointer-events-none"
         />
 
-        {/* SVG Overlay for Dynamic Flight Arc, Glowing Pins, and Animated Plane */}
+        {/* SVG Overlay for Dynamic Flight Arc, Pins, and Animated Plane */}
         <svg
           viewBox="0 0 1000 550"
-          className="absolute inset-0 w-full h-full object-contain z-10 pointer-events-none"
-          preserveAspectRatio="xMidYMid meet"
+          className="absolute inset-0 w-full h-full object-cover z-10 pointer-events-none"
+          preserveAspectRatio="xMidYMid slice"
         >
           <defs>
             <linearGradient id="flightArcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -189,7 +186,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             </filter>
           </defs>
 
-          {/* CURVED FLIGHT TRAJECTORY ARC (China -> Bangladesh) */}
+          {/* CURVED FLIGHT TRAJECTORY ARC (China -> Bangladesh Over Asia) */}
           <g filter="url(#arcGlow)">
             <path
               d={`M ${originPos.x} ${originPos.y} Q ${controlPos.x} ${controlPos.y} ${destPos.x} ${destPos.y}`}
@@ -197,7 +194,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
               stroke="#F59E0B"
               strokeWidth="4"
               strokeDasharray="8 6"
-              opacity="0.85"
+              opacity="0.9"
             />
             <path
               d={`M ${originPos.x} ${originPos.y} Q ${controlPos.x} ${controlPos.y} ${destPos.x} ${destPos.y}`}
@@ -207,14 +204,14 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             />
           </g>
 
-          {/* China Origin Pulse Marker */}
+          {/* China Origin Pulse Marker (Directly over China Red Pin) */}
           <g transform={`translate(${originPos.x}, ${originPos.y})`}>
             <circle r="16" fill="#EF4444" fillOpacity="0.4" className="animate-ping" />
             <circle r="10" fill="#EF4444" stroke="#FFFFFF" strokeWidth="2.5" />
             <circle r="4" fill="#FFFFFF" />
           </g>
 
-          {/* Bangladesh Destination Pulse Marker */}
+          {/* Bangladesh Destination Pulse Marker (Directly over Bangladesh Green Pin) */}
           <g transform={`translate(${destPos.x}, ${destPos.y})`}>
             <circle r="18" fill="#10B981" fillOpacity="0.4" className="animate-ping" />
             <circle r="11" fill="#10B981" stroke="#FFFFFF" strokeWidth="2.5" />
@@ -232,7 +229,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             </g>
 
             {/* Glowing Airplane Icon */}
-            <g transform="scale(1.3)">
+            <g transform="scale(1.35)">
               <circle r="16" fill="#F59E0B" fillOpacity="0.3" className="animate-pulse" />
               <path
                 d="M 0 -16 L 6 4 L 18 10 L 6 12 L 4 19 L 0 16 L -4 19 L -6 12 L -18 10 L -6 4 Z"
