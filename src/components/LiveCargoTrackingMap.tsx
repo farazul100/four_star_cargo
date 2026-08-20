@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Plane, RefreshCw, Layers, MapPin, CheckCircle2, PackageCheck, ArrowRight } from 'lucide-react';
+import { Plane, RefreshCw, Layers, MapPin, CheckCircle2, PackageCheck, ArrowRight, AlertCircle } from 'lucide-react';
 import { Carton, FlyingProposal, Language, Theme } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { CARGO_PLANE_BASE64 } from './cargoPlaneData';
@@ -28,10 +28,23 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
   const [animProgress, setAnimProgress] = useState<number>(0.25); // 0.15 (China) to 0.80 (BD approach)
 
-  // Map active database proposals
+  // ONLY INCLUDE FINALIZED & DISPATCHED FLIGHTS (Exclude un-dispatched draft proposals)
   const activeProposals = useMemo(() => {
     const safeProps = Array.isArray(proposals) ? proposals : [];
-    return safeProps.filter((p) => p && p.status !== 'rejected');
+    return safeProps.filter((p) => {
+      if (!p) return false;
+      const st = (p.status || '').toLowerCase();
+      // Only include released/dispatched/in-transit/landed flights
+      return (
+        st === 'dispatched' ||
+        st === 'in_transit' ||
+        st === 'flying' ||
+        st === 'shipped' ||
+        st === 'received' ||
+        st === 'arrived' ||
+        st === 'delivered'
+      );
+    });
   }, [proposals]);
 
   // Selected proposal or active flight default
@@ -45,15 +58,18 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
 
   // Calculate live flight status based on system data
   const flightStatus = useMemo(() => {
-    if (!currentProposal) return 'in_transit';
+    if (!currentProposal) return 'none';
     const st = (currentProposal.status || '').toLowerCase();
     if (st === 'received' || st === 'delivered' || st === 'arrived') return 'received';
-    if (st === 'dispatched' || st === 'in_transit') return 'in_transit';
-    return 'proposed';
+    if (st === 'dispatched' || st === 'in_transit' || st === 'flying' || st === 'shipped') return 'in_transit';
+    return 'none';
   }, [currentProposal]);
 
   // REALISTIC SLOW FLIGHT ANIMATION LOGIC (Glides slowly across Asia until received in BD)
   useEffect(() => {
+    if (flightStatus === 'none') {
+      return;
+    }
     if (flightStatus === 'received') {
       setAnimProgress(0.88); // Landed at DAC Hub in Bangladesh
       return;
@@ -103,13 +119,13 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
 
   // Active step flow index (1 to 6) based on real flight status
   const currentStepIndex = useMemo(() => {
-    if (flightStatus === 'proposed') return 2; // Warehouse
+    if (flightStatus === 'none') return 1;
     if (flightStatus === 'received') return 5; // Customs Clearance / DAC Hub
     return 4; // Air Transit
   }, [flightStatus]);
 
-  const totalWeight = currentProposal?.total_weight || 1280;
-  const cartonsCount = currentProposal?.items_count || (currentProposal?.carton_ids || []).length || 45;
+  const totalWeight = currentProposal?.total_weight || 0;
+  const cartonsCount = currentProposal?.items_count || (currentProposal?.carton_ids || []).length || 0;
   const flightName = currentProposal?.flying_name || currentProposal?.flight_number || 'BS-206';
   const awb = currentProposal?.awb_number || '157-889120';
 
@@ -131,14 +147,14 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
 
         {/* Dynamic Flight Selector & System Badge */}
         <div className="flex flex-wrap items-center gap-3">
-          {activeProposals.length > 0 && (
+          {activeProposals.length > 0 ? (
             <select
               value={selectedFlightId}
               onChange={(e) => setSelectedFlightId(e.target.value)}
               className="bg-slate-800 border border-slate-700 text-xs md:text-sm font-medium text-slate-200 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
             >
               <option value="all">
-                {isBn ? '✈️ প্রধান সক্রিয় এয়ার ফ্লাইট' : '✈️ Active Flight Batches'} ({activeProposals.length})
+                {isBn ? '✈️ প্রধান সক্রিয় রিলিজড ফ্লাইট' : '✈️ Active Flying Flights'} ({activeProposals.length})
               </option>
               {activeProposals.map((p, idx) => (
                 <option key={p.id || idx} value={p.id}>
@@ -146,6 +162,11 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
                 </option>
               ))}
             </select>
+          ) : (
+            <div className="px-3 py-1.5 rounded-xl bg-amber-950/60 border border-amber-700/80 text-amber-300 text-xs font-bold flex items-center gap-1.5">
+              <AlertCircle className="w-4 h-4 text-amber-400" />
+              <span>{isBn ? 'কোনো রিলিজড উড্ডয়নকৃত ফ্লাইট নেই (প্রস্তাবনা এখনো ফ্লাই করেনি)' : 'No Released In-Flight Batches Currently'}</span>
+            </div>
           )}
 
           <button
@@ -220,38 +241,53 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
         </svg>
 
         {/* NATIVE 100% PERFECT HIGH-RESOLUTION PNG AIRPLANE FLOATING DIRECTLY ON TOP OF THE TRAJECTORY LINE AT Z-30 */}
-        <div
-          className="absolute z-30 pointer-events-none transition-all duration-150 ease-linear flex items-center justify-center"
-          style={{
-            left: `${(planePos.x / 1024) * 100}%`,
-            top: `${(planePos.y / 682) * 100}%`,
-            transform: `translate(-50%, -50%)`,
-          }}
-        >
-          {/* FLOATING FLIGHT NAME BADGE POSITIONED ABSOLUTELY ABOVE AIRPLANE */}
-          <div className="absolute -top-11 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-950/90 text-white border border-amber-500/80 px-3 py-1 rounded-xl shadow-2xl backdrop-blur-md flex items-center gap-2 animate-bounce z-40">
-            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-            <span className="text-[11px] font-black text-amber-400 uppercase tracking-widest">
-              ✈️ #{flightName}
-            </span>
-            <span className="text-[10px] font-bold text-slate-300">
-              ({cartonsCount} CTNs)
-            </span>
-          </div>
-
-          {/* AIRPLANE IMAGE ROTATED ALONG TRAJECTORY TANGENT (CENTERED EXACTLY ON THE LINE) */}
+        {currentProposal && flightStatus !== 'none' ? (
           <div
+            className="absolute z-30 pointer-events-none transition-all duration-150 ease-linear flex items-center justify-center"
             style={{
-              transform: `rotate(${planePos.angle - 180}deg)`,
+              left: `${(planePos.x / 1024) * 100}%`,
+              top: `${(planePos.y / 682) * 100}%`,
+              transform: `translate(-50%, -50%)`,
             }}
           >
-            <img
-              src={CARGO_PLANE_BASE64}
-              alt="Four Star Cargo Aircraft"
-              className="w-32 sm:w-44 md:w-56 h-auto object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)]"
-            />
+            {/* FLOATING FLIGHT NAME BADGE POSITIONED ABSOLUTELY ABOVE AIRPLANE */}
+            <div className="absolute -top-11 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-950/90 text-white border border-amber-500/80 px-3 py-1 rounded-xl shadow-2xl backdrop-blur-md flex items-center gap-2 animate-bounce z-40">
+              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+              <span className="text-[11px] font-black text-amber-400 uppercase tracking-widest">
+                ✈️ #{flightName}
+              </span>
+              <span className="text-[10px] font-bold text-slate-300">
+                ({cartonsCount} CTNs)
+              </span>
+            </div>
+
+            {/* AIRPLANE IMAGE ROTATED ALONG TRAJECTORY TANGENT (CENTERED EXACTLY ON THE LINE) */}
+            <div
+              style={{
+                transform: `rotate(${planePos.angle - 180}deg)`,
+              }}
+            >
+              <img
+                src={CARGO_PLANE_BASE64}
+                alt="Four Star Cargo Aircraft"
+                className="w-32 sm:w-44 md:w-56 h-auto object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)]"
+              />
+            </div>
           </div>
-        </div>
+        ) : (
+          /* NO DISPATCHED FLIGHT NOTIFICATION BANNER OVERLAY */
+          <div className="absolute z-30 bg-slate-900/90 border border-amber-500/80 rounded-2xl px-5 py-3 shadow-2xl backdrop-blur-md text-center max-w-sm">
+            <div className="flex items-center justify-center gap-2 text-amber-400 text-sm font-black mb-1">
+              <Plane className="w-5 h-5 animate-pulse" />
+              <span>{isBn ? 'কোনো ফ্লাইট রিলিজ করা হয়নি' : 'No Flight Currently Dispatched'}</span>
+            </div>
+            <p className="text-xs text-slate-300 font-medium leading-relaxed">
+              {isBn
+                ? 'প্রস্তাবনা এখনো ফাইনাল হয়ে রিলিজ করা হয়নি। "ফাইনাল ফ্লাইং লিস্ট" থেকে ফিনিশ ও ডিসপ্যাচ করা হলে এখানে বিমান উড্ডয়ন দেখতে পাবেন।'
+                : 'Proposals are pending dispatch. Once released from Final Flying List, active cargo aircraft will appear live here.'}
+            </p>
+          </div>
+        )}
 
         {/* FLOATING DETAIL CARD 1: ORIGIN CHINA (Top Right Overlay) */}
         <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 w-52 sm:w-60 bg-slate-900/85 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3 shadow-2xl text-white">
@@ -278,11 +314,11 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
           <div className="mt-2 pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-300">
             <div>
               <span className="text-slate-400 block text-[9px]">Flight No:</span>
-              <span className="font-bold text-white">#{flightName}</span>
+              <span className="font-bold text-white">{currentProposal ? `#${flightName}` : 'N/A'}</span>
             </div>
             <div className="text-right">
               <span className="text-slate-400 block text-[9px]">Total Cargo:</span>
-              <span className="font-bold text-amber-400">{cartonsCount} CTNs ({totalWeight}kg)</span>
+              <span className="font-bold text-amber-400">{currentProposal ? `${cartonsCount} CTNs (${totalWeight}kg)` : '0 CTNs'}</span>
             </div>
           </div>
         </div>
@@ -312,13 +348,13 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
           <div className="mt-2 pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-300">
             <div>
               <span className="text-slate-400 block text-[9px]">Status:</span>
-              <span className={`font-bold capitalize ${flightStatus === 'received' ? 'text-emerald-400' : 'text-amber-400'}`}>
-                {flightStatus === 'received' ? '✅ Landed at DAC' : '✈️ In-Transit Flying'}
+              <span className={`font-bold capitalize ${flightStatus === 'received' ? 'text-emerald-400' : flightStatus === 'in_transit' ? 'text-amber-400' : 'text-slate-400'}`}>
+                {flightStatus === 'received' ? '✅ Landed at DAC' : flightStatus === 'in_transit' ? '✈️ In-Transit Flying' : '⏳ Pending Release'}
               </span>
             </div>
             <div className="text-right">
               <span className="text-slate-400 block text-[9px]">AWB No:</span>
-              <span className="font-bold text-slate-200">{awb}</span>
+              <span className="font-bold text-slate-200">{currentProposal ? awb : 'N/A'}</span>
             </div>
           </div>
         </div>
