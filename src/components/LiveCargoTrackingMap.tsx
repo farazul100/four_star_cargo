@@ -219,17 +219,17 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
           </g>
         </svg>
 
-        {/* NATIVE 100% PERFECT HIGH-RESOLUTION PNG AIRPLANE & FLOATING FLIGHT NAME BADGE AT Z-30 */}
+        {/* NATIVE 100% PERFECT HIGH-RESOLUTION PNG AIRPLANE FLOATING DIRECTLY ON TOP OF THE TRAJECTORY LINE AT Z-30 */}
         <div
-          className="absolute z-30 pointer-events-none transition-all duration-150 ease-linear flex flex-col items-center justify-center"
+          className="absolute z-30 pointer-events-none transition-all duration-150 ease-linear flex items-center justify-center"
           style={{
             left: `${(planePos.x / 1024) * 100}%`,
             top: `${(planePos.y / 682) * 100}%`,
             transform: `translate(-50%, -50%)`,
           }}
         >
-          {/* FLOATING FLIGHT NAME BADGE ABOVE AIRPLANE */}
-          <div className="mb-2 whitespace-nowrap bg-slate-950/90 text-white border border-amber-500/80 px-3 py-1 rounded-xl shadow-2xl backdrop-blur-md flex items-center gap-2 animate-bounce">
+          {/* FLOATING FLIGHT NAME BADGE POSITIONED ABSOLUTELY ABOVE AIRPLANE */}
+          <div className="absolute -top-11 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-950/90 text-white border border-amber-500/80 px-3 py-1 rounded-xl shadow-2xl backdrop-blur-md flex items-center gap-2 animate-bounce z-40">
             <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
             <span className="text-[11px] font-black text-amber-400 uppercase tracking-widest">
               ✈️ #{flightName}
@@ -239,7 +239,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             </span>
           </div>
 
-          {/* AIRPLANE IMAGE ROTATED ALONG TRAJECTORY TANGENT */}
+          {/* AIRPLANE IMAGE ROTATED ALONG TRAJECTORY TANGENT (CENTERED EXACTLY ON THE LINE) */}
           <div
             style={{
               transform: `rotate(${planePos.angle - 180}deg)`,
