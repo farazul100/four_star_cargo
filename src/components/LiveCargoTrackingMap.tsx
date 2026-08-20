@@ -26,7 +26,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
 
   const [selectedFlightId, setSelectedFlightId] = useState<string>('all');
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const [animProgress, setAnimProgress] = useState<number>(0.55); // 0 to 1 along flight arc
+  const [animProgress, setAnimProgress] = useState<number>(0.50); // 0.20 to 0.80 along flight arc
 
   // Map active database proposals
   const activeProposals = useMemo(() => {
@@ -52,24 +52,17 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
     return 'proposed';
   }, [currentProposal]);
 
-  // Animate plane along curve when in-transit
+  // ALWAYS ANIMATE PLANE CONTINUOUSLY IN CLEAR MID-AIR BETWEEN CHINA AND BANGLADESH (0.22 to 0.78)
   useEffect(() => {
-    if (flightStatus === 'proposed') {
-      setAnimProgress(0.12); // At China hub
-      return;
-    }
-    if (flightStatus === 'received') {
-      setAnimProgress(0.88); // Landed at DAC Hub
-      return;
-    }
-
-    // Flying in mid-air
     const interval = setInterval(() => {
-      setAnimProgress((prev) => (prev >= 0.85 ? 0.15 : prev + 0.006));
-    }, 80);
+      setAnimProgress((prev) => {
+        if (prev >= 0.78) return 0.22;
+        return prev + 0.005;
+      });
+    }, 60);
 
     return () => clearInterval(interval);
-  }, [flightStatus]);
+  }, []);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -219,26 +212,34 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             <circle r="4.5" fill="#FFFFFF" />
           </g>
 
-          {/* ANIMATED AIRPLANE FLYING ALONG THE ARC (User's HD Transparent PNG Airplane + Glowing Aura) */}
+          {/* HIGH-VISIBILITY ANIMATED CARGO AIRPLANE IN MID-AIR */}
           <g transform={`translate(${planePos.x}, ${planePos.y}) rotate(${planePos.angle + 180})`}>
-            {/* Glowing Amber Pulse Aura */}
-            <circle r="36" fill="#F59E0B" fillOpacity="0.3" className="animate-pulse" />
-            <circle r="22" fill="#F59E0B" fillOpacity="0.5" />
+            {/* Bright Pulsing Golden Aura Badge */}
+            <circle r="38" fill="#F59E0B" fillOpacity="0.35" className="animate-pulse" />
+            <circle r="24" fill="#D97706" fillOpacity="0.6" />
 
-            {/* Embedded High-Res Transparent Cutout Airplane PNG Image */}
+            {/* Glowing White Airplane Base Shape */}
+            <path
+              d="M 0 -22 L 8 6 L 24 14 L 8 16 L 5 25 L 0 21 L -5 25 L -8 16 L -24 14 L -8 6 Z"
+              fill="#FFFFFF"
+              stroke="#F59E0B"
+              strokeWidth="2"
+            />
+
+            {/* User's Transparent PNG Airplane Image Overlay */}
             <image
               href={CARGO_PLANE_BASE64}
               xlinkHref={CARGO_PLANE_BASE64}
-              x="-55"
-              y="-19"
-              width="110"
-              height="38"
+              x="-65"
+              y="-22"
+              width="130"
+              height="44"
             />
           </g>
         </svg>
 
         {/* FLOATING DETAIL CARD 1: ORIGIN CHINA (Top Right Overlay) */}
-        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 w-56 sm:w-64 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3.5 shadow-2xl text-white">
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 w-52 sm:w-60 bg-slate-900/85 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3 shadow-2xl text-white">
           <div className="flex items-center justify-between pb-1.5 border-b border-slate-800">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
               Origin
@@ -249,17 +250,17 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             </span>
           </div>
 
-          <div className="mt-2">
-            <div className="text-sm font-black text-white flex items-center justify-between">
+          <div className="mt-1.5">
+            <div className="text-xs font-black text-white flex items-center justify-between">
               <span>China Cargo Hub</span>
-              <span className="text-[11px] font-semibold text-slate-400">CAN / PVG</span>
+              <span className="text-[10px] font-semibold text-slate-400">CAN / PVG</span>
             </div>
-            <p className="text-[11px] font-medium text-slate-300 mt-0.5">
-              Airport: <span className="text-amber-400 font-bold">Guangzhou / Shanghai PVG</span>
+            <p className="text-[10px] font-medium text-slate-300 mt-0.5">
+              Airport: <span className="text-amber-400 font-bold">Guangzhou / PVG</span>
             </p>
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-300">
+          <div className="mt-2 pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-300">
             <div>
               <span className="text-slate-400 block text-[9px]">Flight No:</span>
               <span className="font-bold text-white">#{flightName}</span>
@@ -272,7 +273,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
         </div>
 
         {/* FLOATING DETAIL CARD 2: DESTINATION BANGLADESH (Top Left Overlay) */}
-        <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 w-56 sm:w-64 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3.5 shadow-2xl text-white">
+        <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 w-52 sm:w-60 bg-slate-900/85 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3 shadow-2xl text-white">
           <div className="flex items-center justify-between pb-1.5 border-b border-slate-800">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
               Destination
@@ -283,17 +284,17 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             </span>
           </div>
 
-          <div className="mt-2">
-            <div className="text-sm font-black text-white flex items-center justify-between">
+          <div className="mt-1.5">
+            <div className="text-xs font-black text-white flex items-center justify-between">
               <span>Bangladesh Hub</span>
-              <span className="text-[11px] font-semibold text-emerald-400">DAC</span>
+              <span className="text-[10px] font-semibold text-emerald-400">DAC</span>
             </div>
-            <p className="text-[11px] font-medium text-slate-300 mt-0.5">
-              Airport: <span className="text-emerald-400 font-bold">Hazrat Shahjalal Intl. (DAC)</span>
+            <p className="text-[10px] font-medium text-slate-300 mt-0.5">
+              Airport: <span className="text-emerald-400 font-bold">Hazrat Shahjalal (DAC)</span>
             </p>
           </div>
 
-          <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-300">
+          <div className="mt-2 pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-300">
             <div>
               <span className="text-slate-400 block text-[9px]">Status:</span>
               <span className={`font-bold capitalize ${flightStatus === 'received' ? 'text-emerald-400' : 'text-amber-400'}`}>
