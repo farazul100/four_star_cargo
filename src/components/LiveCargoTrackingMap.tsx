@@ -26,7 +26,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
 
   const [selectedFlightId, setSelectedFlightId] = useState<string>('all');
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const [animProgress, setAnimProgress] = useState<number>(0.25); // 0.15 (China) to 0.80 (BD approach)
+  const [animProgress, setAnimProgress] = useState<number>(0.20); // 0.15 (China) to 0.52 (Mid-air)
 
   // ONLY INCLUDE FINALIZED & DISPATCHED FLIGHTS (Exclude un-dispatched draft proposals)
   const activeProposals = useMemo(() => {
@@ -65,7 +65,9 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
     return 'none';
   }, [currentProposal]);
 
-  // REALISTIC SLOW FLIGHT ANIMATION LOGIC (Glides slowly across Asia until received in BD)
+  // REALISTIC MID-AIR SLOWDOWN & PAUSE ANIMATION LOGIC
+  // Airplane flies from China to mid-air (0.48-0.53), slows down & pauses in mid-air over Asia.
+  // It NEVER reaches Bangladesh until status is officially marked 'received' at Dhaka Hub!
   useEffect(() => {
     if (flightStatus === 'none') {
       return;
@@ -75,13 +77,18 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
       return;
     }
 
-    // Slowly fly across from China (0.15) towards BD (0.80) at realistic speed
+    // In-Transit Flight: Glides from China to mid-air, then micro-steps & lingers in mid-air
     const interval = setInterval(() => {
       setAnimProgress((prev) => {
-        if (prev >= 0.80) return 0.15; // Loop back slowly if still in-transit
-        return prev + 0.0008; // Very smooth, slow progression (~65 seconds)
+        if (prev < 0.48) {
+          return prev + 0.001; // Smooth initial climb from China to mid-air
+        } else if (prev >= 0.53) {
+          return 0.48; // Oscillate gently in mid-air (NEVER crosses to BD until received)
+        } else {
+          return prev + 0.00025; // Super slow micro-movement in mid-air
+        }
       });
-    }, 80);
+    }, 100);
 
     return () => clearInterval(interval);
   }, [flightStatus]);
