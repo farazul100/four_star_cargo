@@ -54,11 +54,11 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
   // Animate plane along curve when in-transit
   useEffect(() => {
     if (flightStatus === 'proposed') {
-      setAnimProgress(0.08); // At China hub
+      setAnimProgress(0.12); // At China hub
       return;
     }
     if (flightStatus === 'received') {
-      setAnimProgress(0.92); // Landed at DAC Hub
+      setAnimProgress(0.88); // Landed at DAC Hub
       return;
     }
 
@@ -77,13 +77,13 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
     }, 700);
   };
 
-  // Coordinates on 1000x520 World Satellite Map View
-  // China (Guangzhou / Shanghai): x=780, y=230
-  // Bangladesh (Dhaka DAC): x=280, y=310
-  // Curve control point: x=510, y=120
-  const originPos = { x: 780, y: 230 };
-  const destPos = { x: 280, y: 310 };
-  const controlPos = { x: 510, y: 120 };
+  // Exact coordinates matching the user's satellite map background image (1000x550)
+  // China (Red country pin on right): x=770, y=420
+  // Bangladesh (Green country pin on left): x=260, y=500
+  // Quadratic Bezier Arc Control Point: x=510, y=200
+  const originPos = { x: 770, y: 420 };
+  const destPos = { x: 260, y: 500 };
+  const controlPos = { x: 510, y: 200 };
 
   // Calculate quadratic Bezier point at ratio t (0 <= t <= 1)
   const getBezierPoint = (t: number) => {
@@ -116,11 +116,11 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
   return (
     <div className={`relative overflow-hidden rounded-2xl border ${isDark ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-900 border-slate-800 text-white'} shadow-2xl font-sans`}>
       {/* Top Header Section */}
-      <div className="flex flex-wrap items-center justify-between gap-4 p-5 md:p-6 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md">
+      <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-4 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md">
         <div>
           <div className="flex items-center gap-2">
             <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
-            <h2 className="text-xl md:text-2xl font-black tracking-wider uppercase text-white">
+            <h2 className="text-lg md:text-xl font-black tracking-wider uppercase text-white">
               SHIPMENT VISUALIZATION
             </h2>
           </div>
@@ -158,36 +158,30 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
         </div>
       </div>
 
-      {/* Main Map Container (Pure Satellite Map matching 1st screenshot exactly) */}
-      <div className="relative w-full aspect-[16/9] min-h-[380px] md:min-h-[480px] bg-[#091526] overflow-hidden select-none">
-        {/* World Satellite View Canvas SVG */}
+      {/* Main Map Container using User's Satellite Map Background (Natural Scaling, No Over-Zoom) */}
+      <div className="relative w-full aspect-[16/9.5] min-h-[360px] md:min-h-[460px] bg-[#071526] overflow-hidden select-none flex items-center justify-center">
+        {/* User's Exact Satellite Map Background Image */}
+        <img
+          src="/images/satellite_china_bd_map.png"
+          alt="Satellite China to Bangladesh Air Cargo Map"
+          className="absolute inset-0 w-full h-full object-contain pointer-events-none transition-all duration-300"
+          onError={(e) => {
+            (e.target as HTMLElement).style.opacity = '0.5';
+          }}
+        />
+
+        {/* SVG Overlay for Dynamic Flight Arc, Glowing Pins, and Animated Plane */}
         <svg
-          viewBox="0 0 1000 520"
-          className="w-full h-full object-cover"
-          preserveAspectRatio="xMidYMid slice"
+          viewBox="0 0 1000 550"
+          className="absolute inset-0 w-full h-full object-contain z-10 pointer-events-none"
+          preserveAspectRatio="xMidYMid meet"
         >
           <defs>
-            <linearGradient id="oceanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stopColor="#0B1A30" />
-              <stop offset="50%" stopColor="#091526" />
-              <stop offset="100%" stopColor="#050C18" />
-            </linearGradient>
-
             <linearGradient id="flightArcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="#EF4444" />
               <stop offset="50%" stopColor="#F59E0B" />
               <stop offset="100%" stopColor="#10B981" />
             </linearGradient>
-
-            <filter id="glowRed" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="8" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
-
-            <filter id="glowGreen" x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="8" result="blur" />
-              <feComposite in="SourceGraphic" in2="blur" operator="over" />
-            </filter>
 
             <filter id="arcGlow" x="-10%" y="-10%" width="120%" height="120%">
               <feGaussianBlur stdDeviation="4" result="blur" />
@@ -195,64 +189,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             </filter>
           </defs>
 
-          {/* Ocean Base */}
-          <rect width="1000" height="520" fill="url(#oceanGrad)" />
-
-          {/* Grid Gridlines (Subtle Satellite Coordinate Lines) */}
-          <g opacity="0.12" stroke="#38BDF8" strokeWidth="0.5" strokeDasharray="4 6">
-            <line x1="0" y1="130" x2="1000" y2="130" />
-            <line x1="0" y1="260" x2="1000" y2="260" />
-            <line x1="0" y1="390" x2="1000" y2="390" />
-            <line x1="250" y1="0" x2="250" y2="520" />
-            <line x1="500" y1="0" x2="500" y2="520" />
-            <line x1="750" y1="0" x2="750" y2="520" />
-          </g>
-
-          {/* World Continents Rough SVG Paths */}
-          <g fill="#1E293B" stroke="#334155" strokeWidth="0.8" opacity="0.65">
-            {/* Africa */}
-            <path d="M 120 220 Q 150 250 170 320 Q 150 380 120 420 Q 90 350 70 280 Z" />
-            {/* Europe */}
-            <path d="M 100 80 Q 180 90 220 120 Q 160 140 100 80 Z" />
-            {/* Middle East & Central Asia */}
-            <path d="M 230 140 Q 340 120 440 150 Q 380 200 230 180 Z" stroke="#475569" />
-            {/* India Subcontinent */}
-            <path d="M 240 210 Q 300 220 320 290 Q 260 320 220 260 Z" fill="#1E293B" />
-            {/* Southeast Asia */}
-            <path d="M 720 270 Q 780 290 820 350 Q 740 370 700 300 Z" />
-            {/* Russia / North Asia */}
-            <path d="M 380 40 Q 700 30 920 60 Q 800 120 380 100 Z" opacity="0.4" />
-          </g>
-
-          {/* 🇨🇳 CHINA REGION HIGHLIGHT (Vibrant Red Overlay matching Screenshot 1) */}
-          <g filter="url(#glowRed)">
-            <path
-              d="M 680 130 Q 780 120 890 160 Q 880 250 760 270 Q 720 210 680 130 Z"
-              fill="#EF4444"
-              fillOpacity="0.75"
-              stroke="#F87171"
-              strokeWidth="2"
-            />
-            <text x="785" y="185" fill="#FFFFFF" fontSize="22" fontWeight="900" textAnchor="middle" letterSpacing="2">
-              CHINA
-            </text>
-          </g>
-
-          {/* 🇧🇩 BANGLADESH REGION HIGHLIGHT (Vibrant Green Overlay matching Screenshot 1) */}
-          <g filter="url(#glowGreen)">
-            <path
-              d="M 265 285 Q 295 275 305 315 Q 285 335 260 320 Z"
-              fill="#10B981"
-              fillOpacity="0.85"
-              stroke="#34D399"
-              strokeWidth="2.5"
-            />
-            <text x="275" y="260" fill="#FFFFFF" fontSize="16" fontWeight="900" textAnchor="middle" letterSpacing="1.5">
-              BANGLADESH
-            </text>
-          </g>
-
-          {/* CURVED FLIGHT TRAJECTORY ARC */}
+          {/* CURVED FLIGHT TRAJECTORY ARC (China -> Bangladesh) */}
           <g filter="url(#arcGlow)">
             <path
               d={`M ${originPos.x} ${originPos.y} Q ${controlPos.x} ${controlPos.y} ${destPos.x} ${destPos.y}`}
@@ -260,7 +197,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
               stroke="#F59E0B"
               strokeWidth="4"
               strokeDasharray="8 6"
-              opacity="0.8"
+              opacity="0.85"
             />
             <path
               d={`M ${originPos.x} ${originPos.y} Q ${controlPos.x} ${controlPos.y} ${destPos.x} ${destPos.y}`}
@@ -270,30 +207,33 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             />
           </g>
 
-          {/* China Origin Pin Marker */}
+          {/* China Origin Pulse Marker */}
           <g transform={`translate(${originPos.x}, ${originPos.y})`}>
-            <circle r="16" fill="#EF4444" fillOpacity="0.3" className="animate-ping" />
+            <circle r="16" fill="#EF4444" fillOpacity="0.4" className="animate-ping" />
             <circle r="10" fill="#EF4444" stroke="#FFFFFF" strokeWidth="2.5" />
             <circle r="4" fill="#FFFFFF" />
           </g>
 
-          {/* Bangladesh Destination Pin Marker */}
+          {/* Bangladesh Destination Pulse Marker */}
           <g transform={`translate(${destPos.x}, ${destPos.y})`}>
-            <circle r="18" fill="#10B981" fillOpacity="0.3" className="animate-ping" />
+            <circle r="18" fill="#10B981" fillOpacity="0.4" className="animate-ping" />
             <circle r="11" fill="#10B981" stroke="#FFFFFF" strokeWidth="2.5" />
             <circle r="4.5" fill="#FFFFFF" />
           </g>
 
           {/* ANIMATED AIRPLANE FLYING ALONG THE ARC */}
           <g transform={`translate(${planePos.x}, ${planePos.y}) rotate(${planePos.angle + 180})`}>
-            <g transform="translate(0, 12) scale(0.9)" opacity="0.3">
+            {/* Airplane Shadow */}
+            <g transform="translate(0, 10) scale(0.9)" opacity="0.3">
               <path
                 d="M 0 -18 L 8 4 L 20 10 L 8 12 L 5 20 L 0 17 L -5 20 L -8 12 L -20 10 L -8 4 Z"
                 fill="#000000"
               />
             </g>
-            <g transform="scale(1.35)">
-              <circle r="18" fill="#F59E0B" fillOpacity="0.25" className="animate-pulse" />
+
+            {/* Glowing Airplane Icon */}
+            <g transform="scale(1.3)">
+              <circle r="16" fill="#F59E0B" fillOpacity="0.3" className="animate-pulse" />
               <path
                 d="M 0 -16 L 6 4 L 18 10 L 6 12 L 4 19 L 0 16 L -4 19 L -6 12 L -18 10 L -6 4 Z"
                 fill="#FFFFFF"
@@ -304,71 +244,71 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
           </g>
         </svg>
 
-        {/* FLOATING DETAIL CARD 1: ORIGIN CHINA (Top Right matching Screenshot 1) */}
-        <div className="absolute top-4 right-4 md:top-6 md:right-6 w-64 md:w-72 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-4 shadow-2xl text-white">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-            <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
+        {/* FLOATING DETAIL CARD 1: ORIGIN CHINA (Top Right Overlay) */}
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 w-56 sm:w-64 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3.5 shadow-2xl text-white">
+          <div className="flex items-center justify-between pb-1.5 border-b border-slate-800">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
               Origin
             </span>
-            <span className="flex items-center gap-1 text-xs font-bold text-red-400 bg-red-950/60 px-2 py-0.5 rounded-full border border-red-800/60">
-              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            <span className="flex items-center gap-1 text-[11px] font-bold text-red-400 bg-red-950/60 px-2 py-0.5 rounded-full border border-red-800/60">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
               China 🇨🇳
             </span>
           </div>
 
-          <div className="mt-2.5">
-            <div className="text-base font-black text-white flex items-center justify-between">
+          <div className="mt-2">
+            <div className="text-sm font-black text-white flex items-center justify-between">
               <span>China Cargo Hub</span>
-              <span className="text-xs font-semibold text-slate-400">CAN / PVG</span>
+              <span className="text-[11px] font-semibold text-slate-400">CAN / PVG</span>
             </div>
-            <p className="text-xs font-medium text-slate-300 mt-1">
-              Departure Airport: <span className="text-amber-400 font-bold">Guangzhou / Shanghai PVG</span>
+            <p className="text-[11px] font-medium text-slate-300 mt-0.5">
+              Airport: <span className="text-amber-400 font-bold">Guangzhou / Shanghai PVG</span>
             </p>
           </div>
 
-          <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-300">
+          <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-300">
             <div>
-              <span className="text-slate-400 block text-[10px]">Flight No:</span>
+              <span className="text-slate-400 block text-[9px]">Flight No:</span>
               <span className="font-bold text-white">#{flightName}</span>
             </div>
             <div className="text-right">
-              <span className="text-slate-400 block text-[10px]">Total Cargo:</span>
+              <span className="text-slate-400 block text-[9px]">Total Cargo:</span>
               <span className="font-bold text-amber-400">{cartonsCount} CTNs ({totalWeight}kg)</span>
             </div>
           </div>
         </div>
 
-        {/* FLOATING DETAIL CARD 2: DESTINATION BANGLADESH (Bottom Left matching Screenshot 1) */}
-        <div className="absolute bottom-6 left-4 md:bottom-8 md:left-6 w-64 md:w-72 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-4 shadow-2xl text-white">
-          <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-            <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
+        {/* FLOATING DETAIL CARD 2: DESTINATION BANGLADESH (Top Left Overlay) */}
+        <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 w-56 sm:w-64 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3.5 shadow-2xl text-white">
+          <div className="flex items-center justify-between pb-1.5 border-b border-slate-800">
+            <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
               Destination
             </span>
-            <span className="flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-800/60">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="flex items-center gap-1 text-[11px] font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-800/60">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
               Bangladesh 🇧🇩
             </span>
           </div>
 
-          <div className="mt-2.5">
-            <div className="text-base font-black text-white flex items-center justify-between">
+          <div className="mt-2">
+            <div className="text-sm font-black text-white flex items-center justify-between">
               <span>Bangladesh Hub</span>
-              <span className="text-xs font-semibold text-emerald-400">DAC</span>
+              <span className="text-[11px] font-semibold text-emerald-400">DAC</span>
             </div>
-            <p className="text-xs font-medium text-slate-300 mt-1">
-              Arrival Airport: <span className="text-emerald-400 font-bold">Hazrat Shahjalal Intl. (DAC)</span>
+            <p className="text-[11px] font-medium text-slate-300 mt-0.5">
+              Airport: <span className="text-emerald-400 font-bold">Hazrat Shahjalal Intl. (DAC)</span>
             </p>
           </div>
 
-          <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-300">
+          <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-300">
             <div>
-              <span className="text-slate-400 block text-[10px]">Current Status:</span>
+              <span className="text-slate-400 block text-[9px]">Status:</span>
               <span className={`font-bold capitalize ${flightStatus === 'received' ? 'text-emerald-400' : 'text-amber-400'}`}>
-                {flightStatus === 'received' ? '✅ Landed & Received at DAC' : '✈️ In-Transit Flying'}
+                {flightStatus === 'received' ? '✅ Landed at DAC' : '✈️ In-Transit Flying'}
               </span>
             </div>
             <div className="text-right">
-              <span className="text-slate-400 block text-[10px]">AWB No:</span>
+              <span className="text-slate-400 block text-[9px]">AWB No:</span>
               <span className="font-bold text-slate-200">{awb}</span>
             </div>
           </div>
@@ -376,8 +316,8 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
       </div>
 
       {/* BOTTOM SECTION: SHIPMENT FLOW BY AIR (6-Step Flow Bar) */}
-      <div className="p-5 md:p-6 bg-slate-900/95 border-t border-slate-800 backdrop-blur-md">
-        <div className="text-center mb-4">
+      <div className="p-4 md:p-5 bg-slate-900/95 border-t border-slate-800 backdrop-blur-md">
+        <div className="text-center mb-3">
           <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">
             SHIPMENT FLOW BY AIR
           </h3>
@@ -385,57 +325,57 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 md:gap-4 relative">
           {/* Step 1: Pickup */}
-          <div className={`flex flex-col items-center text-center p-3 rounded-xl border transition-all ${currentStepIndex >= 1 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 border ${currentStepIndex >= 1 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-lg shadow-amber-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
-              <MapPin className="w-5 h-5" />
+          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 1 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center mb-1.5 border ${currentStepIndex >= 1 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
+              <MapPin className="w-4 h-4" />
             </div>
             <span className="text-xs font-bold block text-white">1. Pickup</span>
-            <span className="text-[10px] text-slate-400 mt-1 leading-tight">Supplier picks up the goods in China</span>
+            <span className="text-[10px] text-slate-400 leading-tight mt-0.5">Supplier picks up in China</span>
           </div>
 
           {/* Step 2: Warehouse */}
-          <div className={`flex flex-col items-center text-center p-3 rounded-xl border transition-all ${currentStepIndex >= 2 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 border ${currentStepIndex >= 2 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-lg shadow-amber-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
-              <PackageCheck className="w-5 h-5" />
+          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 2 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center mb-1.5 border ${currentStepIndex >= 2 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
+              <PackageCheck className="w-4 h-4" />
             </div>
             <span className="text-xs font-bold block text-white">2. Warehouse</span>
-            <span className="text-[10px] text-slate-400 mt-1 leading-tight">Goods received at China Warehouse</span>
+            <span className="text-[10px] text-slate-400 leading-tight mt-0.5">China Warehouse received</span>
           </div>
 
           {/* Step 3: Documentation */}
-          <div className={`flex flex-col items-center text-center p-3 rounded-xl border transition-all ${currentStepIndex >= 3 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 border ${currentStepIndex >= 3 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-lg shadow-amber-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
-              <Layers className="w-5 h-5" />
+          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 3 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center mb-1.5 border ${currentStepIndex >= 3 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
+              <Layers className="w-4 h-4" />
             </div>
             <span className="text-xs font-bold block text-white">3. Documentation</span>
-            <span className="text-[10px] text-slate-400 mt-1 leading-tight">Export documentation & customs</span>
+            <span className="text-[10px] text-slate-400 leading-tight mt-0.5">Export customs cleared</span>
           </div>
 
           {/* Step 4: Air Transit */}
-          <div className={`flex flex-col items-center text-center p-3 rounded-xl border transition-all ${currentStepIndex >= 4 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 border ${currentStepIndex >= 4 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-lg shadow-amber-500/20 animate-pulse' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
-              <Plane className="w-5 h-5" />
+          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 4 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center mb-1.5 border ${currentStepIndex >= 4 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20 animate-pulse' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
+              <Plane className="w-4 h-4" />
             </div>
             <span className="text-xs font-bold block text-white">4. Air Transit</span>
-            <span className="text-[10px] text-slate-400 mt-1 leading-tight">Shipment in transit by air</span>
+            <span className="text-[10px] text-slate-400 leading-tight mt-0.5">Shipment in transit by air</span>
           </div>
 
           {/* Step 5: Customs Clearance */}
-          <div className={`flex flex-col items-center text-center p-3 rounded-xl border transition-all ${currentStepIndex >= 5 ? 'bg-emerald-950/30 border-emerald-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 border ${currentStepIndex >= 5 ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
-              <CheckCircle2 className="w-5 h-5" />
+          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 5 ? 'bg-emerald-950/30 border-emerald-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center mb-1.5 border ${currentStepIndex >= 5 ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-md shadow-emerald-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
+              <CheckCircle2 className="w-4 h-4" />
             </div>
             <span className="text-xs font-bold block text-white">5. Customs Clearance</span>
-            <span className="text-[10px] text-slate-400 mt-1 leading-tight">Import clearance in Bangladesh</span>
+            <span className="text-[10px] text-slate-400 leading-tight mt-0.5">Import cleared in BD</span>
           </div>
 
           {/* Step 6: Final Delivery */}
-          <div className={`flex flex-col items-center text-center p-3 rounded-xl border transition-all ${currentStepIndex >= 6 ? 'bg-emerald-950/30 border-emerald-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 border ${currentStepIndex >= 6 ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
-              <ArrowRight className="w-5 h-5" />
+          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 6 ? 'bg-emerald-950/30 border-emerald-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center mb-1.5 border ${currentStepIndex >= 6 ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-md shadow-emerald-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
+              <ArrowRight className="w-4 h-4" />
             </div>
             <span className="text-xs font-bold block text-white">6. Final Delivery</span>
-            <span className="text-[10px] text-slate-400 mt-1 leading-tight">Delivered to doorstep in BD</span>
+            <span className="text-[10px] text-slate-400 leading-tight mt-0.5">Delivered to doorstep</span>
           </div>
         </div>
       </div>
