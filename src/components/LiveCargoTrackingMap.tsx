@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Plane, RefreshCw, Layers, MapPin, CheckCircle2, PackageCheck, ArrowRight } from 'lucide-react';
 import { Carton, FlyingProposal, Language, Theme } from '../types';
 import { useTheme } from '../context/ThemeContext';
+import { CARGO_PLANE_BASE64 } from './cargoPlaneData';
 
 interface LiveCargoTrackingMapProps {
   cartons?: Carton[];
@@ -192,15 +193,15 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
               d={`M ${originPos.x} ${originPos.y} Q ${controlPos.x} ${controlPos.y} ${destPos.x} ${destPos.y}`}
               fill="none"
               stroke="#F59E0B"
-              strokeWidth="4"
-              strokeDasharray="8 6"
+              strokeWidth="5"
+              strokeDasharray="9 7"
               opacity="0.9"
             />
             <path
               d={`M ${originPos.x} ${originPos.y} Q ${controlPos.x} ${controlPos.y} ${destPos.x} ${destPos.y}`}
               fill="none"
               stroke="url(#flightArcGrad)"
-              strokeWidth="3"
+              strokeWidth="3.5"
             />
           </g>
 
@@ -218,17 +219,20 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             <circle r="4.5" fill="#FFFFFF" />
           </g>
 
-          {/* ANIMATED AIRPLANE FLYING ALONG THE ARC (User's Transparent PNG Airplane) */}
+          {/* ANIMATED AIRPLANE FLYING ALONG THE ARC (User's HD Transparent PNG Airplane + Glowing Aura) */}
           <g transform={`translate(${planePos.x}, ${planePos.y}) rotate(${planePos.angle + 180})`}>
-            {/* Glowing Aura Effect */}
-            <circle r="24" fill="#F59E0B" fillOpacity="0.2" className="animate-pulse" />
-            {/* Transparent Cutout Airplane PNG Image */}
+            {/* Glowing Amber Pulse Aura */}
+            <circle r="36" fill="#F59E0B" fillOpacity="0.3" className="animate-pulse" />
+            <circle r="22" fill="#F59E0B" fillOpacity="0.5" />
+
+            {/* Embedded High-Res Transparent Cutout Airplane PNG Image */}
             <image
-              href="/images/cargo_plane.png"
-              x="-36"
-              y="-12"
-              width="72"
-              height="24"
+              href={CARGO_PLANE_BASE64}
+              xlinkHref={CARGO_PLANE_BASE64}
+              x="-55"
+              y="-19"
+              width="110"
+              height="38"
             />
           </g>
         </svg>
