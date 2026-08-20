@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Plane, Radio, Activity, RefreshCw, Compass, Check, ShieldCheck, ArrowRight, Layers } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Plane, RefreshCw, Layers, MapPin, CheckCircle2, PackageCheck, AlertCircle, ArrowRight } from 'lucide-react';
 import { Carton, FlyingProposal, Language, Theme } from '../types';
 import { useTheme } from '../context/ThemeContext';
 
@@ -23,626 +23,431 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
   const isBn = language === 'bn';
   const isDark = activeTheme === 'dark';
 
-  const [selectedRoute, setSelectedRoute] = useState<string>('all');
-  const [activeFlightPopup, setActiveFlightPopup] = useState<string>('BS-206');
+  const [selectedFlightId, setSelectedFlightId] = useState<string>('all');
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
+  const [animProgress, setAnimProgress] = useState<number>(0.55); // 0 to 1 along flight arc
 
-  // Very gentle mid-air floating hover oscillation
-  const [hoverPhase, setHoverPhase] = useState<number>(0);
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setHoverPhase((prev) => (prev + 0.08) % (Math.PI * 2));
-    }, 150);
-    return () => clearInterval(timer);
-  }, []);
-
-  const handleRefreshRadar = () => {
-    setIsRefreshing(true);
-    setTimeout(() => {
-      setIsRefreshing(false);
-    }, 800);
-  };
-
-  // Derive real status from system database proposals & cartons props
-  // Derive real status from system database proposals & cartons props
-  const getSystemFlightStatus = (flightNo: string, originCode: string): 'in_transit' | 'received' | 'proposed' => {
-    // 1. Match from real database proposals
-    const matchProp = proposals.find(
-      (p) =>
-        p.id?.toLowerCase() === flightNo.toLowerCase() ||
-        p.flight_number?.toLowerCase() === flightNo.toLowerCase() ||
-        p.flying_name?.toLowerCase() === flightNo.toLowerCase() ||
-        (p.flying_name && (p.flying_name.toLowerCase().includes(flightNo.toLowerCase()) || flightNo.toLowerCase().includes(p.flying_name.toLowerCase()))) ||
-        (p.warehouse_name && p.warehouse_name.toLowerCase().includes(originCode.toLowerCase()))
-    );
-
-    if (matchProp) {
-      const pStatus = matchProp.status as string;
-      if (pStatus === 'received' || pStatus === 'delivered' || pStatus === 'arrived') {
-        return 'received';
-      }
-      if (pStatus === 'dispatched' || pStatus === 'in_transit') {
-        return 'in_transit';
-      }
-      // Pending or Approved (Before clicking Finish & Launch) = ON GROUND AT ORIGIN
-      if (pStatus === 'proposed' || pStatus === 'pending' || pStatus === 'approved') {
-        return 'proposed';
-      }
-    }
-
-    // 2. Check cartons attached to flight
-    const matchCartons = cartons.filter((c) => c.flight_number === flightNo);
-    if (matchCartons.length > 0) {
-      if (matchCartons.every((c) => c.status === 'received' || c.status === 'delivered')) {
-        return 'received';
-      }
-      if (matchCartons.some((c) => c.status === 'in_transit')) {
-        return 'in_transit';
-      }
-      if (matchCartons.some((c) => c.status === 'proposed' || c.status === 'booked')) {
-        return 'proposed';
-      }
-    }
-
-    // Default fallback: ON GROUND (Not flying until released by incharge)
-    return 'proposed';
-  };
-
-  // SVG Coordinates for 800x360 Canvas:
-  // Dhaka (DAC): x=380, y=210
-  // Guangzhou (CAN): x=680, y=140
-  // Hong Kong (HKG): x=710, y=175
-  // Dubai (DXB): x=120, y=160
-
-  // Dynamically map routes strictly based on active database proposals
-  const activeProposals = React.useMemo(() => {
+  // Map active database proposals
+  const activeProposals = useMemo(() => {
     const safeProps = Array.isArray(proposals) ? proposals : [];
     return safeProps.filter((p) => p && p.status !== 'rejected');
   }, [proposals]);
 
-  const initialRoutes = React.useMemo(() => {
-    if (activeProposals.length === 0) {
-      return [];
+  // Selected proposal or active flight default
+  const currentProposal = useMemo(() => {
+    if (selectedFlightId !== 'all') {
+      const match = activeProposals.find((p) => p.id === selectedFlightId || p.flight_number === selectedFlightId);
+      if (match) return match;
+    }
+    return activeProposals[0] || null;
+  }, [selectedFlightId, activeProposals]);
+
+  // Calculate live flight status based on system data
+  const flightStatus = useMemo(() => {
+    if (!currentProposal) return 'in_transit';
+    const st = (currentProposal.status || '').toLowerCase();
+    if (st === 'received' || st === 'delivered' || st === 'arrived') return 'received';
+    if (st === 'dispatched' || st === 'in_transit') return 'in_transit';
+    return 'proposed';
+  }, [currentProposal]);
+
+  // Animate plane along curve when in-transit
+  useEffect(() => {
+    if (flightStatus === 'proposed') {
+      setAnimProgress(0.08); // At China hub
+      return;
+    }
+    if (flightStatus === 'received') {
+      setAnimProgress(0.92); // Landed at DAC Hub
+      return;
     }
 
-    return activeProposals.map((p, idx) => {
-      const whName = (p.warehouse_name || '').toLowerCase();
-      const isHongKong = whName.includes('hongkong') || whName.includes('hkg');
-      const isDubai = whName.includes('dubai') || whName.includes('dxb') || whName.includes('uae');
+    // Flying in mid-air
+    const interval = setInterval(() => {
+      setAnimProgress((prev) => (prev >= 0.85 ? 0.15 : prev + 0.006));
+    }, 80);
 
-      const originCoords = isHongKong
-        ? { x: 710, y: 175 }
-        : isDubai
-        ? { x: 120, y: 160 }
-        : { x: 680, y: 140 };
+    return () => clearInterval(interval);
+  }, [flightStatus]);
 
-      const curveControl = isHongKong
-        ? { x: 555, y: 145 }
-        : isDubai
-        ? { x: 250, y: 120 }
-        : { x: 530, y: 100 };
+  const handleRefresh = () => {
+    setIsRefreshing(true);
+    setTimeout(() => {
+      setIsRefreshing(false);
+    }, 700);
+  };
 
-      const color = isHongKong ? '#A855F7' : isDubai ? '#10B981' : '#3B82F6';
+  // Coordinates on 1000x520 World Satellite View
+  // China (Guangzhou / Shanghai): x=780, y=230
+  // Bangladesh (Dhaka DAC): x=280, y=310
+  // Curve control point: x=510, y=120
+  const originPos = { x: 780, y: 230 };
+  const destPos = { x: 280, y: 310 };
+  const controlPos = { x: 510, y: 120 };
 
-      // Extract exact flight batch name/number from proposal attributes
-      const rawFlight = (p.flight_number || p.flying_name || p.id || `BS-0${idx + 1}`).trim();
-      const flightNo = rawFlight.toUpperCase();
+  // Calculate quadratic Bezier point at ratio t (0 <= t <= 1)
+  const getBezierPoint = (t: number) => {
+    const invT = 1 - t;
+    const x = invT * invT * originPos.x + 2 * invT * t * controlPos.x + t * t * destPos.x;
+    const y = invT * invT * originPos.y + 2 * invT * t * controlPos.y + t * t * destPos.y;
 
-      return {
-        id: p.id || `prop-${idx}`,
-        name: `${p.warehouse_name || 'Guangzhou Hub'} 🇨🇳 ➔ ${p.destination_warehouse_name || (isBn ? 'বাংলাদেশ (ঢাকা)' : 'Bangladesh (DAC 🇧🇩)')}`,
-        originName: p.warehouse_name || 'Guangzhou Hub',
-        originCode: isHongKong ? 'HKG' : isDubai ? 'DXB' : 'CAN',
-        flightNo,
-        airline: p.airline || 'US-Bangla Air Cargo',
-        awb: (p as any).awb || '157-889120',
-        originCoords,
-        destCoords: { x: 380, y: 210 },
-        curveControl,
-        midAirRatio: 0.58,
-        weight: `${p.total_weight || 0} kg`,
-        cartonsCount: p.items_count || (p.carton_ids || []).length,
-        color,
-      };
-    });
-  }, [activeProposals, isBn]);
+    // Calculate tangent angle for smooth plane rotation
+    const dx = 2 * (1 - t) * (controlPos.x - originPos.x) + 2 * t * (destPos.x - controlPos.x);
+    const dy = 2 * (1 - t) * (controlPos.y - originPos.y) + 2 * t * (destPos.y - controlPos.y);
+    const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
 
-  const routes = initialRoutes.map((r) => {
-    const systemStatus = getSystemFlightStatus(r.flightNo, r.originCode);
+    return { x, y, angle };
+  };
 
-    let progress = 0.0;
-    let statusLabel = '';
-    let altitude = '0 ft (Ground)';
-    let speed = '0 km/h';
-    let eta = isBn ? 'ফিনিশ ও ডেসপ্যাচ করলে উড্ডয়ন শুরু হবে' : 'Awaiting Incharge Release';
+  const planePos = getBezierPoint(animProgress);
 
-    if (systemStatus === 'received') {
-      progress = 1.0;
-      statusLabel = isBn ? '🛬 বাংলাদেশ ওয়্যারহাউজে প্রাপ্ত (Arrived BD)' : '🛬 Received at BD Warehouse';
-      altitude = '0 ft (Landed at DAC)';
-      speed = '0 km/h (Parked)';
-      eta = isBn ? 'বাংলাদেশে পৌঁছেছে' : 'Landed in Bangladesh';
-    } else if (systemStatus === 'proposed') {
-      progress = 0.0;
-      statusLabel = isBn
-        ? '⏳ প্রস্তুত / ইনচার্জ ফিনিশ ও ডেসপ্যাচের অপেক্ষায় (Awaiting Release)'
-        : '⏳ Origin Hub / Awaiting Incharge Release';
-      altitude = '0 ft (On Ground)';
-      speed = '0 km/h';
-      eta = isBn ? 'ইনচার্জ ফিনিশ দিলে বিমান উড্ডয়ন করবে' : 'Launches when Incharge clicks Finish';
-    } else {
-      // systemStatus === 'in_transit' -> ACTIVE MID-AIR FLIGHT!
-      const gentleFloat = Math.sin(hoverPhase + (r.id === 'hongkong' ? 1.5 : 0)) * 0.015;
-      progress = Math.max(0.12, Math.min(0.88, r.midAirRatio + gentleFloat));
-      statusLabel = isBn
-        ? '✈️ আকাশে ফ্লাইটে চলমান (BD ইনচার্জ রিসিভ না করা পর্যন্ত আকাশে থাকবে)'
-        : '✈️ Airborne Cruising (Mid-Air until BD Received)';
-      altitude = '35,500 ft (Cruising)';
-      speed = '850 km/h';
-      eta = isBn ? 'বাংলাদেশ অভিমুখে অন-ফ্লাইট' : 'En-route to Bangladesh';
-    }
+  // Active step flow index (1 to 6) based on real flight status
+  const currentStepIndex = useMemo(() => {
+    if (flightStatus === 'proposed') return 2; // Warehouse
+    if (flightStatus === 'received') return 5; // Customs Clearance / DAC Hub
+    return 4; // Air Transit
+  }, [flightStatus]);
 
-    return {
-      ...r,
-      status: systemStatus,
-      progress,
-      statusLabel,
-      altitude,
-      speed,
-      eta,
-    };
-  });
-
-  const activeRouteObj = routes.find((r) => r.flightNo === activeFlightPopup) || routes[0];
-  const isOriginOnLeft = activeRouteObj ? activeRouteObj.originCoords.x < 400 : false;
-  const cardPositionClass = isOriginOnLeft ? 'bottom-3 right-3' : 'bottom-3 left-3';
+  const totalWeight = currentProposal?.total_weight || 1280;
+  const cartonsCount = currentProposal?.items_count || (currentProposal?.carton_ids || []).length || 45;
+  const flightName = currentProposal?.flying_name || currentProposal?.flight_number || 'BS-206';
+  const airline = currentProposal?.airline || 'US-Bangla Air Cargo';
+  const awb = currentProposal?.awb_number || '157-889120';
 
   return (
-    <div
-      className={`border rounded-3xl overflow-hidden shadow-2xs transition-all ${
-        isDark ? 'bg-[#0B132B] border-slate-800 text-white' : 'bg-slate-50 border-slate-200/90 text-slate-900'
-      }`}
-    >
-      {/* Top Header Bar */}
-      <div className={`p-5 border-b flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-        isDark
-          ? 'bg-[#0B132A] border-slate-800 text-white'
-          : 'bg-white border-slate-200 text-slate-900 shadow-2xs'
-      }`}>
+    <div className={`relative overflow-hidden rounded-2xl border ${isDark ? 'bg-slate-950 border-slate-800 shadow-2xl text-white' : 'bg-slate-900 border-slate-800 text-white shadow-2xl'} font-sans`}>
+      {/* Top Header Section */}
+      <div className="flex flex-wrap items-center justify-between gap-4 p-5 md:p-6 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md">
         <div>
-          <div className="flex items-center space-x-2.5">
-            <div className="p-2 rounded-xl bg-blue-600/10 text-blue-600 dark:text-blue-400">
-              <Radio className="w-5 h-5 animate-pulse" />
-            </div>
-            <div>
-              <h3 className="text-base font-medium text-slate-900 dark:text-white flex items-center space-x-2">
-                <span>{isBn ? 'রুট-টু-রুট এয়ার কার্গো ফ্লাইট ট্র্যাকিং রাডার' : 'Route-to-Route Air Cargo Radar'}</span>
-                <span className="inline-flex items-center space-x-1 px-2.5 py-0.5 rounded-full text-[10px] font-normal bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                  <span>SYSTEM STATUS SYNCED</span>
-                </span>
-              </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-normal">
-                {isBn
-                  ? 'বাংলাদেশ ওয়্যারহাউজ ইনচার্জ রিসিভড না করা পর্যন্ত বিমান আকাশে ধীরে ধীরে ভেসে থাকবে, আপডেট দিলে বাংলাদেশে পৌঁছানো দেখাবে'
-                  : 'Planes hover mid-air en-route until Bangladesh Warehouse Incharge updates shipment status as Received'}
-              </p>
-            </div>
+          <div className="flex items-center gap-2">
+            <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
+            <h2 className="text-xl md:text-2xl font-black tracking-wider uppercase text-white">
+              SHIPMENT VISUALIZATION
+            </h2>
           </div>
+          <p className="text-xs md:text-sm font-semibold text-slate-400 mt-0.5">
+            China To Bangladesh <span className="text-amber-400 font-bold uppercase tracking-wider">By Air</span>
+          </p>
         </div>
 
-        {/* Action Controls & Route Selector */}
-        <div className="flex items-center space-x-2">
-          {/* Route Filter Selector Pills */}
-          <div className={`flex items-center p-1 rounded-xl border text-xs font-normal ${
-            isDark ? 'bg-slate-900/90 border-slate-700/80' : 'bg-slate-100 border-slate-300/80'
-          }`}>
-            <button
-              type="button"
-              onClick={() => setSelectedRoute('all')}
-              className={`px-3 py-1.5 rounded-lg transition-all font-medium text-xs whitespace-nowrap cursor-pointer select-none hover:opacity-90 active:scale-95 ${
-                selectedRoute === 'all'
-                  ? 'bg-[#1D4ED8] text-white shadow-2xs'
-                  : isDark
-                  ? 'text-slate-200 hover:bg-slate-800 hover:text-white'
-                  : 'text-slate-700 hover:bg-slate-200/80 hover:text-slate-900'
-              }`}
+        {/* Dynamic Flight Selector & System Badge */}
+        <div className="flex flex-wrap items-center gap-3">
+          {activeProposals.length > 0 && (
+            <select
+              value={selectedFlightId}
+              onChange={(e) => setSelectedFlightId(e.target.value)}
+              className="bg-slate-800 border border-slate-700 text-xs md:text-sm font-medium text-slate-200 rounded-xl px-3 py-2 outline-none focus:ring-2 focus:ring-amber-500 cursor-pointer"
             >
-              {isBn ? 'সকল রুট' : 'All Routes'}
-            </button>
+              <option value="all">
+                {isBn ? '✈️ প্রধান সক্রিয় এয়ার ফ্লাইট' : '✈️ Active Flight Batches'} ({activeProposals.length})
+              </option>
+              {activeProposals.map((p, idx) => (
+                <option key={p.id || idx} value={p.id}>
+                  {p.flying_name || p.flight_number || `Flight #${idx + 1}`} ({p.total_weight || 0}kg)
+                </option>
+              ))}
+            </select>
+          )}
 
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedRoute('guangzhou');
-                setActiveFlightPopup('BS-206');
-              }}
-              className={`px-3 py-1.5 rounded-lg transition-all font-medium text-xs whitespace-nowrap cursor-pointer select-none hover:opacity-90 active:scale-95 ${
-                selectedRoute === 'guangzhou'
-                  ? 'bg-blue-600 text-white shadow-2xs'
-                  : isDark
-                  ? 'text-slate-200 hover:bg-slate-800 hover:text-white'
-                  : 'text-slate-700 hover:bg-slate-200/80 hover:text-slate-900'
-              }`}
-            >
-              🇨🇳 {isBn ? 'চীন ➔ 🇧🇩' : 'China ➔ BD'}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedRoute('hongkong');
-                setActiveFlightPopup('CX-008');
-              }}
-              className={`px-3 py-1.5 rounded-lg transition-all font-medium text-xs whitespace-nowrap cursor-pointer select-none hover:opacity-90 active:scale-95 ${
-                selectedRoute === 'hongkong'
-                  ? 'bg-purple-600 text-white shadow-2xs'
-                  : isDark
-                  ? 'text-slate-200 hover:bg-slate-800 hover:text-white'
-                  : 'text-slate-700 hover:bg-slate-200/80 hover:text-slate-900'
-              }`}
-            >
-              🇭🇰 {isBn ? 'হংকং ➔ 🇧🇩' : 'Hong Kong ➔ BD'}
-            </button>
-
-            <button
-              type="button"
-              onClick={() => {
-                setSelectedRoute('dubai');
-                setActiveFlightPopup('EK-582');
-              }}
-              className={`px-3 py-1.5 rounded-lg transition-all font-medium text-xs whitespace-nowrap cursor-pointer select-none hover:opacity-90 active:scale-95 ${
-                selectedRoute === 'dubai'
-                  ? 'bg-emerald-600 text-white shadow-2xs'
-                  : isDark
-                  ? 'text-slate-200 hover:bg-slate-800 hover:text-white'
-                  : 'text-slate-700 hover:bg-slate-200/80 hover:text-slate-900'
-              }`}
-            >
-              🇦🇪 {isBn ? 'দুবাই ➔ 🇧🇩' : 'Dubai ➔ BD'}
-            </button>
-          </div>
-
-          {/* Refresh Radar Button */}
           <button
-            type="button"
-            onClick={handleRefreshRadar}
-            className={`p-2 rounded-xl border transition-all text-xs font-normal cursor-pointer select-none hover:opacity-90 active:scale-95 flex items-center space-x-1 ${
-              isDark
-                ? 'bg-slate-900 border-slate-700 text-slate-200 hover:bg-slate-800 hover:text-white'
-                : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-100 shadow-2xs'
-            }`}
-            title={isBn ? 'রিফ্রেশ করুন' : 'Refresh Radar'}
+            onClick={handleRefresh}
+            className={`p-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-all ${isRefreshing ? 'animate-spin' : ''}`}
+            title={isBn ? 'রিফ্রেশ লাইভ ডাটা' : 'Refresh Live Radar'}
           >
-            <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin text-[#1D4ED8]' : ''}`} />
+            <RefreshCw className="w-4 h-4 text-amber-400" />
           </button>
         </div>
       </div>
 
-      {/* Futuristic Air Radar Canvas Container */}
-      <div className={`relative w-full overflow-hidden min-h-[380px] p-4 flex flex-col justify-between select-none ${
-        isDark ? 'bg-[#090F1E] text-white' : 'bg-slate-900 text-white'
-      }`}>
-        {/* Decorative Grid Overlay & Concentric Radar Rings */}
-        <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:24px_24px] opacity-30 pointer-events-none" />
+      {/* Main Map Container */}
+      <div className="relative w-full aspect-[16/9] min-h-[380px] md:min-h-[480px] bg-[#091526] overflow-hidden select-none">
+        {/* World Map Satellite Graphic Canvas/SVG */}
+        <svg
+          viewBox="0 0 1000 520"
+          className="w-full h-full object-cover"
+          preserveAspectRatio="xMidYMid slice"
+        >
+          <defs>
+            {/* Satellite Map Gradient Patterns */}
+            <linearGradient id="oceanGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#0B1A30" />
+              <stop offset="50%" stopColor="#091526" />
+              <stop offset="100%" stopColor="#050C18" />
+            </linearGradient>
 
-        {/* Global Telemetry Overlay Bar */}
-        <div className="relative z-10 flex flex-wrap items-center justify-between gap-3 text-xs font-normal text-slate-300 bg-slate-950/80 backdrop-blur-md p-3 rounded-2xl border border-slate-800">
-          <div className="flex items-center space-x-4">
-            <span className="flex items-center space-x-1.5">
-              <Compass className="w-4 h-4 text-blue-400 animate-spin" style={{ animationDuration: '12s' }} />
-              <span className="text-slate-300 font-medium">{isBn ? 'এয়ার রুট কভারেজ মানচিত্র' : 'Air Cargo Radar Field'}</span>
-            </span>
-            <span className="text-slate-700">|</span>
-            <span className="flex items-center space-x-1 font-mono text-emerald-400">
-              <Activity className="w-3.5 h-3.5" />
-              <span>BD INCHARGE SYSTEM SYNC: OK</span>
-            </span>
-          </div>
+            <linearGradient id="flightArcGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor="#EF4444" />
+              <stop offset="50%" stopColor="#F59E0B" />
+              <stop offset="100%" stopColor="#10B981" />
+            </linearGradient>
 
-          <div className="flex items-center space-x-3 text-[11px] font-mono">
-            <span className="text-slate-400">DHAKA HUB: <span className="text-white">DAC (Bangladesh 🇧🇩)</span></span>
-            <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">SYSTEM LIVE</span>
-          </div>
-        </div>
+            {/* Glowing filter effects */}
+            <filter id="glowRed" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="8" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
 
-        {/* Vector SVG World & Flight Route Canvas */}
-        <div className="relative w-full h-[310px] my-2">
-          <svg viewBox="0 0 800 340" className="w-full h-full overflow-visible">
-            <defs>
-              <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
-                <feGaussianBlur stdDeviation="3" result="blur" />
-                <feComposite in="SourceGraphic" in2="blur" operator="over" />
-              </filter>
+            <filter id="glowGreen" x="-20%" y="-20%" width="140%" height="140%">
+              <feGaussianBlur stdDeviation="8" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
 
-              <linearGradient id="grad-guangzhou" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#3B82F6" stopOpacity="0.9" />
-                <stop offset="100%" stopColor="#10B981" stopOpacity="0.9" />
-              </linearGradient>
+            <filter id="arcGlow" x="-10%" y="-10%" width="120%" height="120%">
+              <feGaussianBlur stdDeviation="4" result="blur" />
+              <feComposite in="SourceGraphic" in2="blur" operator="over" />
+            </filter>
+          </defs>
 
-              <linearGradient id="grad-hongkong" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#A855F7" stopOpacity="0.9" />
-                <stop offset="100%" stopColor="#10B981" stopOpacity="0.9" />
-              </linearGradient>
+          {/* Ocean Base */}
+          <rect width="1000" height="520" fill="url(#oceanGrad)" />
 
-              <linearGradient id="grad-dubai" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#F59E0B" stopOpacity="0.9" />
-                <stop offset="100%" stopColor="#10B981" stopOpacity="0.9" />
-              </linearGradient>
-            </defs>
+          {/* Grid Gridlines (Subtle Radar Coordinate Lines) */}
+          <g opacity="0.12" stroke="#38BDF8" strokeWidth="0.5" strokeDasharray="4 6">
+            <line x1="0" y1="130" x2="1000" y2="130" />
+            <line x1="0" y1="260" x2="1000" y2="260" />
+            <line x1="0" y1="390" x2="1000" y2="390" />
+            <line x1="250" y1="0" x2="250" y2="520" />
+            <line x1="500" y1="0" x2="500" y2="520" />
+            <line x1="750" y1="0" x2="750" y2="520" />
+          </g>
 
-            {/* Concentric Radar Range Rings Centered around Dhaka (x=380, y=210) */}
-            <circle cx="380" cy="210" r="80" fill="none" stroke="#1E293B" strokeWidth="1" strokeDasharray="3 3" opacity="0.6" />
-            <circle cx="380" cy="210" r="160" fill="none" stroke="#1E293B" strokeWidth="1" strokeDasharray="4 4" opacity="0.5" />
-            <circle cx="380" cy="210" r="250" fill="none" stroke="#1E293B" strokeWidth="1" strokeDasharray="5 5" opacity="0.4" />
+          {/* World Continents Rough SVG Paths (Detailed Realistic Satellite Outline) */}
+          <g fill="#1E293B" stroke="#334155" strokeWidth="0.8" opacity="0.6">
+            {/* Africa */}
+            <path d="M 120 220 Q 150 250 170 320 Q 150 380 120 420 Q 90 350 70 280 Z" />
+            {/* Europe */}
+            <path d="M 100 80 Q 180 90 220 120 Q 160 140 100 80 Z" />
+            {/* Middle East & Central Asia */}
+            <path d="M 230 140 Q 340 120 440 150 Q 380 200 230 180 Z" stroke="#475569" />
+            {/* India Subcontinent */}
+            <path d="M 240 210 Q 300 220 320 290 Q 260 320 220 260 Z" fill="#1E293B" />
+            {/* Southeast Asia */}
+            <path d="M 720 270 Q 780 290 820 350 Q 740 370 700 300 Z" />
+            {/* Russia / North Asia */}
+            <path d="M 380 40 Q 700 30 920 60 Q 800 120 380 100 Z" opacity="0.4" />
+          </g>
 
-            {/* Smooth Continent Landmass Vector Outlines (Asia, Middle East, India) */}
-            {/* Indian Subcontinent Outline */}
+          {/* 🇨🇳 CHINA REGION HIGHLIGHT (Vibrant Red Overlay matching Screenshot 1) */}
+          <g filter="url(#glowRed)">
+            {/* China Territory Shape */}
             <path
-              d="M 330 140 L 360 160 L 410 170 L 440 190 L 420 230 L 385 265 L 360 250 L 340 210 L 310 180 L 315 150 Z"
-              fill="#1E293B"
-              fillOpacity="0.35"
-              stroke="#334155"
-              strokeWidth="1"
+              d="M 680 130 Q 780 120 890 160 Q 880 250 760 270 Q 720 210 680 130 Z"
+              fill="#EF4444"
+              fillOpacity="0.75"
+              stroke="#F87171"
+              strokeWidth="2"
             />
-            {/* Southeast Asia & China Landmass */}
+            <text x="785" y="185" fill="#FFFFFF" fontSize="22" fontWeight="900" textAnchor="middle" letterSpacing="2">
+              CHINA
+            </text>
+          </g>
+
+          {/* 🇧🇩 BANGLADESH REGION HIGHLIGHT (Vibrant Green Overlay matching Screenshot 1) */}
+          <g filter="url(#glowGreen)">
+            {/* Bangladesh Territory Shape */}
             <path
-              d="M 450 120 L 550 100 L 730 110 L 760 170 L 720 220 L 630 250 L 540 210 L 470 175 Z"
-              fill="#1E293B"
-              fillOpacity="0.3"
-              stroke="#334155"
-              strokeWidth="1"
+              d="M 265 285 Q 295 275 305 315 Q 285 335 260 320 Z"
+              fill="#10B981"
+              fillOpacity="0.85"
+              stroke="#34D399"
+              strokeWidth="2.5"
             />
-            {/* Middle East & Gulf Landmass */}
+            <text x="275" y="260" fill="#FFFFFF" fontSize="16" fontWeight="900" textAnchor="middle" letterSpacing="1.5">
+              BANGLADESH
+            </text>
+          </g>
+
+          {/* CURVED FLIGHT TRAJECTORY ARC (China -> Bangladesh Curved Line) */}
+          <g filter="url(#arcGlow)">
+            {/* Background Glow Arc */}
             <path
-              d="M 60 120 L 150 110 L 220 140 L 200 200 L 140 230 L 80 190 Z"
-              fill="#1E293B"
-              fillOpacity="0.3"
-              stroke="#334155"
-              strokeWidth="1"
+              d={`M ${originPos.x} ${originPos.y} Q ${controlPos.x} ${controlPos.y} ${destPos.x} ${destPos.y}`}
+              fill="none"
+              stroke="#F59E0B"
+              strokeWidth="4"
+              strokeDasharray="8 6"
+              opacity="0.8"
             />
+            {/* Animated Solid Dash Pulse Arc */}
+            <path
+              d={`M ${originPos.x} ${originPos.y} Q ${controlPos.x} ${controlPos.y} ${destPos.x} ${destPos.y}`}
+              fill="none"
+              stroke="url(#flightArcGrad)"
+              strokeWidth="3"
+            />
+          </g>
 
-            {/* Zero active flights empty state badge */}
-            {routes.length === 0 && (
-              <g className="animate-in fade-in duration-300">
-                <rect x="200" y="140" width="400" height="60" rx="12" fill="#0F172A" fillOpacity="0.85" stroke="#334155" strokeWidth="1" />
-                <text x="400" y="165" textAnchor="middle" fill="#94A3B8" fontSize="12" fontWeight="500">
-                  {isBn ? 'বর্তমানে কোনো ফ্লাইট প্রস্তাবনা উড্ডয়ন অবস্থায় নেই' : 'No Active Air Cargo Flights in Transit'}
-                </text>
-                <text x="400" y="185" textAnchor="middle" fill="#64748B" fontSize="10">
-                  {isBn ? 'ইনচার্জ প্রস্তাবনা তৈরি ও ডেসপ্যাচ করলে এখানে রিয়েল-টাইম উড্ডয়ন দেখা যাবে' : 'Live planes appear when Warehouse Incharge releases flight proposals'}
-                </text>
-              </g>
-            )}
+          {/* China Origin Pin Marker */}
+          <g transform={`translate(${originPos.x}, ${originPos.y})`}>
+            <circle r="16" fill="#EF4444" fillOpacity="0.3" className="animate-ping" />
+            <circle r="10" fill="#EF4444" stroke="#FFFFFF" strokeWidth="2.5" />
+            <circle r="4" fill="#FFFFFF" />
+          </g>
 
-            {/* Flight Path Curves & Airplane Markers */}
-            {routes.map((r) => {
-              if (selectedRoute !== 'all' && selectedRoute !== r.id) return null;
+          {/* Bangladesh Destination Pin Marker */}
+          <g transform={`translate(${destPos.x}, ${destPos.y})`}>
+            <circle r="18" fill="#10B981" fillOpacity="0.3" className="animate-ping" />
+            <circle r="11" fill="#10B981" stroke="#FFFFFF" strokeWidth="2.5" />
+            <circle r="4.5" fill="#FFFFFF" />
+          </g>
 
-              const pathD = `M ${r.originCoords.x} ${r.originCoords.y} Q ${r.curveControl.x} ${r.curveControl.y} ${r.destCoords.x} ${r.destCoords.y}`;
-
-              const t = r.progress;
-              const planeX = (1 - t) * (1 - t) * r.originCoords.x + 2 * (1 - t) * t * r.curveControl.x + t * t * r.destCoords.x;
-              const planeY = (1 - t) * (1 - t) * r.originCoords.y + 2 * (1 - t) * t * r.curveControl.y + t * t * r.destCoords.y;
-
-              // Explicit plane rotation ensuring nose points directly along flight path towards Bangladesh (Dhaka DAC 🇧🇩):
-              // 1. Dubai (West of BD, x < 400): Flies East-Southeast towards Dhaka -> rotate(90deg)
-              // 2. China & Hong Kong (East of BD, x >= 400): Fly West-Southwest towards Dhaka -> rotate(-180deg)
-              const planeRotation = r.originCoords.x < 400 ? 90 : -180;
-
-              const isSelected = activeFlightPopup === r.flightNo;
-              const isLanded = r.status === 'received';
-
-              return (
-                <g key={r.id}>
-                  {/* High-Tech Glowing Flight Trajectory Route Line */}
-                  <path
-                    d={pathD}
-                    fill="none"
-                    stroke={r.color || '#3B82F6'}
-                    strokeWidth={isSelected ? '3.5' : '2.5'}
-                    strokeDasharray={isLanded ? '3 3' : r.status === 'in_transit' ? '8 4' : '5 5'}
-                    strokeOpacity={isLanded ? 0.45 : 0.85}
-                    className={`transition-all duration-300 ${r.status === 'in_transit' ? 'animate-pulse' : ''}`}
-                    filter="url(#glow)"
-                  />
-                  {/* Subtle Secondary Inner Core Line */}
-                  <path
-                    d={pathD}
-                    fill="none"
-                    stroke="#FFFFFF"
-                    strokeWidth="1"
-                    strokeDasharray={r.status === 'in_transit' ? '4 6' : '2 4'}
-                    strokeOpacity={r.status === 'in_transit' ? 0.9 : 0.4}
-                  />
-
-                  {/* Origin Hub Circle */}
-                  <g className="cursor-pointer" onClick={() => setActiveFlightPopup(r.flightNo)}>
-                    <circle cx={r.originCoords.x} cy={r.originCoords.y} r="14" fill={r.color} fillOpacity="0.15" />
-                    <circle cx={r.originCoords.x} cy={r.originCoords.y} r="6" fill={r.color} />
-                    <text
-                      x={r.originCoords.x}
-                      y={r.originCoords.y - 12}
-                      textAnchor="middle"
-                      fill="#FFFFFF"
-                      fontSize="10"
-                      className="font-mono font-normal select-none"
-                    >
-                      {r.originCode}
-                    </text>
-                  </g>
-
-                  {/* Airplane Marker */}
-                  <g
-                    transform={`translate(${planeX}, ${planeY})`}
-                    className="cursor-pointer transition-transform duration-300 hover:scale-125"
-                    onClick={() => setActiveFlightPopup(r.flightNo)}
-                  >
-                    <circle
-                      cx="0"
-                      cy="0"
-                      r="16"
-                      fill={isLanded ? '#10B981' : r.color}
-                      fillOpacity="0.25"
-                      className={isLanded ? '' : 'animate-ping'}
-                    />
-                    <circle
-                      cx="0"
-                      cy="0"
-                      r="10"
-                      fill="#0F172A"
-                      stroke={isLanded ? '#10B981' : r.color}
-                      strokeWidth="2"
-                    />
-                    <foreignObject x="-8" y="-8" width="16" height="16">
-                      <div className="w-full h-full flex items-center justify-center text-blue-400">
-                        {isLanded ? (
-                          <Check className="w-3.5 h-3.5 text-emerald-400" />
-                        ) : (
-                          <Plane
-                            className="w-3.5 h-3.5 text-blue-400"
-                            style={{ transform: `rotate(${planeRotation}deg)` }}
-                          />
-                        )}
-                      </div>
-                    </foreignObject>
-
-                    {/* Flight Badge Label */}
-                    <rect
-                      x="12"
-                      y="-10"
-                      width="62"
-                      height="18"
-                      rx="9"
-                      fill="#0F172A"
-                      stroke={isLanded ? '#10B981' : r.color}
-                      strokeWidth="1"
-                    />
-                    <text x="43" y="3" textAnchor="middle" fill="#FFFFFF" fontSize="9" className="font-mono font-normal">
-                      {isLanded ? `${r.flightNo} 🛬` : r.flightNo}
-                    </text>
-                  </g>
-                </g>
-              );
-            })}
-
-            {/* Destination Hub: Dhaka Central Airport (DAC 🇧🇩) */}
-            <g className="cursor-pointer">
-              <circle cx="380" cy="210" r="22" fill="#10B981" fillOpacity="0.2" className="animate-pulse" />
-              <circle cx="380" cy="210" r="12" fill="#10B981" fillOpacity="0.4" />
-              <circle cx="380" cy="210" r="6" fill="#10B981" />
-              <text x="380" y="244" textAnchor="middle" fill="#10B981" fontSize="11" className="font-mono font-normal tracking-wide">
-                DAC (Dhaka Central 🇧🇩)
-              </text>
+          {/* ANIMATED AIRPLANE FLYING ALONG THE ARC */}
+          <g transform={`translate(${planePos.x}, ${planePos.y}) rotate(${planePos.angle + 180})`}>
+            {/* Airplane Shadow */}
+            <g transform="translate(0, 12) scale(0.9)" opacity="0.3">
+              <path
+                d="M 0 -18 L 8 4 L 20 10 L 8 12 L 5 20 L 0 17 L -5 20 L -8 12 L -20 10 L -8 4 Z"
+                fill="#000000"
+              />
             </g>
-          </svg>
 
-          {/* Floating Detail Card (Placed dynamically on OPPOSITE side of active flight route) */}
-          {activeRouteObj && (
-            <div className={`absolute ${cardPositionClass} max-w-sm w-full backdrop-blur-xl border rounded-none p-4 text-xs font-normal shadow-2xl space-y-3 z-20 transition-all duration-300 ${
-              isDark
-                ? 'bg-[#141416]/95 border-[#2C2C2E] text-white shadow-[0_20px_50px_rgba(0,0,0,0.8)]'
-                : 'bg-white/95 border-slate-300 text-slate-900 shadow-xl'
-            }`}>
-              <div className="flex items-center justify-between border-b pb-2.5 border-slate-200 dark:border-[#2C2C2E]">
-                <div className="flex items-center space-x-2">
-                  <div className="p-1.5 rounded-none bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                    <Plane className="w-4 h-4" />
-                  </div>
-                  <div>
-                    <h4 className={`font-medium flex items-center space-x-1.5 ${isDark ? 'text-white' : 'text-slate-900 font-semibold'}`}>
-                      <span>{activeRouteObj.flightNo}</span>
-                      <span className={`text-[10px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-600 font-normal'}`}>({activeRouteObj.airline})</span>
-                    </h4>
-                    <p className={`text-[10px] font-mono mt-0.5 ${isDark ? 'text-slate-400' : 'text-slate-700 font-medium'}`}>{activeRouteObj.name}</p>
-                  </div>
-                </div>
+            {/* Glowing Airplane Icon */}
+            <g transform="scale(1.35)">
+              <circle r="18" fill="#F59E0B" fillOpacity="0.25" className="animate-pulse" />
+              {/* Custom High-Res Vector Airplane */}
+              <path
+                d="M 0 -16 L 6 4 L 18 10 L 6 12 L 4 19 L 0 16 L -4 19 L -6 12 L -18 10 L -6 4 Z"
+                fill="#FFFFFF"
+                stroke="#D97706"
+                strokeWidth="1.5"
+              />
+            </g>
+          </g>
+        </svg>
 
-                <span className={`px-2.5 py-0.5 rounded-none text-[10px] font-mono border ${
-                  activeRouteObj.status === 'received'
-                    ? isDark ? 'bg-emerald-500/20 text-emerald-300 border-emerald-500/30' : 'bg-emerald-50 text-emerald-800 border-emerald-300 font-bold'
-                    : activeRouteObj.status === 'in_transit'
-                    ? isDark ? 'bg-blue-500/20 text-blue-300 border-blue-500/30' : 'bg-blue-50 text-blue-800 border-blue-300 font-bold'
-                    : isDark ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-amber-50 text-amber-800 border-amber-300 font-bold'
-                }`}>
-                  {activeRouteObj.status === 'received'
-                    ? isBn ? '🛬 বাংলাদেশ ওয়্যারহাউজে প্রাপ্ত' : '🛬 Received in BD'
-                    : activeRouteObj.status === 'in_transit'
-                    ? isBn ? '✈️ মিড-এয়ার ফ্লাইটে চলমান' : '✈️ Cruising Mid-Air'
-                    : isBn ? '⏳ রিলিজের অপেক্ষায় (Awaiting Release)' : '⏳ Awaiting Launch'}
-                </span>
-              </div>
+        {/* FLOATING DETAIL CARD 1: ORIGIN CHINA (Top Right matching Screenshot 1) */}
+        <div className="absolute top-4 right-4 md:top-6 md:right-6 w-64 md:w-72 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-4 shadow-2xl text-white">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
+              Origin
+            </span>
+            <span className="flex items-center gap-1 text-xs font-bold text-red-400 bg-red-950/60 px-2 py-0.5 rounded-full border border-red-800/60">
+              <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              China 🇨🇳
+            </span>
+          </div>
 
-              {/* Metrics */}
-              <div className="grid grid-cols-3 gap-2 text-center text-[11px] font-mono">
-                <div className={`p-2 rounded-none border ${isDark ? 'bg-[#0E0E10] border-[#2C2C2E]' : 'bg-slate-100 border-slate-300'}`}>
-                  <span className="text-[9px] text-slate-500 dark:text-slate-400 block">{isBn ? 'উচ্চতা' : 'ALTITUDE'}</span>
-                  <span className="text-blue-600 dark:text-blue-400 font-medium">{activeRouteObj.altitude}</span>
-                </div>
-                <div className={`p-2 rounded-none border ${isDark ? 'bg-[#0E0E10] border-[#2C2C2E]' : 'bg-slate-100 border-slate-300'}`}>
-                  <span className="text-[9px] text-slate-500 dark:text-slate-400 block">{isBn ? 'গতিবেগ' : 'SPEED'}</span>
-                  <span className="text-purple-600 dark:text-purple-400 font-medium">{activeRouteObj.speed}</span>
-                </div>
-                <div className={`p-2 rounded-none border ${isDark ? 'bg-[#0E0E10] border-[#2C2C2E]' : 'bg-slate-100 border-slate-300'}`}>
-                  <span className="text-[9px] text-slate-500 dark:text-slate-400 block">{isBn ? 'অবস্থা' : 'STATUS'}</span>
-                  <span className="text-emerald-600 dark:text-emerald-400 font-medium">{activeRouteObj.eta}</span>
-                </div>
-              </div>
-
-              {/* Notice */}
-              <div className={`p-2 rounded-none border text-[10px] font-normal leading-relaxed ${
-                isDark ? 'bg-[#0E0E10] border-[#2C2C2E] text-slate-400' : 'bg-slate-50 border-slate-300 text-slate-700'
-              }`}>
-                {isBn
-                  ? '💡 নোট: বাংলাদেশ ওয়্যারহাউজ ইনচার্জ কার্গো রিসিভড মার্ক না করা পর্যন্ত বিমানটি আন্তর্জাতিক আকাশে ভাসমান থাকবে।'
-                  : '💡 Note: Airplane stays cruising in mid-air until BD Warehouse Incharge updates status as Received.'}
-              </div>
+          <div className="mt-2.5">
+            <div className="text-base font-black text-white flex items-center justify-between">
+              <span>China Cargo Hub</span>
+              <span className="text-xs font-semibold text-slate-400">CAN / PVG</span>
             </div>
-          )}
+            <p className="text-xs font-medium text-slate-300 mt-1">
+              Departure Airport: <span className="text-amber-400 font-bold">Guangzhou / Shanghai PVG</span>
+            </p>
+          </div>
+
+          <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-300">
+            <div>
+              <span className="text-slate-400 block text-[10px]">Flight No:</span>
+              <span className="font-bold text-white">#{flightName}</span>
+            </div>
+            <div className="text-right">
+              <span className="text-slate-400 block text-[10px]">Total Cargo:</span>
+              <span className="font-bold text-amber-400">{cartonsCount} CTNs ({totalWeight}kg)</span>
+            </div>
+          </div>
         </div>
 
-        {/* Bottom Legend Cards */}
-        <div className={`relative z-10 grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t text-xs font-normal ${
-          isDark ? 'border-[#2C2C2E] text-slate-300' : 'border-slate-300 text-slate-800'
-        }`}>
-          {routes.map((r) => (
-            <div
-              key={r.id}
-              onClick={() => setActiveFlightPopup(r.flightNo)}
-              className={`flex items-center justify-between p-2.5 rounded-none transition-all cursor-pointer border ${
-                activeFlightPopup === r.flightNo
-                  ? isDark
-                    ? 'bg-[#242426] border-blue-500/80 shadow-2xs'
-                    : 'bg-blue-50/90 border-blue-500 shadow-2xs text-slate-900'
-                  : isDark
-                  ? 'bg-[#18181A] border-[#2C2C2E] hover:bg-[#202023] text-slate-200'
-                  : 'bg-white border-slate-300 hover:bg-slate-50 text-slate-900 shadow-xs'
-              }`}
-            >
-              <div className="flex items-center space-x-2 min-w-0">
-                <span className="w-2.5 h-2.5 rounded-none shrink-0" style={{ backgroundColor: r.color }}></span>
-                <div className="min-w-0">
-                  <span className={`block font-normal text-[11px] truncate ${isDark ? 'text-white' : 'text-slate-900 font-semibold'}`}>
-                    {r.name}
-                  </span>
-                  <span className={`text-[10px] font-mono ${isDark ? 'text-slate-400' : 'text-slate-700 font-medium'}`}>
-                    {r.flightNo} • {r.weight}
-                  </span>
-                </div>
-              </div>
+        {/* FLOATING DETAIL CARD 2: DESTINATION BANGLADESH (Bottom Left matching Screenshot 1) */}
+        <div className="absolute bottom-20 left-4 md:bottom-24 md:left-6 w-64 md:w-72 bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-2xl p-4 shadow-2xl text-white">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+            <span className="text-[11px] font-extrabold uppercase tracking-widest text-slate-400">
+              Destination
+            </span>
+            <span className="flex items-center gap-1 text-xs font-bold text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded-full border border-emerald-800/60">
+              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+              Bangladesh 🇧🇩
+            </span>
+          </div>
 
-              <span className={`text-[10px] px-2 py-0.5 rounded-none border font-mono shrink-0 ml-2 ${
-                r.status === 'received'
-                  ? isDark ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-emerald-50 text-emerald-800 border-emerald-300 font-bold'
-                  : r.status === 'in_transit'
-                  ? isDark ? 'bg-blue-500/10 text-blue-400 border-blue-500/20' : 'bg-blue-50 text-blue-800 border-blue-300 font-bold'
-                  : isDark ? 'bg-amber-500/10 text-amber-400 border-amber-500/20' : 'bg-amber-50 text-amber-800 border-amber-300 font-bold'
-              }`}>
-                {r.status === 'received' ? '🛬 BD Arrived' : r.status === 'in_transit' ? '✈️ Mid-Air' : '⏳ Awaiting Launch'}
+          <div className="mt-2.5">
+            <div className="text-base font-black text-white flex items-center justify-between">
+              <span>Bangladesh Hub</span>
+              <span className="text-xs font-semibold text-emerald-400">DAC</span>
+            </div>
+            <p className="text-xs font-medium text-slate-300 mt-1">
+              Arrival Airport: <span className="text-emerald-400 font-bold">Hazrat Shahjalal Intl. (DAC)</span>
+            </p>
+          </div>
+
+          <div className="mt-3 pt-2.5 border-t border-slate-800/80 flex items-center justify-between text-xs text-slate-300">
+            <div>
+              <span className="text-slate-400 block text-[10px]">Current Status:</span>
+              <span className={`font-bold capitalize ${flightStatus === 'received' ? 'text-emerald-400' : 'text-amber-400'}`}>
+                {flightStatus === 'received' ? '✅ Landed & Received at DAC' : '✈️ In-Transit Flying'}
               </span>
             </div>
-          ))}
+            <div className="text-right">
+              <span className="text-slate-400 block text-[10px]">AWB No:</span>
+              <span className="font-bold text-slate-200">{awb}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* BOTTOM SECTION: SHIPMENT FLOW BY AIR (6-Step Flow matching Screenshot 1) */}
+      <div className="p-5 md:p-6 bg-slate-900/95 border-t border-slate-800 backdrop-blur-md">
+        <div className="text-center mb-4">
+          <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">
+            SHIPMENT FLOW BY AIR
+          </h3>
+        </div>
+
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 md:gap-4 relative">
+          {/* Step 1: Pickup */}
+          <div className={`flex flex-col items-center text-center p-3 rounded-xl border transition-all ${currentStepIndex >= 1 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 border ${currentStepIndex >= 1 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-lg shadow-amber-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
+              <MapPin className="w-5 h-5" />
+            </div>
+            <span className="text-xs font-bold block text-white">1. Pickup</span>
+            <span className="text-[10px] text-slate-400 mt-1 leading-tight">Supplier picks up the goods in China</span>
+          </div>
+
+          {/* Step 2: Warehouse */}
+          <div className={`flex flex-col items-center text-center p-3 rounded-xl border transition-all ${currentStepIndex >= 2 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 border ${currentStepIndex >= 2 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-lg shadow-amber-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
+              <PackageCheck className="w-5 h-5" />
+            </div>
+            <span className="text-xs font-bold block text-white">2. Warehouse</span>
+            <span className="text-[10px] text-slate-400 mt-1 leading-tight">Goods received at China Warehouse</span>
+          </div>
+
+          {/* Step 3: Documentation */}
+          <div className={`flex flex-col items-center text-center p-3 rounded-xl border transition-all ${currentStepIndex >= 3 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 border ${currentStepIndex >= 3 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-lg shadow-amber-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
+              <Layers className="w-5 h-5" />
+            </div>
+            <span className="text-xs font-bold block text-white">3. Documentation</span>
+            <span className="text-[10px] text-slate-400 mt-1 leading-tight">Export documentation & customs</span>
+          </div>
+
+          {/* Step 4: Air Transit */}
+          <div className={`flex flex-col items-center text-center p-3 rounded-xl border transition-all ${currentStepIndex >= 4 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 border ${currentStepIndex >= 4 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-lg shadow-amber-500/20 animate-pulse' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
+              <Plane className="w-5 h-5" />
+            </div>
+            <span className="text-xs font-bold block text-white">4. Air Transit</span>
+            <span className="text-[10px] text-slate-400 mt-1 leading-tight">Shipment in transit by air</span>
+          </div>
+
+          {/* Step 5: Customs Clearance */}
+          <div className={`flex flex-col items-center text-center p-3 rounded-xl border transition-all ${currentStepIndex >= 5 ? 'bg-emerald-950/30 border-emerald-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 border ${currentStepIndex >= 5 ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
+              <CheckCircle2 className="w-5 h-5" />
+            </div>
+            <span className="text-xs font-bold block text-white">5. Customs Clearance</span>
+            <span className="text-[10px] text-slate-400 mt-1 leading-tight">Import clearance in Bangladesh</span>
+          </div>
+
+          {/* Step 6: Final Delivery */}
+          <div className={`flex flex-col items-center text-center p-3 rounded-xl border transition-all ${currentStepIndex >= 6 ? 'bg-emerald-950/30 border-emerald-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 border ${currentStepIndex >= 6 ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-lg shadow-emerald-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
+              <ArrowRight className="w-5 h-5" />
+            </div>
+            <span className="text-xs font-bold block text-white">6. Final Delivery</span>
+            <span className="text-[10px] text-slate-400 mt-1 leading-tight">Delivered to doorstep in BD</span>
+          </div>
         </div>
       </div>
     </div>
