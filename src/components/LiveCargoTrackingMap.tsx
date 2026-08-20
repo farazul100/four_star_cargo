@@ -212,28 +212,17 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             <circle r="4.5" fill="#FFFFFF" />
           </g>
 
-          {/* HIGH-VISIBILITY ANIMATED CARGO AIRPLANE IN MID-AIR */}
+          {/* ANIMATED AIRPLANE FLYING ALONG THE ARC (User's Exact Commercial Airliner PNG Photo Only) */}
           <g transform={`translate(${planePos.x}, ${planePos.y}) rotate(${planePos.angle + 180})`}>
-            {/* Bright Pulsing Golden Aura Badge */}
-            <circle r="38" fill="#F59E0B" fillOpacity="0.35" className="animate-pulse" />
-            <circle r="24" fill="#D97706" fillOpacity="0.6" />
-
-            {/* Glowing White Airplane Base Shape */}
-            <path
-              d="M 0 -22 L 8 6 L 24 14 L 8 16 L 5 25 L 0 21 L -5 25 L -8 16 L -24 14 L -8 6 Z"
-              fill="#FFFFFF"
-              stroke="#F59E0B"
-              strokeWidth="2"
-            />
-
-            {/* User's Transparent PNG Airplane Image Overlay */}
+            {/* User's Exact Transparent PNG Commercial Airplane Photo */}
             <image
               href={CARGO_PLANE_BASE64}
               xlinkHref={CARGO_PLANE_BASE64}
-              x="-65"
-              y="-22"
-              width="130"
-              height="44"
+              x="-60"
+              y="-20"
+              width="120"
+              height="40"
+              style={{ filter: 'drop-shadow(0px 4px 12px rgba(0, 0, 0, 0.85))' }}
             />
           </g>
         </svg>
