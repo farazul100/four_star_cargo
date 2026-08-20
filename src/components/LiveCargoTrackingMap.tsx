@@ -211,14 +211,9 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             <circle r="11" fill="#10B981" stroke="#FFFFFF" strokeWidth="2.5" />
             <circle r="4.5" fill="#FFFFFF" />
           </g>
-
-          {/* Glowing Radar Beacon Underneath Plane */}
-          <g transform={`translate(${planePos.x}, ${planePos.y})`}>
-            <circle r="36" fill="#F59E0B" fillOpacity="0.3" className="animate-ping" />
-          </g>
         </svg>
 
-        {/* NATIVE HARDWARE-ACCELERATED HTML PNG AIRPLANE FLOATING ON TOP AT Z-30 */}
+        {/* NATIVE 100% SOLID HIGH-RESOLUTION PNG AIRPLANE FLOATING ON TOP AT Z-30 */}
         <div
           className="absolute z-30 pointer-events-none transition-transform duration-75 ease-linear flex items-center justify-center"
           style={{
@@ -229,8 +224,8 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
         >
           <img
             src={CARGO_PLANE_BASE64}
-            alt="User Cargo Plane"
-            className="w-28 sm:w-36 md:w-48 h-auto object-contain filter drop-shadow-[0_10px_20px_rgba(0,0,0,0.9)] brightness-110"
+            alt="Four Star Cargo Aircraft"
+            className="w-36 sm:w-48 md:w-60 h-auto object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.95)]"
           />
         </div>
 
