@@ -26,7 +26,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
 
   const [selectedFlightId, setSelectedFlightId] = useState<string>('all');
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-  const [animProgress, setAnimProgress] = useState<number>(0.50); // 0.22 to 0.78 along flight arc
+  const [animProgress, setAnimProgress] = useState<number>(0.25); // 0.15 (China) to 0.80 (BD approach)
 
   // Map active database proposals
   const activeProposals = useMemo(() => {
@@ -52,17 +52,23 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
     return 'proposed';
   }, [currentProposal]);
 
-  // ALWAYS ANIMATE PLANE CONTINUOUSLY IN CLEAR MID-AIR BETWEEN CHINA AND BANGLADESH (0.22 to 0.78)
+  // REALISTIC SLOW FLIGHT ANIMATION LOGIC (Glides slowly across Asia until received in BD)
   useEffect(() => {
+    if (flightStatus === 'received') {
+      setAnimProgress(0.88); // Landed at DAC Hub in Bangladesh
+      return;
+    }
+
+    // Slowly fly across from China (0.15) towards BD (0.80) at realistic speed
     const interval = setInterval(() => {
       setAnimProgress((prev) => {
-        if (prev >= 0.78) return 0.22;
-        return prev + 0.005;
+        if (prev >= 0.80) return 0.15; // Loop back slowly if still in-transit
+        return prev + 0.0008; // Very smooth, slow progression (~65 seconds)
       });
-    }, 60);
+    }, 80);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [flightStatus]);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
@@ -213,20 +219,38 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
           </g>
         </svg>
 
-        {/* NATIVE 100% PERFECT HIGH-RESOLUTION PNG AIRPLANE FLOATING ON TOP AT Z-30 */}
+        {/* NATIVE 100% PERFECT HIGH-RESOLUTION PNG AIRPLANE & FLOATING FLIGHT NAME BADGE AT Z-30 */}
         <div
-          className="absolute z-30 pointer-events-none transition-transform duration-75 ease-linear flex items-center justify-center"
+          className="absolute z-30 pointer-events-none transition-all duration-150 ease-linear flex flex-col items-center justify-center"
           style={{
             left: `${(planePos.x / 1024) * 100}%`,
             top: `${(planePos.y / 682) * 100}%`,
-            transform: `translate(-50%, -50%) rotate(${planePos.angle - 180}deg)`,
+            transform: `translate(-50%, -50%)`,
           }}
         >
-          <img
-            src={CARGO_PLANE_BASE64}
-            alt="Four Star Cargo Aircraft"
-            className="w-32 sm:w-44 md:w-56 h-auto object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)]"
-          />
+          {/* FLOATING FLIGHT NAME BADGE ABOVE AIRPLANE */}
+          <div className="mb-2 whitespace-nowrap bg-slate-950/90 text-white border border-amber-500/80 px-3 py-1 rounded-xl shadow-2xl backdrop-blur-md flex items-center gap-2 animate-bounce">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+            <span className="text-[11px] font-black text-amber-400 uppercase tracking-widest">
+              ✈️ #{flightName}
+            </span>
+            <span className="text-[10px] font-bold text-slate-300">
+              ({cartonsCount} CTNs)
+            </span>
+          </div>
+
+          {/* AIRPLANE IMAGE ROTATED ALONG TRAJECTORY TANGENT */}
+          <div
+            style={{
+              transform: `rotate(${planePos.angle - 180}deg)`,
+            }}
+          >
+            <img
+              src={CARGO_PLANE_BASE64}
+              alt="Four Star Cargo Aircraft"
+              className="w-32 sm:w-44 md:w-56 h-auto object-contain filter drop-shadow-[0_8px_16px_rgba(0,0,0,0.9)]"
+            />
+          </div>
         </div>
 
         {/* FLOATING DETAIL CARD 1: ORIGIN CHINA (Top Right Overlay) */}
