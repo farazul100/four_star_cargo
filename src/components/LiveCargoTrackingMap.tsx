@@ -77,13 +77,13 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
     }, 700);
   };
 
-  // Exact coordinates aligned 1-to-1 over satellite_china_bd_map.png pins (viewBox: 0 0 1000 550)
-  // China Red Pin on satellite map: x=770, y=230
-  // Bangladesh Green Pin on satellite map: x=415, y=270
-  // Bezier Arc Control Point (Arcing upwards over Asia): x=590, y=130
-  const originPos = { x: 770, y: 230 };
-  const destPos = { x: 415, y: 270 };
-  const controlPos = { x: 590, y: 130 };
+  // Exact 1-to-1 coordinates over satellite_china_bd_map.png pins (viewBox: 0 0 1000 550)
+  // China Red Pin (Verified correct): x=770, y=420
+  // Bangladesh Green Pin (Fixed directly on Bangladesh pin): x=265, y=495
+  // Quadratic Bezier Control Point: x=515, y=200
+  const originPos = { x: 770, y: 420 };
+  const destPos = { x: 265, y: 495 };
+  const controlPos = { x: 515, y: 200 };
 
   // Calculate quadratic Bezier point at ratio t (0 <= t <= 1)
   const getBezierPoint = (t: number) => {
@@ -159,7 +159,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
       </div>
 
       {/* Main Map Container aligned 1-to-1 with Satellite Background */}
-      <div className="relative w-full aspect-[1000/550] min-h-[360px] md:min-h-[460px] bg-[#071526] overflow-hidden select-none">
+      <div className="relative w-full aspect-[1000/550] min-h-[360px] md:min-h-[460px] bg-[#071526] overflow-hidden select-none flex items-center justify-center">
         {/* User's Exact Satellite Map Background Image */}
         <img
           src="/images/satellite_china_bd_map.png"
@@ -186,7 +186,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             </filter>
           </defs>
 
-          {/* CURVED FLIGHT TRAJECTORY ARC (China -> Bangladesh Over Asia) */}
+          {/* CURVED FLIGHT TRAJECTORY ARC (China -> Bangladesh) */}
           <g filter="url(#arcGlow)">
             <path
               d={`M ${originPos.x} ${originPos.y} Q ${controlPos.x} ${controlPos.y} ${destPos.x} ${destPos.y}`}
@@ -194,7 +194,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
               stroke="#F59E0B"
               strokeWidth="4"
               strokeDasharray="8 6"
-              opacity="0.9"
+              opacity="0.85"
             />
             <path
               d={`M ${originPos.x} ${originPos.y} Q ${controlPos.x} ${controlPos.y} ${destPos.x} ${destPos.y}`}
