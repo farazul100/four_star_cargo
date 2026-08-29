@@ -791,3 +791,99 @@ export const logSystemAuditAction = (
   saveHostingerDbData(DB_KEYS.AUDIT, updatedAuditLogs);
   return newAuditLog;
 };
+
+// FACTORY SYSTEM DATA RESET (Super Admin Only)
+// Wipes all transactional data (cartons, proposals, ledgers, vouchers, customer records, logs)
+// Preserves Super Admin account credentials, role permissions, warehouse configs, and DB table/column schemas.
+export const performFactorySystemReset = async (currentUser?: any) => {
+  const resetTime = new Date().toISOString();
+  const resetUser = currentUser && currentUser.name ? currentUser : getActiveSystemUser();
+
+  const resetAuditLog: AuditLog = {
+    id: `audit-factory-reset-${Date.now()}`,
+    user_id: resetUser.id || 'usr-admin-master',
+    user_name: resetUser.name || 'সুপার এডমিন (Super Admin)',
+    user_role: resetUser.role || 'super_admin',
+    action: 'FACTORY_SYSTEM_RESET',
+    entity_type: 'system',
+    entity_id: 'ALL_TRANSACTIONS',
+    details: 'সুপার এডমিন কতৃক ফ্যাক্টরি রিসেট সম্পন্ন হয়েছে। সাইটের সমস্ত ট্রানজ্যাকশন ডাটা মুছে ফেলা হয়েছে (এডমিন আইডি ও কলাম অক্ষত)।',
+    created_at: resetTime,
+  };
+
+  // Clear LocalStorage transactional keys
+  const keysToClear = [
+    DB_KEYS.CARTONS,
+    DB_KEYS.PROPOSALS,
+    DB_KEYS.CUSTOMERS,
+    DB_KEYS.CRM_CUSTOMERS,
+    DB_KEYS.LEDGER,
+    DB_KEYS.EXPENSES,
+    DB_KEYS.CONVERSATIONS,
+    DB_KEYS.MESSAGES,
+    DB_KEYS.CALLS,
+    'fsc_vps_notifications',
+    'fsc_deliveries',
+    'cartons',
+    'proposals',
+    'customers',
+    'ledger',
+    'expenses',
+  ];
+
+  keysToClear.forEach((key) => {
+    try {
+      localStorage.setItem(key, JSON.stringify([]));
+    } catch (e) {}
+  });
+
+  // Save audit log recording the reset
+  try {
+    localStorage.setItem(DB_KEYS.AUDIT, JSON.stringify([resetAuditLog]));
+  } catch (e) {}
+
+  // Clear window in-memory references
+  if (typeof window !== 'undefined') {
+    window.__FSC_GLOBAL_CARTONS__ = [];
+    window.__FSC_GLOBAL_PROPOSALS__ = [];
+  }
+
+  // Push clean reset payload directly to Hostinger server DB api
+  const cleanPayload = {
+    cartons: [],
+    proposals: [],
+    customers: [],
+    crm_customers: [],
+    ledger: [],
+    expenses: [],
+    auditLogs: [resetAuditLog],
+    notifications: [],
+    deliveries: [],
+    fsc_vps_cartons: [],
+    fsc_vps_proposals: [],
+    fsc_vps_customers: [],
+    fsc_vps_ledger: [],
+    fsc_vps_expenses: [],
+    fsc_vps_audit: [resetAuditLog],
+  };
+
+  try {
+    const endpoints = ['/api/db.php', '/api/db', 'https://four.kee2mart.com/api/db.php'];
+    await Promise.allSettled(
+      endpoints.map((url) =>
+        fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(cleanPayload),
+        })
+      )
+    );
+  } catch (e) {}
+
+  // Trigger real-time sync event
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key: 'factory_reset' } }));
+  }
+
+  return true;
+};

@@ -6,9 +6,15 @@ import {
   Save,
   Globe,
   Building,
+  AlertTriangle,
+  RotateCcw,
+  ShieldAlert,
+  Trash2,
+  X,
+  Lock,
 } from 'lucide-react';
 import { Language, User } from '../types';
-import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction, performFactorySystemReset } from '../lib/db';
 import {
   PathaoApiCredentials,
   getPathaoApiSettings,
@@ -78,8 +84,13 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
   isDark = false,
 }) => {
   const isBn = language === 'bn';
-  const [activeTab, setActiveTab] = useState<'general' | 'api' | 'budget_rates'>('general');
+  const [activeTab, setActiveTab] = useState<'general' | 'api' | 'budget_rates' | 'danger_zone'>('general');
   const [isTestingPathao, setIsTestingPathao] = useState(false);
+
+  // Danger Zone Factory Reset State
+  const [showResetModal, setShowResetModal] = useState<boolean>(false);
+  const [resetConfirmInput, setResetConfirmInput] = useState<string>('');
+  const [isResetting, setIsResetting] = useState<boolean>(false);
 
   // General Form Settings State
   const [settings, setSettings] = useState<GeneralSettingsData>(() => {
@@ -289,6 +300,19 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
           >
             <Building className="w-4 h-4 text-teal-300" />
             <span>{isBn ? '💰 বাজেট ও ফ্রেইট রেট সেটিংস' : 'Budget & Rate Settings'}</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setActiveTab('danger_zone')}
+            className={`px-4 py-2 rounded-none text-xs font-bold flex items-center space-x-2 transition-all cursor-pointer ${
+              activeTab === 'danger_zone'
+                ? 'bg-rose-700 text-white shadow-xs'
+                : 'bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 border border-rose-500/20'
+            }`}
+          >
+            <AlertTriangle className="w-4 h-4 text-rose-500" />
+            <span>{isBn ? '🚨 ডেঞ্জার জোন (ফ্যাক্টরি রিসেট)' : '🚨 Danger Zone (Factory Reset)'}</span>
           </button>
         </div>
       </div>
@@ -1009,6 +1033,150 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
           </div>
         </form>
       </div>
+
+      {/* TAB 4: DANGER ZONE — FACTORY SYSTEM RESET */}
+      {activeTab === 'danger_zone' && (
+        <div className="space-y-6">
+          <div className={`p-6 md:p-8 rounded-2xl border ${
+            isDark ? 'bg-[#181014] border-rose-900/60 text-white' : 'bg-rose-50/80 border-rose-200 text-slate-900'
+          } shadow-xl space-y-6`}>
+            <div className="flex items-start space-x-4">
+              <div className="p-3.5 bg-rose-500/20 text-rose-500 rounded-2xl border border-rose-500/30 shrink-0">
+                <AlertTriangle className="w-8 h-8 text-rose-500 animate-pulse" />
+              </div>
+              <div className="space-y-1.5 flex-1">
+                <div className="flex items-center gap-2">
+                  <h3 className="text-lg font-black text-rose-600 dark:text-rose-400 uppercase tracking-wider">
+                    {isBn ? '🚨 ডেঞ্জার জোন — ফ্যাক্টরি সিস্টেম রিস্টোর (Reset All Data)' : '🚨 Danger Zone — Factory System Restore'}
+                  </h3>
+                  <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-rose-600 text-white font-mono font-bold">SUPER ADMIN ONLY</span>
+                </div>
+                <p className="text-xs text-slate-600 dark:text-slate-300 font-medium leading-relaxed">
+                  {isBn
+                    ? 'এই অপশনটি শুধুমাত্র সুপার এডমিনদের জন্য। রিস্টোর বাটনে ক্লিক করলে পুরো সাইটের সমস্ত ট্রানজ্যাকশন ডাটা (যেমন: সকল কার্টুন, ফ্লাইট প্রস্তাবনা, ফিন্যান্সিয়াল লেজার, খরচ, কাস্টমার ও ট্র্যাকিং ডাটা) সম্পূর্ণরূপে মুছে একদম ফ্রেশ ০-অবস্থায় চলে আসবে।'
+                    : 'This action is exclusively for Super Admin. Clicking restore will wipe all site transaction data (cartons, flight proposals, financial ledger, expenses, customer records & tracking data) turning the site 100% fresh.'}
+                </p>
+              </div>
+            </div>
+
+            <div className={`p-4 rounded-xl border text-xs space-y-2.5 ${
+              isDark ? 'bg-[#110B0E] border-rose-900/40 text-slate-300' : 'bg-white border-rose-200 text-slate-700 shadow-2xs'
+            }`}>
+              <div className="font-bold text-rose-600 dark:text-rose-400 flex items-center gap-2 text-xs uppercase tracking-wider">
+                <ShieldAlert className="w-4 h-4" />
+                <span>{isBn ? 'সুরক্ষিত এবং অক্ষত থাকবে (Protected System Data):' : 'Protected Credentials & Database Schemas:'}</span>
+              </div>
+              <ul className="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[11px] font-mono">
+                <li className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-semibold flex items-center gap-1.5">
+                  <span>✅</span>
+                  <span>{isBn ? 'সুপার এডমিন অ্যাকাউন্ট ও আইডি' : 'Super Admin Account ID'}</span>
+                </li>
+                <li className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-semibold flex items-center gap-1.5">
+                  <span>✅</span>
+                  <span>{isBn ? 'ডাটাবেস টেবিল ও কলাম স্কিমা' : 'DB Tables & Column Schema'}</span>
+                </li>
+                <li className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-semibold flex items-center gap-1.5">
+                  <span>✅</span>
+                  <span>{isBn ? 'ওয়্যারহাউজ কনফিগারেশন' : 'Warehouse System Configs'}</span>
+                </li>
+              </ul>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                type="button"
+                onClick={() => {
+                  setResetConfirmInput('');
+                  setShowResetModal(true);
+                }}
+                className="px-6 py-3 rounded-xl bg-rose-600 hover:bg-rose-700 active:scale-95 text-white font-black text-xs shadow-xl flex items-center space-x-2 transition-all cursor-pointer border border-rose-500"
+              >
+                <RotateCcw className="w-4 h-4 text-white" />
+                <span>{isBn ? '🔥 পুরো সাইটের ডাটা মুছে রিস্টোর করুন (Reset Site Data)' : '🔥 Perform Factory Reset & Restore Data'}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* DOUBLE-CONFIRMATION FACTORY RESET MODAL */}
+      {showResetModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className={`max-w-md w-full border rounded-2xl p-6 space-y-5 shadow-2xl ${
+            isDark ? 'bg-[#1C1C1E] border-rose-800 text-white' : 'bg-white border-rose-200 text-slate-900'
+          }`}>
+            <div className="flex items-center justify-between border-b border-rose-500/20 pb-3">
+              <div className="flex items-center space-x-2 text-rose-500">
+                <AlertTriangle className="w-5 h-5 animate-bounce" />
+                <h3 className="font-black text-sm uppercase tracking-wider">
+                  {isBn ? '🚨 সাইট ডাটা রিসেট নিশ্চিতকরণ' : '🚨 Factory System Reset Confirmation'}
+                </h3>
+              </div>
+              <button
+                onClick={() => setShowResetModal(false)}
+                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <p className="font-semibold text-rose-600 dark:text-rose-400 bg-rose-500/10 border border-rose-500/20 p-3 rounded-xl">
+                ⚠️ {isBn
+                  ? 'আপনি কি নিশ্চিত যে পুরো সাইটের সমস্ত ট্রানজ্যাকশন ডাটা মুছে ফেলতে চান? সুপার এডমিন আইডি এবং টেবিল কলামসমূহ অক্ষত থাকবে।'
+                  : 'Are you sure you want to delete all site transaction data? Super Admin ID and database table columns will stay intact.'}
+              </p>
+
+              <div className="space-y-1.5 pt-1">
+                <label className="text-[11px] font-bold text-slate-400 block uppercase tracking-wider">
+                  {isBn ? 'নিশ্চিত করতে নিচে "RESET" শব্দটি লিখুন:' : 'Type "RESET" below to confirm:'}
+                </label>
+                <input
+                  type="text"
+                  value={resetConfirmInput}
+                  onChange={(e) => setResetConfirmInput(e.target.value)}
+                  placeholder="RESET"
+                  className={`w-full border rounded-xl py-2 px-3 text-xs font-mono font-bold tracking-widest uppercase outline-none ${
+                    isDark ? 'bg-[#121214] border-rose-900 text-rose-400 focus:border-rose-500' : 'bg-rose-50 border-rose-300 text-rose-700 focus:border-rose-500'
+                  }`}
+                />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end space-x-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowResetModal(false)}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold transition-all cursor-pointer"
+              >
+                {isBn ? 'বাতিল করুন' : 'Cancel'}
+              </button>
+
+              <button
+                type="button"
+                disabled={resetConfirmInput.trim().toUpperCase() !== 'RESET' || isResetting}
+                onClick={async () => {
+                  setIsResetting(true);
+                  try {
+                    await performFactorySystemReset(currentUser);
+                    showToast(isBn ? '✅ সম্পূর্ণ সাইট ডাটা রিসেট সফল হয়েছে! পেজ রিফ্রেস হচ্ছে...' : '✅ Factory System Reset complete! Reloading...');
+                    setTimeout(() => {
+                      window.location.reload();
+                    }, 1500);
+                  } catch (e) {
+                    showToast(isBn ? '🔴 রিসেট ব্যর্থ হয়েছে' : '🔴 Reset failed');
+                    setIsResetting(false);
+                  }
+                }}
+                className="px-5 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-black shadow-lg flex items-center space-x-2 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                <Trash2 className="w-4 h-4 text-white" />
+                <span>{isResetting ? (isBn ? 'রিসেট হচ্ছে...' : 'Resetting...') : (isBn ? 'হ্যাঁ, সমস্ত ডাটা রিসেট করুন' : 'Confirm Factory Reset')}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
