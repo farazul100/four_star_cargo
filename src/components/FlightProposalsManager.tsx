@@ -556,9 +556,9 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                   onChange={(e) => setWarehouseFilter(e.target.value)}
                   className="bg-transparent outline-none cursor-pointer text-xs font-normal dark:bg-[#121214] dark:text-white"
                 >
-                  <option value="all" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">{isBn ? 'সব ওয়্যারহাউজ (All Origin Hubs)' : 'All Origin Hubs'}</option>
-                  <option value="wh-china" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">গুয়াংজু ওয়্যারহাউজ (China)</option>
-                  <option value="wh-hk" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">হংকং ওয়্যারহাউজ (Hong Kong)</option>
+                  <option value="all" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">All Origin Hubs</option>
+                  <option value="wh-china" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">Guangzhou Air Cargo Hub (China)</option>
+                  <option value="wh-hk" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">Hong Kong Cargo Terminal (Hong Kong)</option>
                 </select>
               </div>
             </div>
@@ -975,9 +975,9 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                     onChange={(e) => setWarehouseFilter(e.target.value)}
                     className="bg-transparent outline-none cursor-pointer text-xs font-normal dark:bg-[#121214] dark:text-white"
                   >
-                    <option value="all" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">{isBn ? 'সব ওয়্যারহাউজ (All Origin Hubs)' : 'All Origin Hubs'}</option>
-                    <option value="wh-china" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">গুয়াংজু ওয়্যারহাউজ (China)</option>
-                    <option value="wh-hk" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">হংকং ওয়্যারহাউজ (Hong Kong)</option>
+                    <option value="all" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">All Origin Hubs</option>
+                    <option value="wh-china" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">Guangzhou Air Cargo Hub (China)</option>
+                    <option value="wh-hk" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">Hong Kong Cargo Terminal (Hong Kong)</option>
                   </select>
                 </div>
               </div>

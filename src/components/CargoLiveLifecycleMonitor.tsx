@@ -98,17 +98,17 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
           </div>
           <div>
             <h1 className="text-xl font-normal tracking-wide flex items-center space-x-2">
-              <span>⚡ কার্গো লাইফসাইকেল মনিটর ও রিয়েল-টাইম অপারেশনস ফিড</span>
+              <span>⚡ Cargo Lifecycle Monitor & Real-Time Operations Feed</span>
             </h1>
             <p className="text-xs text-slate-500 dark:text-slate-400 font-light mt-1">
-              এক পলকে দেখে নিন কখন কোন প্রোডাক্ট বুকিং হয়েছে, ফ্লাইটে রয়েছে, বাংলাদেশ ওয়্যারহাউজে মেপে রিসিভ করা হয়েছে এবং কাস্টমারকে ডেলিভারি দেওয়া হয়েছে।
+              Track at a glance when products are booked, flying in air, received at BD hub, and delivered to customers.
             </p>
           </div>
         </div>
 
         <div className="flex items-center space-x-2 text-xs text-slate-500 font-light bg-slate-100 dark:bg-slate-800/80 px-3 py-1.5 rounded-none border border-slate-300 dark:border-slate-700">
           <Clock className="w-4 h-4 text-emerald-500" />
-          <span>অটোমেটিক রিয়েল-টাইম সিঙ্ক সক্রিয়</span>
+          <span>Automatic Real-Time Sync Active</span>
         </div>
       </div>
 
@@ -119,14 +119,14 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
           isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-200'
         }`}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-light text-slate-500">📝 চীন বুকিং (Booked)</span>
+            <span className="text-xs font-light text-slate-500">📝 China Booked</span>
             <div className="p-2 bg-blue-500/10 text-blue-500 rounded-none border border-blue-500/20">
               <Package className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline justify-between">
             <span className="text-2xl font-normal text-slate-900 dark:text-white font-mono">{bookedCount}</span>
-            <span className="text-[11px] text-slate-400 font-light">মোট কার্টুন</span>
+            <span className="text-[11px] text-slate-400 font-light">Total Cartons</span>
           </div>
         </div>
 
@@ -135,14 +135,14 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
           isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-200'
         }`}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-light text-slate-500">✈️ এয়ার ফ্লাইট (In Transit)</span>
+            <span className="text-xs font-light text-slate-500">✈️ Air Flight (In Transit)</span>
             <div className="p-2 bg-amber-500/10 text-amber-500 rounded-none border border-amber-500/20">
               <Plane className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline justify-between">
             <span className="text-2xl font-normal text-slate-900 dark:text-white font-mono">{flyingCount}</span>
-            <span className="text-[11px] text-slate-400 font-light">আকাশপথে পরিবাহিত</span>
+            <span className="text-[11px] text-slate-400 font-light">In-Flight Transit</span>
           </div>
         </div>
 
@@ -151,14 +151,14 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
           isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-200'
         }`}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-light text-slate-500">📥 BD স্টক (Stock Received)</span>
+            <span className="text-xs font-light text-slate-500">📥 BD Hub Received</span>
             <div className="p-2 bg-emerald-500/10 text-emerald-500 rounded-none border border-emerald-500/20">
               <CheckCircle2 className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline justify-between">
             <span className="text-2xl font-normal text-slate-900 dark:text-white font-mono">{bdReceivedCount}</span>
-            <span className="text-[11px] text-slate-400 font-light">মেপে রিসিভড</span>
+            <span className="text-[11px] text-slate-400 font-light">Calibrated & Received</span>
           </div>
         </div>
 
@@ -167,14 +167,14 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
           isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-200'
         }`}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-light text-slate-500">🚚 বিলিকৃত (Delivered)</span>
+            <span className="text-xs font-light text-slate-500">🚚 Customer Delivered</span>
             <div className="p-2 bg-purple-500/10 text-purple-500 rounded-none border border-purple-500/20">
               <Truck className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-2 flex items-baseline justify-between">
             <span className="text-2xl font-normal text-slate-900 dark:text-white font-mono">{deliveredCount}</span>
-            <span className="text-[11px] text-slate-400 font-light">কাস্টমারকে হস্তান্তরিত</span>
+            <span className="text-[11px] text-slate-400 font-light">Handed to Customer</span>
           </div>
         </div>
       </div>
@@ -195,7 +195,7 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200'
               }`}
             >
-              📦 সকল অ্যাক্টিভিটি ({totalCount})
+              📦 All Activity ({totalCount})
             </button>
             <button
               type="button"
@@ -206,7 +206,7 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200'
               }`}
             >
-              📝 চীন বুকিং ({bookedCount})
+              📝 China Booked ({bookedCount})
             </button>
             <button
               type="button"
@@ -217,7 +217,7 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200'
               }`}
             >
-              ✈️ এয়ার ফ্লাইট ({flyingCount})
+              ✈️ Air Flight ({flyingCount})
             </button>
             <button
               type="button"
@@ -228,7 +228,7 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200'
               }`}
             >
-              📥 BD স্টক রিসিভ ({bdReceivedCount})
+              📥 BD Hub Received ({bdReceivedCount})
             </button>
             <button
               type="button"
@@ -239,7 +239,7 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200'
               }`}
             >
-              🚚 কাস্টমার ডেলিভারি ({deliveredCount})
+              🚚 Customer Delivery ({deliveredCount})
             </button>
           </div>
 
@@ -264,7 +264,7 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
             isDark ? 'bg-slate-900 border-slate-800 text-slate-400' : 'bg-white border-slate-200 text-slate-500'
           }`}>
             <Package className="w-10 h-10 mx-auto opacity-40 mb-2 font-light" />
-            <p className="text-sm font-light">কোনো কার্টুন অ্যাক্টিভিটি ডাটা পাওয়া যায়নি</p>
+            <p className="text-sm font-light">No cargo activity data found</p>
           </div>
         ) : (
           filteredCartons.map((carton) => {
@@ -319,15 +319,15 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
                     <div className="flex items-center justify-between">
                       <span className="font-normal flex items-center space-x-1">
                         <Package className="w-3.5 h-3.5" />
-                        <span>১. চীন বুকিং</span>
+                        <span>1. China Booking</span>
                       </span>
-                      <span className="text-[10px] bg-blue-500/20 px-1.5 py-0.5 rounded-none font-light">সম্পন্ন</span>
+                      <span className="text-[10px] bg-blue-500/20 px-1.5 py-0.5 rounded-none font-light">Completed</span>
                     </div>
                     <div className="text-[11px] font-light text-slate-500 dark:text-slate-400">
-                      উৎস: {carton.current_warehouse_name || 'গুয়াংজু ওয়্যারহাউজ'}
+                      Origin: {carton.current_warehouse_name || 'Guangzhou Air Cargo Hub'}
                     </div>
                     <div className="text-[10px] font-light text-slate-400">
-                      তারিখ: {carton.created_at ? new Date(carton.created_at).toLocaleDateString('bn-BD') : 'N/A'}
+                      Date: {carton.created_at ? new Date(carton.created_at).toLocaleDateString('en-US') : 'N/A'}
                     </div>
                   </div>
 
@@ -340,19 +340,19 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
                     <div className="flex items-center justify-between">
                       <span className="font-normal flex items-center space-x-1">
                         <Plane className="w-3.5 h-3.5" />
-                        <span>২. এয়ার ফ্লাইট</span>
+                        <span>2. Air Flight</span>
                       </span>
                       {isFlying ? (
-                        <span className="text-[10px] bg-amber-500/20 px-1.5 py-0.5 rounded-none font-light">ফ্লাইটে আছে</span>
+                        <span className="text-[10px] bg-amber-500/20 px-1.5 py-0.5 rounded-none font-light">In Transit</span>
                       ) : (
-                        <span className="text-[10px] text-slate-400 font-light">অপেমান</span>
+                        <span className="text-[10px] text-slate-400 font-light">Pending</span>
                       )}
                     </div>
                     <div className="text-[11px] font-light text-slate-500 dark:text-slate-400">
-                      ফ্লাইট: {carton.flight_number || 'N/A'} (AWB: {carton.awb_number || 'N/A'})
+                      Flight: {carton.flight_number || 'N/A'} (AWB: {carton.awb_number || 'N/A'})
                     </div>
                     <div className="text-[10px] font-light text-slate-400">
-                      ফ্লাইং তারিখ: {carton.flying_date || 'N/A'}
+                      Flight Date: {carton.flying_date || 'N/A'}
                     </div>
                   </div>
 
@@ -365,19 +365,19 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
                     <div className="flex items-center justify-between">
                       <span className="font-normal flex items-center space-x-1">
                         <CheckCircle2 className="w-3.5 h-3.5" />
-                        <span>৩. BD মেপে রিসিভড</span>
+                        <span>3. BD Hub Received</span>
                       </span>
                       {isBDReceived ? (
-                        <span className="text-[10px] bg-emerald-500/20 px-1.5 py-0.5 rounded-none font-light">স্টকে রিসিভড</span>
+                        <span className="text-[10px] bg-emerald-500/20 px-1.5 py-0.5 rounded-none font-light">Stock Received</span>
                       ) : (
-                        <span className="text-[10px] text-slate-400 font-light">অপেমান</span>
+                        <span className="text-[10px] text-slate-400 font-light">Pending</span>
                       )}
                     </div>
                     <div className="text-[11px] font-light text-slate-500 dark:text-slate-400">
-                      লোকেশন: ঢাকা সেন্ট্রাল Hub (wh-bd)
+                      Location: Dhaka Central Hub (wh-bd)
                     </div>
                     <div className="text-[10px] font-normal text-emerald-600 dark:text-emerald-400">
-                      চূড়ান্ত স্কেল ওজন: {carton.gross_weight} KG
+                      Calibrated Weight: {carton.gross_weight} KG
                     </div>
                   </div>
 
@@ -390,19 +390,19 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
                     <div className="flex items-center justify-between">
                       <span className="font-normal flex items-center space-x-1">
                         <Truck className="w-3.5 h-3.5" />
-                        <span>৪. কাস্টমার ডেলিভারি</span>
+                        <span>4. Customer Delivery</span>
                       </span>
                       {isDelivered ? (
-                        <span className="text-[10px] bg-purple-500/20 px-1.5 py-0.5 rounded-none font-light">ডেলিভারড</span>
+                        <span className="text-[10px] bg-purple-500/20 px-1.5 py-0.5 rounded-none font-light">Delivered</span>
                       ) : (
-                        <span className="text-[10px] text-slate-400 font-light">প্রসেসিং</span>
+                        <span className="text-[10px] text-slate-400 font-light">Processing</span>
                       )}
                     </div>
                     <div className="text-[11px] font-light text-slate-500 dark:text-slate-400">
-                      অবস্থা: {isDelivered ? 'কাস্টমারকে হস্তান্তরিত' : 'ওয়্যারহাউজে বিলির অপেক্ষায়'}
+                      Status: {isDelivered ? 'Handed Over to Customer' : 'Awaiting Dispatch at Hub'}
                     </div>
                     <div className="text-[10px] font-light text-slate-400">
-                      স্ট্যাটাস: {isDelivered ? 'পরিশোধিত / হস্তান্তরিত' : 'প্রস্তুতgetStock'}
+                      Payment: {isDelivered ? 'Settled & Delivered' : 'Ready for Pickup'}
                     </div>
                   </div>
                 </div>

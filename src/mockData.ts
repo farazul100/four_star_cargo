@@ -3,7 +3,7 @@ import { User, Warehouse, Carton, FlyingProposal, Customer, LedgerEntry, AuditLo
 export const INITIAL_USERS: User[] = [
   {
     id: 'usr-admin-master',
-    name: 'সুপার এডমিন (Super Admin)',
+    name: 'Super Admin',
     email: 'superadmin@cargo.com',
     password: 'Cargo@2026',
     role: 'super_admin',
@@ -15,7 +15,7 @@ export const INITIAL_USERS: User[] = [
 export const INITIAL_WAREHOUSES: Warehouse[] = [
   {
     id: 'wh-china',
-    name: 'গুয়াংজু ওয়্যারহাউজ (Guangzhou Air Cargo Hub)',
+    name: 'Guangzhou Air Cargo Hub',
     country: 'China 🇨🇳',
     code: 'CAN-01',
     hub_type: 'origin',
@@ -29,7 +29,7 @@ export const INITIAL_WAREHOUSES: Warehouse[] = [
   },
   {
     id: 'wh-hk',
-    name: 'হংকং ওয়্যারহাউজ (Hong Kong Cargo Terminal)',
+    name: 'Hong Kong Cargo Terminal',
     country: 'Hong Kong 🇭🇰',
     code: 'HKG-01',
     hub_type: 'origin',
@@ -43,7 +43,7 @@ export const INITIAL_WAREHOUSES: Warehouse[] = [
   },
   {
     id: 'wh-dubai',
-    name: 'দুবাই ওয়্যারহাউজ (Dubai Cargo Village Hub)',
+    name: 'Dubai Cargo Village Hub',
     country: 'UAE 🇦🇪',
     code: 'DXB-01',
     hub_type: 'origin',
@@ -57,12 +57,12 @@ export const INITIAL_WAREHOUSES: Warehouse[] = [
   },
   {
     id: 'wh-bd',
-    name: 'ঢাকা সেন্ট্রাল ওয়্যারহাউজ (Dhaka Central Freight Hub)',
+    name: 'Dhaka Central Freight Hub',
     country: 'Bangladesh 🇧🇩',
     code: 'DAC-01',
     hub_type: 'destination',
     is_final_destination: true,
-    address: 'প্লট ৪৫, তেজগাঁও শিল্প এলাকা, ঢাকা-১২০৮',
+    address: 'Plot 45, Tejgaon Industrial Area, Dhaka-1208',
     city: 'Dhaka',
     phone: '+880 1711-009988',
     status: 'active',

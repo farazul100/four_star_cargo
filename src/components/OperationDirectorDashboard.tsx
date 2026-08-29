@@ -518,7 +518,7 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
             <div className="space-y-4 pt-1">
               <div>
                 <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
-                  <span className="font-medium">গুয়াংজু ওয়্যারহাউজ (Guangzhou Hub 🇨🇳)</span>
+                  <span className="font-medium">Guangzhou Air Hub 🇨🇳</span>
                   <span className="text-slate-900 dark:text-white font-bold font-mono">65% (923 kg)</span>
                 </div>
                 <div className="w-full h-3.5 bg-[#F1F5F9] dark:bg-slate-800 rounded-none overflow-hidden border border-slate-200/70 p-0.5">
@@ -790,7 +790,7 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
           <div className="space-y-5 pt-2">
             <div>
               <div className="flex justify-between text-xs text-slate-700 dark:text-slate-300 mb-1.5 font-normal">
-                <span className="font-normal">গুয়াংজু ওয়্যারহাউজ (Guangzhou Hub 🇨🇳)</span>
+                <span className="font-normal">Guangzhou Air Hub 🇨🇳</span>
                 <span className="text-slate-900 dark:text-white font-normal font-mono">65% (923 kg)</span>
               </div>
               <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">

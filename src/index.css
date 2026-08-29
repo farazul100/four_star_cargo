@@ -127,19 +127,16 @@ html.light .text-\[\#7C7C7C\] {
 html.light .text-slate-400,
 html.light .text-slate-500 {
   color: #334155 !important;
-  font-weight: 500 !important;
 }
 
 html.light .text-slate-600,
 html.light .text-slate-700 {
   color: #1E293B !important;
-  font-weight: 600 !important;
 }
 
 html.light .text-slate-800,
 html.light .text-slate-900 {
   color: #020617 !important;
-  font-weight: 700 !important;
 }
 
 /* Form Controls, Inputs & Selects */
