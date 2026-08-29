@@ -8,9 +8,11 @@ import { ForgotPasswordModal } from '../components/ForgotPasswordModal';
 import { useTranslation } from '../hooks/useTranslation';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../hooks/useAuth';
+import { useAuthContext } from '../context/AuthContext';
 import { UserRole, User as UserType } from '../types';
 import { INITIAL_USERS } from '../mockData';
 import { getHostingerDbData, logSystemAuditAction } from '../lib/db';
+import { Navigate } from 'react-router-dom';
 
 interface LoginPageProps {
   expectedRole: UserRole;
@@ -22,7 +24,19 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
   const { lang } = useTranslation();
   const { theme, toggleTheme } = useTheme();
   const { signIn } = useAuth();
+  const { user } = useAuthContext();
   const isDark = theme === 'dark';
+
+  if (user) {
+    const dashboardRoutes: Record<string, string> = {
+      super_admin: '/admin/dashboard',
+      operation_director: '/operations/dashboard',
+      warehouse_incharge: '/warehouse/dashboard',
+      accountant: '/accounts/dashboard',
+      crm_executive: '/crm/dashboard',
+    };
+    return <Navigate to={dashboardRoutes[user.role] || targetDashboardRoute} replace />;
+  }
 
   const dbUsers: UserType[] = getHostingerDbData().users || INITIAL_USERS;
   const roleUsers = dbUsers.filter((u: UserType) => u.role === expectedRole);

@@ -13,6 +13,23 @@ import { useAuthContext } from './context/AuthContext';
 import { useTranslation } from './hooks/useTranslation';
 import { initHostingerDb, fetchServerDbAndSync } from './lib/db';
 
+const getRoleDashboardRoute = (role?: string): string | null => {
+  switch (role) {
+    case 'super_admin':
+      return '/admin/dashboard';
+    case 'operation_director':
+      return '/operations/dashboard';
+    case 'warehouse_incharge':
+      return '/warehouse/dashboard';
+    case 'accountant':
+      return '/accounts/dashboard';
+    case 'crm_executive':
+      return '/crm/dashboard';
+    default:
+      return null;
+  }
+};
+
 export function App() {
   const { user } = useAuthContext();
   const { lang } = useTranslation();
@@ -22,11 +39,18 @@ export function App() {
     fetchServerDbAndSync();
   }, []);
 
+  const userDashboardRoute = user ? getRoleDashboardRoute(user.role) : null;
+
   return (
     <>
       <Routes>
-        {/* Public Landing & Role Selection */}
-        <Route path="/" element={<LandingPage />} />
+        {/* Public Landing & Role Selection — Auto-redirects if already logged in */}
+        <Route
+          path="/"
+          element={
+            userDashboardRoute ? <Navigate to={userDashboardRoute} replace /> : <LandingPage />
+          }
+        />
 
         {/* Public Customer Shipment Tracking (Unauthenticated Public Portal) */}
         <Route path="/track" element={<PublicTrackingPage />} />
@@ -35,32 +59,52 @@ export function App() {
         <Route path="/search" element={<PublicTrackingPage />} />
         <Route path="/crm/search" element={<PublicTrackingPage />} />
 
-        {/* Dedicated Role Login Screens */}
+        {/* Dedicated Role Login Screens — Auto-redirects if already logged in */}
         <Route
           path="/admin/login"
-          element={<LoginPage expectedRole="super_admin" targetDashboardRoute="/admin/dashboard" />}
+          element={
+            userDashboardRoute ? (
+              <Navigate to={userDashboardRoute} replace />
+            ) : (
+              <LoginPage expectedRole="super_admin" targetDashboardRoute="/admin/dashboard" />
+            )
+          }
         />
         <Route
           path="/operations/login"
           element={
-            <LoginPage
-              expectedRole="operation_director"
-              targetDashboardRoute="/operations/dashboard"
-            />
+            userDashboardRoute ? (
+              <Navigate to={userDashboardRoute} replace />
+            ) : (
+              <LoginPage
+                expectedRole="operation_director"
+                targetDashboardRoute="/operations/dashboard"
+              />
+            )
           }
         />
         <Route
           path="/warehouse/login"
           element={
-            <LoginPage
-              expectedRole="warehouse_incharge"
-              targetDashboardRoute="/warehouse/dashboard"
-            />
+            userDashboardRoute ? (
+              <Navigate to={userDashboardRoute} replace />
+            ) : (
+              <LoginPage
+                expectedRole="warehouse_incharge"
+                targetDashboardRoute="/warehouse/dashboard"
+              />
+            )
           }
         />
         <Route
           path="/accounts/login"
-          element={<LoginPage expectedRole="accountant" targetDashboardRoute="/accounts/dashboard" />}
+          element={
+            userDashboardRoute ? (
+              <Navigate to={userDashboardRoute} replace />
+            ) : (
+              <LoginPage expectedRole="accountant" targetDashboardRoute="/accounts/dashboard" />
+            )
+          }
         />
 
         {/* Protected Super Admin Role Dashboards with Dedicated Slugs */}
