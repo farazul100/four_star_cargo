@@ -9,7 +9,6 @@ import { AccountsDashboardPage } from './pages/AccountsDashboardPage';
 import { CrmDashboardPage } from './pages/CrmDashboardPage';
 import { PublicTrackingPage } from './pages/PublicTrackingPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
-import { AiAssistantFloatingWidget } from './components/AiAssistantFloatingWidget';
 import { useAuthContext } from './context/AuthContext';
 import { useTranslation } from './hooks/useTranslation';
 import { initHostingerDb, fetchServerDbAndSync } from './lib/db';
@@ -136,9 +135,6 @@ export function App() {
         {/* Fallback redirect */}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
-
-      {/* Floating Four Star Cargo AI Assistant Widget */}
-      <AiAssistantFloatingWidget currentUser={user} language={lang} />
     </>
   );
 }
