@@ -48,6 +48,40 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             
             $merged = array_merge($existing, $decoded);
 
+            // 1.1 Strict Factory Reset Mode: Wipe all transactional keys on Hostinger disk
+            if (!empty($decoded['is_factory_reset'])) {
+                $masterUser = [
+                    [
+                        'id' => 'usr-admin-master',
+                        'name' => 'Super Admin',
+                        'email' => 'superadmin@cargo.com',
+                        'password' => 'Cargo@2026',
+                        'role' => 'super_admin',
+                        'status' => 'active',
+                        'created_at' => '2026-01-01T00:00:00Z'
+                    ]
+                ];
+                $merged['users'] = $masterUser;
+                $merged['fsc_vps_users'] = $masterUser;
+                $merged['cartons'] = [];
+                $merged['fsc_vps_cartons'] = [];
+                $merged['proposals'] = [];
+                $merged['fsc_vps_proposals'] = [];
+                $merged['customers'] = [];
+                $merged['fsc_vps_customers'] = [];
+                $merged['crm_customers'] = [];
+                $merged['fsc_vps_crm_customers'] = [];
+                $merged['ledger'] = [];
+                $merged['fsc_vps_ledger'] = [];
+                $merged['expenses'] = [];
+                $merged['fsc_vps_expenses'] = [];
+                $merged['deliveries'] = [];
+                $merged['notifications'] = [];
+                $merged['conversations'] = [];
+                $merged['messages'] = [];
+                $merged['calls'] = [];
+            }
+
             if (!empty($existingApiKey)) {
                 if (empty($merged['gemini_api_key'])) {
                     $merged['gemini_api_key'] = $existingApiKey;

@@ -802,14 +802,22 @@ export const performFactorySystemReset = async (currentUser?: any) => {
   const resetAuditLog: AuditLog = {
     id: `audit-factory-reset-${Date.now()}`,
     user_id: resetUser.id || 'usr-admin-master',
-    user_name: resetUser.name || 'সুপার এডমিন (Super Admin)',
+    user_name: resetUser.name || 'Super Admin',
     user_role: resetUser.role || 'super_admin',
     action: 'FACTORY_SYSTEM_RESET',
     entity_type: 'system',
     entity_id: 'ALL_TRANSACTIONS',
-    details: 'সুপার এডমিন কতৃক ফ্যাক্টরি রিসেট সম্পন্ন হয়েছে। সাইটের সমস্ত ট্রানজ্যাকশন ডাটা মুছে ফেলা হয়েছে (এডমিন আইডি ও কলাম অক্ষত)।',
+    details: 'Super Admin executed Factory System Reset. All customer, flight, inventory, ledger & operational data deleted. Super Admin ID & credentials preserved.',
     created_at: resetTime,
   };
+
+  // Keep ONLY Super Admin Master Account (superadmin@cargo.com / Cargo@2026)
+  const masterUserOnly = [INITIAL_USERS[0]];
+  try {
+    localStorage.setItem(DB_KEYS.USERS, JSON.stringify(masterUserOnly));
+    localStorage.setItem('fsc_vps_users', JSON.stringify(masterUserOnly));
+    localStorage.setItem('users', JSON.stringify(masterUserOnly));
+  } catch (e) {}
 
   // Clear LocalStorage transactional keys
   const keysToClear = [
@@ -829,6 +837,11 @@ export const performFactorySystemReset = async (currentUser?: any) => {
     'customers',
     'ledger',
     'expenses',
+    'deliveries',
+    'notifications',
+    'conversations',
+    'messages',
+    'calls',
   ];
 
   keysToClear.forEach((key) => {
@@ -848,8 +861,10 @@ export const performFactorySystemReset = async (currentUser?: any) => {
     window.__FSC_GLOBAL_PROPOSALS__ = [];
   }
 
-  // Push clean reset payload directly to Hostinger server DB api
+  // Push clean reset payload directly to Hostinger server DB api with is_factory_reset flag
   const cleanPayload = {
+    is_factory_reset: true,
+    users: masterUserOnly,
     cartons: [],
     proposals: [],
     customers: [],
@@ -859,6 +874,10 @@ export const performFactorySystemReset = async (currentUser?: any) => {
     auditLogs: [resetAuditLog],
     notifications: [],
     deliveries: [],
+    conversations: [],
+    messages: [],
+    calls: [],
+    fsc_vps_users: masterUserOnly,
     fsc_vps_cartons: [],
     fsc_vps_proposals: [],
     fsc_vps_customers: [],
