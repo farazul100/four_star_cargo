@@ -186,7 +186,8 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   const [auditPage, setAuditPage] = useState(1);
   const [expandedLogId, setExpandedLogId] = useState<string | null>(null);
 
-  const itemsPerPage = 6;
+  const itemsPerPage = 20;
+  const [auditItemsPerPage, setAuditItemsPerPage] = useState<number | 'all'>(50);
 
   // WAREHOUSE MANAGEMENT STATE
   const [showAddWh, setShowAddWh] = useState(false);
@@ -890,10 +891,13 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
       return matchesSearch && matchesAction && matchesEntity;
     });
 
-    const paginatedAuditLogs = filteredAuditLogs.slice(
-      (auditPage - 1) * itemsPerPage,
-      auditPage * itemsPerPage
-    );
+    const pageSize = auditItemsPerPage === 'all' ? (filteredAuditLogs.length || 1) : auditItemsPerPage;
+    const totalPages = Math.ceil(filteredAuditLogs.length / pageSize) || 1;
+    const safePage = Math.min(Math.max(1, auditPage), totalPages);
+
+    const paginatedAuditLogs = auditItemsPerPage === 'all'
+      ? filteredAuditLogs
+      : filteredAuditLogs.slice((safePage - 1) * pageSize, safePage * pageSize);
 
     return (
       <div className="space-y-6 font-sans">
@@ -908,14 +912,33 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
             <input
               type="text"
               value={auditSearch}
-              onChange={(e) => setAuditSearch(e.target.value)}
+              onChange={(e) => {
+                setAuditSearch(e.target.value);
+                setAuditPage(1);
+              }}
               placeholder={isBn ? 'কর্মকর্তা বা একশন খুঁজুন...' : 'Search staff or action...'}
               className={`w-full border rounded-xl py-1.5 pl-8 pr-3 text-xs outline-none font-normal ${
                 isDark ? 'bg-[#121214] border-slate-700/80 text-white placeholder-slate-400' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
               }`}
             />
           </div>
-          <div className="flex items-center space-x-3">
+          <div className="flex flex-wrap items-center space-x-3">
+            <select
+              value={auditItemsPerPage}
+              onChange={(e) => {
+                const val = e.target.value;
+                setAuditItemsPerPage(val === 'all' ? 'all' : Number(val));
+                setAuditPage(1);
+              }}
+              className={`border rounded-xl px-2.5 py-1 text-xs outline-none font-medium cursor-pointer ${
+                isDark ? 'bg-[#121214] border-slate-700/80 text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-700'
+              }`}
+            >
+              <option value={25}>25 {isBn ? 'টি প্রতি পৃষ্ঠায়' : 'per page'}</option>
+              <option value={50}>50 {isBn ? 'টি প্রতি পৃষ্ঠায়' : 'per page'}</option>
+              <option value={100}>100 {isBn ? 'টি প্রতি পৃষ্ঠায়' : 'per page'}</option>
+              <option value="all">{isBn ? 'সবগুলো দেখতে (All)' : 'Show All'}</option>
+            </select>
             <span className="text-[11px] text-slate-400 font-normal">
               {isBn ? `সর্বমোট ${filteredAuditLogs.length} টি সিস্টেম এক্টিভিটি রেকর্ড পাওয়া গেছে` : `Total ${filteredAuditLogs.length} audit logs`}
             </span>
@@ -971,6 +994,54 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
               ))
             )}
           </div>
+
+          {/* Audit Logs Pagination Controls */}
+          {filteredAuditLogs.length > 0 && auditItemsPerPage !== 'all' && totalPages > 1 && (
+            <div className={`p-3 border-t flex flex-col sm:flex-row items-center justify-between gap-3 text-xs ${
+              isDark ? 'bg-[#1A1A1C] border-slate-800/80 text-slate-300' : 'bg-slate-50/80 border-slate-200/80 text-slate-600'
+            }`}>
+              <div className="text-[11px] text-slate-400 font-medium">
+                {isBn
+                  ? `দেখাচ্ছে ${(safePage - 1) * pageSize + 1} - ${Math.min(safePage * pageSize, filteredAuditLogs.length)} (সর্বমোট ${filteredAuditLogs.length} টি রেকর্ড)`
+                  : `Showing ${(safePage - 1) * pageSize + 1} - ${Math.min(safePage * pageSize, filteredAuditLogs.length)} of ${filteredAuditLogs.length} audit logs`}
+              </div>
+              <div className="flex items-center space-x-2">
+                <button
+                  disabled={safePage <= 1}
+                  onClick={() => setAuditPage((p) => Math.max(1, p - 1))}
+                  className={`px-3 py-1 rounded-xl border text-[11px] font-semibold transition-all ${
+                    safePage <= 1
+                      ? 'opacity-40 cursor-not-allowed border-slate-700/40 text-slate-500'
+                      : isDark
+                      ? 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-white'
+                      : 'bg-white hover:bg-slate-100 border-slate-300 text-slate-700'
+                  }`}
+                >
+                  {isBn ? '◄ পূর্ববর্তী' : '◄ Previous'}
+                </button>
+
+                <div className="flex items-center space-x-1 px-2 text-xs font-mono">
+                  <span className="font-bold text-[#00897B]">{safePage}</span>
+                  <span className="text-slate-400">/</span>
+                  <span className="font-semibold text-slate-400">{totalPages}</span>
+                </div>
+
+                <button
+                  disabled={safePage >= totalPages}
+                  onClick={() => setAuditPage((p) => Math.min(totalPages, p + 1))}
+                  className={`px-3 py-1 rounded-xl border text-[11px] font-semibold transition-all ${
+                    safePage >= totalPages
+                      ? 'opacity-40 cursor-not-allowed border-slate-700/40 text-slate-500'
+                      : isDark
+                      ? 'bg-slate-800 hover:bg-slate-700 border-slate-700 text-white'
+                      : 'bg-white hover:bg-slate-100 border-slate-300 text-slate-700'
+                  }`}
+                >
+                  {isBn ? 'পরবর্তী ►' : 'Next ►'}
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     );
