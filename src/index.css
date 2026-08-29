@@ -3,33 +3,38 @@
 
 @layer base {
   :root {
-    --brand-turquoise: #1FB6A8;
-    --brand-cyan: #22A6B3;
-    --brand-blue: #1B4F91;
-    --brand-navy: #0F2D52;
+    --brand-turquoise: #00B4D8;
+    --brand-cyan: #00A896;
+    --brand-blue: #2563EB;
+    --brand-navy: #0F172A;
     
-    --status-pending: #F5A623;
-    --status-transit: #1B4F91;
-    --status-received: #1FB6A8;
-    --status-delivered: #16A34A;
-    --status-cancelled: #DC2626;
+    --status-pending: #D97706;
+    --status-transit: #2563EB;
+    --status-received: #059669;
+    --status-delivered: #10B981;
+    --status-cancelled: #E11D48;
 
     /* Light Theme */
-    --bg-main: #F4F5F7;
+    --bg-main: #F8FAFC;
     --bg-card: #FFFFFF;
-    --border-color: #E5E7EB;
-    --text-main: #111827;
-    --text-muted: #6B7280;
+    --border-color: #CBD5E1;
+    --text-main: #0F172A;
+    --text-muted: #334155;
   }
 
   .dark {
     /* Dark Theme */
-    --bg-main: #141414;
-    --bg-card: #1C1C1E;
-    --border-color: #2C2C2E;
+    --bg-main: #0F172A;
+    --bg-card: #1E293B;
+    --border-color: #334155;
     --text-main: #FFFFFF;
-    --text-muted: #9E9E9E;
+    --text-muted: #CBD5E1;
   }
+}
+
+/* STRICT ZERO BORDER-RADIUS GLOBAL RULE */
+*, *::before, *::after, button, input, select, textarea, div, span, label, form, section, table, th, td, tr, p, header, aside, nav, article, select option {
+  border-radius: 0px !important;
 }
 
 * {
@@ -60,25 +65,25 @@ body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, span, p, div, a {
 }
 
 /* =========================================================
-   LIGHT THEME OVERRIDES (MATCHING IMAGE 9 REFERENCE)
+   LIGHT THEME OVERRIDES (HIGH VISIBILITY VIBRANT UI & TEXT)
    ========================================================= */
 html.light, html.light body {
   background-color: #F8FAFC !important;
-  color: #111827 !important;
+  color: #0F172A !important;
 }
 
 /* Canvas & Containers */
 html.light .bg-\[\#141414\] {
   background-color: #F8FAFC !important;
-  color: #111827 !important;
+  color: #0F172A !important;
 }
 
 /* Header & Sidebar */
 html.light header,
 html.light aside {
   background-color: #FFFFFF !important;
-  color: #111827 !important;
-  border-color: #E5E7EB !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
 }
 
 /* Cards & Content Panels */
@@ -87,21 +92,21 @@ html.light .bg-\[\#18181A\],
 html.light .bg-\[\#11202F\],
 html.light .bg-\[\#18181B\] {
   background-color: #FFFFFF !important;
-  color: #111827 !important;
-  border-color: #E5E7EB !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
 }
 
 /* Hover & Active Pill States */
 html.light .bg-\[\#242426\],
 html.light .bg-\[\#1E3247\] {
-  background-color: #F3F4F6 !important;
-  color: #111827 !important;
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
 }
 
 html.light .hover\:bg-\[\#1E1E20\]:hover,
 html.light .hover\:bg-\[\#242426\]:hover {
-  background-color: #F9FAFB !important;
+  background-color: #E2E8F0 !important;
 }
 
 /* Borders */
@@ -109,29 +114,32 @@ html.light .border-\[\#2C2C2E\],
 html.light .border-\[\#2C2C2E\]\/80,
 html.light .border-\[\#2C2C2E\]\/60,
 html.light .border-\[\#1E3247\] {
-  border-color: #E5E7EB !important;
+  border-color: #CBD5E1 !important;
 }
 
-/* Typography Overrides & Clean Readable Light Text */
+/* Typography Overrides for High Visibility & Contrast */
 html.light .text-\[\#9E9E9E\],
 html.light .text-\[\#8FA3AD\],
 html.light .text-\[\#7C7C7C\] {
-  color: #475569 !important;
+  color: #334155 !important;
 }
 
 html.light .text-slate-400,
 html.light .text-slate-500 {
-  color: #475569 !important;
+  color: #334155 !important;
+  font-weight: 500 !important;
 }
 
 html.light .text-slate-600,
 html.light .text-slate-700 {
-  color: #334155 !important;
+  color: #1E293B !important;
+  font-weight: 600 !important;
 }
 
 html.light .text-slate-800,
 html.light .text-slate-900 {
-  color: #0F172A !important;
+  color: #020617 !important;
+  font-weight: 700 !important;
 }
 
 /* Form Controls, Inputs & Selects */
