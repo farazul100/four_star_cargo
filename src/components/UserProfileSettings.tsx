@@ -337,7 +337,6 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
                 }`}
               >
                 <option value="en">English (US)</option>
-                <option value="bn">বাংলা (Bangla)</option>
                 <option value="cn">中文 (Chinese)</option>
                 <option value="ar">العربية (Arabic)</option>
                 <option value="hi">हिन्दी (Hindi)</option>

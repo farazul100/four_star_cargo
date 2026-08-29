@@ -4,6 +4,7 @@ import { Carton, FlyingProposal, Language } from '../types';
 import { useTranslation } from '../hooks/useTranslation';
 import { useTheme } from '../context/ThemeContext';
 import { Logo } from './Logo';
+import { LanguageSelector } from './LanguageSelector';
 import { PublicCustomerChatWidget } from './PublicCustomerChatWidget';
 
 interface PublicTrackingProps {
@@ -92,17 +93,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
 
         {/* Right Corner: Controls (Language & Theme Switcher) */}
         <div className="flex items-center space-x-3">
-          <button
-            onClick={() => setLang(lang === 'bn' ? 'en' : 'bn')}
-            className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-full text-xs font-semibold border transition-all cursor-pointer ${
-              isDark
-                ? 'bg-slate-900 border-slate-700 text-slate-200 hover:border-[#00897B]'
-                : 'bg-slate-100 border-slate-300 text-slate-800 hover:border-[#00897B]'
-            }`}
-          >
-            <Globe className="w-3.5 h-3.5 text-[#00897B]" />
-            <span>{lang === 'bn' ? '🇬🇧 English' : '🇧🇩 বাংলা'}</span>
-          </button>
+          <LanguageSelector onLanguageChange={(code) => setLang(code as any)} />
 
           <button
             onClick={toggleTheme}

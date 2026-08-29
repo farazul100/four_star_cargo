@@ -33,7 +33,7 @@ interface CrmManagementSystemProps {
 
 export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
   currentUser,
-  language = 'bn',
+  language = 'en',
   theme: themeProp,
   initialStageTab = 'create_customer',
 }) => {

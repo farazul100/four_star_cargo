@@ -8,7 +8,6 @@ export interface LanguageOption {
 }
 
 export const LANGUAGES: LanguageOption[] = [
-  { code: 'bn', label: 'বাংলা (Bangla)' },
   { code: 'en', label: 'English (US)' },
   { code: 'cn', label: '中文 (Chinese)' },
   { code: 'ar', label: 'العربية (Arabic)' },
@@ -46,7 +45,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ onLanguageCh
         new (window as any).google.translate.TranslateElement(
           {
             pageLanguage: 'en',
-            includedLanguages: 'en,bn,zh-CN,ar,hi,ur',
+            includedLanguages: 'en,zh-CN,ar,hi,ur',
             autoDisplay: false,
           },
           'google_translate_element'

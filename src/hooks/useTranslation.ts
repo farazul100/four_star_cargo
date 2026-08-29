@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import bnDict from '../locales/bn.json';
 import enDict from '../locales/en.json';
 import cnDict from '../locales/cn.json';
 import arDict from '../locales/ar.json';
@@ -9,14 +8,14 @@ import { Language } from '../types';
 
 const dictionaries: Record<Language, Record<string, string>> = {
   en: enDict,
-  bn: bnDict,
+  bn: enDict,
   cn: cnDict,
   ar: arDict,
   hi: hiDict,
   ur: urDict,
 };
 
-const VALID_LANGS: Language[] = ['en', 'bn', 'cn', 'ar', 'hi', 'ur'];
+const VALID_LANGS: Language[] = ['en', 'cn', 'ar', 'hi', 'ur'];
 
 export const useTranslation = () => {
   const [lang, setLang] = useState<Language>(() => {
@@ -36,7 +35,7 @@ export const useTranslation = () => {
     if (saved && VALID_LANGS.includes(saved as Language)) {
       return saved as Language;
     }
-    return 'bn';
+    return 'en';
   });
 
   useEffect(() => {
@@ -59,7 +58,7 @@ export const useTranslation = () => {
         selectElem.value = 'en';
         selectElem.dispatchEvent(new Event('change'));
       }
-    } else if (lang !== 'bn') {
+    } else {
       document.cookie = `googtrans=/en/${targetGtCode}; path=/;`;
       const selectElem = document.querySelector('.goog-te-combo') as HTMLSelectElement;
       if (selectElem && selectElem.value !== targetGtCode) {
@@ -69,7 +68,7 @@ export const useTranslation = () => {
     }
   }, [lang]);
 
-  const dictionary: Record<string, string> = dictionaries[lang] || dictionaries.bn;
+  const dictionary: Record<string, string> = dictionaries[lang] || dictionaries.en;
 
   const t = (key: string): string => {
     return dictionary[key] || dictionaries.en[key] || key;

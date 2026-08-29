@@ -28,12 +28,12 @@ interface CargoLiveLifecycleMonitorProps {
 }
 
 export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps> = ({
-  language = 'bn',
+  language = 'en',
   cartons: propCartons,
   proposals: propProposals,
 }) => {
   const { lang } = useTranslation();
-  const isBn = lang === 'bn' || language === 'bn';
+  const isBn = (lang as any) === 'bn' || (language as any) === 'bn';
   const { theme } = useTheme();
   const isDark = theme === 'dark';
 

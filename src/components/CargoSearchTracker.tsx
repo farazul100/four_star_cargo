@@ -50,11 +50,11 @@ interface GroupedTrackingShipment {
 export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
   cartons = [],
   proposals = [],
-  language = 'bn',
+  language = 'en',
 }) => {
   const { lang } = useTranslation();
   const { theme } = useTheme();
-  const isBn = language === 'bn' || lang === 'bn';
+  const isBn = language === 'bn' || (lang as any) === 'bn';
   const isDark = theme === 'dark';
 
   const [searchQuery, setSearchQuery] = useState('');

@@ -2,7 +2,7 @@ export type UserRole = 'super_admin' | 'operation_director' | 'warehouse_incharg
 
 export type CartonStatus = 'booked' | 'proposed' | 'in_transit' | 'received' | 'delivered';
 
-export type Language = 'bn' | 'en' | 'cn' | 'ar' | 'hi' | 'ur';
+export type Language = 'en' | 'bn' | 'cn' | 'ar' | 'hi' | 'ur';
 
 export type Theme = 'dark' | 'light';
 

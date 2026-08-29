@@ -114,7 +114,7 @@ const INITIAL_EXPENSES: ExpenseItem[] = [
 ];
 
 export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
-  language = 'bn',
+  language = 'en',
   theme: themeProp,
   ledgerEntries: ledgerEntriesProp,
 }) => {
