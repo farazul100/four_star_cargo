@@ -580,57 +580,78 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
               </button>
             </div>
 
-            <div className="space-y-3.5 text-xs font-light">
-              <div>
-                <div className={`flex justify-between mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
-                  <span>✈️ {isBn ? 'চায়না বিমান ফ্রেইট ও কার্গো চার্জ (Flight Cargo Shipping)' : 'China Air Freight Cargo Shipping'}</span>
-                  <span className={`font-mono font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>৳850,000 (51.6%)</span>
-                </div>
-                <div className={`w-full h-2 rounded-none overflow-hidden ${isDark ? 'bg-[#0B1622]' : 'bg-slate-100 border border-slate-200'}`}>
-                  <div className="bg-[#00897B] h-full" style={{ width: '51.6%' }} />
-                </div>
-              </div>
+            {(() => {
+              const totalExpAmount = expenses.reduce((sum, e) => sum + e.amount, 0);
+              const getCatTotal = (cat: string) =>
+                expenses.filter((e) => e.category === cat).reduce((sum, e) => sum + e.amount, 0);
 
-              <div>
-                <div className={`flex justify-between mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
-                  <span>👥 {isBn ? 'ওয়্যারহাউজ ও স্টাফ বেতন (Staff Salary Disbursed)' : 'Warehouse Staff Salaries'}</span>
-                  <span className={`font-mono font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>৳320,000 (19.5%)</span>
-                </div>
-                <div className={`w-full h-2 rounded-none overflow-hidden ${isDark ? 'bg-[#0B1622]' : 'bg-slate-100 border border-slate-200'}`}>
-                  <div className="bg-blue-600 h-full" style={{ width: '19.5%' }} />
-                </div>
-              </div>
+              const categories = [
+                {
+                  id: 'shipping',
+                  label: isBn ? 'চায়না বিমান ফ্রেইট ও কার্গো চার্জ (Flight Cargo Shipping)' : 'China Air Freight Cargo Shipping',
+                  icon: '✈️',
+                  color: 'bg-[#00897B]',
+                  total: getCatTotal('shipping'),
+                },
+                {
+                  id: 'salary',
+                  label: isBn ? 'ওয়্যারহাউজ ও স্টাফ বেতন (Staff Salary Disbursed)' : 'Warehouse Staff Salaries',
+                  icon: '👥',
+                  color: 'bg-blue-600',
+                  total: getCatTotal('salary'),
+                },
+                {
+                  id: 'warehouse_rent',
+                  label: isBn ? 'তেজগাঁও হাবে মাসিক ভাড়া ও ইউটিলিটি (Warehouse Lease & Rent)' : 'Warehouse Lease & Rent',
+                  icon: '🏢',
+                  color: 'bg-amber-600',
+                  total: getCatTotal('warehouse_rent'),
+                },
+                {
+                  id: 'customs',
+                  label: isBn ? 'ঢাকা এয়ারপোর্ট কাস্টমস ক্লিয়ারেন্স ও ডিউটি ট্যাক্স (Customs Duty)' : 'Customs Clearance Duty & Tax',
+                  icon: '🛃',
+                  color: 'bg-purple-600',
+                  total: getCatTotal('customs'),
+                },
+                {
+                  id: 'packing_transport',
+                  label: isBn ? 'লোকাল ট্রাক ট্রানজিট ও প্যাকিং মেটেরিয়ালস (Local Transport & Packing)' : 'Local Transit & Transport',
+                  icon: '🚚',
+                  color: 'bg-emerald-600',
+                  total: getCatTotal('packing_transport'),
+                },
+              ];
 
-              <div>
-                <div className={`flex justify-between mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
-                  <span>🏢 {isBn ? 'তেজগাঁও হাবে মাসিক ভাড়া ও ইউটিলিটি (Warehouse Lease & Rent)' : 'Warehouse Lease & Rent'}</span>
-                  <span className={`font-mono font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>৳250,000 (15.2%)</span>
-                </div>
-                <div className={`w-full h-2 rounded-none overflow-hidden ${isDark ? 'bg-[#0B1622]' : 'bg-slate-100 border border-slate-200'}`}>
-                  <div className="bg-amber-600 h-full" style={{ width: '15.2%' }} />
-                </div>
-              </div>
+              if (totalExpAmount === 0) {
+                return (
+                  <div className={`p-4 text-center text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    {isBn ? 'এখনো কোনো খরচের ভাউচার এন্ট্রি করা হয়নি। (মোট খরচ: ৳০)' : 'No expense vouchers recorded yet. (Total Expenses: ৳0)'}
+                  </div>
+                );
+              }
 
-              <div>
-                <div className={`flex justify-between mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
-                  <span>🛃 {isBn ? 'ঢাকা এয়ারপোর্ট কাস্টমস ক্লিয়ারেন্স ও ডিউটি ট্যাক্স (Customs Duty)' : 'Customs Clearance Duty & Tax'}</span>
-                  <span className={`font-mono font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>৳140,000 (8.5%)</span>
+              return (
+                <div className="space-y-3.5 text-xs font-light">
+                  {categories.map((cat) => {
+                    const pct = totalExpAmount > 0 ? ((cat.total / totalExpAmount) * 100).toFixed(1) : '0';
+                    return (
+                      <div key={cat.id}>
+                        <div className={`flex justify-between mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
+                          <span>{cat.icon} {cat.label}</span>
+                          <span className={`font-mono font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                            ৳{cat.total.toLocaleString()} ({pct}%)
+                          </span>
+                        </div>
+                        <div className={`w-full h-2 rounded-none overflow-hidden ${isDark ? 'bg-[#0B1622]' : 'bg-slate-100 border border-slate-200'}`}>
+                          <div className={`${cat.color} h-full`} style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                <div className={`w-full h-2 rounded-none overflow-hidden ${isDark ? 'bg-[#0B1622]' : 'bg-slate-100 border border-slate-200'}`}>
-                  <div className="bg-purple-600 h-full" style={{ width: '8.5%' }} />
-                </div>
-              </div>
-
-              <div>
-                <div className={`flex justify-between mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
-                  <span>🚚 {isBn ? 'লোকাল ট্রাক ট্রানজিট ও প্যাকিং মেটেরিয়ালস (Local Transport & Packing)' : 'Local Transit & Transport'}</span>
-                  <span className={`font-mono font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>৳85,000 (5.2%)</span>
-                </div>
-                <div className={`w-full h-2 rounded-none overflow-hidden ${isDark ? 'bg-[#0B1622]' : 'bg-slate-100 border border-slate-200'}`}>
-                  <div className="bg-emerald-600 h-full" style={{ width: '5.2%' }} />
-                </div>
-              </div>
-            </div>
+              );
+            })()}
           </div>
 
           {/* Right 1 Col: Customer Payment Collection Progress & Direct Actions */}

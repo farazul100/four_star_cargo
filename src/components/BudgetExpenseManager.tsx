@@ -25,93 +25,8 @@ interface BudgetExpenseManagerProps {
   ledgerEntries?: LedgerEntry[];
 }
 
-// Initial Mock Expense Items (All Operational Categories Populated)
-const INITIAL_EXPENSES: ExpenseItem[] = [
-  {
-    id: 'exp-101',
-    title: 'China CZ-304 Air Flight Freight Cargo Shipping Fee',
-    category: 'shipping',
-    amount: 850000,
-    date: '2026-08-14',
-    payment_method: 'bank_transfer',
-    voucher_no: 'VCH-9941',
-    notes: 'Guangzhou Airport Charter Flight Batch #4',
-    created_by: 'Super Admin',
-    created_at: '2026-08-14T10:30:00Z',
-  },
-  {
-    id: 'exp-102',
-    title: 'Dhaka Central Warehouse Monthly Lease & Rent',
-    category: 'warehouse_rent',
-    amount: 250000,
-    date: '2026-08-01',
-    payment_method: 'bank_transfer',
-    voucher_no: 'VCH-9920',
-    notes: 'Tejgaon Industrial Area Hub August Rent',
-    created_by: 'Super Admin',
-    created_at: '2026-08-01T09:00:00Z',
-  },
-  {
-    id: 'exp-103',
-    title: 'Warehouse & Operations Staff August Monthly Salaries',
-    category: 'salary',
-    amount: 320000,
-    date: '2026-08-05',
-    payment_method: 'bank_transfer',
-    voucher_no: 'VCH-9935',
-    notes: 'Disbursed to 12 Staff Members',
-    created_by: 'Super Admin',
-    created_at: '2026-08-05T12:00:00Z',
-  },
-  {
-    id: 'exp-104',
-    title: 'Dhaka Airport Customs Clearance Duty & AIT Tax',
-    category: 'customs',
-    amount: 140000,
-    date: '2026-08-12',
-    payment_method: 'bank_transfer',
-    voucher_no: 'VCH-9938',
-    notes: 'Customs Release Bill #C-8841',
-    created_by: 'Super Admin',
-    created_at: '2026-08-12T14:15:00Z',
-  },
-  {
-    id: 'exp-105',
-    title: 'Wooden Crate Packing Materials & Local Truck Courier Transport',
-    category: 'packing_transport',
-    amount: 85000,
-    date: '2026-08-10',
-    payment_method: 'cash',
-    voucher_no: 'VCH-9930',
-    notes: 'Bubble wrap, cartons & pickup transport',
-    created_by: 'Warehouse Incharge',
-    created_at: '2026-08-10T16:45:00Z',
-  },
-  {
-    id: 'exp-106',
-    title: 'Dhaka Hub Electricity, Water Utility & Fiber Internet Bill',
-    category: 'utilities',
-    amount: 45000,
-    date: '2026-08-08',
-    payment_method: 'bank_transfer',
-    voucher_no: 'VCH-9915',
-    notes: 'DESCO electricity & ISP optical fiber monthly bill',
-    created_by: 'Accountant',
-    created_at: '2026-08-08T11:20:00Z',
-  },
-  {
-    id: 'exp-107',
-    title: 'Office Stationery, Printing Supplies & Legal Audit Fee',
-    category: 'other',
-    amount: 35000,
-    date: '2026-08-03',
-    payment_method: 'cash',
-    voucher_no: 'VCH-9905',
-    notes: 'Printed thermal sticker rolls & audit document fees',
-    created_by: 'Super Admin',
-    created_at: '2026-08-03T15:10:00Z',
-  },
-];
+// Initial Mock Expense Items (Empty by default for fresh operations)
+const INITIAL_EXPENSES: ExpenseItem[] = [];
 
 export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
   language = 'en',
@@ -132,22 +47,23 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Expenses Main State synced with Hostinger DB / Accountant Panel (Fallback to INITIAL_EXPENSES if empty)
+  // Expenses Main State synced with Hostinger DB / Accountant Panel
   const [expenses, setExpenses] = useState<ExpenseItem[]>(() => {
     const dbData = getHostingerDbData();
-    if (dbData.expenses && Array.isArray(dbData.expenses) && dbData.expenses.length > 0) {
+    if (dbData.expenses && Array.isArray(dbData.expenses)) {
       return dbData.expenses;
     }
-    saveHostingerDbData('fsc_vps_expenses', INITIAL_EXPENSES);
-    return INITIAL_EXPENSES;
+    return [];
   });
 
   // Real-time DB Sync Listener
   React.useEffect(() => {
     return subscribeToDbUpdates(() => {
       const dbData = getHostingerDbData();
-      if (dbData.expenses && Array.isArray(dbData.expenses) && dbData.expenses.length > 0) {
+      if (dbData.expenses && Array.isArray(dbData.expenses)) {
         setExpenses(dbData.expenses);
+      } else {
+        setExpenses([]);
       }
     });
   }, []);
@@ -238,11 +154,9 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
   const liveDbData = getHostingerDbData();
   const liveLedgerEntries: LedgerEntry[] = ledgerEntriesProp || liveDbData.ledgerEntries || [];
 
-  const totalCargoIncome = liveLedgerEntries.length > 0
-    ? liveLedgerEntries
-        .filter((l) => l.type === 'charge')
-        .reduce((sum, entry) => sum + entry.amount, 0)
-    : 2850000;
+  const totalCargoIncome = liveLedgerEntries
+    .filter((l) => l.type === 'charge')
+    .reduce((sum, entry) => sum + entry.amount, 0);
 
   // Filtered Expenses
   const filteredExpenses = expenses.filter((exp) => {
