@@ -27,12 +27,15 @@ const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: (id: string) => void
   toast,
   onDismiss,
 }) => {
+  const onDismissRef = React.useRef(onDismiss);
+  onDismissRef.current = onDismiss;
+
   useEffect(() => {
     const timer = setTimeout(() => {
-      onDismiss(toast.id);
-    }, 4500);
+      onDismissRef.current(toast.id);
+    }, 2000);
     return () => clearTimeout(timer);
-  }, [toast.id, onDismiss]);
+  }, [toast.id]);
 
   const icons = {
     success: <CheckCircle2 className="w-5 h-5 text-emerald-400 shrink-0" />,
