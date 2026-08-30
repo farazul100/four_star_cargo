@@ -20,7 +20,7 @@ import {
   Check,
 } from 'lucide-react';
 import { Warehouse, User, Language, Theme, WarehouseInchargeStaff, AuditLog } from '../types';
-import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, publishSystemNotification, logSystemAuditAction } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, saveHostingerDbMultiData, subscribeToDbUpdates, publishSystemNotification, logSystemAuditAction } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
 
@@ -211,13 +211,19 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
 
     const currentDbUsers = getHostingerDbData().users || [];
     const updatedUsers = [
-      ...currentDbUsers.filter((u) => u.id !== staffId && u.email !== inchargeEmail),
+      ...currentDbUsers.filter((u) => u.id !== staffId && u.email.toLowerCase() !== inchargeEmail.toLowerCase()),
       newUser,
     ];
-    setUsers(updatedUsers);
-    saveHostingerDbData(DB_KEYS.USERS, updatedUsers);
 
-    syncWarehouses(updatedWhs, `Super Admin assigned Incharge ${inchargeName} (${inchargeEmail}) to Warehouse ${targetWhForIncharge.name}`);
+    setUsers(updatedUsers);
+    setWarehouses(updatedWhs);
+
+    saveHostingerDbMultiData({
+      [DB_KEYS.USERS]: updatedUsers,
+      [DB_KEYS.WAREHOUSES]: updatedWhs,
+    });
+
+    logSystemAuditAction(null, 'warehouse_update', 'warehouse', 'wh-sync', `Super Admin assigned Incharge ${inchargeName} (${inchargeEmail}) to Warehouse ${targetWhForIncharge.name}`);
 
     publishSystemNotification({
       title: isBn ? 'নতুন ইনচার্জ দায়িত্ব গ্রহণ' : 'New Incharge Assigned',
@@ -259,21 +265,35 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
 
   // ACTION: REMOVE INCHARGE STAFF FROM WAREHOUSE
   const handleRemoveInchargeStaff = (whId: string, staffId: string) => {
+    const targetWh = warehouses.find((w) => w.id === whId);
+    const targetStaff = targetWh?.incharge_staff?.find((s) => s.id === staffId);
+    const staffEmail = (targetStaff?.email || '').toLowerCase().trim();
+
     const updatedWhs = warehouses.map((w) => {
       if (w.id === whId) {
         return {
           ...w,
-          incharge_staff: (w.incharge_staff || []).filter((s) => s.id !== staffId),
+          incharge_staff: (w.incharge_staff || []).filter(
+            (s) => s.id !== staffId && (staffEmail ? (s.email || '').toLowerCase().trim() !== staffEmail : true)
+          ),
         };
       }
       return w;
     });
 
-    const updatedUsers = users.filter((u) => u.id !== staffId);
-    setUsers(updatedUsers);
-    saveHostingerDbData(DB_KEYS.USERS, updatedUsers);
+    const updatedUsers = users.filter(
+      (u) => u.id !== staffId && (staffEmail ? (u.email || '').toLowerCase().trim() !== staffEmail : true)
+    );
 
-    syncWarehouses(updatedWhs, `Super Admin removed Incharge #${staffId} from Warehouse #${whId}`);
+    setUsers(updatedUsers);
+    setWarehouses(updatedWhs);
+
+    saveHostingerDbMultiData({
+      [DB_KEYS.USERS]: updatedUsers,
+      [DB_KEYS.WAREHOUSES]: updatedWhs,
+    });
+
+    logSystemAuditAction(null, 'warehouse_update', 'warehouse', 'wh-sync', `Super Admin removed Incharge #${staffId} (${staffEmail || staffId}) from Warehouse #${whId}`);
     addToast('info', isBn ? 'ইনচার্জ অ্যাকাউন্ট অপসারিত' : 'Incharge Staff Removed');
   };
 

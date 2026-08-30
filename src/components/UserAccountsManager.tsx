@@ -28,7 +28,7 @@ import {
   Eye,
 } from 'lucide-react';
 import { User, UserRole, Warehouse, Language, Theme, AuditLog, Carton } from '../types';
-import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, publishSystemNotification, logSystemAuditAction } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, saveHostingerDbMultiData, subscribeToDbUpdates, publishSystemNotification, logSystemAuditAction } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { useAuth } from '../hooks/useAuth';
 import { ToastContainer, ToastMessage } from './Toast';
@@ -231,16 +231,30 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
       return;
     }
 
+    const delId = userToDelete.id;
+    const delEmail = (userToDelete.email || '').toLowerCase().trim();
+
     // Also remove from any warehouse incharge roster if applicable
     const updatedWhs = warehouses.map((w) => ({
       ...w,
-      incharge_staff: (w.incharge_staff || []).filter((s) => s.id !== userToDelete.id && s.email !== userToDelete.email),
+      incharge_staff: (w.incharge_staff || []).filter(
+        (s) => s.id !== delId && (delEmail ? (s.email || '').toLowerCase().trim() !== delEmail : true)
+      ),
     }));
-    setWarehouses(updatedWhs);
-    saveHostingerDbData(DB_KEYS.WAREHOUSES, updatedWhs);
 
-    const updatedUsers = users.filter((u) => u.id !== userToDelete.id && u.email !== userToDelete.email);
-    syncUsers(updatedUsers, `Super Admin permanently deleted user account: ${userToDelete.name} (${userToDelete.email})`);
+    const updatedUsers = users.filter(
+      (u) => u.id !== delId && (delEmail ? (u.email || '').toLowerCase().trim() !== delEmail : true)
+    );
+
+    setWarehouses(updatedWhs);
+    setUsers(updatedUsers);
+
+    saveHostingerDbMultiData({
+      [DB_KEYS.USERS]: updatedUsers,
+      [DB_KEYS.WAREHOUSES]: updatedWhs,
+    });
+
+    logSystemAuditAction(null, 'user_delete', 'user', delId, `Super Admin permanently deleted user account: ${userToDelete.name} (${userToDelete.email})`);
 
     addToast(
       'success',
