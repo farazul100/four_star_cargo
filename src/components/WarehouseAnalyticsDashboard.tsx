@@ -625,20 +625,28 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
           </div>
 
           <div className="mt-4 space-y-3.5 text-xs font-normal">
-            <div className="flex items-start space-x-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1E293B] transition-colors">
-              <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5">
-                <CheckCircle2 className="w-3.5 h-3.5" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-slate-900 dark:text-white">Arrived at Bangladesh Airport</span>
-                  <span className="text-[10px] font-mono text-slate-400">2h ago</span>
+            {myCartons.length > 0 ? (
+              myCartons.slice(0, 4).map((c) => (
+                <div key={c.id} className="flex items-start space-x-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1E293B] transition-colors">
+                  <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">
+                    <Package className="w-3.5 h-3.5" />
+                  </div>
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-slate-900 dark:text-white">Carton #{c.ctn_no}</span>
+                      <span className="text-[10px] font-mono text-slate-400">{(c as any).booking_date || c.created_at?.split('T')[0] || 'Recent'}</span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                      {c.product_name_en} • Gross Weight: {c.gross_weight} kg • Tracking: {c.tracking_number}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  Flight <strong className="font-mono text-slate-700 dark:text-slate-300">BS-201</strong> landed & payload weight verified
-                </p>
+              ))
+            ) : (
+              <div className="p-6 text-center text-slate-400 text-xs">
+                No recent activity logged for this warehouse
               </div>
-            </div>
+            )}
           </div>
         </div>
       </div>
