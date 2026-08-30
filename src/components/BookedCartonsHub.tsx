@@ -37,6 +37,41 @@ interface BookedCartonsHubProps {
 }
 
 /**
+ * Helper to extract numeric value from ctn_no string (e.g. CTN-01 -> 1, CTN-03 -> 3, GZAU-105 -> 105)
+ */
+export const extractCartonNumber = (ctnNo: string): number => {
+  if (!ctnNo) return 999999;
+  const match = ctnNo.match(/\d+/);
+  return match ? parseInt(match[0], 10) : 999999;
+};
+
+/**
+ * Natural carton comparator: Sorts by numeric carton number (CTN-01 -> CTN-02 -> CTN-03)
+ * while preserving sub-item grouping for merged cartons.
+ */
+export const compareCartonsNaturally = (a: Carton, b: Carton): number => {
+  const numA = extractCartonNumber(a.ctn_no);
+  const numB = extractCartonNumber(b.ctn_no);
+
+  // Primary: Sort by numeric carton number (1, 2, 3...)
+  if (numA !== numB) {
+    return numA - numB;
+  }
+
+  // Secondary: Sort by ctn_no string if numbers match
+  const ctnComp = (a.ctn_no || '').localeCompare(b.ctn_no || '', undefined, { numeric: true });
+  if (ctnComp !== 0) return ctnComp;
+
+  // Tertiary: Keep cartons with same master_group_id together
+  if (a.master_group_id && b.master_group_id && a.master_group_id !== b.master_group_id) {
+    return a.master_group_id.localeCompare(b.master_group_id);
+  }
+
+  // Quaternary: Sort by shipping_mark
+  return (a.shipping_mark || '').localeCompare(b.shipping_mark || '', undefined, { numeric: true });
+};
+
+/**
  * Helper to determine rowSpan and grouping for merged cartons in table displays.
  */
 export const getCartonRowSpanInfo = (cartons: Carton[], index: number) => {
@@ -45,12 +80,16 @@ export const getCartonRowSpanInfo = (cartons: Carton[], index: number) => {
 
   // Case 1: Merged by explicit master_group_id
   if (current.master_group_id) {
-    const firstIdx = cartons.findIndex((c) => c.master_group_id === current.master_group_id);
-    if (index === firstIdx) {
-      const count = cartons.filter((c) => c.master_group_id === current.master_group_id).length;
-      return { isFirst: true, rowSpan: count, isMerged: true };
+    const groupRows = cartons.filter((c) => c.master_group_id === current.master_group_id);
+    const count = groupRows.length;
+
+    if (count > 1) {
+      const firstIdx = cartons.findIndex((c) => c.master_group_id === current.master_group_id);
+      if (index === firstIdx) {
+        return { isFirst: true, rowSpan: count, isMerged: true };
+      }
+      return { isFirst: false, rowSpan: 0, isMerged: true };
     }
-    return { isFirst: false, rowSpan: 0, isMerged: true };
   }
 
   // Case 2: Merged by identical ctn_no (consecutive rows)
@@ -64,7 +103,11 @@ export const getCartonRowSpanInfo = (cartons: Carton[], index: number) => {
     count++;
   }
 
-  return { isFirst: true, rowSpan: count, isMerged: count > 1 || !!current.is_merged };
+  if (count > 1) {
+    return { isFirst: true, rowSpan: count, isMerged: true };
+  }
+
+  return { isFirst: true, rowSpan: 1, isMerged: false };
 };
 
 export const getSlNumberForCartonRow = (cartons: Carton[], index: number) => {
@@ -270,26 +313,16 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   const totalGrossWeight = filteredCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0);
   const totalCbmVolume = filteredCartons.reduce((sum, c) => sum + (c.cbm || 0), 0);
 
-  // Active Customer in Modal (Sorted so merged cartons are grouped together)
+  // Active Customer in Modal (Sorted naturally by carton number: CTN-01, CTN-02...)
   const activeCustomerCartons = React.useMemo(() => {
     if (!activeCustomerModalMark) return [];
     const list = customerGroupsMap[activeCustomerModalMark] || [];
-    return [...list].sort((a, b) => {
-      const groupA = a.master_group_id || a.ctn_no || '';
-      const groupB = b.master_group_id || b.ctn_no || '';
-      if (groupA !== groupB) return groupA.localeCompare(groupB);
-      return (a.shipping_mark || '').localeCompare(b.shipping_mark || '');
-    });
+    return [...list].sort(compareCartonsNaturally);
   }, [activeCustomerModalMark, customerGroupsMap]);
 
   // Filtered Cartons Sorted for List View
   const sortedFilteredCartons = React.useMemo(() => {
-    return [...filteredCartons].sort((a, b) => {
-      const groupA = a.master_group_id || a.ctn_no || '';
-      const groupB = b.master_group_id || b.ctn_no || '';
-      if (groupA !== groupB) return groupA.localeCompare(groupB);
-      return (a.shipping_mark || '').localeCompare(b.shipping_mark || '');
-    });
+    return [...filteredCartons].sort(compareCartonsNaturally);
   }, [filteredCartons]);
 
   const handleSaveEditedCarton = (e: React.FormEvent) => {
