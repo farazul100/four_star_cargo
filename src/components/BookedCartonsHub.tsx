@@ -36,6 +36,48 @@ interface BookedCartonsHubProps {
   onDeleteCarton?: (cartonId: string) => void;
 }
 
+/**
+ * Helper to determine rowSpan and grouping for merged cartons in table displays.
+ */
+export const getCartonRowSpanInfo = (cartons: Carton[], index: number) => {
+  const current = cartons[index];
+  if (!current) return { isFirst: true, rowSpan: 1, isMerged: false };
+
+  // Case 1: Merged by explicit master_group_id
+  if (current.master_group_id) {
+    const firstIdx = cartons.findIndex((c) => c.master_group_id === current.master_group_id);
+    if (index === firstIdx) {
+      const count = cartons.filter((c) => c.master_group_id === current.master_group_id).length;
+      return { isFirst: true, rowSpan: count, isMerged: true };
+    }
+    return { isFirst: false, rowSpan: 0, isMerged: true };
+  }
+
+  // Case 2: Merged by identical ctn_no (consecutive rows)
+  const isSameAsPrev = index > 0 && cartons[index - 1].ctn_no === current.ctn_no;
+  if (isSameAsPrev) {
+    return { isFirst: false, rowSpan: 0, isMerged: true };
+  }
+
+  let count = 1;
+  while (index + count < cartons.length && cartons[index + count].ctn_no === current.ctn_no) {
+    count++;
+  }
+
+  return { isFirst: true, rowSpan: count, isMerged: count > 1 || !!current.is_merged };
+};
+
+export const getSlNumberForCartonRow = (cartons: Carton[], index: number) => {
+  let sl = 0;
+  for (let i = 0; i <= index; i++) {
+    const span = getCartonRowSpanInfo(cartons, i);
+    if (span.isFirst) {
+      sl++;
+    }
+  }
+  return sl;
+};
+
 export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   cartons,
   warehouses,
@@ -228,8 +270,27 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   const totalGrossWeight = filteredCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0);
   const totalCbmVolume = filteredCartons.reduce((sum, c) => sum + (c.cbm || 0), 0);
 
-  // Active Customer in Modal
-  const activeCustomerCartons = activeCustomerModalMark ? customerGroupsMap[activeCustomerModalMark] || [] : [];
+  // Active Customer in Modal (Sorted so merged cartons are grouped together)
+  const activeCustomerCartons = React.useMemo(() => {
+    if (!activeCustomerModalMark) return [];
+    const list = customerGroupsMap[activeCustomerModalMark] || [];
+    return [...list].sort((a, b) => {
+      const groupA = a.master_group_id || a.ctn_no || '';
+      const groupB = b.master_group_id || b.ctn_no || '';
+      if (groupA !== groupB) return groupA.localeCompare(groupB);
+      return (a.shipping_mark || '').localeCompare(b.shipping_mark || '');
+    });
+  }, [activeCustomerModalMark, customerGroupsMap]);
+
+  // Filtered Cartons Sorted for List View
+  const sortedFilteredCartons = React.useMemo(() => {
+    return [...filteredCartons].sort((a, b) => {
+      const groupA = a.master_group_id || a.ctn_no || '';
+      const groupB = b.master_group_id || b.ctn_no || '';
+      if (groupA !== groupB) return groupA.localeCompare(groupB);
+      return (a.shipping_mark || '').localeCompare(b.shipping_mark || '');
+    });
+  }, [filteredCartons]);
 
   const handleSaveEditedCarton = (e: React.FormEvent) => {
     e.preventDefault();
@@ -618,110 +679,150 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                {filteredCartons.map((c, idx) => (
-                  <tr key={c.id} className="hover:bg-slate-50/60 dark:hover:bg-[#1E293B] transition-colors">
-                    <td className="p-3 text-center font-mono text-slate-400 border border-slate-200 dark:border-slate-700">
-                      {idx + 1}
-                    </td>
+                {sortedFilteredCartons.map((c, idx) => {
+                  const spanInfo = getCartonRowSpanInfo(sortedFilteredCartons, idx);
+                  const slNum = getSlNumberForCartonRow(sortedFilteredCartons, idx);
 
-                    <td className="p-3 font-mono font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700">
-                      <div>{c.ctn_no}</div>
-                      {c.is_merged && (
-                        <span className="mt-0.5 inline-block px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30">
-                          🔗 MERGED
-                        </span>
-                      )}
-                    </td>
-
-                    <td className="p-3 font-mono text-blue-600 dark:text-blue-400 font-bold border border-slate-200 dark:border-slate-700">
-                      {c.shipping_mark}
-                    </td>
-
-                    <td className="p-3 font-mono text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 truncate">
-                      {c.tracking_number}
-                    </td>
-
-                    <td className="p-3 border border-slate-200 dark:border-slate-700">
-                      <div className="font-normal text-slate-900 dark:text-white truncate">{c.product_name_en}</div>
-                      {c.product_name_cn && (
-                        <div className="text-[10px] text-slate-500 truncate">{c.product_name_cn}</div>
-                      )}
-                    </td>
-
-                    <td className="p-3 text-center font-mono border border-slate-200 dark:border-slate-700">
-                      {c.quantity} pcs
-                    </td>
-
-                    <td className="p-3 text-center font-mono border border-slate-200 dark:border-slate-700 text-slate-500">
-                      {c.net_weight} kg
-                    </td>
-
-                    <td className="p-3 text-center font-mono font-bold border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
-                      {c.gross_weight} kg
-                    </td>
-
-                    <td className="p-3 text-center font-mono border border-slate-200 dark:border-slate-700 text-purple-600 dark:text-purple-400">
-                      {c.cbm}
-                    </td>
-
-                    <td className="p-3 border border-slate-200 dark:border-slate-700 truncate">
-                      {c.destination_warehouse_name || warehouses.find((w) => w.id === c.destination_warehouse_id)?.name || 'Bangladesh Hub'}
-                    </td>
-
-                    <td className="p-3 text-center border border-slate-200 dark:border-slate-700">
-                      <span className={`px-2 py-0.5 rounded-none text-[10px] font-bold uppercase font-mono ${
-                        c.status === 'booked'
-                          ? 'bg-blue-500/10 text-blue-600 dark:text-blue-300 border border-blue-500/20'
-                          : c.status === 'in_transit'
-                          ? 'bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/20'
-                          : c.status === 'received'
-                          ? 'bg-teal-500/10 text-teal-600 dark:text-teal-300 border border-teal-500/20'
-                          : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border border-emerald-500/20'
-                      }`}>
-                        {c.status}
-                      </span>
-                    </td>
-
-                    <td className="p-3 text-center border border-slate-200 dark:border-slate-700">
-                      <div className="flex items-center justify-center space-x-1">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedCartonsForInvoiceModal([c])}
-                          className="p-1 text-[#00897B] hover:text-[#26A69A] cursor-pointer"
-                          title={isBn ? 'কার্টুন ইনভয়েস প্রিন্ট করুন' : 'Print Carton Invoice'}
+                  return (
+                    <tr
+                      key={c.id}
+                      className={`transition-colors ${
+                        spanInfo.isMerged
+                          ? isDark
+                            ? 'bg-indigo-950/20 hover:bg-indigo-950/30'
+                            : 'bg-indigo-50/40 hover:bg-indigo-50/70'
+                          : isDark
+                          ? 'hover:bg-slate-800/50'
+                          : 'hover:bg-slate-50/80'
+                      }`}
+                    >
+                      {/* SL (RowSpanned if Merged) */}
+                      {spanInfo.isFirst && (
+                        <td
+                          rowSpan={spanInfo.rowSpan}
+                          className={`p-3 text-center font-mono align-middle font-bold border border-slate-200 dark:border-slate-700 ${
+                            spanInfo.isMerged
+                              ? isDark
+                                ? 'bg-indigo-950/40 text-indigo-400 border-r-2 border-r-indigo-500'
+                                : 'bg-indigo-50/80 text-indigo-700 border-r-2 border-r-indigo-500'
+                              : 'text-slate-400'
+                          }`}
                         >
-                          <Printer className="w-3.5 h-3.5" />
-                        </button>
-                        {c.photo_url && (
+                          {slNum}
+                        </td>
+                      )}
+
+                      {/* CTN NO (RowSpanned if Merged) */}
+                      {spanInfo.isFirst && (
+                        <td
+                          rowSpan={spanInfo.rowSpan}
+                          className={`p-3 font-mono font-bold align-middle border border-slate-200 dark:border-slate-700 ${
+                            spanInfo.isMerged
+                              ? isDark
+                                ? 'bg-indigo-950/40 text-indigo-300'
+                                : 'bg-indigo-50/80 text-indigo-900'
+                              : 'text-slate-900 dark:text-white'
+                          }`}
+                        >
+                          <div>{c.ctn_no}</div>
+                          {spanInfo.isMerged && (
+                            <span className="mt-0.5 inline-block px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30">
+                              🔗 MERGED ({spanInfo.rowSpan})
+                            </span>
+                          )}
+                        </td>
+                      )}
+
+                      <td className="p-3 font-mono text-blue-600 dark:text-blue-400 font-bold border border-slate-200 dark:border-slate-700">
+                        {c.shipping_mark}
+                      </td>
+
+                      <td className="p-3 font-mono text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 truncate">
+                        {c.tracking_number}
+                      </td>
+
+                      <td className="p-3 border border-slate-200 dark:border-slate-700">
+                        <div className="font-normal text-slate-900 dark:text-white truncate">{c.product_name_en}</div>
+                        {c.product_name_cn && (
+                          <div className="text-[10px] text-slate-500 truncate">{c.product_name_cn}</div>
+                        )}
+                      </td>
+
+                      <td className="p-3 text-center font-mono border border-slate-200 dark:border-slate-700">
+                        {c.quantity} pcs
+                      </td>
+
+                      <td className="p-3 text-center font-mono border border-slate-200 dark:border-slate-700 text-slate-500">
+                        {c.net_weight} kg
+                      </td>
+
+                      <td className="p-3 text-center font-mono font-bold border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
+                        {c.gross_weight} kg
+                      </td>
+
+                      <td className="p-3 text-center font-mono border border-slate-200 dark:border-slate-700 text-purple-600 dark:text-purple-400">
+                        {c.cbm}
+                      </td>
+
+                      <td className="p-3 border border-slate-200 dark:border-slate-700 truncate">
+                        {c.destination_warehouse_name || warehouses.find((w) => w.id === c.destination_warehouse_id)?.name || 'Bangladesh Hub'}
+                      </td>
+
+                      <td className="p-3 text-center border border-slate-200 dark:border-slate-700">
+                        <span className={`px-2 py-0.5 rounded-none text-[10px] font-bold uppercase font-mono ${
+                          c.status === 'booked'
+                            ? 'bg-blue-500/10 text-blue-600 dark:text-blue-300 border border-blue-500/20'
+                            : c.status === 'in_transit'
+                            ? 'bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/20'
+                            : c.status === 'received'
+                            ? 'bg-teal-500/10 text-teal-600 dark:text-teal-300 border border-teal-500/20'
+                            : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border border-emerald-500/20'
+                        }`}>
+                          {c.status}
+                        </span>
+                      </td>
+
+                      <td className="p-3 text-center border border-slate-200 dark:border-slate-700">
+                        <div className="flex items-center justify-center space-x-1">
                           <button
                             type="button"
-                            onClick={() => setPreviewPhotoUrl(c.photo_url!)}
-                            className="p-1 text-blue-500 hover:text-blue-700 cursor-pointer"
-                            title="View Photo Proof"
+                            onClick={() => setSelectedCartonsForInvoiceModal([c])}
+                            className="p-1 text-[#00897B] hover:text-[#26A69A] cursor-pointer"
+                            title={isBn ? 'কার্টুন ইনভয়েস প্রিন্ট করুন' : 'Print Carton Invoice'}
                           >
-                            <Eye className="w-3.5 h-3.5" />
+                            <Printer className="w-3.5 h-3.5" />
                           </button>
-                        )}
-                        <button
-                          type="button"
-                          onClick={() => setEditingCarton(c)}
-                          className="p-1 text-slate-400 hover:text-blue-600 cursor-pointer"
-                          title="Edit Carton"
-                        >
-                          <Edit2 className="w-3.5 h-3.5" />
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteSingleCarton(c.id)}
-                          className="p-1 text-slate-400 hover:text-red-600 cursor-pointer"
-                          title={isBn ? 'কার্টুন ডিলেট করুন' : 'Delete Carton'}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                          {c.photo_url && (
+                            <button
+                              type="button"
+                              onClick={() => setPreviewPhotoUrl(c.photo_url!)}
+                              className="p-1 text-blue-500 hover:text-blue-700 cursor-pointer"
+                              title="View Photo Proof"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                          <button
+                            type="button"
+                            onClick={() => setEditingCarton(c)}
+                            className="p-1 text-slate-400 hover:text-blue-600 cursor-pointer"
+                            title="Edit Carton"
+                          >
+                            <Edit2 className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteSingleCarton(c.id)}
+                            className="p-1 text-slate-400 hover:text-red-600 cursor-pointer"
+                            title={isBn ? 'কার্টুন ডিলেট করুন' : 'Delete Carton'}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -814,44 +915,97 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                  {activeCustomerCartons.map((c, idx) => (
-                    <tr key={c.id} className="hover:bg-slate-50/50 dark:hover:bg-[#1E293B]/30">
-                      <td className="p-3 font-mono text-slate-400">{idx + 1}</td>
-                      <td className="p-3 font-mono font-bold text-slate-900 dark:text-white">{c.ctn_no}</td>
-                      <td className="p-3 font-mono text-blue-600 dark:text-blue-400 font-bold">{c.shipping_mark}</td>
-                      <td className="p-3 font-mono text-slate-500">{c.tracking_number}</td>
-                      <td className="p-3 font-sans truncate max-w-[160px]">
-                        <div>{c.product_name_en}</div>
-                        {c.product_name_cn && <div className="text-[10px] text-slate-400">{c.product_name_cn}</div>}
-                      </td>
-                      <td className="p-3 text-center font-mono">{c.quantity} pcs | {c.net_weight} kg</td>
-                      <td className="p-3 text-center font-mono font-bold text-emerald-600 dark:text-emerald-400">{c.gross_weight} kg</td>
-                      <td className="p-3 text-center font-mono text-purple-600 dark:text-purple-400">{c.cbm} CBM</td>
-                      <td className="p-3 text-center">
-                        {c.photo_url ? (
+                  {activeCustomerCartons.map((c, idx) => {
+                    const spanInfo = getCartonRowSpanInfo(activeCustomerCartons, idx);
+                    const slNum = getSlNumberForCartonRow(activeCustomerCartons, idx);
+
+                    return (
+                      <tr
+                        key={c.id}
+                        className={`transition-colors ${
+                          spanInfo.isMerged
+                            ? isDark
+                              ? 'bg-indigo-950/20 hover:bg-indigo-950/30'
+                              : 'bg-indigo-50/40 hover:bg-indigo-50/70'
+                            : isDark
+                            ? 'hover:bg-slate-800/50'
+                            : 'hover:bg-slate-50/80'
+                        }`}
+                      >
+                        {/* SL (RowSpanned if Merged) */}
+                        {spanInfo.isFirst && (
+                          <td
+                            rowSpan={spanInfo.rowSpan}
+                            className={`p-3 font-mono text-center align-middle font-bold border border-slate-200 dark:border-slate-700 ${
+                              spanInfo.isMerged
+                                ? isDark
+                                  ? 'bg-indigo-950/40 text-indigo-400 border-r-2 border-r-indigo-500'
+                                  : 'bg-indigo-50/80 text-indigo-700 border-r-2 border-r-indigo-500'
+                                : 'text-slate-400'
+                            }`}
+                          >
+                            {slNum}
+                          </td>
+                        )}
+
+                        {/* CTN NO (RowSpanned if Merged) */}
+                        {spanInfo.isFirst && (
+                          <td
+                            rowSpan={spanInfo.rowSpan}
+                            className={`p-3 font-mono font-bold align-middle border border-slate-200 dark:border-slate-700 ${
+                              spanInfo.isMerged
+                                ? isDark
+                                  ? 'bg-indigo-950/40 text-indigo-300'
+                                  : 'bg-indigo-50/80 text-indigo-900'
+                                : 'text-slate-900 dark:text-white'
+                            }`}
+                          >
+                            <div className="font-bold">{c.ctn_no}</div>
+                            {spanInfo.isMerged && (
+                              <span className="mt-1 inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30">
+                                <span>🔗 MERGED ({spanInfo.rowSpan})</span>
+                              </span>
+                            )}
+                          </td>
+                        )}
+
+                        <td className="p-3 font-mono text-blue-600 dark:text-blue-400 font-bold border border-slate-200 dark:border-slate-700">
+                          {c.shipping_mark}
+                        </td>
+                        <td className="p-3 font-mono text-slate-500 border border-slate-200 dark:border-slate-700">{c.tracking_number}</td>
+                        <td className="p-3 font-sans truncate max-w-[160px] border border-slate-200 dark:border-slate-700">
+                          <div>{c.product_name_en}</div>
+                          {c.product_name_cn && <div className="text-[10px] text-slate-400">{c.product_name_cn}</div>}
+                        </td>
+                        <td className="p-3 text-center font-mono border border-slate-200 dark:border-slate-700">{c.quantity} pcs | {c.net_weight} kg</td>
+                        <td className="p-3 text-center font-mono font-bold text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700">{c.gross_weight} kg</td>
+                        <td className="p-3 text-center font-mono text-purple-600 dark:text-purple-400 border border-slate-200 dark:border-slate-700">{c.cbm} CBM</td>
+                        <td className="p-3 text-center border border-slate-200 dark:border-slate-700">
+                          {c.photo_url ? (
+                            <button
+                              type="button"
+                              onClick={() => setPreviewPhotoUrl(c.photo_url!)}
+                              className="px-2 py-1 rounded text-[10px] font-mono bg-blue-500/10 text-blue-500 hover:underline cursor-pointer"
+                            >
+                              View Photo
+                            </button>
+                          ) : (
+                            <span className="text-[10px] text-slate-400">No Photo</span>
+                          )}
+                        </td>
+                        <td className="p-3 text-center border border-slate-200 dark:border-slate-700">
                           <button
                             type="button"
-                            onClick={() => setPreviewPhotoUrl(c.photo_url!)}
-                            className="px-2 py-1 rounded text-[10px] font-mono bg-blue-500/10 text-blue-500 hover:underline cursor-pointer"
+                            onClick={() => handleDeleteSingleCarton(c.id)}
+                            className="p-1 text-slate-400 hover:text-red-600 cursor-pointer"
+                            title={isBn ? 'কার্টুন ডিলেট করুন' : 'Delete Carton'}
                           >
-                            View Photo
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
-                        ) : (
-                          <span className="text-[10px] text-slate-400">No Photo</span>
-                        )}
-                      </td>
-                      <td className="p-3 text-center">
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteSingleCarton(c.id)}
-                          className="p-1 text-slate-400 hover:text-red-600 cursor-pointer"
-                          title={isBn ? 'কার্টুন ডিলেট করুন' : 'Delete Carton'}
-                        >
-                          <Trash2 className="w-3.5 h-3.5" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
