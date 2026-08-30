@@ -80,12 +80,12 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
           <div className={activeTab === 'system_chat' ? 'w-full h-full' : 'max-w-7xl mx-auto space-y-5'}>
             {/* Header Pattern: Title + Subtitle (Only render if pageTitle exists and not notifications/profile/chat) */}
             {activeTab !== 'notifications' && activeTab !== 'profile' && activeTab !== 'system_chat' && Boolean(pageTitle) && (
-              <div className={`border-b pb-3 ${isDark ? 'border-[#2C2C2E]/60' : 'border-gray-200'}`}>
-                <h1 className={`text-xl font-medium tracking-tight ${isDark ? 'text-white' : 'text-gray-900'}`}>
+              <div className={`border-b pb-3 ${isDark ? 'border-[#2C2C2E]/60' : 'border-slate-300'}`}>
+                <h1 className={`text-xl tracking-tight ${isDark ? 'text-white font-medium' : 'text-black font-semibold'}`}>
                   {pageTitle}
                 </h1>
                 {pageSubtitle && (
-                  <p className={`text-xs mt-0.5 ${isDark ? 'text-[#9E9E9E]' : 'text-gray-500'}`}>
+                  <p className={`text-xs mt-0.5 ${isDark ? 'text-[#9E9E9E]' : 'text-black/80 font-normal'}`}>
                     {pageSubtitle}
                   </p>
                 )}
