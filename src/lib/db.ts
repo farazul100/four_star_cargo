@@ -3,7 +3,7 @@
  * Provides direct database persistence & Role-Based Access Control (RBAC)
  */
 
-import { User, Warehouse, Carton, FlyingProposal, Customer, LedgerEntry, AuditLog, ExpenseItem, CrmCustomer } from '../types';
+import { User, Warehouse, Carton, FlyingProposal, Customer, LedgerEntry, AuditLog, ExpenseItem, CrmCustomer, WarehouseInchargeStaff } from '../types';
 import {
   INITIAL_USERS,
   INITIAL_WAREHOUSES,
@@ -241,7 +241,73 @@ export const getHostingerDbData = () => {
     });
   }
 
+  // 3. Merge incharge_staff from all warehouses into userMap
+  if (Array.isArray(warehouses)) {
+    warehouses.forEach((wh) => {
+      if (wh && Array.isArray(wh.incharge_staff)) {
+        wh.incharge_staff.forEach((stf) => {
+          if (stf && stf.email && !userMap.has(stf.email.toLowerCase())) {
+            userMap.set(stf.email.toLowerCase(), {
+              id: stf.id || `usr-stf-${Date.now()}`,
+              name: stf.name,
+              email: stf.email,
+              password: 'Cargo@2026',
+              role: 'warehouse_incharge',
+              warehouse_id: wh.id,
+              warehouse_name: wh.name,
+              phone: stf.phone || '+880 1700-000000',
+              status: stf.status || 'active',
+              created_at: stf.created_at || new Date().toISOString(),
+            });
+          }
+        });
+      }
+    });
+  }
+
   const mergedUsers = Array.from(userMap.values());
+
+  // 4. Ensure all warehouse_incharge role users are synced into their warehouse incharge_staff roster
+  if (Array.isArray(warehouses)) {
+    let whUpdated = false;
+    warehouses = warehouses.map((wh) => {
+      const whUsers = mergedUsers.filter(
+        (u) => u.role === 'warehouse_incharge' && u.warehouse_id === wh.id
+      );
+      if (whUsers.length > 0) {
+        const staffMap = new Map<string, WarehouseInchargeStaff>();
+        (wh.incharge_staff || []).forEach((stf) => {
+          if (stf && stf.email) staffMap.set(stf.email.toLowerCase(), stf);
+        });
+        whUsers.forEach((u) => {
+          if (u.email && !staffMap.has(u.email.toLowerCase())) {
+            staffMap.set(u.email.toLowerCase(), {
+              id: u.id,
+              name: u.name,
+              email: u.email,
+              phone: u.phone || '+880 1700-000000',
+              role: 'warehouse_incharge',
+              status: u.status || 'active',
+              created_at: u.created_at || new Date().toISOString(),
+            });
+            whUpdated = true;
+          }
+        });
+        return {
+          ...wh,
+          incharge_staff: Array.from(staffMap.values()),
+        };
+      }
+      return wh;
+    });
+
+    if (whUpdated) {
+      try {
+        localStorage.setItem(DB_KEYS.WAREHOUSES, JSON.stringify(warehouses));
+      } catch {}
+    }
+  }
+
   try {
     localStorage.setItem(DB_KEYS.USERS, JSON.stringify(mergedUsers));
   } catch {}
