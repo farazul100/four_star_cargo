@@ -358,12 +358,12 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
   });
 
   return (
-    <div className="space-y-5 max-w-7xl mx-auto font-sans font-light">
+    <div className="space-y-5 w-full font-sans font-light">
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
       {/* VIEW 1: DEDICATED EXPANDED CUSTOMER CREATION FORM PAGE */}
       {activeStageTab === 'create_customer' && (
-        <div className={`border rounded-2xl p-6 sm:p-8 shadow-md space-y-6 transition-all max-w-4xl mx-auto ${
+        <div className={`border rounded-2xl p-6 sm:p-8 shadow-md space-y-6 transition-all w-full ${
           isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-300 text-black'
         }`}>
           {/* Header Card */}
