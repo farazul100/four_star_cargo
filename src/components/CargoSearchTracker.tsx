@@ -189,17 +189,17 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
   return (
     <div className="space-y-6">
       {/* Brand & Search Title Card */}
-      <div className={`p-6 rounded-none border space-y-4 ${
-        isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 shadow-2xs text-slate-900'
+      <div className={`p-6 md:p-8 rounded-2xl border space-y-5 transition-all ${
+        isDark ? 'bg-[#1E293B] border-slate-700 text-white shadow-xl' : 'bg-white border-slate-200 shadow-sm text-slate-900'
       }`}>
-        <div className="text-center space-y-2">
+        <div className="text-center space-y-2.5">
           <div className="flex justify-center mb-1">
             <Logo size="md" />
           </div>
           <h2 className={`text-xl md:text-3xl font-extrabold font-poppins ${isDark ? 'text-white' : 'text-slate-900'}`}>
             {isBn ? 'গ্লোবাল কার্গো ট্র্যাকিং সার্চ পোর্টাল' : 'Universal Cargo Search Portal'}
           </h2>
-          <p className={`text-xs max-w-lg mx-auto font-light ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+          <p className={`text-xs md:text-sm max-w-xl mx-auto font-normal leading-relaxed ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
             {isBn
               ? 'আপনার ট্র্যাকিং নম্বর (Tracking ID) দিন — ওই আইডির অধীনে চায়না ওয়্যারহাউজ, ফ্লাইট ও বাংলাদেশ ওয়্যারহাউজে কোন কোন কার্টুন রয়েছে তা একসাথে স্পষ্ট ফুটে উঠবে।'
               : 'Enter your Tracking ID or Reference Number to track exact carton distribution across China Warehouse, In-Flight, and BD Hub.'}
@@ -209,21 +209,21 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
         {/* Global Search Bar Form */}
         <form
           onSubmit={handleSearchSubmit}
-          className={`border rounded-none p-3 shadow-xl flex flex-col sm:flex-row items-center gap-3 ${
-            isDark ? 'bg-[#11202F] border-[#1FB6A8]/30 shadow-[#1FB6A8]/5' : 'bg-slate-50 border-slate-300 shadow-sm'
+          className={`border rounded-xl p-3 shadow-lg flex flex-col sm:flex-row items-center gap-3 ${
+            isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-300 shadow-sm'
           }`}
         >
           <div className="relative flex-1 w-full">
-            <Search className={`w-5 h-5 absolute left-4 top-3.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-400'}`} />
+            <Search className={`w-5 h-5 absolute left-4 top-3.5 ${isDark ? 'text-teal-400' : 'text-slate-400'}`} />
             <input
               type="text"
               required
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={isBn ? 'উদাহরণ: TRK98421039 বা FSC-2026-0891 বা SM-DHAKA-88...' : 'e.g. TRK98421039 or FSC-2026-0891...'}
-              className={`w-full border rounded-none py-3 pl-12 pr-4 text-sm outline-none transition-all font-mono font-medium ${
+              className={`w-full border rounded-xl py-3 pl-12 pr-4 text-sm outline-none transition-all font-mono font-medium ${
                 isDark
-                  ? 'bg-[#0B1622] border-[#1E3247] focus:border-[#1FB6A8] text-white placeholder-[#8FA3AD]'
+                  ? 'bg-slate-950 border-slate-600 focus:border-teal-400 text-white placeholder:text-slate-300'
                   : 'bg-white border-slate-300 focus:border-teal-600 text-slate-900 placeholder-slate-400'
               }`}
             />
@@ -231,7 +231,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
 
           <button
             type="submit"
-            className="w-full sm:w-auto py-3 px-8 rounded-none bg-[#00897B] hover:bg-[#00796B] active:bg-[#00695C] text-white font-medium text-xs shadow-md transition-all flex items-center justify-center space-x-2 shrink-0 cursor-pointer border-0"
+            className="w-full sm:w-auto py-3 px-8 rounded-xl bg-[#00897B] hover:bg-[#00796B] active:bg-[#00695C] text-white font-semibold text-xs shadow-md transition-all flex items-center justify-center space-x-2 shrink-0 cursor-pointer border-0"
           >
             <Search className="w-4 h-4" />
             <span>{isBn ? 'ট্র্যাকিং সার্চ করুন' : 'Track Shipment'}</span>
@@ -264,13 +264,13 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
               return (
                 <div
                   key={shipment.trackingNumber}
-                  className={`border rounded-none p-5 md:p-6 space-y-6 shadow-2xl transition-all ${
-                    isDark ? 'bg-[#11202F] border-[#1E3247]' : 'bg-white border-slate-300'
+                  className={`border rounded-2xl p-5 md:p-6 space-y-6 shadow-xl transition-all ${
+                    isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-300'
                   }`}
                 >
                   {/* Master Tracking Header Card */}
-                  <div className={`p-4 rounded-none border flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-                    isDark ? 'bg-[#0B1622] border-[#1E3247]' : 'bg-slate-50 border-slate-200'
+                  <div className={`p-4 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                    isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-200'
                   }`}>
                     <div className="space-y-1">
                       <div className="flex items-center space-x-2 flex-wrap gap-y-1">
@@ -336,7 +336,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                         } ${
                           chinaStockCartons.length > 0
                             ? isDark ? 'bg-amber-500/15 border-amber-500/40 text-amber-300' : 'bg-amber-50 border-amber-300 text-amber-900'
-                            : isDark ? 'bg-[#0E0E10] border-[#2C2C2E] text-slate-500 opacity-60' : 'bg-slate-50 border-slate-200 text-slate-400'
+                            : isDark ? 'bg-slate-900 border-slate-700 text-slate-400 opacity-75' : 'bg-slate-50 border-slate-200 text-slate-400'
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -354,12 +354,12 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                       {/* 2. Flying In-Transit */}
                       <div
                         onClick={() => setLocationFilter('transit')}
-                        className={`p-3 border rounded-none cursor-pointer transition-all ${
+                        className={`p-3 border rounded-xl cursor-pointer transition-all ${
                           locationFilter === 'transit' ? 'ring-2 ring-blue-500 font-bold' : ''
                         } ${
                           inTransitCartons.length > 0
                             ? isDark ? 'bg-blue-500/15 border-blue-500/40 text-blue-300' : 'bg-blue-50 border-blue-300 text-blue-900'
-                            : isDark ? 'bg-[#0E0E10] border-[#2C2C2E] text-slate-500 opacity-60' : 'bg-slate-50 border-slate-200 text-slate-400'
+                            : isDark ? 'bg-slate-900 border-slate-700 text-slate-400 opacity-75' : 'bg-slate-50 border-slate-200 text-slate-400'
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -377,12 +377,12 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                       {/* 3. BD Hub Received */}
                       <div
                         onClick={() => setLocationFilter('bd_hub')}
-                        className={`p-3 border rounded-none cursor-pointer transition-all ${
+                        className={`p-3 border rounded-xl cursor-pointer transition-all ${
                           locationFilter === 'bd_hub' ? 'ring-2 ring-teal-500 font-bold' : ''
                         } ${
                           bdHubCartons.length > 0
                             ? isDark ? 'bg-teal-500/15 border-teal-500/40 text-teal-300' : 'bg-teal-50 border-teal-300 text-teal-900'
-                            : isDark ? 'bg-[#0E0E10] border-[#2C2C2E] text-slate-500 opacity-60' : 'bg-slate-50 border-slate-200 text-slate-400'
+                            : isDark ? 'bg-slate-900 border-slate-700 text-slate-400 opacity-75' : 'bg-slate-50 border-slate-200 text-slate-400'
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -400,12 +400,12 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                       {/* 4. Delivered */}
                       <div
                         onClick={() => setLocationFilter('delivered')}
-                        className={`p-3 border rounded-none cursor-pointer transition-all ${
+                        className={`p-3 border rounded-xl cursor-pointer transition-all ${
                           locationFilter === 'delivered' ? 'ring-2 ring-emerald-500 font-bold' : ''
                         } ${
                           deliveredCartons.length > 0
                             ? isDark ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : 'bg-emerald-50 border-emerald-300 text-emerald-900'
-                            : isDark ? 'bg-[#0E0E10] border-[#2C2C2E] text-slate-500 opacity-60' : 'bg-slate-50 border-slate-200 text-slate-400'
+                            : isDark ? 'bg-slate-900 border-slate-700 text-slate-400 opacity-75' : 'bg-slate-50 border-slate-200 text-slate-400'
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -488,7 +488,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                     <div className="overflow-x-auto border border-slate-200 dark:border-slate-800">
                       <table className="w-full text-left text-xs font-mono">
                         <thead className={`border-b text-[11px] ${
-                          isDark ? 'bg-[#0E0E10] border-slate-800 text-slate-400' : 'bg-slate-100 border-slate-200 text-slate-700'
+                          isDark ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
                         }`}>
                           <tr>
                             <th className="p-2.5">#</th>
