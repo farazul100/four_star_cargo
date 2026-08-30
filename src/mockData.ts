@@ -10,6 +10,36 @@ export const INITIAL_USERS: User[] = [
     status: 'active',
     created_at: '2026-01-01T00:00:00Z',
   },
+  {
+    id: 'usr-opd-master',
+    name: 'OPD',
+    email: 'op@cargo.com',
+    password: 'Cargo@2026',
+    role: 'operation_director',
+    warehouse_name: 'Central Access',
+    status: 'active',
+    created_at: '2026-01-01T00:00:00Z',
+  },
+  {
+    id: 'usr-acc-master',
+    name: 'Chief Accountant',
+    email: 'accountant@cargo.com',
+    password: 'Cargo@2026',
+    role: 'accountant',
+    warehouse_name: 'Central Access',
+    status: 'active',
+    created_at: '2026-01-01T00:00:00Z',
+  },
+  {
+    id: 'usr-crm-master',
+    name: 'CRM',
+    email: 'crm@cargo.com',
+    password: 'Cargo@2026',
+    role: 'crm_executive',
+    warehouse_name: 'Central Access',
+    status: 'active',
+    created_at: '2026-01-01T00:00:00Z',
+  },
 ];
 
 export const INITIAL_WAREHOUSES: Warehouse[] = [
