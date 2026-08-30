@@ -29,15 +29,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     } catch (e) {
       console.error('Error restoring active user session:', e);
     }
-    // Default fallback to keep master super admin session active on direct browser URL visits
-    return {
-      id: 'usr-admin-master',
-      name: 'সুপার এডমিন (Super Admin)',
-      email: 'superadmin@cargo.com',
-      role: 'super_admin',
-      status: 'active',
-      created_at: '2026-01-01T00:00:00Z',
-    };
+    return null;
   });
   const [loading, setLoading] = useState(false);
 
