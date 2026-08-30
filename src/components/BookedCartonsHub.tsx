@@ -195,9 +195,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       {/* KPI METRICS & VIEW MODE HEADER CONTROLS */}
       {/* ------------------------------------------------------------- */}
       <div
-        className={`p-5 rounded-none-none border transition-all shadow-xs space-y-4 ${
+        className={`p-5 rounded-2xl border transition-all shadow-xl space-y-4 ${
           isDark
-            ? 'bg-[#1C1C1E] border-slate-800 text-white'
+            ? 'bg-[#1E293B] border-slate-700 text-white'
             : 'bg-white border-slate-200/90 text-slate-900'
         }`}
       >
@@ -398,9 +398,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 return (
                   <div
                     key={mark}
-                    className={`p-5 rounded-none-none border transition-all shadow-xs flex flex-col justify-between space-y-4 hover:shadow-md cursor-pointer ${
+                    className={`p-5 rounded-2xl border transition-all shadow-xl flex flex-col justify-between space-y-4 hover:shadow-2xl cursor-pointer ${
                       isDark
-                        ? 'bg-[#1C1C1E] border-slate-800 hover:border-blue-500/50'
+                        ? 'bg-[#1E293B] border-slate-700 hover:border-teal-500/50'
                         : 'bg-white border-slate-200 hover:border-blue-400'
                     }`}
                     onClick={() => setActiveCustomerModalMark(mark)}
@@ -469,8 +469,8 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               })}
             </div>
           ) : (
-            <div className={`p-10 rounded-none-none border text-center space-y-3 ${
-              isDark ? 'bg-[#1C1C1E] border-slate-800 text-slate-400' : 'bg-white border-slate-200 text-slate-500'
+            <div className={`p-10 rounded-2xl border text-center space-y-3 shadow-xl ${
+              isDark ? 'bg-[#1E293B] border-slate-700 text-slate-300' : 'bg-white border-slate-200 text-slate-500'
             }`}>
               <Box className="w-10 h-10 text-slate-400 mx-auto opacity-40" />
               <div className="text-sm font-medium">{isBn ? 'কোনো বুকিংকৃত কার্টুন পাওয়া যায়নি' : 'No Booked Cartons Found'}</div>
@@ -487,9 +487,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       {/* ------------------------------------------------------------- */}
       {viewMode === 'list' && (
         <div
-          className={`rounded-none-none border transition-all shadow-xs overflow-hidden ${
+          className={`rounded-2xl border transition-all shadow-xl overflow-hidden ${
             isDark
-              ? 'bg-[#1C1C1E] border-slate-800 text-white'
+              ? 'bg-[#1E293B] border-slate-700 text-white'
               : 'bg-white border-slate-200 text-slate-900'
           }`}
         >

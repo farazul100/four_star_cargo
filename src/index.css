@@ -437,14 +437,14 @@ iframe.skiptranslate {
 html.dark select,
 .dark select {
   color-scheme: dark !important;
-  background-color: #121214 !important;
+  background-color: #0F172A !important;
   color: #FFFFFF !important;
 }
 
 html.dark select option,
 .dark select option,
 .dark option {
-  background-color: #1C1C1E !important;
+  background-color: #1E293B !important;
   color: #FFFFFF !important;
   padding: 8px 12px;
 }

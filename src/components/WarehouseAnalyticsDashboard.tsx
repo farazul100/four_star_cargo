@@ -124,9 +124,9 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
     <div className="space-y-6">
       {/* 1. Header Banner & Quick Action Shortcuts */}
       <div
-        className={`p-6 rounded-xl border transition-all shadow-2xs ${
+        className={`p-6 rounded-2xl border transition-all shadow-xl ${
           isDark
-            ? 'bg-[#1C1C1E] border-slate-800 text-white'
+            ? 'bg-[#1E293B] border-slate-700 text-white'
             : 'bg-white border-slate-200/90 text-slate-900'
         }`}
       >
@@ -200,8 +200,8 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* KPI 1 */}
         <div
-          className={`p-5 rounded-xl border transition-all shadow-2xs ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90'
+          className={`p-5 rounded-2xl border transition-all shadow-xl ${
+            isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90'
           }`}
         >
           <div className="flex items-center justify-between">
@@ -228,8 +228,8 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
 
         {/* KPI 2 */}
         <div
-          className={`p-5 rounded-xl border transition-all shadow-2xs ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90'
+          className={`p-5 rounded-2xl border transition-all shadow-xl ${
+            isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90'
           }`}
         >
           <div className="flex items-center justify-between">
@@ -256,8 +256,8 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
 
         {/* KPI 3 */}
         <div
-          className={`p-5 rounded-xl border transition-all shadow-2xs ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90'
+          className={`p-5 rounded-2xl border transition-all shadow-xl ${
+            isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90'
           }`}
         >
           <div className="flex items-center justify-between">
@@ -284,8 +284,8 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
 
         {/* KPI 4 */}
         <div
-          className={`p-5 rounded-xl border transition-all shadow-2xs ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90'
+          className={`p-5 rounded-2xl border transition-all shadow-xl ${
+            isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90'
           }`}
         >
           <div className="flex items-center justify-between">
@@ -315,8 +315,8 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Monthly Cargo Intake vs Air Dispatch Trend Chart (2 Cols) */}
         <div
-          className={`lg:col-span-2 p-6 rounded-xl border transition-all shadow-2xs ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90'
+          className={`lg:col-span-2 p-6 rounded-2xl border transition-all shadow-xl ${
+            isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90'
           }`}
         >
           <div className="flex items-center justify-between border-b pb-4 border-slate-200 dark:border-slate-800">
