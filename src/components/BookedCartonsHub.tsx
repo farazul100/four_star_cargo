@@ -544,7 +544,12 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                     </td>
 
                     <td className="p-3 font-mono font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700">
-                      {c.ctn_no}
+                      <div>{c.ctn_no}</div>
+                      {c.is_merged && (
+                        <span className="mt-0.5 inline-block px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30">
+                          🔗 MERGED
+                        </span>
+                      )}
                     </td>
 
                     <td className="p-3 font-mono text-blue-600 dark:text-blue-400 font-bold border border-slate-200 dark:border-slate-700">

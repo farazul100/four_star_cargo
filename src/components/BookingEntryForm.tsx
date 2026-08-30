@@ -16,6 +16,7 @@ import {
   ListPlus,
   AlertTriangle,
   Printer,
+  Layers,
 } from 'lucide-react';
 import { Carton, Warehouse, User, Language, Customer, LedgerEntry } from '../types';
 import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction, publishSystemNotification } from '../lib/db';
@@ -43,6 +44,8 @@ interface BatchCartonRow {
   gross_weight: number;
   cbm: number;
   photo_url?: string;
+  master_group_id?: string;
+  is_merged?: boolean;
 }
 
 export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
@@ -454,10 +457,171 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
   const handleRemovePreviewRow = (rowId: string) => {
     if (previewRows.length <= 1) return;
     setPreviewRows(previewRows.filter((r) => r.id !== rowId));
+    setSelectedRowIds((prev) => prev.filter((id) => id !== rowId));
+  };
+
+  // -------------------------------------------------------------
+  // CARTON MERGING & SUB-ITEM SYSTEM (IMAGE 2 COMPLIANT)
+  // -------------------------------------------------------------
+  const [selectedRowIds, setSelectedRowIds] = useState<string[]>([]);
+
+  // Add a Sub-Shipping Mark / Sub-Item to an existing carton (Carton Merging)
+  const handleAddSubItem = (targetRowId: string) => {
+    const targetIdx = previewRows.findIndex((r) => r.id === targetRowId);
+    if (targetIdx === -1) return;
+
+    const targetRow = previewRows[targetIdx];
+    const groupId = targetRow.master_group_id || `grp-${targetRow.id}`;
+
+    // Find existing sub-items in the same group to derive next shipping mark
+    const groupRows = previewRows.filter(
+      (r) => (r.master_group_id && r.master_group_id === groupId) || r.id === targetRowId
+    );
+
+    let nextMark = targetRow.shipping_mark;
+    const parts = targetRow.shipping_mark.split('-');
+    if (parts.length >= 2 && !isNaN(parseInt(parts[parts.length - 1]))) {
+      const baseNum = parseInt(parts[parts.length - 1]);
+      const prefix = parts.slice(0, -1).join('-');
+      nextMark = `${prefix}-${baseNum + groupRows.length}`;
+    } else {
+      nextMark = `${targetRow.shipping_mark}-${groupRows.length + 1}`;
+    }
+
+    const newSubRow: BatchCartonRow = {
+      id: `sub-row-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      entry_date: targetRow.entry_date,
+      ctn_no: targetRow.ctn_no,
+      packaging_number: targetRow.packaging_number,
+      shipping_mark: nextMark,
+      product_name_en: targetRow.product_name_en,
+      product_name_cn: targetRow.product_name_cn,
+      quantity: targetRow.quantity,
+      net_weight: targetRow.net_weight,
+      gross_weight: targetRow.gross_weight,
+      cbm: targetRow.cbm,
+      photo_url: targetRow.photo_url,
+      master_group_id: groupId,
+      is_merged: true,
+    };
+
+    const updatedRows = [...previewRows];
+    updatedRows[targetIdx] = {
+      ...targetRow,
+      master_group_id: groupId,
+      is_merged: true,
+    };
+
+    const insertIdx = targetIdx + groupRows.length;
+    updatedRows.splice(insertIdx, 0, newSubRow);
+    setPreviewRows(updatedRows);
+  };
+
+  // Bulk Merge Checked Rows into one Master Carton
+  const handleMergeSelectedRows = () => {
+    if (selectedRowIds.length < 2) return;
+    const firstSelected = previewRows.find((r) => selectedRowIds.includes(r.id));
+    if (!firstSelected) return;
+
+    const groupId = firstSelected.master_group_id || `grp-${firstSelected.id}`;
+
+    setPreviewRows((prev) =>
+      prev.map((r) => {
+        if (selectedRowIds.includes(r.id)) {
+          return {
+            ...r,
+            ctn_no: firstSelected.ctn_no,
+            packaging_number: firstSelected.packaging_number,
+            master_group_id: groupId,
+            is_merged: true,
+          };
+        }
+        return r;
+      })
+    );
+    setSelectedRowIds([]);
+  };
+
+  // Unmerge a single row
+  const handleUnmergeRow = (rowId: string) => {
+    setPreviewRows((prev) =>
+      prev.map((r, idx) => {
+        if (r.id === rowId) {
+          const newCtn = `CTN-${idx + 1}`;
+          return {
+            ...r,
+            ctn_no: newCtn,
+            packaging_number: `BOX-${100 + idx + 1}`,
+            master_group_id: undefined,
+            is_merged: false,
+          };
+        }
+        return r;
+      })
+    );
+  };
+
+  // Toggle selection for bulk merge
+  const handleToggleSelectRow = (rowId: string) => {
+    setSelectedRowIds((prev) =>
+      prev.includes(rowId) ? prev.filter((id) => id !== rowId) : [...prev, rowId]
+    );
+  };
+
+  // Toggle select all
+  const handleToggleSelectAll = () => {
+    if (selectedRowIds.length === previewRows.length) {
+      setSelectedRowIds([]);
+    } else {
+      setSelectedRowIds(previewRows.map((r) => r.id));
+    }
+  };
+
+  // Helper to compute row spans for merged carton rows
+  const getRowSpanInfo = (index: number) => {
+    const currentRow = previewRows[index];
+    if (!currentRow) return { rowSpan: 1, isFirst: true };
+
+    const groupKey = currentRow.master_group_id || (currentRow.is_merged ? currentRow.ctn_no : null);
+    if (!groupKey) return { rowSpan: 1, isFirst: true };
+
+    let firstIdx = index;
+    while (
+      firstIdx > 0 &&
+      ((previewRows[firstIdx - 1].master_group_id || (previewRows[firstIdx - 1].is_merged ? previewRows[firstIdx - 1].ctn_no : null)) === groupKey)
+    ) {
+      firstIdx--;
+    }
+
+    if (firstIdx !== index) {
+      return { rowSpan: 0, isFirst: false };
+    }
+
+    let span = 0;
+    while (
+      index + span < previewRows.length &&
+      ((previewRows[index + span].master_group_id || (previewRows[index + span].is_merged ? previewRows[index + span].ctn_no : null)) === groupKey)
+    ) {
+      span++;
+    }
+
+    return { rowSpan: span, isFirst: true };
   };
 
   const handleRowUpdate = (rowId: string, field: keyof BatchCartonRow, val: any) => {
-    setPreviewRows((prev) => prev.map((r) => (r.id === rowId ? { ...r, [field]: val } : r)));
+    setPreviewRows((prev) => {
+      const targetRow = prev.find((r) => r.id === rowId);
+      if (!targetRow) return prev;
+
+      // If updating ctn_no or packaging_number on a merged carton, update all rows in that group
+      if ((field === 'ctn_no' || field === 'packaging_number') && targetRow.master_group_id) {
+        return prev.map((r) =>
+          r.master_group_id === targetRow.master_group_id ? { ...r, [field]: val } : r
+        );
+      }
+
+      return prev.map((r) => (r.id === rowId ? { ...r, [field]: val } : r));
+    });
   };
 
   // SUBMIT ALL CARTONS BOOKING TO SYSTEM DATABASE
@@ -510,6 +674,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       updated_at: new Date().toISOString(),
       current_warehouse_name: myWh?.name,
       destination_warehouse_name: warehouses.find((w) => w.id === destWhId)?.name,
+      master_group_id: r.master_group_id,
+      is_merged: r.is_merged,
     }));
 
     // Save cartons to central database & propagate state (Filter out previous cartons with same tracking number)
@@ -1110,7 +1276,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       </div>
 
       {/* ------------------------------------------------------------- */}
-      {/* 2. LIVE BOOKING PREVIEW TABLE */}
+      {/* 2. LIVE BOOKING PREVIEW TABLE (WITH CARTON MERGING SUPPORT) */}
       {/* ------------------------------------------------------------- */}
       {previewRows.length > 0 ? (
         <div
@@ -1120,46 +1286,67 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
               : 'bg-white border-slate-200/90 text-slate-900'
           }`}
         >
-          <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row md:items-center justify-between gap-3">
             <div className="flex items-center space-x-2">
               <FileCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               <h3 className={`text-xs font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                {isBn ? 'কাস্টমার বুকিং প্রিভিউ টেবিল (Live Booking Preview)' : 'Live Customer Booking Preview'}
+                {isBn ? 'কাস্টমার বুকিং ও কার্টুন মার্জ প্রিভিউ টেবিল' : 'Live Booking & Carton Merge Preview'}
               </h3>
             </div>
 
-            <div className="flex items-center space-x-4 text-xs font-mono text-slate-500">
-              <span>মোট কার্টুন: <strong className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{previewRows.length}টি</strong></span>
-              <span>মোট ওজন: <strong className="text-emerald-600 dark:text-emerald-400 font-medium">{totalGrossWeightCalc.toFixed(1)} kg</strong></span>
-              <span>মোট সিবিএম: <strong className="text-purple-600 dark:text-purple-400 font-medium">{totalCbmCalc.toFixed(2)} CBM</strong></span>
+            {/* MERGE TOOLBAR & SUMMARY STATS */}
+            <div className="flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={handleMergeSelectedRows}
+                disabled={selectedRowIds.length < 2}
+                className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white text-xs font-medium transition-all flex items-center space-x-1.5 cursor-pointer shadow-xs border-0 outline-none"
+              >
+                <Layers className="w-3.5 h-3.5" />
+                <span>{isBn ? `🔗 সিলেক্টেড (${selectedRowIds.length}) মার্জ করুন` : `🔗 Merge Selected (${selectedRowIds.length})`}</span>
+              </button>
+
+              <div className="flex items-center space-x-3 text-xs font-mono text-slate-500 pl-2 border-l border-slate-200 dark:border-slate-700">
+                <span>মোট কার্টুন: <strong className={`font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{previewRows.length}টি</strong></span>
+                <span>মোট ওজন: <strong className="text-emerald-600 dark:text-emerald-400 font-medium">{totalGrossWeightCalc.toFixed(1)} kg</strong></span>
+                <span>মোট সিবিএম: <strong className="text-purple-600 dark:text-purple-400 font-medium">{totalCbmCalc.toFixed(2)} CBM</strong></span>
+              </div>
             </div>
           </div>
 
-          {/* Clean Fixed Width Grid Table */}
+          {/* Clean Fixed Width Grid Table with RowSpans for Merged Cartons */}
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse border border-slate-200 dark:border-slate-700 table-fixed min-w-[1200px]">
+            <table className="w-full text-left text-xs border-collapse border border-slate-200 dark:border-slate-700 table-fixed min-w-[1250px]">
               <colgroup>
-                <col style={{ width: '45px' }} />
-                <col style={{ width: '120px' }} />
-                <col style={{ width: '120px' }} />
+                <col style={{ width: '65px' }} />
+                <col style={{ width: '115px' }} />
                 <col style={{ width: '130px' }} />
-                <col style={{ width: '280px' }} />
-                <col style={{ width: '90px' }} />
-                <col style={{ width: '90px' }} />
-                <col style={{ width: '90px' }} />
+                <col style={{ width: '140px' }} />
+                <col style={{ width: '260px' }} />
                 <col style={{ width: '85px' }} />
-                <col style={{ width: '125px' }} />
-                <col style={{ width: '90px' }} />
-                <col style={{ width: '55px' }} />
+                <col style={{ width: '85px' }} />
+                <col style={{ width: '85px' }} />
+                <col style={{ width: '80px' }} />
+                <col style={{ width: '120px' }} />
+                <col style={{ width: '85px' }} />
+                <col style={{ width: '110px' }} />
               </colgroup>
               <thead className={`uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-slate-700 font-medium ${
                 isDark ? 'bg-[#1E293B] text-slate-300' : 'bg-slate-100 text-slate-700'
               }`}>
                 <tr>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">SL</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">
+                    <input
+                      type="checkbox"
+                      checked={previewRows.length > 0 && selectedRowIds.length === previewRows.length}
+                      onChange={handleToggleSelectAll}
+                      className="rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                      title={isBn ? 'সব সিলেক্ট করুন' : 'Select All'}
+                    />
+                  </th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">ENTRY DATE</th>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">CTN NO.</th>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">SHIPPING MARK</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">CTN NO. & CODE</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium text-blue-600 dark:text-blue-400">SHIPPING MARK</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">PRODUCT NAME (EN & CN)</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">QTY (PCS)</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">N.WEIGHT</th>
@@ -1171,180 +1358,263 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                {previewRows.map((r, idx) => (
-                  <tr key={r.id} className="hover:bg-slate-50/60 dark:hover:bg-[#1E293B] transition-colors">
-                    <td className="p-2 text-center font-mono text-slate-400 border border-slate-200 dark:border-slate-700">
-                      {idx + 1}
-                    </td>
+                {previewRows.map((r, idx) => {
+                  const spanInfo = getRowSpanInfo(idx);
 
-                    {/* Entry Date */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden">
-                      <input
-                        type="date"
-                        value={r.entry_date}
-                        onChange={(e) => handleRowUpdate(r.id, 'entry_date', e.target.value)}
-                        className={`w-full bg-transparent border-0 outline-none text-xs font-mono px-1 py-1 rounded focus:bg-blue-500/10 ${
-                          isDark ? 'text-slate-200' : 'text-slate-800'
-                        }`}
-                      />
-                    </td>
+                  return (
+                    <tr
+                      key={r.id}
+                      className={`transition-colors ${
+                        r.is_merged
+                          ? isDark
+                            ? 'bg-indigo-950/20 hover:bg-indigo-950/30'
+                            : 'bg-indigo-50/40 hover:bg-indigo-50/70'
+                          : isDark
+                          ? 'hover:bg-slate-800/50'
+                          : 'hover:bg-slate-50/80'
+                      }`}
+                    >
+                      {/* SL & Checkbox (RowSpanned if Merged) */}
+                      {spanInfo.isFirst && (
+                        <td
+                          rowSpan={spanInfo.rowSpan}
+                          className={`p-2 text-center font-mono border border-slate-200 dark:border-slate-700 align-middle ${
+                            spanInfo.rowSpan > 1
+                              ? isDark
+                                ? 'bg-indigo-950/40 border-r-2 border-r-indigo-500'
+                                : 'bg-indigo-50/80 border-r-2 border-r-indigo-500'
+                              : ''
+                          }`}
+                        >
+                          <div className="flex flex-col items-center justify-center space-y-1">
+                            <input
+                              type="checkbox"
+                              checked={selectedRowIds.includes(r.id)}
+                              onChange={() => handleToggleSelectRow(r.id)}
+                              className="rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
+                            />
+                            <span className="text-slate-500 text-[11px] font-bold">{idx + 1}</span>
+                            {spanInfo.rowSpan > 1 && (
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30 whitespace-nowrap">
+                                🔗 MERGED ({spanInfo.rowSpan})
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                      )}
 
-                    {/* Carton No */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden">
-                      <input
-                        type="text"
-                        value={r.ctn_no}
-                        onChange={(e) => handleRowUpdate(r.id, 'ctn_no', e.target.value)}
-                        className={`w-full bg-transparent border-0 outline-none text-xs font-mono font-medium px-1 py-1 rounded focus:bg-blue-500/10 ${
-                          isDark ? 'text-white' : 'text-slate-900'
-                        }`}
-                      />
-                    </td>
+                      {/* Entry Date (RowSpanned if Merged) */}
+                      {spanInfo.isFirst && (
+                        <td
+                          rowSpan={spanInfo.rowSpan}
+                          className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden align-middle"
+                        >
+                          <input
+                            type="date"
+                            value={r.entry_date}
+                            onChange={(e) => handleRowUpdate(r.id, 'entry_date', e.target.value)}
+                            className={`w-full bg-transparent border-0 outline-none text-xs font-mono px-1 py-1 rounded focus:bg-blue-500/10 ${
+                              isDark ? 'text-slate-200' : 'text-slate-800'
+                            }`}
+                          />
+                        </td>
+                      )}
 
-                    {/* Customer Shipping Mark */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden">
-                      <input
-                        type="text"
-                        value={r.shipping_mark}
-                        onChange={(e) => handleRowUpdate(r.id, 'shipping_mark', e.target.value)}
-                        placeholder="SM-DHAKA-88"
-                        className="w-full bg-transparent border-0 outline-none text-xs font-mono text-blue-600 dark:text-blue-400 font-medium px-1 py-1 rounded focus:bg-blue-500/10 truncate"
-                      />
-                    </td>
+                      {/* Carton No & Code (RowSpanned if Merged) */}
+                      {spanInfo.isFirst && (
+                        <td
+                          rowSpan={spanInfo.rowSpan}
+                          className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden align-middle"
+                        >
+                          <input
+                            type="text"
+                            value={r.ctn_no}
+                            onChange={(e) => handleRowUpdate(r.id, 'ctn_no', e.target.value)}
+                            className={`w-full bg-transparent border-0 outline-none text-xs font-mono font-bold px-1 py-1 rounded focus:bg-blue-500/10 ${
+                              isDark ? 'text-white' : 'text-slate-900'
+                            }`}
+                          />
+                          {r.packaging_number && (
+                            <div className="text-[10px] font-mono text-slate-400 px-1 truncate">
+                              {r.packaging_number}
+                            </div>
+                          )}
+                        </td>
+                      )}
 
-                    {/* Product Name (EN & CN) */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden">
-                      <div className="space-y-1">
+                      {/* Customer Shipping Mark (Individual per merged sub-item) */}
+                      <td className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden align-middle">
+                        <div className="flex items-center space-x-1">
+                          {r.is_merged && (
+                            <span className="text-[9px] font-mono text-indigo-500 font-bold">└</span>
+                          )}
+                          <input
+                            type="text"
+                            value={r.shipping_mark}
+                            onChange={(e) => handleRowUpdate(r.id, 'shipping_mark', e.target.value)}
+                            placeholder="e.g. ASI/BELAL-9"
+                            className="w-full bg-transparent border-0 outline-none text-xs font-mono text-blue-600 dark:text-blue-400 font-bold px-1 py-1 rounded focus:bg-blue-500/10 truncate"
+                          />
+                        </div>
+                      </td>
+
+                      {/* Product Name (EN & CN) */}
+                      <td className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden align-middle">
+                        <div className="space-y-1">
+                          <input
+                            type="text"
+                            value={r.product_name_en}
+                            onChange={(e) => handleRowUpdate(r.id, 'product_name_en', e.target.value)}
+                            placeholder="Product English Name"
+                            className={`w-full bg-transparent border-0 border-b border-slate-200/60 dark:border-slate-700 outline-none text-xs font-normal px-1 py-0.5 focus:bg-blue-500/10 truncate ${
+                              isDark ? 'text-white' : 'text-slate-900'
+                            }`}
+                          />
+                          <input
+                            type="text"
+                            value={r.product_name_cn}
+                            onChange={(e) => handleRowUpdate(r.id, 'product_name_cn', e.target.value)}
+                            placeholder="中文品名"
+                            className={`w-full bg-transparent border-0 outline-none text-xs font-normal px-1 py-0.5 focus:bg-blue-500/10 truncate ${
+                              isDark ? 'text-slate-400' : 'text-slate-600'
+                            }`}
+                          />
+                        </div>
+                      </td>
+
+                      {/* Quantity/CTN */}
+                      <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden align-middle">
                         <input
-                          type="text"
-                          value={r.product_name_en}
-                          onChange={(e) => handleRowUpdate(r.id, 'product_name_en', e.target.value)}
-                          placeholder="Product English Name"
-                          className={`w-full bg-transparent border-0 border-b border-slate-200/60 dark:border-slate-700 outline-none text-xs font-normal px-1 py-0.5 focus:bg-blue-500/10 truncate ${
+                          type="number"
+                          min={1}
+                          value={r.quantity}
+                          onChange={(e) => handleRowUpdate(r.id, 'quantity', parseInt(e.target.value) || 1)}
+                          className={`w-full bg-transparent border-0 outline-none text-xs font-mono text-center px-1 py-1 rounded focus:bg-blue-500/10 ${
                             isDark ? 'text-white' : 'text-slate-900'
                           }`}
                         />
+                      </td>
+
+                      {/* N. Weight (KG) */}
+                      <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden align-middle">
                         <input
-                          type="text"
-                          value={r.product_name_cn}
-                          onChange={(e) => handleRowUpdate(r.id, 'product_name_cn', e.target.value)}
-                          placeholder="中文品名"
-                          className={`w-full bg-transparent border-0 outline-none text-xs font-normal px-1 py-0.5 focus:bg-blue-500/10 truncate ${
+                          type="number"
+                          step="0.1"
+                          min={0.1}
+                          value={r.net_weight}
+                          onChange={(e) => handleRowUpdate(r.id, 'net_weight', parseFloat(e.target.value) || 0)}
+                          className={`w-full bg-transparent border-0 outline-none text-xs font-mono text-center px-1 py-1 rounded focus:bg-blue-500/10 ${
                             isDark ? 'text-slate-400' : 'text-slate-600'
                           }`}
                         />
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Quantity/CTN */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden">
-                      <input
-                        type="number"
-                        min={1}
-                        value={r.quantity}
-                        onChange={(e) => handleRowUpdate(r.id, 'quantity', parseInt(e.target.value) || 1)}
-                        className={`w-full bg-transparent border-0 outline-none text-xs font-mono text-center px-1 py-1 rounded focus:bg-blue-500/10 ${
-                          isDark ? 'text-white' : 'text-slate-900'
-                        }`}
-                      />
-                    </td>
+                      {/* G. Weight (KG) */}
+                      <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden align-middle">
+                        <input
+                          type="number"
+                          step="0.1"
+                          min={0.1}
+                          value={r.gross_weight}
+                          onChange={(e) => {
+                            const newGross = parseFloat(e.target.value) || 0;
+                            handleRowUpdate(r.id, 'gross_weight', newGross);
+                          }}
+                          className={`w-full bg-transparent border-0 outline-none text-xs font-mono text-center font-bold px-1 py-1 rounded focus:bg-blue-500/10 ${
+                            isDark ? 'text-white font-bold' : 'text-slate-900 font-bold'
+                          }`}
+                        />
+                      </td>
 
-                    {/* N. Weight (KG) */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden">
-                      <input
-                        type="number"
-                        step="0.1"
-                        min={0.1}
-                        value={r.net_weight}
-                        onChange={(e) => handleRowUpdate(r.id, 'net_weight', parseFloat(e.target.value) || 0)}
-                        className={`w-full bg-transparent border-0 outline-none text-xs font-mono text-center px-1 py-1 rounded focus:bg-blue-500/10 ${
-                          isDark ? 'text-slate-400' : 'text-slate-600'
-                        }`}
-                      />
-                    </td>
+                      {/* CBM/CTN */}
+                      <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden align-middle">
+                        <input
+                          type="number"
+                          step="0.01"
+                          min={0.01}
+                          value={r.cbm}
+                          onChange={(e) => handleRowUpdate(r.id, 'cbm', parseFloat(e.target.value) || 0)}
+                          className="w-full bg-transparent border-0 outline-none text-xs font-mono text-center text-purple-600 dark:text-purple-400 px-1 py-1 rounded focus:bg-blue-500/10"
+                        />
+                      </td>
 
-                    {/* G. Weight (KG) */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden">
-                      <input
-                        type="number"
-                        step="0.1"
-                        min={0.1}
-                        value={r.gross_weight}
-                        onChange={(e) => {
-                          const newGross = parseFloat(e.target.value) || 0;
-                          handleRowUpdate(r.id, 'gross_weight', newGross);
-                        }}
-                        className={`w-full bg-transparent border-0 outline-none text-xs font-mono text-center font-medium px-1 py-1 rounded focus:bg-blue-500/10 ${
-                          isDark ? 'text-white font-bold' : 'text-slate-900 font-bold'
-                        }`}
-                      />
-                    </td>
+                      {/* TRACKING NUM */}
+                      <td className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden align-middle">
+                        <input
+                          type="text"
+                          value={masterTrackingNumber}
+                          onChange={(e) => setMasterTrackingNumber(e.target.value)}
+                          className={`w-full bg-transparent border-0 outline-none text-xs font-mono px-1 py-1 rounded focus:bg-blue-500/10 truncate ${
+                            isDark ? 'text-slate-300' : 'text-slate-700'
+                          }`}
+                        />
+                      </td>
 
-                    {/* CBM/CTN */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden">
-                      <input
-                        type="number"
-                        step="0.01"
-                        min={0.01}
-                        value={r.cbm}
-                        onChange={(e) => handleRowUpdate(r.id, 'cbm', parseFloat(e.target.value) || 0)}
-                        className="w-full bg-transparent border-0 outline-none text-xs font-mono text-center text-purple-600 dark:text-purple-400 px-1 py-1 rounded focus:bg-blue-500/10"
-                      />
-                    </td>
+                      {/* Photo Proof Column */}
+                      <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden align-middle">
+                        {r.photo_url ? (
+                          <div className="flex items-center justify-center space-x-1">
+                            <button
+                              type="button"
+                              onClick={() => setPreviewPhotoModalUrl(r.photo_url!)}
+                              className={`px-2 py-1 rounded text-[10px] font-mono border ${
+                                isDark ? 'bg-blue-500/15 text-blue-300 border-blue-500/30' : 'bg-blue-50 text-blue-700 border-blue-200'
+                              }`}
+                            >
+                              <span>View</span>
+                            </button>
+                          </div>
+                        ) : (
+                          <label className="text-[10px] text-slate-400 hover:text-blue-500 cursor-pointer flex items-center justify-center space-x-1 font-normal">
+                            <Upload className="w-3 h-3" />
+                            <span>Upload</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              onChange={(e) => handleFileUpload(e, r.id)}
+                              className="hidden"
+                            />
+                          </label>
+                        )}
+                      </td>
 
-                    {/* TRACKING NUM */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden">
-                      <input
-                        type="text"
-                        value={masterTrackingNumber}
-                        onChange={(e) => setMasterTrackingNumber(e.target.value)}
-                        className={`w-full bg-transparent border-0 outline-none text-xs font-mono px-1 py-1 rounded focus:bg-blue-500/10 truncate ${
-                          isDark ? 'text-slate-300' : 'text-slate-700'
-                        }`}
-                      />
-                    </td>
-
-                    {/* Photo Proof Column */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden">
-                      {r.photo_url ? (
+                      {/* Action (+ MERGE / UNMERGE / DELETE) */}
+                      <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden align-middle">
                         <div className="flex items-center justify-center space-x-1">
                           <button
                             type="button"
-                            onClick={() => setPreviewPhotoModalUrl(r.photo_url!)}
-                            className={`px-2 py-1 rounded text-[10px] font-mono border ${
-                              isDark ? 'bg-blue-500/15 text-blue-300 border-blue-500/30' : 'bg-blue-50 text-blue-700 border-blue-200'
-                            }`}
+                            onClick={() => handleAddSubItem(r.id)}
+                            title={isBn ? 'এই কার্টুনে সাব-শিপিং মার্ক যোগ করে কার্টুন মার্জ করুন' : 'Add Sub-Shipping Mark to Merge Cartons'}
+                            className="px-1.5 py-1 rounded bg-indigo-500/15 hover:bg-indigo-500/25 text-indigo-600 dark:text-indigo-300 font-mono text-[10px] font-medium flex items-center space-x-0.5 border border-indigo-500/30 cursor-pointer"
                           >
-                            <span>View</span>
+                            <Plus className="w-3 h-3" />
+                            <span>+ Merge</span>
+                          </button>
+
+                          {r.is_merged && (
+                            <button
+                              type="button"
+                              onClick={() => handleUnmergeRow(r.id)}
+                              title={isBn ? 'মার্জ বাতিল করে আলাদা কার্টুন বানান' : 'Unmerge Carton'}
+                              className="p-1 text-amber-500 hover:text-amber-600 cursor-pointer"
+                            >
+                              <X className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => handleRemovePreviewRow(r.id)}
+                            disabled={previewRows.length <= 1}
+                            className="p-1 text-slate-400 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
-                      ) : (
-                        <label className="text-[10px] text-slate-400 hover:text-blue-500 cursor-pointer flex items-center justify-center space-x-1 font-normal">
-                          <Upload className="w-3 h-3" />
-                          <span>Upload</span>
-                          <input
-                            type="file"
-                            accept="image/*"
-                            onChange={(e) => handleFileUpload(e, r.id)}
-                            className="hidden"
-                          />
-                        </label>
-                      )}
-                    </td>
-
-                    {/* Action Remove */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden">
-                      <button
-                        type="button"
-                        onClick={() => handleRemovePreviewRow(r.id)}
-                        disabled={previewRows.length <= 1}
-                        className="p-1 text-slate-400 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>

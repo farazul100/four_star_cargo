@@ -109,6 +109,8 @@ export interface Carton {
   recipient_phone?: string;
   recipient_address?: string;
   updated_at?: string;
+  master_group_id?: string; // Grouping ID for merged cartons sharing the same master carton number/code
+  is_merged?: boolean; // Flag indicating if carton is part of a merged sub-item group
   // UI joins
   current_warehouse_name?: string;
   destination_warehouse_name?: string;
