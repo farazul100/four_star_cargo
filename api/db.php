@@ -167,18 +167,44 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!empty($input)) {
         $decoded = json_decode($input, true);
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-            $existing = readCurrentServerDb($pdo, $filePaths);
-            if (!is_array($existing)) {
-                $existing = $seedDatabase;
-            }
+            // Check if Factory System Reset is requested
+            $isReset = !empty($decoded['is_factory_reset']);
             
-            $finalDb = $existing;
-            foreach ($decoded as $key => $val) {
-                $finalDb[$key] = $val;
+            if ($isReset) {
+                // Completely purge MySQL table if connected
+                if ($pdo) {
+                    try {
+                        @$pdo->exec("TRUNCATE TABLE `fsc_system_store`");
+                    } catch (Throwable $t) {}
+                }
+                
+                // Clear disk files
+                foreach ($filePaths as $path) {
+                    if (file_exists($path)) {
+                        @unlink($path);
+                    }
+                }
+                
+                $finalDb = $seedDatabase;
+                foreach ($decoded as $key => $val) {
+                    if ($key !== 'is_factory_reset') {
+                        $finalDb[$key] = $val;
+                    }
+                }
+            } else {
+                $existing = readCurrentServerDb($pdo, $filePaths);
+                if (!is_array($existing)) {
+                    $existing = $seedDatabase;
+                }
+                
+                $finalDb = $existing;
+                foreach ($decoded as $key => $val) {
+                    $finalDb[$key] = $val;
+                }
             }
 
             writeServerDb($pdo, $filePaths, $finalDb);
-            echo json_encode(['status' => 'success', 'message' => 'Hostinger DB synchronized']);
+            echo json_encode(['status' => 'success', 'message' => 'Hostinger DB synchronized', 'is_factory_reset' => $isReset]);
             exit();
         }
     }

@@ -348,8 +348,37 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
   if (activeTab === 'dashboard') {
     const inTransitCartons = cartons.filter((c) => c.status === 'in_transit');
     const bookedStockCartons = cartons.filter((c) => c.status === 'booked');
-    const totalDispatchedWeight = finalizedProposals.reduce((sum, p) => sum + (p.total_weight || 0), 1420);
+    const totalDispatchedWeight = finalizedProposals.reduce((sum, p) => sum + (p.total_weight || 0), 0);
     const totalInventoryWeight = cartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0);
+
+    // Calculate real warehouse volume breakdown
+    const gzCartons = cartons.filter((c) => c.current_warehouse_id === 'wh-china' || (c.current_warehouse_name || '').toLowerCase().includes('guangzhou') || (c.current_warehouse_name || '').toLowerCase().includes('china'));
+    const hkCartons = cartons.filter((c) => (c.current_warehouse_name || '').toLowerCase().includes('hong kong') || (c.current_warehouse_name || '').toLowerCase().includes('hk'));
+    const dubaiCartons = cartons.filter((c) => (c.current_warehouse_name || '').toLowerCase().includes('dubai') || (c.current_warehouse_name || '').toLowerCase().includes('uae'));
+
+    const gzWeight = gzCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0);
+    const hkWeight = hkCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0);
+    const dubaiWeight = dubaiCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0);
+    const hubTotalWeight = gzWeight + hkWeight + dubaiWeight;
+
+    const gzPct = hubTotalWeight > 0 ? Math.round((gzWeight / hubTotalWeight) * 100) : 0;
+    const hkPct = hubTotalWeight > 0 ? Math.round((hkWeight / hubTotalWeight) * 100) : 0;
+    const dubaiPct = hubTotalWeight > 0 ? Math.round((dubaiWeight / hubTotalWeight) * 100) : 0;
+
+    // Construct 30-day dynamic trend chart data (defaults to clean 0 if no finalized flights)
+    const todayDate = new Date();
+    const trendData = [0, 1, 2, 3, 4, 5, 6].map((dayOffset) => {
+      const d = new Date(todayDate);
+      d.setDate(d.getDate() - (6 - dayOffset));
+      const dateStr = `${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getDate().toString().padStart(2, '0')}`;
+      const dayIsoStr = d.toISOString().split('T')[0];
+      
+      const dayWeight = finalizedProposals
+        .filter((p) => (p.finalized_at || p.date || '').startsWith(dayIsoStr))
+        .reduce((sum, p) => sum + (p.total_weight || 0), 0);
+
+      return { date: dateStr, value: dayWeight };
+    });
 
     return (
       <div className="space-y-6">
@@ -359,22 +388,22 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Today's Flying Volume */}
           <div
-            className={`border rounded-none p-5 space-y-3 transition-all ${
-              isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900 shadow-2xs'
+            className={`border rounded-2xl p-5 space-y-3 transition-all ${
+              isDark ? 'bg-[#1E293B] border-slate-700 text-white shadow-xl' : 'bg-white border-slate-200/90 text-slate-900 shadow-xs'
             }`}
           >
             <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
               <span className="font-medium">{isBn ? 'আজকের ডিসপ্যাচড ভলিউম' : "Today's Flying Cargo"}</span>
-              <Plane className="w-5 h-5 text-[#1D4ED8]" />
+              <Plane className="w-5 h-5 text-[#00897B]" />
             </div>
             <div>
               <div className="text-2xl font-bold font-sans text-slate-900 dark:text-white">
-                {totalDispatchedWeight.toLocaleString()} <span className="text-xs font-normal text-slate-500">kg</span>
+                {totalDispatchedWeight.toLocaleString()} <span className="text-xs font-normal text-slate-400">kg</span>
               </div>
               <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mt-1">
-                <span>{finalizedProposals.length || 3} Flights Dispatched</span>
-                <span className="text-emerald-600 dark:text-emerald-400 font-bold text-[11px]">
-                  +18.4%
+                <span>{finalizedProposals.length} Flights Dispatched</span>
+                <span className={`font-bold text-[11px] ${totalDispatchedWeight > 0 ? 'text-emerald-500' : 'text-slate-400'}`}>
+                  {totalDispatchedWeight > 0 ? '+18.4%' : '0%'}
                 </span>
               </div>
             </div>
@@ -383,8 +412,8 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
           {/* Card 2: Pending Proposal Submissions */}
           <div
             onClick={() => setActiveTab && setActiveTab('proposals')}
-            className={`border rounded-none p-5 space-y-3 transition-all cursor-pointer hover:border-[#1D4ED8]/60 ${
-              isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900 shadow-2xs'
+            className={`border rounded-2xl p-5 space-y-3 transition-all cursor-pointer hover:border-[#00897B] ${
+              isDark ? 'bg-[#1E293B] border-slate-700 text-white shadow-xl' : 'bg-white border-slate-200/90 text-slate-900 shadow-xs'
             }`}
           >
             <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
@@ -393,32 +422,32 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
             </div>
             <div>
               <div className="text-2xl font-bold font-sans text-slate-900 dark:text-white">
-                {pendingProposals.length} <span className="text-xs font-normal text-slate-500">Origin Hubs</span>
+                {pendingProposals.length} <span className="text-xs font-normal text-slate-400">Origin Hubs</span>
               </div>
               <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mt-1">
-                <span>{proposalCartons.length || 48} Cartons awaiting review</span>
-                <span className="text-[#1D4ED8] font-medium text-[11px] hover:underline">Review →</span>
+                <span>{proposalCartons.length} Cartons awaiting review</span>
+                <span className="text-[#00897B] dark:text-teal-400 font-medium text-[11px] hover:underline">Review →</span>
               </div>
             </div>
           </div>
 
           {/* Card 3: In-Transit Active Shipments */}
           <div
-            className={`border rounded-none p-5 space-y-3 transition-all ${
-              isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900 shadow-2xs'
+            className={`border rounded-2xl p-5 space-y-3 transition-all ${
+              isDark ? 'bg-[#1E293B] border-slate-700 text-white shadow-xl' : 'bg-white border-slate-200/90 text-slate-900 shadow-xs'
             }`}
           >
             <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
               <span className="font-medium">{isBn ? 'ইন-ট্রানজিট কার্গো শিপমেন্ট' : 'Active In-Transit Cargo'}</span>
-              <Truck className="w-5 h-5 text-[#1D4ED8]" />
+              <Truck className="w-5 h-5 text-[#00897B]" />
             </div>
             <div>
               <div className="text-2xl font-bold font-sans text-slate-900 dark:text-white">
-                {inTransitCartons.length || 186} <span className="text-xs font-normal text-slate-500">Cartons</span>
+                {inTransitCartons.length} <span className="text-xs font-normal text-slate-400">Cartons</span>
               </div>
               <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mt-1">
-                <span>4 Active Flight Batches</span>
-                <span className="text-blue-600 dark:text-blue-400 font-bold text-[11px]">
+                <span>{finalizedProposals.length} Active Flight Batches</span>
+                <span className="text-blue-500 dark:text-blue-400 font-bold text-[11px]">
                   En Route BD
                 </span>
               </div>
@@ -428,37 +457,37 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
           {/* Card 4: All Booking List */}
           <div
             onClick={() => setActiveTab && setActiveTab('cartons')}
-            className={`border rounded-none p-5 space-y-3 transition-all cursor-pointer hover:border-[#1D4ED8]/60 ${
-              isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900 shadow-2xs'
+            className={`border rounded-2xl p-5 space-y-3 transition-all cursor-pointer hover:border-[#00897B] ${
+              isDark ? 'bg-[#1E293B] border-slate-700 text-white shadow-xl' : 'bg-white border-slate-200/90 text-slate-900 shadow-xs'
             }`}
           >
             <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
               <span className="font-medium">{isBn ? 'অল বুকিং লিস্ট' : 'All Booking List'}</span>
-              <Package className="w-5 h-5 text-purple-600" />
+              <Package className="w-5 h-5 text-purple-500" />
             </div>
             <div>
               <div className="text-2xl font-bold font-sans text-slate-900 dark:text-white">
-                {bookedStockCartons.length || 342} <span className="text-xs font-normal text-slate-500">Cartons</span>
+                {bookedStockCartons.length} <span className="text-xs font-normal text-slate-400">Cartons</span>
               </div>
               <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mt-1">
-                <span>{totalInventoryWeight.toLocaleString() || '7,850'} kg stored</span>
-                <span className="text-purple-600 dark:text-purple-400 font-medium text-[11px] hover:underline">{isBn ? 'অল বুকিং দেখুন →' : 'View All Bookings →'}</span>
+                <span>{totalInventoryWeight.toLocaleString()} kg stored</span>
+                <span className="text-purple-500 dark:text-purple-400 font-medium text-[11px] hover:underline">{isBn ? 'অল বুকিং দেখুন →' : 'View All Bookings →'}</span>
               </div>
             </div>
           </div>
         </div>
 
-        {/* 2. PENDING PROPOSAL ACTION BANNER (Pure White Card with Primary Blue Left Accent Line) */}
+        {/* 2. PENDING PROPOSAL ACTION BANNER */}
         {pendingProposals.length > 0 && (
           <div
-            className={`p-4 rounded-none border-l-4 border-l-[#1D4ED8] border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs ${
+            className={`p-4 rounded-xl border-l-4 border-l-[#00897B] border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-md ${
               isDark
-                ? 'bg-[#1C1C1E] border-slate-800 text-white'
+                ? 'bg-[#1E293B] border-slate-700 text-white'
                 : 'bg-white border-slate-200/90 text-slate-900'
             }`}
           >
             <div className="flex items-center space-x-3">
-              <AlertCircle className="w-5 h-5 text-[#1D4ED8] shrink-0" />
+              <AlertCircle className="w-5 h-5 text-[#00897B] shrink-0" />
               <div>
                 <strong className="font-bold text-sm block text-slate-900 dark:text-white">
                   {isBn
@@ -474,7 +503,7 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
             </div>
             <button
               onClick={() => setActiveTab && setActiveTab('proposals')}
-              className="py-2.5 px-4 rounded-none bg-[#1D4ED8] hover:bg-[#1e40af] text-white font-semibold text-xs shadow-xs shrink-0 cursor-pointer flex items-center space-x-1.5"
+              className="py-2.5 px-4 rounded-xl bg-[#00897B] hover:bg-[#00796B] text-white font-semibold text-xs shadow-md shrink-0 cursor-pointer flex items-center space-x-1.5 border-0"
             >
               <span>{isBn ? 'প্রোপোজাল রিভিউ করুন' : 'Review Proposals Inbox'}</span>
               <ArrowRight className="w-4 h-4" />
@@ -488,17 +517,7 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
           <SleekLineChart
             title={isBn ? 'দৈনিক অর্ডার (৩০ দিন)' : 'Daily Flying Cargo Trend (30 Days)'}
             subtitle={isBn ? 'আকাশপথে ফ্লাইটের তারিখভিত্তিক কার্গো ভলিউম (kg)' : 'Real-time 30-day air cargo volume trend'}
-            data={[
-              { date: '07-31', value: 420 },
-              { date: '08-02', value: 650 },
-              { date: '08-04', value: 890 },
-              { date: '08-06', value: 720 },
-              { date: '08-08', value: 1150 },
-              { date: '08-10', value: 850 },
-              { date: '08-12', value: 940 },
-              { date: '08-14', value: 1280 },
-              { date: '08-15', value: 1420 },
-            ]}
+            data={trendData}
             color="#00A896"
             unit="kg"
             isDark={isDark}
@@ -506,46 +525,46 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
 
           {/* Origin Hub Volume Share & Route Status */}
           <div
-            className={`border rounded-none p-6 space-y-4 shadow-2xs ${
-              isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+            className={`border rounded-2xl p-6 space-y-4 shadow-xl ${
+              isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
             }`}
           >
             <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
               <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
-                <Building2 className="w-4 h-4 text-[#1D4ED8]" />
+                <Building2 className="w-4 h-4 text-[#00897B]" />
                 <span>{isBn ? 'ওয়্যারহাউজ-টু-ওয়্যারহাউজ ভলিউম ও শেয়ার' : 'Origin Hub Volume Ratio & Traffic'}</span>
               </h3>
-              <span className="text-xs text-[#1D4ED8] font-mono font-semibold">Active Cargo</span>
+              <span className="text-xs text-[#00897B] dark:text-teal-400 font-mono font-semibold">Active Cargo</span>
             </div>
 
             <div className="space-y-4 pt-1">
               <div>
-                <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
+                <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300 mb-1">
                   <span className="font-medium">Guangzhou Air Hub 🇨🇳</span>
-                  <span className="text-slate-900 dark:text-white font-bold font-mono">65% (923 kg)</span>
+                  <span className="text-slate-900 dark:text-white font-bold font-mono">{gzPct}% ({gzWeight.toLocaleString()} kg)</span>
                 </div>
-                <div className="w-full h-3.5 bg-[#F1F5F9] dark:bg-slate-800 rounded-none overflow-hidden border border-slate-200/70 p-0.5">
-                  <div className="h-full bg-gradient-to-r from-blue-500 to-[#1D4ED8] rounded-none w-[65%]" />
+                <div className="w-full h-3.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-300 dark:border-slate-700 p-0.5">
+                  <div className="h-full bg-gradient-to-r from-teal-500 to-[#00897B] rounded-full transition-all duration-300" style={{ width: `${gzPct}%` }} />
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
+                <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300 mb-1">
                   <span className="font-medium">হংকং ওয়্যারহাউজ (Hong Kong Hub 🇭🇰)</span>
-                  <span className="text-slate-900 dark:text-white font-bold font-mono">25% (355 kg)</span>
+                  <span className="text-slate-900 dark:text-white font-bold font-mono">{hkPct}% ({hkWeight.toLocaleString()} kg)</span>
                 </div>
-                <div className="w-full h-3.5 bg-[#F1F5F9] dark:bg-slate-800 rounded-none overflow-hidden border border-slate-200/70 p-0.5">
-                  <div className="h-full bg-gradient-to-r from-indigo-500 to-[#1D4ED8] rounded-none w-[25%]" />
+                <div className="w-full h-3.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-300 dark:border-slate-700 p-0.5">
+                  <div className="h-full bg-gradient-to-r from-indigo-500 to-blue-600 rounded-full transition-all duration-300" style={{ width: `${hkPct}%` }} />
                 </div>
               </div>
 
               <div>
-                <div className="flex justify-between text-xs text-slate-600 dark:text-slate-400 mb-1">
+                <div className="flex justify-between text-xs text-slate-600 dark:text-slate-300 mb-1">
                   <span className="font-medium">দুবাই ওয়্যারহাউজ (Dubai Hub 🇦🇪)</span>
-                  <span className="text-slate-900 dark:text-white font-bold font-mono">10% (142 kg)</span>
+                  <span className="text-slate-900 dark:text-white font-bold font-mono">{dubaiPct}% ({dubaiWeight.toLocaleString()} kg)</span>
                 </div>
-                <div className="w-full h-3.5 bg-[#F1F5F9] dark:bg-slate-800 rounded-none overflow-hidden border border-slate-200/70 p-0.5">
-                  <div className="h-full bg-gradient-to-r from-sky-400 to-blue-500 rounded-none w-[10%]" />
+                <div className="w-full h-3.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden border border-slate-300 dark:border-slate-700 p-0.5">
+                  <div className="h-full bg-gradient-to-r from-sky-400 to-teal-500 rounded-full transition-all duration-300" style={{ width: `${dubaiPct}%` }} />
                 </div>
               </div>
             </div>
@@ -554,18 +573,18 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
 
         {/* 4. RECENT DISPATCHED FLIGHTS FEED TABLE */}
         <div
-          className={`border rounded-none overflow-hidden shadow-2xs ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          className={`border rounded-2xl overflow-hidden shadow-xl ${
+            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900 shadow-xs'
           }`}
         >
           <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
             <h3 className="text-sm font-bold text-slate-900 dark:text-white flex items-center space-x-2">
-              <History className="w-4 h-4 text-[#1D4ED8]" />
+              <History className="w-4 h-4 text-[#00897B]" />
               <span>{isBn ? 'সাম্প্রতিক ফাইনালাইজড ফ্লাইট সমূহের তালিকা' : 'Recent Dispatched Flight Batches'}</span>
             </h3>
             <button
               onClick={() => setActiveTab && setActiveTab('history')}
-              className="text-xs text-[#1D4ED8] hover:underline font-medium cursor-pointer"
+              className="text-xs text-[#00897B] dark:text-teal-400 hover:underline font-medium cursor-pointer"
             >
               {isBn ? 'সব হিস্ট্রি দেখুন →' : 'View Full History →'}
             </button>
@@ -575,7 +594,7 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
             <table className="w-full text-left text-xs">
               <thead
                 className={`uppercase text-[10px] tracking-wider border-b ${
-                  isDark ? 'bg-[#121214] text-slate-400 border-slate-800' : 'bg-slate-50 text-slate-500 border-slate-200'
+                  isDark ? 'bg-slate-900 text-slate-300 border-slate-800' : 'bg-slate-50 text-slate-500 border-slate-200'
                 }`}
               >
                 <tr>
@@ -589,24 +608,32 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
                 </tr>
               </thead>
               <tbody className={`divide-y ${isDark ? 'divide-slate-800 text-slate-200' : 'divide-slate-200/80 text-slate-800'}`}>
-                {finalizedProposals.slice(0, 5).map((fh) => (
-                  <tr key={fh.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
-                    <td className="p-3.5 font-mono text-[#1D4ED8] font-bold">{fh.date}</td>
-                    <td className="p-3.5 font-mono text-slate-700 dark:text-slate-300">
-                      <div>{fh.flight_number || 'BS-206'}</div>
-                      <div className="text-[10px] text-slate-400">AWB: {fh.awb_number || '157-884120'}</div>
-                    </td>
-                    <td className="p-3.5 font-medium text-slate-900 dark:text-white">{fh.warehouse_name}</td>
-                    <td className="p-3.5 text-[#1D4ED8] font-semibold">{fh.items_count} Cartons</td>
-                    <td className="p-3.5 font-mono text-slate-600 dark:text-slate-300">{fh.total_weight} kg</td>
-                    <td className="p-3.5 text-slate-500 dark:text-slate-400">{fh.finalized_by}</td>
-                    <td className="p-3.5">
-                      <span className="px-2.5 py-0.5 rounded-none bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold border border-emerald-500/20">
-                        DISPATCHED
-                      </span>
+                {finalizedProposals.length === 0 ? (
+                  <tr>
+                    <td colSpan={7} className="p-8 text-center text-xs font-mono text-slate-400">
+                      {isBn ? 'কোনো ডিসপ্যাচড ফ্লাইট হিস্ট্রি পাওয়া যায়নি (০ টি রেকর্ড)' : 'No dispatched flight batch history found (0 records)'}
                     </td>
                   </tr>
-                ))}
+                ) : (
+                  finalizedProposals.slice(0, 5).map((fh) => (
+                    <tr key={fh.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
+                      <td className="p-3.5 font-mono text-[#00897B] font-bold">{fh.date}</td>
+                      <td className="p-3.5 font-mono text-slate-700 dark:text-slate-300">
+                        <div>{fh.flight_number || 'N/A'}</div>
+                        <div className="text-[10px] text-slate-400">AWB: {fh.awb_number || 'N/A'}</div>
+                      </td>
+                      <td className="p-3.5 font-medium text-slate-900 dark:text-white">{fh.warehouse_name}</td>
+                      <td className="p-3.5 text-[#00897B] font-semibold">{fh.items_count} Cartons</td>
+                      <td className="p-3.5 font-mono text-slate-600 dark:text-slate-300">{fh.total_weight} kg</td>
+                      <td className="p-3.5 text-slate-500 dark:text-slate-400">{fh.finalized_by}</td>
+                      <td className="p-3.5">
+                        <span className="px-2.5 py-0.5 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-semibold border border-emerald-500/20">
+                          DISPATCHED
+                        </span>
+                      </td>
+                    </tr>
+                  ))
+                )}
               </tbody>
             </table>
           </div>
