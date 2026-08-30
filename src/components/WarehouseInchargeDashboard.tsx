@@ -640,6 +640,8 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
 
   // DEFAULT TAB: OWN WAREHOUSE INVENTORY PAGE (Strictly current physical warehouse stock)
   const myCartons = cartons.filter((c) => {
+    // Deduct stock automatically: cartons in flight (in_transit) or delivered are minused from origin physical stock
+    if (c.status === 'in_transit' || c.status === 'delivered') return false;
     if (!currentUser?.warehouse_id && currentUser?.role === 'super_admin') return true;
     return (
       c.current_warehouse_id === myWhId ||

@@ -132,8 +132,8 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       if (!isDestinationMatch) return false;
     }
 
-    // CRITICAL REQUIREMENT: If user is Warehouse Incharge, ONLY show flights where Operations has clicked "arrived_bd" or "received"!
-    if (isWarehouseStaff && (p.status === 'in_transit' || p.status === 'approved' || p.status === 'pending')) {
+    // CRITICAL REQUIREMENT: If user is Warehouse Incharge, ONLY show flights that have been dispatched/in_transit or received (hide pending/approved proposals)
+    if (isWarehouseStaff && (p.status === 'approved' || p.status === 'pending')) {
       return false;
     }
 
@@ -142,7 +142,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
         ? true
         : statusFilter === 'received'
         ? (p.status === 'received' || p.status === ('arrived_bd' as any))
-        : p.status === 'in_transit';
+        : (p.status === 'in_transit' || p.status === 'dispatched');
 
     return matchesSearch && matchesStatus;
   });
