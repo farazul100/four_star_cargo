@@ -29,7 +29,7 @@ import {
 import { FlyingProposal, Carton, Warehouse, Language, User } from '../types';
 import { ToastContainer, ToastMessage } from './Toast';
 import { useTheme } from '../context/ThemeContext';
-import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction, resetHostingerDbToDefault, subscribeToDbUpdates } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, saveHostingerDbMultiData, logSystemAuditAction, resetHostingerDbToDefault, subscribeToDbUpdates } from '../lib/db';
 import { FlightProposalsManager } from './FlightProposalsManager';
 import { FinalFlyingListSection } from './FinalFlyingListSection';
 import { SleekLineChart } from './SleekLineChart';
@@ -147,11 +147,10 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
       c.id === cartonId ? { ...c, status: 'booked' as const } : c
     );
     setCartons(updatedCartons);
-    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
 
-    // Remove from active proposal carton_ids array
+    let updatedProposals = proposals;
     if (activeProposal) {
-      const updatedProposals = proposals.map((p) =>
+      updatedProposals = proposals.map((p) =>
         p.id === activeProposal.id
           ? {
               ...p,
@@ -161,8 +160,12 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
           : p
       );
       setProposals(updatedProposals);
-      saveHostingerDbData('fsc_vps_proposals', updatedProposals);
     }
+
+    saveHostingerDbMultiData({
+      fsc_vps_cartons: updatedCartons,
+      fsc_vps_proposals: updatedProposals,
+    });
 
     logSystemAuditAction(
       currentUser,

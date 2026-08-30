@@ -432,11 +432,13 @@ const getPrimaryServerEndpoint = () => {
 };
 
 let isPushing = false;
+let lastLocalMutationTime = 0;
 
-const pushFullDbToServer = () => {
+const pushFullDbToServer = (immediate: boolean = false) => {
   if (typeof window === 'undefined') return;
   if (pushTimeout) clearTimeout(pushTimeout);
-  pushTimeout = setTimeout(async () => {
+
+  const doPush = async () => {
     if (isPushing) return;
     isPushing = true;
     try {
@@ -482,13 +484,22 @@ const pushFullDbToServer = () => {
         headers: { 'Content-Type': 'application/json' },
         body: payloadStr,
       });
+      lastLocalMutationTime = Date.now();
     } catch {} finally {
       isPushing = false;
     }
-  }, 150);
+  };
+
+  if (immediate) {
+    doPush();
+  } else {
+    pushTimeout = setTimeout(doPush, 50);
+  }
 };
 
 export const saveHostingerDbData = (key: string, data: any) => {
+  lastLocalMutationTime = Date.now();
+
   // Clean deduplication by ID before saving
   if (key === DB_KEYS.CARTONS && Array.isArray(data)) {
     const cartonMap = new Map<string, Carton>();
@@ -536,8 +547,38 @@ export const saveHostingerDbData = (key: string, data: any) => {
     dbBroadcastChannel?.postMessage({ key, timestamp: Date.now() });
   }
 
-  // Push full DB snapshot to server file DB asynchronously
-  pushFullDbToServer();
+  // Push full DB snapshot to server file DB immediately
+  pushFullDbToServer(true);
+};
+
+// Atomic Multi-Key Saver helper to update proposals and cartons together without race conditions
+export const saveHostingerDbMultiData = (entries: Record<string, any>) => {
+  lastLocalMutationTime = Date.now();
+
+  Object.entries(entries).forEach(([key, data]) => {
+    if (key === DB_KEYS.CARTONS && Array.isArray(data)) {
+      window.__FSC_GLOBAL_CARTONS__ = data;
+    }
+    if (key === DB_KEYS.PROPOSALS && Array.isArray(data)) {
+      window.__FSC_GLOBAL_PROPOSALS__ = data;
+    }
+    try {
+      localStorage.setItem(key, JSON.stringify(data));
+      if (key === DB_KEYS.LEDGER || key === 'fsc_vps_ledger_entries') {
+        localStorage.setItem('fsc_vps_ledger', JSON.stringify(data));
+        localStorage.setItem('fsc_vps_ledger_entries', JSON.stringify(data));
+      }
+    } catch (e) {}
+  });
+
+  if (typeof window !== 'undefined') {
+    Object.entries(entries).forEach(([key, data]) => {
+      window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key, data } }));
+    });
+    dbBroadcastChannel?.postMessage({ key: 'multi_sync', timestamp: Date.now() });
+  }
+
+  pushFullDbToServer(true);
 };
 
 let isFetchingSync = false;
@@ -545,6 +586,9 @@ let isFetchingSync = false;
 // Helper to fetch latest server disk DB (/api/db.php) and sync to LocalStorage across different browsers
 export const fetchServerDbAndSync = async () => {
   if (typeof window === 'undefined' || isFetchingSync) return;
+  // MUTATION GUARD: Do not overwrite local state if a local save/delete action occurred within 4000ms or push is in progress
+  if (isPushing || (Date.now() - lastLocalMutationTime < 4000)) return;
+
   isFetchingSync = true;
   try {
     const endpoint = getPrimaryServerEndpoint();

@@ -33,7 +33,7 @@ import { DeliveredProductsSection } from './DeliveredProductsSection';
 import { WarehouseAnalyticsDashboard } from './WarehouseAnalyticsDashboard';
 import { BookedCartonsHub } from './BookedCartonsHub';
 import { ToastContainer, ToastMessage } from './Toast';
-import { saveHostingerDbData, getHostingerDbData, logSystemAuditAction, subscribeToDbUpdates } from '../lib/db';
+import { saveHostingerDbData, saveHostingerDbMultiData, getHostingerDbData, logSystemAuditAction, subscribeToDbUpdates } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { PublicTracking } from './PublicTracking';
 import { CargoSearchTracker } from './CargoSearchTracker';
@@ -309,9 +309,6 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
     });
     const finalProps = Array.from(propMap.values());
 
-    setProposalHistory(finalProps);
-    saveHostingerDbData('fsc_vps_proposals', finalProps);
-
     const updatedCartons = cartons.map((c) => {
       if (selectedProposalCartonIds.includes(c.id)) {
         return {
@@ -324,8 +321,13 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
       return c;
     });
 
+    setProposalHistory(finalProps);
     setCartons(updatedCartons);
-    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+
+    saveHostingerDbMultiData({
+      fsc_vps_proposals: finalProps,
+      fsc_vps_cartons: updatedCartons,
+    });
 
     addToast(
       'success',

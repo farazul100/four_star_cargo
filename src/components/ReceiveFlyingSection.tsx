@@ -13,7 +13,7 @@ import {
 import { FlyingProposal, Carton, Warehouse, User, Language } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
-import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, saveHostingerDbMultiData, logSystemAuditAction } from '../lib/db';
 
 interface ReceiveFlyingSectionProps {
   proposals?: FlyingProposal[];
@@ -86,9 +86,10 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
     });
     setCartons(updatedCartons);
 
-    // 3. Save to Hostinger DB
-    saveHostingerDbData('fsc_vps_proposals', updatedProposals);
-    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+    saveHostingerDbMultiData({
+      fsc_vps_proposals: updatedProposals,
+      fsc_vps_cartons: updatedCartons,
+    });
 
     logSystemAuditAction(
       currentUser,
