@@ -509,7 +509,7 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-[#1E3247] pb-3">
             <div className="flex items-center space-x-2">
               <BarChart3 className="w-4 h-4 text-[#00897B]" />
-              <h2 className="text-sm font-bold">{isBn ? 'আর্থিক বিবরণী ও হিসেব রিপোর্ট (Financial Statements)' : 'Periodical Financial Statements'}</h2>
+              <h2 className="text-sm font-bold">Periodical Financial Statements</h2>
             </div>
 
             <div className="flex items-center space-x-2">
@@ -524,7 +524,7 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                       : 'text-slate-700 hover:text-slate-900'
                   }`}
                 >
-                  {isBn ? 'দৈনিক রিপোর্ট' : 'Daily Report'}
+                  Daily Report
                 </button>
                 <button
                   onClick={() => setReportTab('monthly')}
@@ -536,7 +536,7 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                       : 'text-slate-700 hover:text-slate-900'
                   }`}
                 >
-                  {isBn ? 'মাসিক রিপোর্ট' : 'Monthly Report'}
+                  Monthly Report
                 </button>
                 <button
                   onClick={() => setReportTab('yearly')}
@@ -548,7 +548,7 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                       : 'text-slate-700 hover:text-slate-900'
                   }`}
                 >
-                  {isBn ? 'বাৎসরিক রিপোর্ট' : 'Yearly Report'}
+                  Yearly Report
                 </button>
               </div>
 
@@ -557,10 +557,10 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                 className={`p-1.5 px-3 rounded-none border text-xs font-light flex items-center space-x-1.5 transition-all cursor-pointer ${
                   isDark ? 'bg-[#0B1622] border-[#1E3247] text-white hover:bg-[#1E3247]' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
                 }`}
-                title={isBn ? 'রিপোর্ট প্রিন্ট বা ডাউনলোড করুন' : 'Print / Export Report'}
+                title="Print / Export Report"
               >
                 <Printer className="w-3.5 h-3.5 opacity-80" />
-                <span className="hidden sm:inline font-light">{isBn ? 'প্রিন্ট রিপোর্ট' : 'Print'}</span>
+                <span className="hidden sm:inline font-light">Print</span>
               </button>
             </div>
           </div>
@@ -572,80 +572,58 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                 isDark ? 'bg-[#0B1622] text-[#8FA3AD] border-[#1E3247]' : 'bg-slate-100 text-slate-600 border-slate-200'
               }`}>
                 <tr>
-                  <th className="p-3">সময়সীমা / তারিখ</th>
-                  <th className="p-3">মোট কার্গো আয় (৳)</th>
-                  <th className="p-3">মোট পরিচালন ব্যয় (৳)</th>
-                  <th className="p-3">আয়-ব্যয়ের নিট পার্থক্য (৳)</th>
-                  <th className="p-3">ব্যয়ের অনুপাত (%)</th>
-                  <th className="p-3 text-right">অবস্থা (Status)</th>
+                  <th className="p-3">Time Period / Date</th>
+                  <th className="p-3">Total Cargo Revenue (৳)</th>
+                  <th className="p-3">Total Operating Expense (৳)</th>
+                  <th className="p-3">Net Profit / Loss (৳)</th>
+                  <th className="p-3">Expense Ratio (%)</th>
+                  <th className="p-3 text-right">Status</th>
                 </tr>
               </thead>
               <tbody className={`divide-y ${isDark ? 'divide-[#1E3247]' : 'divide-slate-200'}`}>
                 {reportTab === 'daily' && (
-                  <>
-                    <tr className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
-                      <td className={`p-3 font-normal ${isDark ? 'text-white' : 'text-slate-900'}`}>আজ (১৫ আগস্ট ২০২৬)</td>
-                      <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400">৳১৪৫,০০০</td>
-                      <td className="p-3 font-mono text-rose-500 dark:text-rose-400">৳৬৫,০০০</td>
-                      <td className="p-3 font-mono font-bold text-teal-600 dark:text-teal-400">+৳৮০,০০০</td>
-                      <td className="p-3 font-mono">44.8%</td>
-                      <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">উদ্বৃত্ত (Profit)</td>
-                    </tr>
-                    <tr className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
-                      <td className={`p-3 font-normal ${isDark ? 'text-white' : 'text-slate-900'}`}>গতকাল (১৪ আগস্ট ২০২৬)</td>
-                      <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400">৳৯৫০,০০০</td>
-                      <td className="p-3 font-mono text-rose-500 dark:text-rose-400">৳৮৫০,০০০</td>
-                      <td className="p-3 font-mono font-bold text-teal-600 dark:text-teal-400">+৳১০০,০০০</td>
-                      <td className="p-3 font-mono">89.4%</td>
-                      <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">উদ্বৃত্ত (Profit)</td>
-                    </tr>
-                  </>
+                  <tr className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
+                    <td className={`p-3 font-normal ${isDark ? 'text-white' : 'text-slate-900'}`}>Today (August 2026)</td>
+                    <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400">৳{totalCargoIncome.toLocaleString()}</td>
+                    <td className="p-3 font-mono text-rose-500 dark:text-rose-400">৳{totalFilteredExpense.toLocaleString()}</td>
+                    <td className="p-3 font-mono font-bold text-teal-600 dark:text-teal-400">
+                      {netProfitOrLoss >= 0 ? '+' : ''}৳{netProfitOrLoss.toLocaleString()}
+                    </td>
+                    <td className="p-3 font-mono">{expenseRatio}%</td>
+                    <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">
+                      {netProfitOrLoss >= 0 ? `Surplus (Profit ${netMarginPercent}%)` : 'Deficit (Loss)'}
+                    </td>
+                  </tr>
                 )}
 
                 {reportTab === 'monthly' && (
-                  <>
-                    <tr className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
-                      <td className={`p-3 font-normal ${isDark ? 'text-white' : 'text-slate-900'}`}>আগস্ট ২০২৬ (বর্তমান মাস)</td>
-                      <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400">৳{totalCargoIncome.toLocaleString()}</td>
-                      <td className="p-3 font-mono text-rose-500 dark:text-rose-400">৳{totalFilteredExpense.toLocaleString()}</td>
-                      <td className="p-3 font-mono font-bold text-teal-600 dark:text-teal-400">
-                        {netProfitOrLoss >= 0 ? '+' : ''}৳{netProfitOrLoss.toLocaleString()}
-                      </td>
-                      <td className="p-3 font-mono">{expenseRatio}%</td>
-                      <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">
-                        {netProfitOrLoss >= 0 ? `উদ্বৃত্ত (Profit ${netMarginPercent}%)` : 'ঘাটতি (Loss)'}
-                      </td>
-                    </tr>
-                    <tr className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
-                      <td className={`p-3 font-normal ${isDark ? 'text-white' : 'text-slate-900'}`}>জুলাই ২০২৬</td>
-                      <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400">৳৩,১০০,০০০</td>
-                      <td className="p-3 font-mono text-rose-500 dark:text-rose-400">৳১,৭২০,০০০</td>
-                      <td className="p-3 font-mono font-bold text-teal-600 dark:text-teal-400">+৳১,৩৮০,০০০</td>
-                      <td className="p-3 font-mono">55.4%</td>
-                      <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">উদ্বৃত্ত (Profit 44.6%)</td>
-                    </tr>
-                  </>
+                  <tr className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
+                    <td className={`p-3 font-normal ${isDark ? 'text-white' : 'text-slate-900'}`}>August 2026 (Current Month)</td>
+                    <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400">৳{totalCargoIncome.toLocaleString()}</td>
+                    <td className="p-3 font-mono text-rose-500 dark:text-rose-400">৳{totalFilteredExpense.toLocaleString()}</td>
+                    <td className="p-3 font-mono font-bold text-teal-600 dark:text-teal-400">
+                      {netProfitOrLoss >= 0 ? '+' : ''}৳{netProfitOrLoss.toLocaleString()}
+                    </td>
+                    <td className="p-3 font-mono">{expenseRatio}%</td>
+                    <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">
+                      {netProfitOrLoss >= 0 ? `Surplus (Profit ${netMarginPercent}%)` : 'Deficit (Loss)'}
+                    </td>
+                  </tr>
                 )}
 
                 {reportTab === 'yearly' && (
-                  <>
-                    <tr className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
-                      <td className={`p-3 font-normal ${isDark ? 'text-white' : 'text-slate-900'}`}>২০২৬ অর্থবছর (YTD 2026)</td>
-                      <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400">৳২২,৪০০,০০০</td>
-                      <td className="p-3 font-mono text-rose-500 dark:text-rose-400">৳১২,৮০০,০০০</td>
-                      <td className="p-3 font-mono font-bold text-teal-600 dark:text-teal-400">+৳৯,৬০০,০০০</td>
-                      <td className="p-3 font-mono">57.1%</td>
-                      <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">বার্ষিক নিট লাভ (42.9%)</td>
-                    </tr>
-                    <tr className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
-                      <td className={`p-3 font-normal ${isDark ? 'text-white' : 'text-slate-900'}`}>২০২৫ অর্থবছর (Full Year 2025)</td>
-                      <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400">৳১৮,৯০০,০০০</td>
-                      <td className="p-3 font-mono text-rose-500 dark:text-rose-400">৳১১,১৫০,০০০</td>
-                      <td className="p-3 font-mono font-bold text-teal-600 dark:text-teal-400">+৳৭,৭৫০,০০০</td>
-                      <td className="p-3 font-mono">58.9%</td>
-                      <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">বার্ষিক নিট লাভ (41.1%)</td>
-                    </tr>
-                  </>
+                  <tr className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
+                    <td className={`p-3 font-normal ${isDark ? 'text-white' : 'text-slate-900'}`}>YTD 2026 (Fiscal Year 2026)</td>
+                    <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400">৳{totalCargoIncome.toLocaleString()}</td>
+                    <td className="p-3 font-mono text-rose-500 dark:text-rose-400">৳{totalFilteredExpense.toLocaleString()}</td>
+                    <td className="p-3 font-mono font-bold text-teal-600 dark:text-teal-400">
+                      {netProfitOrLoss >= 0 ? '+' : ''}৳{netProfitOrLoss.toLocaleString()}
+                    </td>
+                    <td className="p-3 font-mono">{expenseRatio}%</td>
+                    <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">
+                      {netProfitOrLoss >= 0 ? `Annual Net Profit (${netMarginPercent}%)` : 'Deficit (Loss)'}
+                    </td>
+                  </tr>
                 )}
               </tbody>
             </table>
@@ -659,10 +637,10 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
           <div className="p-4 border-b border-slate-200 dark:border-[#1E3247] flex items-center justify-between">
             <h2 className="text-sm font-bold flex items-center space-x-2">
               <FileSpreadsheet className="w-4 h-4 text-[#00897B]" />
-              <span>{isBn ? 'সকল খরচের বিস্তারিত অডিট তালিকা (Expense Ledger)' : 'Itemized Expenses Ledger'}</span>
+              <span>Itemized Expenses Ledger</span>
             </h2>
             <span className={`text-xs font-mono ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>
-              {filteredExpenses.length} {isBn ? 'টি খরচ ভাউচার' : 'entries'}
+              {filteredExpenses.length} entries
             </span>
           </div>
 
@@ -672,12 +650,12 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                 isDark ? 'bg-[#0B1622] text-[#8FA3AD] border-[#1E3247]' : 'bg-slate-100 text-slate-600 border-slate-200'
               }`}>
                 <tr>
-                  <th className="p-3.5">তারিখ</th>
-                  <th className="p-3.5">ভাউচার নম্বর</th>
-                  <th className="p-3.5">খাত / ক্যাটাগরি</th>
-                  <th className="p-3.5">বিবরণ / শিরোনাম</th>
-                  <th className="p-3.5">পেমেন্ট মেথড</th>
-                  <th className="p-3.5 text-right">টাকার পরিমাণ (৳)</th>
+                  <th className="p-3.5">Date</th>
+                  <th className="p-3.5">Voucher No</th>
+                  <th className="p-3.5">Category</th>
+                  <th className="p-3.5">Description / Title</th>
+                  <th className="p-3.5">Payment Method</th>
+                  <th className="p-3.5 text-right">Amount (৳)</th>
                 </tr>
               </thead>
               <tbody className={`divide-y ${isDark ? 'divide-[#1E3247]' : 'divide-slate-200'}`}>
@@ -763,13 +741,13 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                         isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-white border-slate-300 text-slate-900'
                       }`}
                     >
-                      <option value="shipping">এয়ার ফ্রাইট ও শিপিং চার্জ</option>
-                      <option value="warehouse_rent">ওয়্যারহাউজ ভাড়া ও লিজ</option>
-                      <option value="salary">স্টাফ বেতন ও ওভারটাইম</option>
-                      <option value="customs">কাস্টমস শুল্ক ও ট্যাক্স</option>
-                      <option value="packing_transport">প্যাকিং ও ট্রান্সপোর্ট</option>
-                      <option value="utilities">ইউটিলিটি ও বিল</option>
-                      <option value="other">অন্যান্য প্রশাসনিক খরচ</option>
+                      <option value="shipping">Air Freight & Shipping Fee</option>
+                      <option value="warehouse_rent">Warehouse Rent & Maintenance</option>
+                      <option value="salary">Staff Salary & Allowance</option>
+                      <option value="customs">Customs Duty & Clearance</option>
+                      <option value="packing_transport">Packing & Local Transport</option>
+                      <option value="utilities">Utilities & Bills</option>
+                      <option value="other">Other Administrative Expenses</option>
                     </select>
                   </div>
 

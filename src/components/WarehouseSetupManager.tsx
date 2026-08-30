@@ -121,7 +121,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
       city: newWhCity || newWhCountry.split(' ')[0],
       hub_type: newWhHubType,
       is_final_destination: newWhHubType === 'destination',
-      address: newWhAddress || 'আন্তর্জাতিক কার্গো টার্মিনাল',
+      address: newWhAddress || 'International Cargo Terminal',
       phone: newWhPhone || '+880 1700-000000',
       status: 'active',
       total_cartons: 0,
