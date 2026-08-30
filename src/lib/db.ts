@@ -47,8 +47,12 @@ export const resetHostingerDbToDefault = () => {
   }
 };
 
+let isDbInitialized = false;
+
 // Initialize Hostinger local persistence safely without wiping real data on refresh
 export const initHostingerDb = () => {
+  if (typeof window === 'undefined' || isDbInitialized) return;
+  isDbInitialized = true;
   if (!localStorage.getItem(DB_KEYS.CARTONS)) {
     localStorage.setItem(DB_KEYS.CARTONS, JSON.stringify([]));
   }
@@ -219,7 +223,7 @@ export const getHostingerDbData = () => {
   const userMap = new Map<string, User>();
 
   // 1. Add Master Super Admin
-  userMap.set('superadmin@cargo.com', {
+  userMap.set('usr-admin-master', {
     id: 'usr-admin-master',
     name: 'সুপার এডমিন (Super Admin)',
     email: 'superadmin@cargo.com',
@@ -233,7 +237,8 @@ export const getHostingerDbData = () => {
   if (Array.isArray(rawUsers)) {
     rawUsers.forEach((u) => {
       if (u && u.email && u.email.toLowerCase() !== 'admin@fourstarcargo.com') {
-        userMap.set(u.email.toLowerCase(), {
+        const uKey = u.id || u.email.toLowerCase().trim();
+        userMap.set(uKey, {
           ...u,
           password: u.password || 'Cargo@2026',
         });
@@ -246,19 +251,25 @@ export const getHostingerDbData = () => {
     warehouses.forEach((wh) => {
       if (wh && Array.isArray(wh.incharge_staff)) {
         wh.incharge_staff.forEach((stf) => {
-          if (stf && stf.email && !userMap.has(stf.email.toLowerCase())) {
-            userMap.set(stf.email.toLowerCase(), {
-              id: stf.id || `usr-stf-${Date.now()}`,
-              name: stf.name,
-              email: stf.email,
-              password: 'Cargo@2026',
-              role: 'warehouse_incharge',
-              warehouse_id: wh.id,
-              warehouse_name: wh.name,
-              phone: stf.phone || '+880 1700-000000',
-              status: stf.status || 'active',
-              created_at: stf.created_at || new Date().toISOString(),
-            });
+          if (stf && (stf.id || stf.email)) {
+            const stfKey = stf.id || (stf.email || '').toLowerCase().trim();
+            const existingUserByEmail = Array.from(userMap.values()).find(
+              (u) => (u.email || '').toLowerCase().trim() === (stf.email || '').toLowerCase().trim()
+            );
+            if (!userMap.has(stfKey) && !existingUserByEmail && stf.email) {
+              userMap.set(stfKey, {
+                id: stf.id || `usr-stf-${Date.now()}`,
+                name: stf.name,
+                email: stf.email,
+                password: 'Cargo@2026',
+                role: 'warehouse_incharge',
+                warehouse_id: wh.id,
+                warehouse_name: wh.name,
+                phone: stf.phone || '+880 1700-000000',
+                status: stf.status || 'active',
+                created_at: stf.created_at || new Date().toISOString(),
+              });
+            }
           }
         });
       }
@@ -277,11 +288,11 @@ export const getHostingerDbData = () => {
       if (whUsers.length > 0) {
         const staffMap = new Map<string, WarehouseInchargeStaff>();
         (wh.incharge_staff || []).forEach((stf) => {
-          if (stf && stf.email) staffMap.set(stf.email.toLowerCase(), stf);
+          if (stf && stf.id) staffMap.set(stf.id, stf);
         });
         whUsers.forEach((u) => {
-          if (u.email && !staffMap.has(u.email.toLowerCase())) {
-            staffMap.set(u.email.toLowerCase(), {
+          if (u.id && !staffMap.has(u.id)) {
+            staffMap.set(u.id, {
               id: u.id,
               name: u.name,
               email: u.email,
@@ -307,10 +318,6 @@ export const getHostingerDbData = () => {
       } catch {}
     }
   }
-
-  try {
-    localStorage.setItem(DB_KEYS.USERS, JSON.stringify(mergedUsers));
-  } catch {}
 
   let notifications: any[] = [];
   try {
