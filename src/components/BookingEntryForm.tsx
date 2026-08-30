@@ -155,7 +155,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       })
     : [];
 
-  // Core Helper: Generate Live Preview Rows from Real Form Values
+  // Core Helper: Generate Live Preview Rows from Real Form Values (supporting weight sequence lists)
   const generatePreviewFromHeader = (
     countNum: number,
     markStr: string,
@@ -169,7 +169,22 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
     ctnPreStr: string,
     startNoVal: number
   ) => {
-    const count = Math.max(1, Math.min(200, countNum));
+    const parsedNetWeights = netWeightsListInput
+      .split(/[\s,;\n]+/)
+      .map((v) => parseFloat(v))
+      .filter((n) => !isNaN(n) && n > 0);
+
+    const parsedGrossWeights = grossWeightsListInput
+      .split(/[\s,;\n]+/)
+      .map((v) => parseFloat(v))
+      .filter((n) => !isNaN(n) && n > 0);
+
+    // Auto-detect count if countNum is not specified but weight lists exist
+    const actualCount = Math.max(
+      1,
+      Math.min(200, countNum > 0 ? countNum : Math.max(parsedGrossWeights.length, parsedNetWeights.length, 1))
+    );
+
     const activeMark = markStr.trim();
     const boxCode = prefixStr.trim() || 'BOX-A';
     const ctnPre = ctnPreStr.trim() || 'CTN-';
@@ -179,7 +194,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
     const baseCodeNum = parseInt(markCode.trim());
     const preStr = markPrefix.trim();
 
-    for (let i = 0; i < count; i++) {
+    for (let i = 0; i < actualCount; i++) {
       const currentNum = startNo + i;
       const padNum = currentNum < 10 ? `0${currentNum}` : `${currentNum}`;
 
@@ -191,6 +206,14 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         rowShippingMark = i === 0 ? activeMark : `${activeMark}-${i + 1}`;
       }
 
+      const rowGross = parsedGrossWeights[i] !== undefined ? parsedGrossWeights[i] : grossWtVal;
+      const rowNet =
+        parsedNetWeights[i] !== undefined
+          ? parsedNetWeights[i]
+          : parsedGrossWeights[i] !== undefined
+          ? Math.round(rowGross * 0.9 * 10) / 10
+          : netWtVal;
+
       newRows.push({
         id: `prev-row-${Date.now()}-${i}`,
         entry_date: todayStr,
@@ -200,8 +223,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         product_name_en: prodEn,
         product_name_cn: prodCn.trim() || prodEn.trim(),
         quantity: qtyVal,
-        net_weight: netWtVal,
-        gross_weight: grossWtVal,
+        net_weight: rowNet,
+        gross_weight: rowGross,
         cbm: cbmVal,
         photo_url: batchPhotoUrl || undefined,
       });
@@ -221,6 +244,16 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       return;
     }
 
+    const parsedNetWeights = netWeightsListInput
+      .split(/[\s,;\n]+/)
+      .map((v) => parseFloat(v))
+      .filter((n) => !isNaN(n) && n > 0);
+
+    const parsedGrossWeights = grossWeightsListInput
+      .split(/[\s,;\n]+/)
+      .map((v) => parseFloat(v))
+      .filter((n) => !isNaN(n) && n > 0);
+
     // Smart Auto-Defaults for smooth instant booking without frustrating validation stops
     const finalTrackingNo = masterTrackingNumber.trim() || `EXP-${Math.floor(Math.random() * 899999 + 100000)}`;
     if (!masterTrackingNumber.trim()) setMasterTrackingNumber(finalTrackingNo);
@@ -234,7 +267,10 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
     const finalMarkPrefix = markPrefix.trim() || 'SM-DHAKA-';
     if (!markPrefix.trim()) setMarkPrefix(finalMarkPrefix);
 
-    const ctnCount = Number(batchCartonCount) > 0 ? Number(batchCartonCount) : 1;
+    const maxWeightListLen = Math.max(parsedGrossWeights.length, parsedNetWeights.length);
+    const ctnCount = Number(batchCartonCount) > 0 ? Number(batchCartonCount) : (maxWeightListLen > 0 ? maxWeightListLen : 1);
+    if (!batchCartonCount) setBatchCartonCount(ctnCount);
+
     const qtyVal = Number(batchQtyPerCarton) > 0 ? Number(batchQtyPerCarton) : 50;
     const grossWt = Number(batchGrossWeight) > 0 ? Number(batchGrossWeight) : 12.5;
     const netWt = Number(batchNetWeight) > 0 ? Number(batchNetWeight) : 11.2;
@@ -273,12 +309,57 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
     if (parsed.length === 0) return;
 
-    setPreviewRows((prev) =>
-      prev.map((r, idx) => ({
-        ...r,
-        net_weight: parsed[idx] !== undefined ? parsed[idx] : r.net_weight,
-      }))
-    );
+    if (previewRows.length === 0 || previewRows.length < parsed.length) {
+      setBatchCartonCount(parsed.length);
+      const count = Math.max(previewRows.length, parsed.length);
+      const activeMark = `${markPrefix.trim() || 'SM-DHAKA-'}${markCode.trim() || '01'}`;
+      const prodEn = batchProdNameEn.trim() || 'General Cargo / তৈরি পোশাক';
+      const startNo = Math.max(1, Number(cartonStartNum) || 1);
+      const ctnPre = cartonPrefix.trim() || 'CTN-';
+      const boxCode = boxPrefix.trim() || 'BOX-A';
+      const baseCodeNum = parseInt(markCode.trim());
+      const preStr = markPrefix.trim();
+
+      const newRows: BatchCartonRow[] = [];
+      for (let i = 0; i < count; i++) {
+        const currentNum = startNo + i;
+        const padNum = currentNum < 10 ? `0${currentNum}` : `${currentNum}`;
+        let rowShippingMark = activeMark;
+        if (!isNaN(baseCodeNum)) {
+          rowShippingMark = `${preStr}${baseCodeNum + i}`;
+        } else if (activeMark) {
+          rowShippingMark = i === 0 ? activeMark : `${activeMark}-${i + 1}`;
+        }
+
+        const nw = parsed[i] !== undefined ? parsed[i] : (previewRows[i]?.net_weight || 11.2);
+        const existingRow = previewRows[i];
+
+        newRows.push({
+          id: existingRow ? existingRow.id : `prev-row-${Date.now()}-${i}`,
+          entry_date: existingRow ? existingRow.entry_date : todayStr,
+          ctn_no: existingRow ? existingRow.ctn_no : `${ctnPre}${padNum}`,
+          packaging_number: existingRow ? existingRow.packaging_number : `${boxCode}${100 + currentNum}`,
+          shipping_mark: existingRow ? existingRow.shipping_mark : rowShippingMark,
+          product_name_en: existingRow ? existingRow.product_name_en : prodEn,
+          product_name_cn: existingRow ? existingRow.product_name_cn : (batchProdNameCn.trim() || prodEn),
+          quantity: existingRow ? existingRow.quantity : (Number(batchQtyPerCarton) || 50),
+          net_weight: nw,
+          gross_weight: existingRow ? existingRow.gross_weight : (Number(batchGrossWeight) || Math.round(nw * 1.1 * 10) / 10),
+          cbm: existingRow ? existingRow.cbm : (Number(batchCbm) || 0.15),
+          photo_url: existingRow ? existingRow.photo_url : (batchPhotoUrl || undefined),
+        });
+      }
+      setPreviewRows(newRows);
+      setSuccessMsg(isBn ? `সফলভাবে ${parsed.length}টি কার্টুনে নিট ওজন সিকোয়েন্স (N.WT) প্রয়োগ করা হয়েছে!` : `Applied N.WT list to ${parsed.length} cartons!`);
+    } else {
+      setPreviewRows((prev) =>
+        prev.map((r, idx) => ({
+          ...r,
+          net_weight: parsed[idx] !== undefined ? parsed[idx] : r.net_weight,
+        }))
+      );
+      setSuccessMsg(isBn ? `সফলভাবে টেবিলে নিট ওজন সিকোয়েন্স (N.WT) প্রয়োগ করা হয়েছে!` : `Applied N.WT list to preview table!`);
+    }
   };
 
   const handleApplyGrossWeightsList = () => {
@@ -291,12 +372,57 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
     if (parsed.length === 0) return;
 
-    setPreviewRows((prev) =>
-      prev.map((r, idx) => ({
-        ...r,
-        gross_weight: parsed[idx] !== undefined ? parsed[idx] : r.gross_weight,
-      }))
-    );
+    if (previewRows.length === 0 || previewRows.length < parsed.length) {
+      setBatchCartonCount(parsed.length);
+      const count = Math.max(previewRows.length, parsed.length);
+      const activeMark = `${markPrefix.trim() || 'SM-DHAKA-'}${markCode.trim() || '01'}`;
+      const prodEn = batchProdNameEn.trim() || 'General Cargo / তৈরি পোশাক';
+      const startNo = Math.max(1, Number(cartonStartNum) || 1);
+      const ctnPre = cartonPrefix.trim() || 'CTN-';
+      const boxCode = boxPrefix.trim() || 'BOX-A';
+      const baseCodeNum = parseInt(markCode.trim());
+      const preStr = markPrefix.trim();
+
+      const newRows: BatchCartonRow[] = [];
+      for (let i = 0; i < count; i++) {
+        const currentNum = startNo + i;
+        const padNum = currentNum < 10 ? `0${currentNum}` : `${currentNum}`;
+        let rowShippingMark = activeMark;
+        if (!isNaN(baseCodeNum)) {
+          rowShippingMark = `${preStr}${baseCodeNum + i}`;
+        } else if (activeMark) {
+          rowShippingMark = i === 0 ? activeMark : `${activeMark}-${i + 1}`;
+        }
+
+        const gw = parsed[i] !== undefined ? parsed[i] : (previewRows[i]?.gross_weight || 12.5);
+        const existingRow = previewRows[i];
+
+        newRows.push({
+          id: existingRow ? existingRow.id : `prev-row-${Date.now()}-${i}`,
+          entry_date: existingRow ? existingRow.entry_date : todayStr,
+          ctn_no: existingRow ? existingRow.ctn_no : `${ctnPre}${padNum}`,
+          packaging_number: existingRow ? existingRow.packaging_number : `${boxCode}${100 + currentNum}`,
+          shipping_mark: existingRow ? existingRow.shipping_mark : rowShippingMark,
+          product_name_en: existingRow ? existingRow.product_name_en : prodEn,
+          product_name_cn: existingRow ? existingRow.product_name_cn : (batchProdNameCn.trim() || prodEn),
+          quantity: existingRow ? existingRow.quantity : (Number(batchQtyPerCarton) || 50),
+          net_weight: existingRow ? existingRow.net_weight : Math.round(gw * 0.9 * 10) / 10,
+          gross_weight: gw,
+          cbm: existingRow ? existingRow.cbm : (Number(batchCbm) || 0.15),
+          photo_url: existingRow ? existingRow.photo_url : (batchPhotoUrl || undefined),
+        });
+      }
+      setPreviewRows(newRows);
+      setSuccessMsg(isBn ? `সফলভাবে ${parsed.length}টি কার্টুনে গ্রস ওজন সিকোয়েন্স (G.WT) প্রয়োগ করা হয়েছে!` : `Applied G.WT list to ${parsed.length} cartons!`);
+    } else {
+      setPreviewRows((prev) =>
+        prev.map((r, idx) => ({
+          ...r,
+          gross_weight: parsed[idx] !== undefined ? parsed[idx] : r.gross_weight,
+        }))
+      );
+      setSuccessMsg(isBn ? `সফলভাবে টেবিলে গ্রস ওজন সিকোয়েন্স (G.WT) প্রয়োগ করা হয়েছে!` : `Applied G.WT list to preview table!`);
+    }
   };
 
   // Process Customer Identification & Ledger Auto-Billing
