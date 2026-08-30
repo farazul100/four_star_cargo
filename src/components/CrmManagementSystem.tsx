@@ -382,7 +382,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
           </div>
 
           <form onSubmit={handleCreateCustomer} className="space-y-6">
-            {/* Section 1: Customer ID & Shipping Mark Identification */}
+            {/* Section 1: Customer ID Identification */}
             <div className="space-y-3">
               <div className="flex items-center space-x-2 border-b pb-1.5 border-teal-500/20">
                 <span className="px-2 py-0.5 text-[11px] font-bold rounded bg-teal-500/10 text-[#00897B] dark:text-teal-400 border border-teal-500/20">
@@ -391,13 +391,13 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                 <h4 className={`text-xs font-bold uppercase tracking-wider ${
                   isDark ? 'text-teal-400' : 'text-slate-900'
                 }`}>
-                  {isBn ? 'কাস্টমার ইউনিক আইডি ও শিপিং মার্ক (Identification & Marking)' : 'Customer ID & Shipping Mark'}
+                  {isBn ? 'কাস্টমার অনন্য আইডি (Customer Identification ID)' : 'Customer Identification ID'}
                 </h4>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
                 {/* Customer Custom ID */}
-                <div className="space-y-1">
+                <div className="space-y-1 max-w-md">
                   <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
                     {isBn ? 'কাস্টমার আইডি (Customer ID)' : 'Customer ID (Client Code)'}
                   </label>
@@ -414,27 +414,6 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                   />
                   <p className={`text-[10px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
                     {isBn ? 'ম্যানুয়াল কাস্টমার অনন্য আইডি (যেমন: FSC-1082)' : 'Unique custom customer code identifier'}
-                  </p>
-                </div>
-
-                {/* Shipping Mark */}
-                <div className="space-y-1">
-                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
-                    {isBn ? 'শিপিং মার্ক (Shipping Mark)' : 'Shipping Mark / Code'}
-                  </label>
-                  <input
-                    type="text"
-                    value={shippingMark}
-                    onChange={(e) => setShippingMark(e.target.value)}
-                    placeholder="e.g. SM-DHAKA-88 / FSC/MASUKA"
-                    className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-medium outline-none transition-all ${
-                      isDark
-                        ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20'
-                        : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-600 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
-                    }`}
-                  />
-                  <p className={`text-[10px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                    {isBn ? 'কার্গো কার্টুন ট্র্যাকিং শিপিং মার্ক (যেমন: SM-DHAKA-88)' : 'Carton mark code used for cargo tracking'}
                   </p>
                 </div>
               </div>
