@@ -358,17 +358,17 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
       {/* VIEW 1: DEDICATED EXPANDED CUSTOMER CREATION FORM PAGE */}
       {activeStageTab === 'create_customer' && (
         <div className={`border rounded-xl p-6 shadow-sm space-y-6 transition-all max-w-4xl mx-auto ${
-          isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-400 text-black'
+          isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-400 text-black'
         }`}>
-          <div className="border-b pb-4 border-slate-300 dark:border-slate-800 flex items-center space-x-3">
+          <div className={`border-b pb-4 flex items-center space-x-3 ${isDark ? 'border-slate-700' : 'border-slate-300'}`}>
             <div className="w-9 h-9 rounded-lg bg-[#00897B]/10 text-[#00897B] flex items-center justify-center">
               <UserPlus className="w-5 h-5 text-[#00897B]" />
             </div>
             <div>
-              <h3 className="text-sm font-semibold text-black dark:text-white">
+              <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-black'}`}>
                 {isBn ? 'নতুন কাস্টমার অনবোর্ডিং ফর্ম (Full Customer Profile Onboarding)' : 'Full Customer Profile Onboarding Form'}
               </h3>
-              <p className="text-xs text-black/80 dark:text-slate-300 font-normal mt-0.5">
+              <p className={`text-xs font-normal mt-0.5 ${isDark ? 'text-slate-300' : 'text-black/80'}`}>
                 {isBn ? 'কাস্টমারের বিবরণ পূরণ করে নির্দিষ্ট স্টেজ সিলেক্ট করে সেভ করুন' : 'Fill detailed customer information and select target stage'}
               </p>
             </div>
@@ -377,7 +377,9 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
           <form onSubmit={handleCreateCustomer} className="space-y-5">
             {/* Section 1: Basic Contact Information */}
             <div className="space-y-3">
-              <h4 className="text-xs font-semibold text-black dark:text-slate-200 uppercase tracking-wider border-b pb-1 border-slate-400 dark:border-slate-800 flex items-center space-x-1.5">
+              <h4 className={`text-xs font-semibold uppercase tracking-wider border-b pb-1 flex items-center space-x-1.5 ${
+                isDark ? 'text-teal-400 border-slate-700' : 'text-black border-slate-400'
+              }`}>
                 <Users className="w-3.5 h-3.5 text-[#00897B]" />
                 <span>{isBn ? '১. প্রাথমিক যোগাযোগের তথ্য (Basic Information)' : '1. Basic Information'}</span>
               </h4>
@@ -385,7 +387,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
                 {/* Customer Name */}
                 <div className="space-y-1">
-                  <label className="text-xs text-black font-medium block">
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
                     {isBn ? 'কাস্টমারের নাম (Name) *' : 'Customer Name *'}
                   </label>
                   <input
@@ -395,14 +397,14 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Masuka Begum"
                     className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none transition-all ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                      isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
                     }`}
                   />
                 </div>
 
                 {/* Phone Number */}
                 <div className="space-y-1">
-                  <label className="text-xs text-black font-medium block">
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
                     {isBn ? 'ফোন নম্বর (Phone Number) *' : 'Phone Number *'}
                   </label>
                   <input
@@ -412,14 +414,14 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="01828661711"
                     className={`w-full border rounded-lg py-2 px-3 text-xs font-mono font-medium outline-none transition-all ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                      isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
                     }`}
                   />
                 </div>
 
                 {/* Company Name */}
                 <div className="space-y-1">
-                  <label className="text-xs text-black font-medium block">
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
                     {isBn ? 'কোম্পানি / ব্যবসার নাম (Company)' : 'Company / Business'}
                   </label>
                   <input
@@ -428,14 +430,14 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     onChange={(e) => setCompanyName(e.target.value)}
                     placeholder="e.g. Four Star Fashion"
                     className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none transition-all ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                      isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
                     }`}
                   />
                 </div>
 
                 {/* Email Address */}
                 <div className="space-y-1">
-                  <label className="text-xs text-black font-medium block">
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
                     {isBn ? 'ইমেইল এড্রেস (Email Address)' : 'Email Address'}
                   </label>
                   <input
@@ -444,14 +446,14 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="client@gmail.com"
                     className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none transition-all ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                      isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
                     }`}
                   />
                 </div>
 
                 {/* Address / Location */}
                 <div className="space-y-1 md:col-span-2">
-                  <label className="text-xs text-black font-medium block">
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
                     {isBn ? 'ঠিকানা / লোকেশন (Address)' : 'Address / Location'}
                   </label>
                   <input
@@ -460,7 +462,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     onChange={(e) => setAddress(e.target.value)}
                     placeholder="e.g. Uttara Sector 7, Dhaka"
                     className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none transition-all ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                      isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
                     }`}
                   />
                 </div>
@@ -469,7 +471,9 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
 
             {/* Section 2: Cargo & Shipment Details */}
             <div className="space-y-3">
-              <h4 className="text-xs font-semibold text-black dark:text-slate-200 uppercase tracking-wider border-b pb-1 border-slate-400 dark:border-slate-800 flex items-center space-x-1.5">
+              <h4 className={`text-xs font-semibold uppercase tracking-wider border-b pb-1 flex items-center space-x-1.5 ${
+                isDark ? 'text-teal-400 border-slate-700' : 'text-black border-slate-400'
+              }`}>
                 <Package className="w-3.5 h-3.5 text-[#00897B]" />
                 <span>{isBn ? '২. শিপমেন্ট ও কার্গো ইনকোয়ারি (Cargo Info)' : '2. Cargo Info'}</span>
               </h4>
@@ -477,7 +481,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
                 {/* Product / Cargo Type */}
                 <div className="space-y-1">
-                  <label className="text-xs text-black font-medium block">
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
                     {isBn ? 'পণ্য বা কার্গো টাইপ (Product Type)' : 'Product / Cargo Type'}
                   </label>
                   <input
@@ -486,14 +490,14 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     onChange={(e) => setProductType(e.target.value)}
                     placeholder="e.g. Garments Fabrics / Electronics"
                     className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none transition-all ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                      isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
                     }`}
                   />
                 </div>
 
                 {/* Estimated Weight */}
                 <div className="space-y-1">
-                  <label className="text-xs text-black font-medium block">
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
                     {isBn ? 'আনুমানিক ওজন/ভলিউম (Est. Weight)' : 'Estimated Weight/Volume'}
                   </label>
                   <input
@@ -502,14 +506,14 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     onChange={(e) => setEstWeight(e.target.value)}
                     placeholder="e.g. 150 kg / 2 CBM"
                     className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none transition-all ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                      isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
                     }`}
                   />
                 </div>
 
                 {/* Social Media Link / WeChat */}
                 <div className="space-y-1">
-                  <label className="text-xs text-black font-medium block">
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
                     {isBn ? 'ফেসবুক/উইচ্যাট পেজ (Social / WeChat)' : 'Social Link / WeChat'}
                   </label>
                   <input
@@ -518,7 +522,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     onChange={(e) => setSocialLink(e.target.value)}
                     placeholder="fb.com/page or wxid_..."
                     className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none transition-all ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                      isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
                     }`}
                   />
                 </div>
@@ -527,7 +531,9 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
 
             {/* Section 3: Country Category & Stage Selection */}
             <div className="space-y-3">
-              <h4 className="text-xs font-semibold text-black dark:text-slate-200 uppercase tracking-wider border-b pb-1 border-slate-400 dark:border-slate-800 flex items-center space-x-1.5">
+              <h4 className={`text-xs font-semibold uppercase tracking-wider border-b pb-1 flex items-center space-x-1.5 ${
+                isDark ? 'text-teal-400 border-slate-700' : 'text-black border-slate-400'
+              }`}>
                 <Globe className="w-3.5 h-3.5 text-[#00897B]" />
                 <span>{isBn ? '৩. কান্ট্রি শট ও স্টেজ সিলেক্ট (Country & Target Stage)' : '3. Country & Target Stage'}</span>
               </h4>
@@ -535,28 +541,28 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                 {/* Country Sheet Category */}
                 <div className="space-y-1">
-                  <label className="text-xs text-black font-medium block">
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
                     {isBn ? 'কান্ট্রি ক্যাটাগরি (Country Sheet)' : 'Country Category'}
                   </label>
                   <select
                     value={countryCategory}
                     onChange={(e) => setCountryCategory(e.target.value as any)}
                     className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none cursor-pointer ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-400 text-black focus:border-[#00897B]'
+                      isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-white border-slate-400 text-black focus:border-[#00897B]'
                     }`}
                   >
-                    <option value="CN_New" className="text-black bg-white">CN New</option>
-                    <option value="CN_Old" className="text-black bg-white">CHINA Old</option>
-                    <option value="KR_New" className="text-black bg-white">KR New</option>
-                    <option value="KR_Old" className="text-black bg-white">Korea Old</option>
-                    <option value="JP_New" className="text-black bg-white">JP New</option>
-                    <option value="Other" className="text-black bg-white">Other</option>
+                    <option value="CN_New" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>CN New</option>
+                    <option value="CN_Old" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>CHINA Old</option>
+                    <option value="KR_New" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>KR New</option>
+                    <option value="KR_Old" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>Korea Old</option>
+                    <option value="JP_New" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>JP New</option>
+                    <option value="Other" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>Other</option>
                   </select>
                 </div>
 
                 {/* Target Stage Selection */}
                 <div className="space-y-1">
-                  <label className="text-xs text-black font-medium block">
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
                     {isBn ? 'কাস্টমার কোন টেবিলে যুক্ত হবে? (Target Table Stage) *' : 'Target Table Stage *'}
                   </label>
                   <select
@@ -566,9 +572,9 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                       isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-white border-slate-400 text-black focus:border-[#00897B]'
                     }`}
                   >
-                    <option value="followup" className="text-black bg-white">🔴 ফলো আপ কাস্টমার (Follow Up Table)</option>
-                    <option value="order_complete" className="text-black bg-white">🔵 নতুন কাস্টমার (New Customer Table)</option>
-                    <option value="important_regular" className="text-black bg-white">⚫ রেগুলার কাস্টমার (Regular Customer Table)</option>
+                    <option value="followup" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>🔴 ফলো আপ কাস্টমার (Follow Up Table)</option>
+                    <option value="order_complete" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>🔵 নতুন কাস্টমার (New Customer Table)</option>
+                    <option value="important_regular" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>⚫ রেগুলার কাস্টমার (Regular Customer Table)</option>
                   </select>
                 </div>
               </div>
@@ -576,7 +582,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
 
             {/* Section 4: Inquiry Notes */}
             <div className="space-y-1">
-              <label className="text-xs text-black font-medium block">
+              <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
                 {isBn ? 'নোট বা ইনকোয়ারি তথ্য (Notes)' : 'Inquiry / Notes'}
               </label>
               <textarea
@@ -585,7 +591,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="e.g. Guangzhou air freight quote given $8.5/kg..."
                 className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none transition-all ${
-                  isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                  isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
                 }`}
               />
             </div>
