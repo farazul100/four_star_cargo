@@ -32,12 +32,14 @@ export const DB_KEYS = {
 };
 
 export const formatWarehouseNameEn = (name?: string): string => {
-  if (!name) return 'Air Cargo Hub';
-  if (name.includes('Guangzhou') || name.includes('গুয়াংজু') || name.includes('গুয়াংজু') || name.includes('চায়না') || name.includes('চায়না')) return 'Guangzhou Air Cargo Hub';
-  if (name.includes('Dhaka') || name.includes('বাংলাদেশ') || name.includes('Tejgaon') || name.includes('DAC')) return 'Dhaka Central Freight Hub';
-  if (name.includes('Hong Kong') || name.includes('হংকং') || name.includes('HKG')) return 'Hong Kong Cargo Terminal';
-  if (name.includes('Dubai') || name.includes('দুবাই') || name.includes('DXB')) return 'Dubai Cargo Village Hub';
-  return name.replace(/[\u0980-\u09FF]+/g, '').trim() || 'Air Cargo Hub';
+  if (!name) return 'Guangzhou Air Cargo Hub';
+  const str = String(name);
+  if (str.includes('Guangzhou') || str.includes('গুয়াংজু') || str.includes('গুয়াংজু') || str.includes('চায়না') || str.includes('চায়না') || str.includes('CAN')) return 'Guangzhou Air Cargo Hub';
+  if (str.includes('Dhaka') || str.includes('বাংলাদেশ') || str.includes('Tejgaon') || str.includes('DAC') || str.includes('ঢাকা')) return 'Dhaka Central Freight Hub';
+  if (str.includes('Hong Kong') || str.includes('হংকং') || str.includes('HKG')) return 'Hong Kong Cargo Terminal';
+  if (str.includes('Dubai') || str.includes('দুবাই') || str.includes('DXB')) return 'Dubai Cargo Village Hub';
+  const cleaned = str.replace(/[\u0980-\u09FF]+/g, '').replace(/\(\s*\)/g, '').trim();
+  return cleaned || 'Air Cargo Hub';
 };
 
 // Reset DB helper for live testing - Clears all demo cartons & proposals completely
@@ -844,6 +846,19 @@ export const fetchServerDbAndSync = async () => {
                 if (localRaw !== mergedStr) {
                   localStorage.setItem(DB_KEYS.USERS, mergedStr);
                   localStorage.setItem('users', mergedStr);
+                  hasChanges = true;
+                }
+              } else if (key === DB_KEYS.WAREHOUSES || key === 'warehouses' || key === 'fsc_vps_warehouses') {
+                const serverWhs: Warehouse[] = Array.isArray(serverData) ? serverData : [];
+                const cleanWhs = serverWhs.map((w) => ({
+                  ...w,
+                  name: formatWarehouseNameEn(w?.name),
+                }));
+                const cleanStr = JSON.stringify(cleanWhs);
+                if (localRaw !== cleanStr) {
+                  localStorage.setItem(DB_KEYS.WAREHOUSES, cleanStr);
+                  localStorage.setItem('warehouses', cleanStr);
+                  localStorage.setItem('fsc_vps_warehouses', cleanStr);
                   hasChanges = true;
                 }
               } else {
