@@ -358,7 +358,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-700">
         <div>
           <h2 className="text-xl font-medium text-slate-900 dark:text-white flex items-center space-x-2.5">
             <div className="p-2 rounded-none bg-emerald-600/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
@@ -399,7 +399,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
 
       {/* Summary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-2xs'}`}>
+        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-2xs'}`}>
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">{isBn ? 'মোট বিলিকৃত কার্টুন' : 'Total Delivered Cartons'}</span>
             <PackageCheck className="w-4 h-4 text-emerald-500" />
@@ -408,7 +408,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
           <p className="text-[11px] text-slate-400 mt-0.5 font-normal">{isBn ? 'ওয়্যারহাউজে স্টক রিসিভড' : 'Received into BD Warehouse'}</p>
         </div>
 
-        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-2xs'}`}>
+        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-2xs'}`}>
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">{isBn ? 'মোট চূড়ান্ত মেপে পাওয়া ওজন' : 'Total Calibrated Gross Weight'}</span>
             <Scale className="w-4 h-4 text-blue-500" />
@@ -417,7 +417,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
           <p className="text-[11px] text-slate-400 mt-0.5 font-normal">{isBn ? 'চূড়ান্ত সত্য বিলিং ওজন' : 'Final official billable weight'}</p>
         </div>
 
-        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-2xs'}`}>
+        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-2xs'}`}>
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">{isBn ? 'মোট আয়তন (Volume)' : 'Total Volume (CBM)'}</span>
             <Building2 className="w-4 h-4 text-purple-500" />
@@ -429,7 +429,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
 
       {/* Filter & Search Toolbar */}
       <div className={`p-4 rounded-none border flex flex-col md:flex-row md:items-center justify-between gap-3 ${
-        isDark ? 'bg-[#1E293B] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'
+        isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90 shadow-2xs'
       }`}>
         {/* Search */}
         <div className="relative flex-1 max-w-md">
@@ -466,10 +466,10 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
       {/* Main Delivered Cartons Table */}
       <div
         className={`border rounded-none overflow-hidden shadow-2xs ${
-          isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}
       >
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
           <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">
             <PackageCheck className="w-4 h-4 text-emerald-500" />
             <span>{isBn ? 'বিলিকৃত প্রোডাক্ট তালিকা (Delivered & Calibrated Stock)' : 'Delivered Products List'}</span>
@@ -483,20 +483,20 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
           <table className="w-full text-left text-xs font-normal border-collapse">
             <thead
               className={`uppercase text-[10px] tracking-wider border-b font-medium ${
-                isDark ? 'bg-slate-900/60 text-slate-400 border-slate-800' : 'bg-slate-50 text-slate-600 border-slate-200'
+                isDark ? 'bg-slate-900/60 text-slate-400 border-slate-700' : 'bg-slate-50 text-slate-600 border-slate-200'
               }`}
             >
               <tr>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800 font-medium">কার্টুন নম্বর (CTN NO)</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800 font-medium">শিপিং মার্ক / ট্র্যাকিং নং</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800 font-medium">প্রোডাক্ট নাম & পিস</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800 font-medium">উৎস ➔ গন্তব্য হাব</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800 font-medium text-center">ফ্লাইট নং</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800 font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">কার্টুন নম্বর (CTN NO)</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">শিপিং মার্ক / ট্র্যাকিং নং</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">প্রোডাক্ট নাম & পিস</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">উৎস ➔ গন্তব্য হাব</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium text-center">ফ্লাইট নং</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium bg-emerald-500/10 text-emerald-700 dark:text-emerald-300">
                   ⚖️ মেপে পাওয়া চূড়ান্ত ওজন
                 </th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800 font-medium text-center">সিবিএম (CBM)</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800 font-medium">অবস্থা (STATUS)</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium text-center">সিবিএম (CBM)</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">অবস্থা (STATUS)</th>
                 <th className="p-3.5 text-right font-medium">মেমো & অ্যাকশন</th>
               </tr>
             </thead>
@@ -507,7 +507,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
             >
               {filteredCartons.length === 0 ? (
                 <tr>
-                  <td colSpan={9} className="p-8 text-center text-slate-400 text-xs font-normal border-b border-slate-200 dark:border-slate-800">
+                  <td colSpan={9} className="p-8 text-center text-slate-400 text-xs font-normal border-b border-slate-200 dark:border-slate-700">
                     {isBn ? 'কোনো বিলিকৃত প্রোডাক্টের ডাটা পাওয়া যায়নি' : 'No delivered products found in stock'}
                   </td>
                 </tr>
@@ -516,37 +516,37 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
                   const itemOrigin = (c as any).origin_warehouse_id || c.current_warehouse_id;
                   return (
                     <tr key={c.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="p-3.5 font-mono text-emerald-600 dark:text-emerald-400 font-bold border-r border-b border-slate-200 dark:border-slate-800">
+                      <td className="p-3.5 font-mono text-emerald-600 dark:text-emerald-400 font-bold border-r border-b border-slate-200 dark:border-slate-700">
                         {c.ctn_no}
                       </td>
-                      <td className="p-3.5 font-normal border-r border-b border-slate-200 dark:border-slate-800">
+                      <td className="p-3.5 font-normal border-r border-b border-slate-200 dark:border-slate-700">
                         <div className="font-semibold text-slate-900 dark:text-white text-xs">{c.shipping_mark}</div>
                         <div className="text-[10px] text-slate-400 font-mono mt-0.5">{c.tracking_number}</div>
                       </td>
-                      <td className="p-3.5 font-normal border-r border-b border-slate-200 dark:border-slate-800">
+                      <td className="p-3.5 font-normal border-r border-b border-slate-200 dark:border-slate-700">
                         <div className="font-medium text-slate-900 dark:text-white">{c.product_name_en}</div>
                         <div className="text-[10px] text-slate-400 font-mono">{c.quantity || 1} Pcs</div>
                       </td>
-                      <td className="p-3.5 font-normal border-r border-b border-slate-200 dark:border-slate-800">
+                      <td className="p-3.5 font-normal border-r border-b border-slate-200 dark:border-slate-700">
                         <span className="inline-flex items-center space-x-1.5 text-xs">
                           <span>{itemOrigin === 'wh-china' ? 'চীন গুয়াংজু' : 'অরিজিন হাব'}</span>
                           <span className="text-slate-400">➔</span>
                           <span className="font-semibold text-emerald-600 dark:text-emerald-400">🇧🇩 DAC</span>
                         </span>
                       </td>
-                      <td className="p-3.5 text-center font-mono text-blue-600 dark:text-blue-400 font-medium border-r border-b border-slate-200 dark:border-slate-800">
+                      <td className="p-3.5 text-center font-mono text-blue-600 dark:text-blue-400 font-medium border-r border-b border-slate-200 dark:border-slate-700">
                         {c.flight_number || 'US-03'}
                       </td>
-                      <td className="p-3.5 font-mono font-bold text-sm bg-emerald-500/5 text-emerald-700 dark:text-emerald-400 border-r border-b border-slate-200 dark:border-slate-800">
+                      <td className="p-3.5 font-mono font-bold text-sm bg-emerald-500/5 text-emerald-700 dark:text-emerald-400 border-r border-b border-slate-200 dark:border-slate-700">
                         <div className="flex items-center space-x-1 justify-center">
                           <Scale className="w-3.5 h-3.5 text-emerald-600" />
                           <span>{c.gross_weight} kg</span>
                         </div>
                       </td>
-                      <td className="p-3.5 text-center font-mono text-slate-600 dark:text-slate-400 border-r border-b border-slate-200 dark:border-slate-800">
+                      <td className="p-3.5 text-center font-mono text-slate-600 dark:text-slate-400 border-r border-b border-slate-200 dark:border-slate-700">
                         {c.cbm || 0.15}
                       </td>
-                      <td className="p-3.5 border-r border-b border-slate-200 dark:border-slate-800">
+                      <td className="p-3.5 border-r border-b border-slate-200 dark:border-slate-700">
                         {c.delivery_status === 'sent_to_pathao' ? (
                           <div className="space-y-1">
                             <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-none bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold border border-emerald-500/30">
@@ -577,7 +577,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
                           </span>
                         )}
                       </td>
-                      <td className="p-3.5 text-right border-b border-slate-200 dark:border-slate-800">
+                      <td className="p-3.5 text-right border-b border-slate-200 dark:border-slate-700">
                         <div className="flex items-center justify-end space-x-1.5 whitespace-nowrap">
                           {c.delivery_status !== 'sent_to_pathao' && c.status !== 'delivered' && (
                             <>
@@ -630,9 +630,9 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
       {selectedPathaoCarton && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
           <div className={`w-full max-w-lg rounded-none border p-6 shadow-2xl space-y-5 ${
-            isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
-            <div className="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+            <div className="flex items-center justify-between border-b pb-3 dark:border-slate-700">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 rounded-none bg-emerald-500/10 flex items-center justify-center text-emerald-600">
                   <Bike className="w-5 h-5" />
@@ -704,7 +704,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
               </div>
 
               {/* Payment Status (Paid / Unpaid) */}
-              <div className="space-y-1.5 bg-slate-50 dark:bg-slate-900 p-3 border border-slate-200 dark:border-slate-800">
+              <div className="space-y-1.5 bg-slate-50 dark:bg-slate-900 p-3 border border-slate-200 dark:border-slate-700">
                 <label className="font-bold text-slate-800 dark:text-white block">
                   {isBn ? 'পেমেন্ট স্ট্যাটাস (Payment Status)' : 'Payment Status'}
                 </label>
@@ -734,7 +734,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
 
                 {/* COD Amount Input (If Unpaid) */}
                 {paymentStatus === 'unpaid' && (
-                  <div className="mt-3 pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                  <div className="mt-3 pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
                     <div>
                       <span className="font-bold text-slate-800 dark:text-white block">{isBn ? 'আদায়যোগ্য টাকার অংক (COD BDT)' : 'COD Amount (BDT)'}</span>
                       <span className="text-[10px] text-slate-400">{isBn ? 'পাঠাও রাইডার কাস্টমারের থেকে সংগ্রহ করবে' : 'To be collected by Pathao Rider'}</span>
@@ -780,9 +780,9 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
       {selectedManualCarton && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
           <div className={`w-full max-w-md rounded-none border p-6 shadow-2xl space-y-5 ${
-            isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
-            <div className="flex items-center justify-between border-b pb-3 dark:border-slate-800">
+            <div className="flex items-center justify-between border-b pb-3 dark:border-slate-700">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 rounded-none bg-blue-500/10 flex items-center justify-center text-blue-600">
                   <Truck className="w-5 h-5" />
@@ -805,7 +805,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
 
             <form onSubmit={handleConfirmManualDelivery} className="space-y-4 text-xs">
               {/* Payment Status (Paid / Unpaid) */}
-              <div className="space-y-1.5 bg-slate-50 dark:bg-slate-900 p-3 border border-slate-200 dark:border-slate-800">
+              <div className="space-y-1.5 bg-slate-50 dark:bg-slate-900 p-3 border border-slate-200 dark:border-slate-700">
                 <label className="font-bold text-slate-800 dark:text-white block">
                   {isBn ? 'পেমেন্ট স্ট্যাটাস (Payment Status)' : 'Payment Status'}
                 </label>
@@ -835,7 +835,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
 
                 {/* Cash Collection Amount */}
                 {manualPaymentStatus === 'unpaid' && (
-                  <div className="mt-3 pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                  <div className="mt-3 pt-2 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
                     <div>
                       <span className="font-bold text-slate-800 dark:text-white block">{isBn ? 'নগদ আদায়কৃত টাকার অংক' : 'Collected Cash Amount'}</span>
                       <span className="text-[10px] text-slate-400">{isBn ? 'সরাসরি লেজারে জমা করা হবে' : 'Synced directly to cash ledger'}</span>

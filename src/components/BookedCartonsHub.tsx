@@ -201,7 +201,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             : 'bg-white border-slate-200/90 text-slate-900'
         }`}
       >
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-800">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-700">
           <div>
             <h2 className={`text-base font-semibold flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               <Box className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -219,7 +219,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             {/* GROUP BY TOGGLE */}
             {/* GROUP BY BADGE (Tracking ID Only) */}
             {viewMode === 'cards' && (
-              <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-slate-900 px-3 py-1.5 rounded-none-none border border-slate-200 dark:border-slate-800 text-xs">
+              <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-slate-900 px-3 py-1.5 rounded-none-none border border-slate-200 dark:border-slate-700 text-xs">
                 <span className="text-[10px] text-slate-500 font-mono">{isBn ? 'গ্রুপ:' : 'Group:'}</span>
                 <span className="px-2.5 py-0.5 rounded-none-none text-[11px] font-semibold bg-emerald-600 text-white shadow-2xs">
                   {isBn ? '📦 ট্র্যাকিং ID' : 'Tracking ID'}
@@ -228,7 +228,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             )}
 
             {/* VIEW MODE TOGGLE */}
-            <div className="flex items-center space-x-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-none-none border border-slate-200 dark:border-slate-800">
+            <div className="flex items-center space-x-1 bg-slate-100 dark:bg-slate-900 p-1 rounded-none-none border border-slate-200 dark:border-slate-700">
               <button
                 type="button"
                 onClick={() => setViewMode('cards')}
@@ -260,22 +260,22 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
         {/* TOP SUMMARY KPIS */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900/70 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+          <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900/70 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
             <div className="text-[10px] text-slate-500 font-mono uppercase">{isBn ? 'মোট কাস্টমার' : 'Total Customers'}</div>
             <div className="text-sm font-bold text-blue-600 dark:text-blue-400 mt-0.5 font-mono">{customerGroupKeys.length} {isBn ? 'জন' : 'Customers'}</div>
           </div>
 
-          <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900/70 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+          <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900/70 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
             <div className="text-[10px] text-slate-500 font-mono uppercase">{isBn ? 'মোট কার্টুন সংখ্যা' : 'Total Cartons'}</div>
             <div className={`text-sm font-bold mt-0.5 font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>{totalCartonCount} {isBn ? 'টি' : 'Cartons'}</div>
           </div>
 
-          <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900/70 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+          <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900/70 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
             <div className="text-[10px] text-slate-500 font-mono uppercase">{isBn ? 'মোট গ্রস ওজন' : 'Total Gross Weight'}</div>
             <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 font-mono">{totalGrossWeight.toFixed(1)} KG</div>
           </div>
 
-          <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900/70 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+          <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900/70 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
             <div className="text-[10px] text-slate-500 font-mono uppercase">{isBn ? 'মোট সিবিএম ভলিউম' : 'Total CBM Volume'}</div>
             <div className="text-sm font-bold text-purple-600 dark:text-purple-400 mt-0.5 font-mono">{totalCbmVolume.toFixed(2)} CBM</div>
           </div>
@@ -407,7 +407,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                   >
                     <div>
                       {/* Customer Card Header */}
-                      <div className="flex items-start justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
+                      <div className="flex items-start justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
                         <div>
                           <div className="text-xs font-mono text-blue-600 dark:text-blue-400 font-bold">
                             {mark}
@@ -447,7 +447,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                     </div>
 
                     {/* Card Action Footer */}
-                    <div className="pt-3 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between text-xs">
+                    <div className="pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
                       <button
                         type="button"
                         onClick={(e) => {
@@ -493,7 +493,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               : 'bg-white border-slate-200 text-slate-900'
           }`}
         >
-          <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
             <h3 className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
               {isBn ? 'সকল কার্টুনের বিবরণ (Central Cartons Inventory Table)' : 'Central Cartons Inventory List'}
             </h3>
@@ -503,7 +503,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse border border-slate-200 dark:border-slate-800 table-fixed min-w-[1200px]">
+            <table className="w-full text-left text-xs border-collapse border border-slate-200 dark:border-slate-700 table-fixed min-w-[1200px]">
               <colgroup>
                 <col style={{ width: '45px' }} />
                 <col style={{ width: '110px' }} />
@@ -518,71 +518,71 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 <col style={{ width: '90px' }} />
                 <col style={{ width: '80px' }} />
               </colgroup>
-              <thead className={`uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-slate-800 font-medium ${
+              <thead className={`uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-slate-700 font-medium ${
                 isDark ? 'bg-slate-900 text-slate-300' : 'bg-slate-100 text-slate-700'
               }`}>
                 <tr>
-                  <th className="p-3 border border-slate-200 dark:border-slate-800 text-center font-medium">SL</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-800 font-medium">CTN NO</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-800 font-medium">MARK</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-800 font-medium">TRACKING NO</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-800 font-medium">PRODUCT (EN & CN)</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-800 text-center font-medium">QTY</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-800 text-center font-medium">N.WT</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-800 text-center font-medium">G.WT</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-800 text-center font-medium">CBM</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-800 font-medium">DESTINATION</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-800 text-center font-medium">STATUS</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-800 text-center font-medium">ACTION</th>
+                  <th className="p-3 border border-slate-200 dark:border-slate-700 text-center font-medium">SL</th>
+                  <th className="p-3 border border-slate-200 dark:border-slate-700 font-medium">CTN NO</th>
+                  <th className="p-3 border border-slate-200 dark:border-slate-700 font-medium">MARK</th>
+                  <th className="p-3 border border-slate-200 dark:border-slate-700 font-medium">TRACKING NO</th>
+                  <th className="p-3 border border-slate-200 dark:border-slate-700 font-medium">PRODUCT (EN & CN)</th>
+                  <th className="p-3 border border-slate-200 dark:border-slate-700 text-center font-medium">QTY</th>
+                  <th className="p-3 border border-slate-200 dark:border-slate-700 text-center font-medium">N.WT</th>
+                  <th className="p-3 border border-slate-200 dark:border-slate-700 text-center font-medium">G.WT</th>
+                  <th className="p-3 border border-slate-200 dark:border-slate-700 text-center font-medium">CBM</th>
+                  <th className="p-3 border border-slate-200 dark:border-slate-700 font-medium">DESTINATION</th>
+                  <th className="p-3 border border-slate-200 dark:border-slate-700 text-center font-medium">STATUS</th>
+                  <th className="p-3 border border-slate-200 dark:border-slate-700 text-center font-medium">ACTION</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                 {filteredCartons.map((c, idx) => (
                   <tr key={c.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-900/40 transition-colors">
-                    <td className="p-3 text-center font-mono text-slate-400 border border-slate-200 dark:border-slate-800">
+                    <td className="p-3 text-center font-mono text-slate-400 border border-slate-200 dark:border-slate-700">
                       {idx + 1}
                     </td>
 
-                    <td className="p-3 font-mono font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-800">
+                    <td className="p-3 font-mono font-bold text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700">
                       {c.ctn_no}
                     </td>
 
-                    <td className="p-3 font-mono text-blue-600 dark:text-blue-400 font-bold border border-slate-200 dark:border-slate-800">
+                    <td className="p-3 font-mono text-blue-600 dark:text-blue-400 font-bold border border-slate-200 dark:border-slate-700">
                       {c.shipping_mark}
                     </td>
 
-                    <td className="p-3 font-mono text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-800 truncate">
+                    <td className="p-3 font-mono text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 truncate">
                       {c.tracking_number}
                     </td>
 
-                    <td className="p-3 border border-slate-200 dark:border-slate-800">
+                    <td className="p-3 border border-slate-200 dark:border-slate-700">
                       <div className="font-normal text-slate-900 dark:text-white truncate">{c.product_name_en}</div>
                       {c.product_name_cn && (
                         <div className="text-[10px] text-slate-500 truncate">{c.product_name_cn}</div>
                       )}
                     </td>
 
-                    <td className="p-3 text-center font-mono border border-slate-200 dark:border-slate-800">
+                    <td className="p-3 text-center font-mono border border-slate-200 dark:border-slate-700">
                       {c.quantity} pcs
                     </td>
 
-                    <td className="p-3 text-center font-mono border border-slate-200 dark:border-slate-800 text-slate-500">
+                    <td className="p-3 text-center font-mono border border-slate-200 dark:border-slate-700 text-slate-500">
                       {c.net_weight} kg
                     </td>
 
-                    <td className="p-3 text-center font-mono font-bold border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white">
+                    <td className="p-3 text-center font-mono font-bold border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
                       {c.gross_weight} kg
                     </td>
 
-                    <td className="p-3 text-center font-mono border border-slate-200 dark:border-slate-800 text-purple-600 dark:text-purple-400">
+                    <td className="p-3 text-center font-mono border border-slate-200 dark:border-slate-700 text-purple-600 dark:text-purple-400">
                       {c.cbm}
                     </td>
 
-                    <td className="p-3 border border-slate-200 dark:border-slate-800 truncate">
+                    <td className="p-3 border border-slate-200 dark:border-slate-700 truncate">
                       {c.destination_warehouse_name || warehouses.find((w) => w.id === c.destination_warehouse_id)?.name || 'Bangladesh Hub'}
                     </td>
 
-                    <td className="p-3 text-center border border-slate-200 dark:border-slate-800">
+                    <td className="p-3 text-center border border-slate-200 dark:border-slate-700">
                       <span className={`px-2 py-0.5 rounded-none text-[10px] font-bold uppercase font-mono ${
                         c.status === 'booked'
                           ? 'bg-blue-500/10 text-blue-600 dark:text-blue-300 border border-blue-500/20'
@@ -596,7 +596,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       </span>
                     </td>
 
-                    <td className="p-3 text-center border border-slate-200 dark:border-slate-800">
+                    <td className="p-3 text-center border border-slate-200 dark:border-slate-700">
                       <div className="flex items-center justify-center space-x-1">
                         <button
                           type="button"
@@ -650,9 +650,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       {activeCustomerModalMark && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
           <div className={`rounded-none-none max-w-4xl w-full p-6 space-y-5 border shadow-2xl ${
-            isDark ? 'bg-slate-900 text-white border-slate-800' : 'bg-white text-slate-900 border-slate-200'
+            isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-900 border-slate-200'
           }`}>
-            <div className="flex items-center justify-between border-b pb-4 border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between border-b pb-4 border-slate-200 dark:border-slate-700">
               <div>
                 <div className="text-xs font-mono text-blue-600 dark:text-blue-400 font-bold uppercase flex items-center space-x-2">
                   <span>Tracking ID: {activeCustomerCartons[0]?.tracking_number || activeCustomerModalMark}</span>
@@ -678,19 +678,19 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
             {/* Customer Batch Summary Badges */}
             <div className="grid grid-cols-3 gap-3">
-              <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="text-[10px] text-slate-500 font-mono">{isBn ? 'মোট কার্টুন সংখ্যা' : 'Total Cartons'}</div>
                 <div className="text-sm font-bold text-blue-600 dark:text-blue-400 font-mono">{activeCustomerCartons.length} {isBn ? 'টি' : 'Cartons'}</div>
               </div>
 
-              <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="text-[10px] text-slate-500 font-mono">{isBn ? 'মোট গ্রস ওজন' : 'Total Gross Weight'}</div>
                 <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 font-mono">
                   {activeCustomerCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0).toFixed(1)} KG
                 </div>
               </div>
 
-              <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="text-[10px] text-slate-500 font-mono">{isBn ? 'মোট ভলিউম CBM' : 'Total CBM Volume'}</div>
                 <div className="text-sm font-bold text-purple-600 dark:text-purple-400 font-mono">
                   {activeCustomerCartons.reduce((sum, c) => sum + (c.cbm || 0), 0).toFixed(2)} CBM
@@ -699,10 +699,10 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             </div>
 
             {/* Customer Cartons Detailed Table */}
-            <div className="max-h-[50vh] overflow-y-auto border border-slate-200 dark:border-slate-800 rounded-none-none">
+            <div className="max-h-[50vh] overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-none-none">
               <table className="w-full text-left text-xs border-collapse min-w-[700px]">
                 <thead className={`uppercase text-[10px] tracking-wider border-b font-medium ${
-                  isDark ? 'bg-slate-950 text-slate-300 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200'
+                  isDark ? 'bg-slate-900 text-slate-300 border-slate-700' : 'bg-slate-100 text-slate-700 border-slate-200'
                 }`}>
                   <tr>
                     <th className="p-3">SL</th>
@@ -767,8 +767,8 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       {/* PHOTO PREVIEW MODAL */}
       {previewPhotoUrl && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-slate-900 text-white rounded-none-none max-w-xl w-full p-4 space-y-3 border border-slate-800">
-            <div className="flex items-center justify-between border-b pb-2 border-slate-800">
+          <div className="bg-slate-900 text-white rounded-none-none max-w-xl w-full p-4 space-y-3 border border-slate-700">
+            <div className="flex items-center justify-between border-b pb-2 border-slate-700">
               <span className="text-xs font-semibold">Proof Photo</span>
               <button onClick={() => setPreviewPhotoUrl(null)} className="p-1 text-slate-400 hover:text-white cursor-pointer">
                 <X className="w-5 h-5" />
@@ -785,9 +785,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       {editingCarton && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
           <form onSubmit={handleSaveEditedCarton} className={`rounded-none-none max-w-md w-full p-6 space-y-4 border shadow-2xl ${
-            isDark ? 'bg-slate-900 text-white border-slate-800' : 'bg-white text-slate-900 border-slate-200'
+            isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-900 border-slate-200'
           }`}>
-            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
               <h3 className="text-sm font-semibold">Edit Carton Specs ({editingCarton.ctn_no})</h3>
               <button type="button" onClick={() => setEditingCarton(null)} className="p-1 text-slate-400 hover:text-slate-600 cursor-pointer">
                 <X className="w-4 h-4" />
@@ -802,7 +802,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                   step="0.1"
                   value={editingCarton.gross_weight}
                   onChange={(e) => setEditingCarton({ ...editingCarton, gross_weight: parseFloat(e.target.value) || 0 })}
-                  className={`w-full px-3 py-2 rounded-none-none border ${isDark ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-300'}`}
+                  className={`w-full px-3 py-2 rounded-none-none border ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300'}`}
                 />
               </div>
 
@@ -813,7 +813,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                   step="0.01"
                   value={editingCarton.cbm}
                   onChange={(e) => setEditingCarton({ ...editingCarton, cbm: parseFloat(e.target.value) || 0 })}
-                  className={`w-full px-3 py-2 rounded-none-none border ${isDark ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-300'}`}
+                  className={`w-full px-3 py-2 rounded-none-none border ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300'}`}
                 />
               </div>
             </div>

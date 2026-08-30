@@ -464,7 +464,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
       {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-700">
         <div>
           <h2 className="text-xl font-medium text-slate-900 dark:text-white flex items-center space-x-2.5">
             <div className="p-2 rounded-none bg-blue-600/10 text-blue-600 dark:text-blue-400">
@@ -482,7 +482,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
       {/* Filter & Search Toolbar */}
       <div className={`p-4 rounded-none border flex flex-col md:flex-row md:items-center justify-between gap-3 ${
-        isDark ? 'bg-[#1E293B] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'
+        isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90 shadow-2xs'
       }`}>
         {/* Search */}
         <div className="relative flex-1 max-w-md">
@@ -547,10 +547,10 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       {/* Main Flights Table */}
       <div
         className={`border rounded-none overflow-hidden shadow-2xs ${
-          isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}
       >
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
           <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">
             <Plane className="w-4 h-4 text-blue-500" />
             <span>{isBn ? 'ইনকামিং ফ্লাইং ও ডিসপ্যাচ তালিকা' : 'Inbound Flights List'}</span>
@@ -564,17 +564,17 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
           <table className="w-full text-left text-xs font-normal border-collapse">
             <thead
               className={`uppercase text-[10px] tracking-wider border-b font-medium ${
-                isDark ? 'bg-slate-900/60 text-slate-400 border-slate-800' : 'bg-slate-50 text-slate-600 border-slate-200'
+                isDark ? 'bg-slate-900/60 text-slate-400 border-slate-700' : 'bg-slate-50 text-slate-600 border-slate-200'
               }`}
             >
               <tr>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800 font-medium">ফ্লাইট তারিখ (DATE)</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800 font-medium">ফ্লাইং নাম / ব্যাচ টাইটেল</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800 font-medium">ফ্লাইট নম্বর / AWB</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800 font-medium">উৎস হাব (ORIGIN)</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800 font-medium">কার্টুন সংখ্যা</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800 font-medium">বাংলাদেশে মেপে পাওয়া ওজন</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-800 font-medium">বর্তমান অবস্থা (STATUS)</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">ফ্লাইট তারিখ (DATE)</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">ফ্লাইং নাম / ব্যাচ টাইটেল</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">ফ্লাইট নম্বর / AWB</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">উৎস হাব (ORIGIN)</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">কার্টুন সংখ্যা</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">বাংলাদেশে মেপে পাওয়া ওজন</th>
+                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">বর্তমান অবস্থা (STATUS)</th>
                 <th className="p-3.5 text-right font-medium">অ্যাকশন (BD RECEIVING & CALIBRATION)</th>
               </tr>
             </thead>
@@ -585,7 +585,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
             >
               {groupedFlightList.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-8 text-center text-slate-400 text-xs font-normal border-b border-slate-200 dark:border-slate-800">
+                  <td colSpan={8} className="p-8 text-center text-slate-400 text-xs font-normal border-b border-slate-200 dark:border-slate-700">
                     {isBn ? 'কোনো ফ্লাইং ডাটা পাওয়া যায়নি' : 'No flying flight batches found'}
                   </td>
                 </tr>
@@ -596,27 +596,27 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
                   return (
                     <tr key={gf.groupKey} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="p-3.5 font-mono text-blue-600 dark:text-blue-400 font-normal border-r border-b border-slate-200 dark:border-slate-800">
+                      <td className="p-3.5 font-mono text-blue-600 dark:text-blue-400 font-normal border-r border-b border-slate-200 dark:border-slate-700">
                         {gf.date || '2026-08-16'}
                       </td>
-                      <td className="p-3.5 font-normal text-slate-900 dark:text-white border-r border-b border-slate-200 dark:border-slate-800">
+                      <td className="p-3.5 font-normal text-slate-900 dark:text-white border-r border-b border-slate-200 dark:border-slate-700">
                         <div className="font-semibold text-slate-900 dark:text-white text-sm">{gf.flying_name}</div>
                         <div className="text-[10px] text-slate-400 font-mono mt-0.5">Flight Group: {gf.flight_number}</div>
                       </td>
-                      <td className="p-3.5 font-mono text-slate-700 dark:text-slate-300 border-r border-b border-slate-200 dark:border-slate-800">
+                      <td className="p-3.5 font-mono text-slate-700 dark:text-slate-300 border-r border-b border-slate-200 dark:border-slate-700">
                         <div className="font-semibold text-blue-600 dark:text-blue-400">{gf.flight_number}</div>
                         <div className="text-[10px] text-slate-400 mt-0.5">AWB: {gf.awb_number}</div>
                       </td>
-                      <td className="p-3.5 font-normal border-r border-b border-slate-200 dark:border-slate-800">
+                      <td className="p-3.5 font-normal border-r border-b border-slate-200 dark:border-slate-700">
                         <span className="inline-flex items-center space-x-1.5">
                           <span>{gf.warehouse_name}</span>
                           <span className="text-slate-400 text-[10px]">➔ 🇧🇩 DAC</span>
                         </span>
                       </td>
-                      <td className="p-3.5 text-blue-600 dark:text-blue-400 font-normal border-r border-b border-slate-200 dark:border-slate-800">
+                      <td className="p-3.5 text-blue-600 dark:text-blue-400 font-normal border-r border-b border-slate-200 dark:border-slate-700">
                         <span className="font-bold text-sm">{gf.total_cartons}</span> Cartons
                       </td>
-                      <td className="p-3.5 font-mono text-slate-900 dark:text-white font-normal border-r border-b border-slate-200 dark:border-slate-800">
+                      <td className="p-3.5 font-mono text-slate-900 dark:text-white font-normal border-r border-b border-slate-200 dark:border-slate-700">
                         <div className="flex items-center space-x-1.5">
                           <span className="font-bold text-sm">{gf.total_weight} kg</span>
                           <button
@@ -629,7 +629,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                           </button>
                         </div>
                       </td>
-                      <td className="p-3.5 border-r border-b border-slate-200 dark:border-slate-800">
+                      <td className="p-3.5 border-r border-b border-slate-200 dark:border-slate-700">
                         {isArrivedBd ? (
                           <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-none bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-medium border border-emerald-500/20">
                             <span>🛬 বাংলাদেশ এয়ারপোর্টে প্রাপ্ত</span>
@@ -641,7 +641,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                           </span>
                         )}
                       </td>
-                      <td className="p-3.5 text-right border-b border-slate-200 dark:border-slate-800">
+                      <td className="p-3.5 text-right border-b border-slate-200 dark:border-slate-700">
                         <div className="flex items-center justify-end space-x-2">
                           <button
                             type="button"
@@ -720,13 +720,13 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
       {/* BD Weight Calibration Modal */}
       {selectedProposalForWeightCalib && (
-        <div className="fixed inset-0 z-50 bg-slate-950/70 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
           <div
             className={`max-w-md w-full rounded-none p-6 shadow-2xl border space-y-5 animate-in fade-in zoom-in-95 duration-200 ${
-              isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+              isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
             }`}
           >
-            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
               <div className="flex items-center space-x-2">
                 <div className="p-2 rounded-none bg-blue-500/10 text-blue-500">
                   <Truck className="w-5 h-5" />
@@ -766,7 +766,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                   value={calibratedWeightInput}
                   onChange={(e) => setCalibratedWeightInput(Number(e.target.value))}
                   className={`w-full px-4 py-2.5 rounded-none text-sm font-mono border focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
-                    isDark ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                    isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                   }`}
                 />
               </div>
@@ -794,14 +794,14 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
       {/* Flight Carton Scan & Receive Modal */}
       {selectedFlightForCartonReceive && (
-        <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-4 font-sans">
+        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-4 font-sans">
           <div
             className={`max-w-5xl w-full rounded-none p-6 shadow-none border space-y-4 max-h-[90vh] flex flex-col ${
-              isDark ? 'bg-slate-900 border-slate-800 text-slate-200' : 'bg-white border-slate-300 text-slate-800'
+              isDark ? 'bg-slate-900 border-slate-700 text-slate-200' : 'bg-white border-slate-300 text-slate-800'
             }`}
           >
             {/* Header */}
-            <div className="flex items-center justify-between border-b pb-3.5 border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between border-b pb-3.5 border-slate-200 dark:border-slate-700">
               <div className="flex items-center space-x-3">
                 <div className="p-2.5 rounded-none bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
                   <Package className="w-5 h-5 font-light" />
@@ -844,7 +844,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
               return (
                 <>
-                  <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-none border border-slate-200 dark:border-slate-800 font-light">
+                  <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-none border border-slate-200 dark:border-slate-700 font-light">
                     <div className="flex items-center space-x-3">
                       <span className="text-xs font-light text-slate-600 dark:text-slate-300">
                         রিসিভিং প্রোগ্রেস: <span className="text-emerald-600 dark:text-emerald-400 font-normal">{receivedCartonsCount} / {flightCartons.length}</span> কার্টুন রিসিভড
@@ -878,9 +878,9 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                   </div>
 
                   {/* Cartons List Table */}
-                  <div className="overflow-y-auto max-h-[52vh] border border-slate-200 dark:border-slate-800 rounded-none">
+                  <div className="overflow-y-auto max-h-[52vh] border border-slate-200 dark:border-slate-700 rounded-none">
                     <table className="w-full text-left text-xs font-light">
-                      <thead className="bg-slate-100 dark:bg-slate-950 text-slate-500 uppercase text-[10px] tracking-wider sticky top-0 border-b border-slate-200 dark:border-slate-800 font-normal">
+                      <thead className="bg-slate-100 dark:bg-slate-900 text-slate-500 uppercase text-[10px] tracking-wider sticky top-0 border-b border-slate-200 dark:border-slate-700 font-normal">
                         <tr>
                           <th className="p-2.5 font-normal">#</th>
                           <th className="p-2.5 font-normal">CTN No</th>

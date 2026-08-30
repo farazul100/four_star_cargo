@@ -137,9 +137,9 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
   const awb = currentProposal?.awb_number || '157-889120';
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl border ${isDark ? 'bg-slate-950 border-slate-800 text-white' : 'bg-slate-900 border-slate-800 text-white'} shadow-2xl font-sans`}>
+    <div className={`relative overflow-hidden rounded-2xl border ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-900 border-slate-700 text-white'} shadow-2xl font-sans`}>
       {/* Top Header Section */}
-      <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-4 border-b border-slate-800/80 bg-slate-900/90 backdrop-blur-md">
+      <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-4 border-b border-slate-700/80 bg-slate-900/90 backdrop-blur-md">
         <div>
           <div className="flex items-center gap-2">
             <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
@@ -258,7 +258,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             }}
           >
             {/* FLOATING FLIGHT NAME BADGE POSITIONED ABSOLUTELY ABOVE AIRPLANE */}
-            <div className="absolute -top-11 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-950/90 text-white border border-amber-500/80 px-3 py-1 rounded-xl shadow-2xl backdrop-blur-md flex items-center gap-2 animate-bounce z-40">
+            <div className="absolute -top-11 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/90 text-white border border-amber-500/80 px-3 py-1 rounded-xl shadow-2xl backdrop-blur-md flex items-center gap-2 animate-bounce z-40">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
               <span className="text-[11px] font-black text-amber-400 uppercase tracking-widest">
                 ✈️ #{flightName}
@@ -298,7 +298,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
 
         {/* FLOATING DETAIL CARD 1: ORIGIN CHINA (Top Right Overlay) */}
         <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 w-52 sm:w-60 bg-slate-900/85 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3 shadow-2xl text-white">
-          <div className="flex items-center justify-between pb-1.5 border-b border-slate-800">
+          <div className="flex items-center justify-between pb-1.5 border-b border-slate-700">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
               Origin
             </span>
@@ -318,7 +318,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             </p>
           </div>
 
-          <div className="mt-2 pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-300">
+          <div className="mt-2 pt-1.5 border-t border-slate-700/80 flex items-center justify-between text-[10px] text-slate-300">
             <div>
               <span className="text-slate-400 block text-[9px]">Flight No:</span>
               <span className="font-bold text-white">{currentProposal ? `#${flightName}` : 'N/A'}</span>
@@ -332,7 +332,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
 
         {/* FLOATING DETAIL CARD 2: DESTINATION BANGLADESH (Top Left Overlay) */}
         <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 w-52 sm:w-60 bg-slate-900/85 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3 shadow-2xl text-white">
-          <div className="flex items-center justify-between pb-1.5 border-b border-slate-800">
+          <div className="flex items-center justify-between pb-1.5 border-b border-slate-700">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
               Destination
             </span>
@@ -352,7 +352,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             </p>
           </div>
 
-          <div className="mt-2 pt-1.5 border-t border-slate-800/80 flex items-center justify-between text-[10px] text-slate-300">
+          <div className="mt-2 pt-1.5 border-t border-slate-700/80 flex items-center justify-between text-[10px] text-slate-300">
             <div>
               <span className="text-slate-400 block text-[9px]">Status:</span>
               <span className={`font-bold capitalize ${flightStatus === 'received' ? 'text-emerald-400' : flightStatus === 'in_transit' ? 'text-amber-400' : 'text-slate-400'}`}>
@@ -368,7 +368,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
       </div>
 
       {/* BOTTOM SECTION: SHIPMENT FLOW BY AIR (6-Step Flow Bar) */}
-      <div className="p-4 md:p-5 bg-slate-900/95 border-t border-slate-800 backdrop-blur-md">
+      <div className="p-4 md:p-5 bg-slate-900/95 border-t border-slate-700 backdrop-blur-md">
         <div className="text-center mb-3">
           <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">
             SHIPMENT FLOW BY AIR
@@ -377,7 +377,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
 
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 md:gap-4 relative">
           {/* Step 1: Pickup */}
-          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 1 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 1 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-700 text-slate-400'}`}>
             <div className={`w-9 h-9 rounded-full flex items-center justify-center mb-1.5 border ${currentStepIndex >= 1 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
               <MapPin className="w-4 h-4" />
             </div>
@@ -386,7 +386,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
           </div>
 
           {/* Step 2: Warehouse */}
-          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 2 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 2 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-700 text-slate-400'}`}>
             <div className={`w-9 h-9 rounded-full flex items-center justify-center mb-1.5 border ${currentStepIndex >= 2 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
               <PackageCheck className="w-4 h-4" />
             </div>
@@ -395,7 +395,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
           </div>
 
           {/* Step 3: Documentation */}
-          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 3 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 3 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-700 text-slate-400'}`}>
             <div className={`w-9 h-9 rounded-full flex items-center justify-center mb-1.5 border ${currentStepIndex >= 3 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
               <Layers className="w-4 h-4" />
             </div>
@@ -404,7 +404,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
           </div>
 
           {/* Step 4: Air Transit */}
-          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 4 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 4 ? 'bg-amber-950/30 border-amber-500/50 text-white' : 'bg-slate-800/40 border-slate-700 text-slate-400'}`}>
             <div className={`w-9 h-9 rounded-full flex items-center justify-center mb-1.5 border ${currentStepIndex >= 4 ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-md shadow-amber-500/20 animate-pulse' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
               <Plane className="w-4 h-4" />
             </div>
@@ -413,7 +413,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
           </div>
 
           {/* Step 5: Customs Clearance */}
-          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 5 ? 'bg-emerald-950/30 border-emerald-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 5 ? 'bg-emerald-950/30 border-emerald-500/50 text-white' : 'bg-slate-800/40 border-slate-700 text-slate-400'}`}>
             <div className={`w-9 h-9 rounded-full flex items-center justify-center mb-1.5 border ${currentStepIndex >= 5 ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-md shadow-emerald-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
               <CheckCircle2 className="w-4 h-4" />
             </div>
@@ -422,7 +422,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
           </div>
 
           {/* Step 6: Final Delivery */}
-          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 6 ? 'bg-emerald-950/30 border-emerald-500/50 text-white' : 'bg-slate-800/40 border-slate-800 text-slate-400'}`}>
+          <div className={`flex flex-col items-center text-center p-2.5 rounded-xl border transition-all ${currentStepIndex >= 6 ? 'bg-emerald-950/30 border-emerald-500/50 text-white' : 'bg-slate-800/40 border-slate-700 text-slate-400'}`}>
             <div className={`w-9 h-9 rounded-full flex items-center justify-center mb-1.5 border ${currentStepIndex >= 6 ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-md shadow-emerald-500/20' : 'bg-slate-800 text-slate-500 border-slate-700'}`}>
               <ArrowRight className="w-4 h-4" />
             </div>

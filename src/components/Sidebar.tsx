@@ -235,14 +235,14 @@ export const Sidebar: React.FC<SidebarProps> = ({
             : 'hidden md:hidden'
         } ${
           isDark
-            ? 'bg-[#0F172A] border-slate-700/80 text-white'
+            ? 'bg-[#1E293B] border-slate-700/80 text-white'
             : 'bg-white border-gray-200 text-gray-900 shadow-sm'
         }`}
       >
         {/* Top Brand Logo Section (inside sidebar) */}
         <div
           className={`h-14 flex items-center px-4 gap-3 border-b shrink-0 ${
-            isDark ? 'border-slate-700/80 bg-[#0F172A]' : 'border-gray-200 bg-white'
+            isDark ? 'border-slate-700/80 bg-[#1E293B]' : 'border-gray-200 bg-white'
           }`}
         >
           <img src="/logo.png" alt="Four Star Cargo" className="w-8 h-8 rounded-lg object-contain" />
@@ -309,7 +309,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Footer info */}
         <div
           className={`p-3 border-t shrink-0 ${
-            isDark ? 'border-slate-700/80 bg-[#0F172A]' : 'border-gray-200 bg-white'
+            isDark ? 'border-slate-700/80 bg-[#1E293B]' : 'border-gray-200 bg-white'
           }`}
         >
           <button

@@ -319,7 +319,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
             isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90'
           }`}
         >
-          <div className="flex items-center justify-between border-b pb-4 border-slate-200 dark:border-slate-800">
+          <div className="flex items-center justify-between border-b pb-4 border-slate-200 dark:border-slate-700">
             <div>
               <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">
                 <BarChart3 className="w-4 h-4 text-blue-500" />
@@ -390,9 +390,9 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
             </div>
 
             {/* Operational Insight Summary Bar Filling the Empty Bottom Area */}
-            <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-800 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-normal">
+            <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-normal">
               <div className={`p-3 rounded-xl border flex items-center space-x-3 transition-colors ${
-                isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50/90 border-slate-200/90 hover:bg-slate-100/60'
+                isDark ? 'bg-slate-900/60 border-slate-700' : 'bg-slate-50/90 border-slate-200/90 hover:bg-slate-100/60'
               }`}>
                 <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
                   <Package className="w-4 h-4" />
@@ -404,7 +404,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
               </div>
 
               <div className={`p-3 rounded-xl border flex items-center space-x-3 transition-colors ${
-                isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50/90 border-slate-200/90 hover:bg-slate-100/60'
+                isDark ? 'bg-slate-900/60 border-slate-700' : 'bg-slate-50/90 border-slate-200/90 hover:bg-slate-100/60'
               }`}>
                 <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
                   <Plane className="w-4 h-4" />
@@ -416,7 +416,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
               </div>
 
               <div className={`p-3 rounded-xl border flex items-center space-x-3 transition-colors ${
-                isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50/90 border-slate-200/90 hover:bg-slate-100/60'
+                isDark ? 'bg-slate-900/60 border-slate-700' : 'bg-slate-50/90 border-slate-200/90 hover:bg-slate-100/60'
               }`}>
                 <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
                   <TrendingUp className="w-4 h-4" />
@@ -435,10 +435,10 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
           {/* Storage Capacity Gauge Card */}
           <div
             className={`p-6 rounded-xl border transition-all shadow-2xs ${
-              isDark ? 'bg-[#1E293B] border-slate-800' : 'bg-white border-slate-200/90'
+              isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90'
             }`}
           >
-            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
               <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">
                 <Box className="w-4 h-4 text-indigo-500" />
                 <span>{isBn ? 'ওয়্যারহাউজ ক্যাপাসিটি মিটার' : 'Storage Capacity Gauge'}</span>
@@ -477,7 +477,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
                 </div>
               </div>
 
-              <div className="mt-4 w-full grid grid-cols-2 gap-2 text-center text-xs font-normal border-t pt-3 border-slate-200 dark:border-slate-800">
+              <div className="mt-4 w-full grid grid-cols-2 gap-2 text-center text-xs font-normal border-t pt-3 border-slate-200 dark:border-slate-700">
                 <div>
                   <div className="text-slate-400 text-[10px]">{isBn ? 'ব্যবহৃত ভলিউম' : 'Used Volume'}</div>
                   <div className="font-mono text-slate-900 dark:text-white font-medium mt-0.5">{totalCbm.toFixed(1)} CBM</div>
@@ -493,10 +493,10 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
           {/* Product Category Distribution */}
           <div
             className={`p-6 rounded-xl border transition-all shadow-2xs ${
-              isDark ? 'bg-[#1E293B] border-slate-800' : 'bg-white border-slate-200/90'
+              isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90'
             }`}
           >
-            <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2 border-b pb-3 border-slate-200 dark:border-slate-800">
+            <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2 border-b pb-3 border-slate-200 dark:border-slate-700">
               <Layers className="w-4 h-4 text-emerald-500" />
               <span>{isBn ? 'পণ্য ক্যাটাগরি ডিস্ট্রিবিউশন' : 'Product Category Share'}</span>
             </h3>
@@ -544,10 +544,10 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
         {/* Destination Breakdown Leaderboard */}
         <div
           className={`p-6 rounded-xl border transition-all shadow-2xs ${
-            isDark ? 'bg-[#1E293B] border-slate-800' : 'bg-white border-slate-200/90'
+            isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90'
           }`}
         >
-          <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
+          <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
             <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">
               <Send className="w-4 h-4 text-blue-500" />
               <span>{isBn ? 'গন্তব্য অনুযায়ী কার্গো ডিসপ্যাচ শেয়ার' : 'Destination Freight Share'}</span>
@@ -557,7 +557,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
 
           <div className="mt-4 space-y-4 text-xs font-normal">
             <div className={`p-3.5 rounded-xl border flex items-center justify-between transition-colors ${
-              isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100/60'
+              isDark ? 'bg-slate-900/60 border-slate-700' : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100/60'
             }`}>
               <div className="flex items-center space-x-3">
                 <span className="text-xl">🇧🇩</span>
@@ -573,7 +573,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
             </div>
 
             <div className={`p-3.5 rounded-xl border flex items-center justify-between transition-colors ${
-              isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100/60'
+              isDark ? 'bg-slate-900/60 border-slate-700' : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100/60'
             }`}>
               <div className="flex items-center space-x-3">
                 <span className="text-xl">🚢</span>
@@ -589,7 +589,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
             </div>
 
             <div className={`p-3.5 rounded-xl border flex items-center justify-between transition-colors ${
-              isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100/60'
+              isDark ? 'bg-slate-900/60 border-slate-700' : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100/60'
             }`}>
               <div className="flex items-center space-x-3">
                 <span className="text-xl">✈️</span>
@@ -609,10 +609,10 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
         {/* Live Warehouse Movement Activity Feed */}
         <div
           className={`p-6 rounded-xl border transition-all shadow-2xs ${
-            isDark ? 'bg-[#1E293B] border-slate-800' : 'bg-white border-slate-200/90'
+            isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90'
           }`}
         >
-          <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
+          <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
             <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">
               <Zap className="w-4 h-4 text-emerald-500 animate-pulse" />
               <span>{isBn ? 'সাম্প্রতিক কার্গো মোশন ও কার্যক্রম' : 'Live Motion Stream'}</span>

@@ -401,7 +401,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
         </div>
 
         {/* View Mode Switcher: Active Proposals vs History Log */}
-        <div className={`flex rounded-none p-1 border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
+        <div className={`flex rounded-none p-1 border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
           <button
             onClick={() => setViewMode('active')}
             className={`px-4 py-1.5 rounded-none text-xs font-normal transition-all cursor-pointer flex items-center space-x-2 ${
@@ -508,7 +508,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
             isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
           }`}>
             <div className="flex flex-wrap items-center gap-2">
-              <div className={`flex rounded-none p-0.5 border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
+              <div className={`flex rounded-none p-0.5 border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
                 <button
                   onClick={() => setStatusFilter('all')}
                   className={`px-3 py-1 rounded-none text-xs font-normal transition-all cursor-pointer ${
@@ -549,12 +549,12 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
 
               <div className={`w-px h-4 mx-0.5 hidden md:block ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`} />
 
-              <div className={`flex items-center space-x-2 border rounded-none px-2.5 py-1.5 ${isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}>
+              <div className={`flex items-center space-x-2 border rounded-none px-2.5 py-1.5 ${isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}>
                 <WarehouseIcon className="w-3.5 h-3.5 text-slate-500" />
                 <select
                   value={warehouseFilter}
                   onChange={(e) => setWarehouseFilter(e.target.value)}
-                  className="bg-transparent outline-none cursor-pointer text-xs font-normal dark:bg-[#0F172A] dark:text-white"
+                  className="bg-transparent outline-none cursor-pointer text-xs font-normal dark:bg-[#1E293B] dark:text-white"
                 >
                   <option value="all" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">All Origin Hubs</option>
                   <option value="wh-china" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">Guangzhou Air Cargo Hub (China)</option>
@@ -571,7 +571,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={isBn ? 'প্রস্তাবনা ID, ফ্লাইট বা কার্টুন নং খুঁজুন...' : 'Search proposal, flight no...'}
                 className={`w-full border rounded-none py-1.5 pl-8 pr-3 text-xs outline-none font-normal ${
-                  isDark ? 'bg-[#0F172A] border-slate-700 text-white placeholder-gray-400' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
+                  isDark ? 'bg-[#1E293B] border-slate-700 text-white placeholder-gray-400' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
                 }`}
               />
               {searchQuery && (
@@ -666,22 +666,22 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                     </div>
 
                     <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 my-3.5 text-xs">
-                      <div className={`p-2.5 rounded-none border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                      <div className={`p-2.5 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                         <span className={`font-normal text-[11px] block ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{isBn ? 'মোট কার্টুন সংখ্যা:' : 'Total Cartons:'}</span>
                         <span className={`font-mono font-medium text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>{prop.items_count} {isBn ? 'টি কার্টুন' : 'cartons'}</span>
                       </div>
 
-                      <div className={`p-2.5 rounded-none border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                      <div className={`p-2.5 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                         <span className={`font-normal text-[11px] block ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{isBn ? 'মোট ওজন (Weight):' : 'Gross Weight:'}</span>
                         <span className={`font-mono font-medium text-sm ${isDark ? 'text-teal-400' : 'text-[#00897B]'}`}>{prop.total_weight.toFixed(1)} kg</span>
                       </div>
 
-                      <div className={`p-2.5 rounded-none border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                      <div className={`p-2.5 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                         <span className={`font-normal text-[11px] block ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{isBn ? 'মোট ভলিউম (Volume):' : 'Volume (CBM):'}</span>
                         <span className={`font-mono font-medium text-sm ${isDark ? 'text-purple-400' : 'text-purple-900'}`}>{prop.total_cbm.toFixed(2)} CBM</span>
                       </div>
 
-                      <div className={`p-2.5 rounded-none border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                      <div className={`p-2.5 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                         <span className={`font-normal text-[11px] block ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{isBn ? 'রিকোয়েস্ট তারিখ:' : 'Request Date:'}</span>
                         <span className={`font-mono font-medium text-xs ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{prop.date}</span>
                       </div>
@@ -817,7 +817,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                 </span>
 
                 {/* Quick Date Range Preset Buttons */}
-                <div className={`flex rounded-none p-0.5 border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
+                <div className={`flex rounded-none p-0.5 border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
                   <button
                     onClick={() => applyDatePreset('all')}
                     className={`px-2.5 py-1 rounded-none text-[11px] font-normal transition-all cursor-pointer ${
@@ -872,7 +872,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
               {/* Precise Date Pickers (From / To) */}
               <div className="flex items-center space-x-2">
                 <div className={`flex items-center space-x-1.5 border rounded-none px-2.5 py-1 text-xs ${
-                  isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                  isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                 }`}>
                   <span className="text-[10px] text-slate-500 font-normal">{isBn ? 'হতে:' : 'From:'}</span>
                   <input
@@ -886,7 +886,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                 <span className="text-slate-400 text-xs">-</span>
 
                 <div className={`flex items-center space-x-1.5 border rounded-none px-2.5 py-1 text-xs ${
-                  isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                  isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                 }`}>
                   <span className="text-[10px] text-slate-500 font-normal">{isBn ? 'পর্যন্ত:' : 'To:'}</span>
                   <input
@@ -915,7 +915,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
             {/* Bottom Row: Status Tabs, Warehouse & Search */}
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex flex-wrap items-center gap-2">
-                <div className={`flex rounded-none p-0.5 border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
+                <div className={`flex rounded-none p-0.5 border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
                   <button
                     onClick={() => setHistoryStatusFilter('all')}
                     className={`px-3 py-1 rounded-none text-xs font-normal transition-all cursor-pointer ${
@@ -968,12 +968,12 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
 
                 <div className={`w-px h-4 mx-0.5 hidden md:block ${isDark ? 'bg-slate-700' : 'bg-slate-200'}`} />
 
-                <div className={`flex items-center space-x-2 border rounded-none px-2.5 py-1.5 ${isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}>
+                <div className={`flex items-center space-x-2 border rounded-none px-2.5 py-1.5 ${isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'}`}>
                   <WarehouseIcon className="w-3.5 h-3.5 text-slate-500" />
                   <select
                     value={warehouseFilter}
                     onChange={(e) => setWarehouseFilter(e.target.value)}
-                    className="bg-transparent outline-none cursor-pointer text-xs font-normal dark:bg-[#0F172A] dark:text-white"
+                    className="bg-transparent outline-none cursor-pointer text-xs font-normal dark:bg-[#1E293B] dark:text-white"
                   >
                     <option value="all" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">All Origin Hubs</option>
                     <option value="wh-china" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">Guangzhou Air Cargo Hub (China)</option>
@@ -990,7 +990,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={isBn ? 'ইতিহাস সার্চ: ID, ফ্লাইট নং...' : 'Search proposal history...'}
                   className={`w-full border rounded-none py-1.5 pl-8 pr-3 text-xs outline-none font-normal ${
-                    isDark ? 'bg-[#0F172A] border-slate-700 text-white placeholder-gray-400' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
+                    isDark ? 'bg-[#1E293B] border-slate-700 text-white placeholder-gray-400' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
                   }`}
                 />
                 {searchQuery && (
@@ -1006,7 +1006,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
           <div className="overflow-x-auto border rounded-none shadow-xs">
             <table className={`w-full text-left text-xs ${isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-slate-900'}`}>
               <thead className={`uppercase text-[10px] tracking-wider border-b ${
-                isDark ? 'bg-[#0F172A] text-gray-400 border-slate-700' : 'bg-slate-100 text-slate-700 border-slate-200 font-normal'
+                isDark ? 'bg-[#1E293B] text-gray-400 border-slate-700' : 'bg-slate-100 text-slate-700 border-slate-200 font-normal'
               }`}>
                 <tr>
                   <th className="p-3">প্রস্তাবনা ID ও ফ্লাইট</th>
@@ -1125,7 +1125,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
       {/* 5. INTERACTIVE CARTON AUDIT & MODIFICATION INSPECTOR MODAL */}
       {/* ========================================================================= */}
       {activeModalProposal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs animate-backdrop-blur-fade">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-xs animate-backdrop-blur-fade">
           <div className={`w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-none border p-6 space-y-5 shadow-2xl animate-modal-pop-bounce ${
             isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
@@ -1158,7 +1158,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
             </div>
 
             <div className={`p-4 rounded-none border grid grid-cols-2 sm:grid-cols-4 gap-3 text-center ${
-              isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-slate-50 border-slate-200'
+              isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'
             }`}>
               <div>
                 <span className={`text-[11px] font-normal uppercase block ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{isBn ? 'মোট কার্টুন' : 'Carton Count'}</span>
@@ -1198,7 +1198,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
             <div className="overflow-x-auto border rounded-none">
               <table className={`w-full text-left text-xs ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 <thead className={`uppercase text-[10px] tracking-wider border-b ${
-                  isDark ? 'bg-slate-950 text-slate-400 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200 font-medium'
+                  isDark ? 'bg-slate-900 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-700 border-slate-200 font-medium'
                 }`}>
                   <tr>
                     <th className="p-2.5 w-8 text-center font-normal">SL</th>
@@ -1286,7 +1286,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                 type="button"
                 onClick={() => setActiveModalProposal(null)}
                 className={`px-4 py-2 rounded-none text-xs font-normal border transition-all cursor-pointer ${
-                  isDark ? 'bg-[#0F172A] border-slate-700 text-gray-400 hover:text-white' : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
+                  isDark ? 'bg-[#1E293B] border-slate-700 text-gray-400 hover:text-white' : 'bg-slate-100 border-slate-200 text-slate-700 hover:bg-slate-200'
                 }`}
               >
                 {isBn ? 'বন্ধ করুন' : 'Close'}
@@ -1388,13 +1388,13 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
         });
 
         return (
-          <div className="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 font-sans animate-backdrop-blur-fade">
+          <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 font-sans animate-backdrop-blur-fade">
             <div className={`w-full max-w-7xl max-h-[92vh] flex flex-col rounded-none border shadow-2xl overflow-hidden font-sans ${
-              isDark ? 'bg-[#0F172A] border-slate-800 text-slate-100' : 'bg-white border-slate-300 text-slate-900'
+              isDark ? 'bg-[#1E293B] border-slate-700 text-slate-100' : 'bg-white border-slate-300 text-slate-900'
             }`}>
               {/* Modal Header */}
               <div className={`p-4 sm:p-5 border-b flex items-center justify-between ${
-                isDark ? 'bg-[#0F172A] border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
+                isDark ? 'bg-[#1E293B] border-slate-700 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
               }`}>
                 <div className="flex items-center space-x-3">
                   <div className="w-9 h-9 rounded-none bg-blue-600/10 text-blue-600 dark:text-blue-400 flex items-center justify-center border border-blue-600/20">
@@ -1452,15 +1452,15 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                       value={addCartonSearch}
                       onChange={(e) => setAddCartonSearch(e.target.value)}
                       className={`w-full pl-8 pr-3 py-1.5 rounded-none border text-xs outline-none transition-all font-normal focus:ring-1 focus:ring-blue-500 ${
-                        isDark ? 'bg-slate-950 border-slate-800 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
+                        isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
                       }`}
                     />
                   </div>
 
-                  <div className={`flex-1 overflow-x-auto overflow-y-auto max-h-[52vh] rounded-none border ${isDark ? "bg-[#1E293B] border-slate-800 text-slate-200" : "bg-white border-slate-200 text-slate-800"}`}>
+                  <div className={`flex-1 overflow-x-auto overflow-y-auto max-h-[52vh] rounded-none border ${isDark ? "bg-[#1E293B] border-slate-700 text-slate-200" : "bg-white border-slate-200 text-slate-800"}`}>
                     <table className="min-w-max w-full text-left text-xs font-light">
                       <thead className={`uppercase text-[10px] tracking-wider border-b sticky top-0 z-10 ${
-                        isDark ? 'bg-[#0F172A] text-slate-300 border-slate-800 font-medium' : 'bg-slate-100 text-slate-700 border-slate-200 font-medium'
+                        isDark ? 'bg-[#1E293B] text-slate-300 border-slate-700 font-medium' : 'bg-slate-100 text-slate-700 border-slate-200 font-medium'
                       }`}>
                         <tr>
                           <th className="p-2.5 w-8 text-center font-normal">
@@ -1522,7 +1522,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                                 </td>
                                 <td className="p-2.5 text-center font-mono text-slate-500 text-[11px]">{idx + 1}</td>
                                 <td className="p-2.5 font-mono whitespace-nowrap">
-                                  <span className="px-2 py-0.5 rounded-none bg-slate-100 dark:bg-[#0F172A] text-teal-700 dark:text-teal-400 font-mono text-[11px] font-medium border border-slate-300 dark:border-slate-700">
+                                  <span className="px-2 py-0.5 rounded-none bg-slate-100 dark:bg-[#1E293B] text-teal-700 dark:text-teal-400 font-mono text-[11px] font-medium border border-slate-300 dark:border-slate-700">
                                     {c.ctn_no}
                                   </span>
                                 </td>
@@ -1564,7 +1564,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                 </div>
 
                 {/* RIGHT PANEL (6 cols / 50% Width): Attached Proposal Payload Live Preview Table */}
-                <div className={`xl:col-span-6 flex flex-col min-h-0 p-3 sm:p-4 space-y-3 ${isDark ? "bg-[#0F172A]" : "bg-slate-50/70"}`}>
+                <div className={`xl:col-span-6 flex flex-col min-h-0 p-3 sm:p-4 space-y-3 ${isDark ? "bg-[#1E293B]" : "bg-slate-50/70"}`}>
                   <div className="flex items-center justify-between">
                     <h4 className="text-xs font-semibold text-slate-900 dark:text-white flex items-center space-x-2">
                       <Plane className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
@@ -1584,15 +1584,15 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                       value={attachedCartonSearch}
                       onChange={(e) => setAttachedCartonSearch(e.target.value)}
                       className={`w-full pl-8 pr-3 py-1.5 rounded-none border text-xs outline-none transition-all font-normal focus:ring-1 focus:ring-blue-500 ${
-                        isDark ? 'bg-slate-950 border-slate-800 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
+                        isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
                       }`}
                     />
                   </div>
 
-                  <div className={`flex-1 overflow-x-auto overflow-y-auto max-h-[52vh] rounded-none border ${isDark ? "bg-[#1E293B] border-slate-800 text-slate-200" : "bg-white border-slate-200 text-slate-800"}`}>
+                  <div className={`flex-1 overflow-x-auto overflow-y-auto max-h-[52vh] rounded-none border ${isDark ? "bg-[#1E293B] border-slate-700 text-slate-200" : "bg-white border-slate-200 text-slate-800"}`}>
                     <table className="min-w-max w-full text-left text-xs font-light">
                       <thead className={`uppercase text-[10px] tracking-wider border-b sticky top-0 z-10 ${
-                        isDark ? 'bg-[#0F172A] text-slate-300 border-slate-800 font-medium' : 'bg-slate-100 text-slate-700 border-slate-200 font-medium'
+                        isDark ? 'bg-[#1E293B] text-slate-300 border-slate-700 font-medium' : 'bg-slate-100 text-slate-700 border-slate-200 font-medium'
                       }`}>
                         <tr>
                           <th className="p-2.5 w-8 text-center font-normal">SL</th>
@@ -1610,7 +1610,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                       <tbody className={`divide-y ${isDark ? 'divide-slate-800 text-slate-300' : 'divide-slate-200 text-slate-700'}`}>
                         {filteredAttachedPayloadPreview.length === 0 ? (
                           <tr>
-                            <td colSpan={10} className="p-8 text-center text-xs text-slate-400 border border-dashed border-slate-300 dark:border-slate-800 rounded-none">
+                            <td colSpan={10} className="p-8 text-center text-xs text-slate-400 border border-dashed border-slate-300 dark:border-slate-700 rounded-none">
                               {attachedCartonSearch
                                 ? (isBn ? 'খুঁজে পাওয়া যায়নি! অন্য কিওয়ার্ড দিয়ে টাইপ করুন।' : 'No attached cartons matching search query.')
                                 : (isBn ? 'এই প্রস্তাবনায় এখনো কোনো কার্টুন যুক্ত নেই।' : 'No cartons attached to this proposal yet.')}
@@ -1628,7 +1628,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                               >
                                 <td className="p-2.5 text-center font-mono text-slate-500 text-[11px]">{idx + 1}</td>
                                 <td className="p-2.5 font-mono whitespace-nowrap flex items-center space-x-1">
-                                  <span className="px-2 py-0.5 rounded-none bg-blue-50 dark:bg-[#0F172A] text-blue-700 dark:text-blue-400 font-mono text-[11px] font-medium border border-blue-300 dark:border-blue-700">
+                                  <span className="px-2 py-0.5 rounded-none bg-blue-50 dark:bg-[#1E293B] text-blue-700 dark:text-blue-400 font-mono text-[11px] font-medium border border-blue-300 dark:border-blue-700">
                                     {ctn.ctn_no}
                                   </span>
                                   {isNewlySelected && (
@@ -1691,7 +1691,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
 
               {/* Modal Summary & Action Footer */}
               <div className={`p-3.5 sm:p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-3 ${
-                isDark ? 'bg-[#0F172A] border-slate-800 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
+                isDark ? 'bg-[#1E293B] border-slate-700 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
               }`}>
                 <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-slate-600 dark:text-slate-400 font-light">
                   <span className="px-2.5 py-1 rounded-none bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-normal border border-slate-300 dark:border-slate-700">
@@ -1743,7 +1743,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
       {/* 7. PRINTABLE FLIGHT MANIFEST REPORT MODAL */}
       {/* ========================================================================= */}
       {printManifestProposal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-xs">
           <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-none bg-white border border-slate-300 p-8 text-slate-900 shadow-2xl space-y-6">
             <div className="flex items-center justify-between border-b pb-4">
               <div className="flex items-center space-x-3">

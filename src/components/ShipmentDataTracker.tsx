@@ -261,12 +261,12 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
       <div className={`p-3 rounded-2xl border flex flex-wrap items-center justify-between gap-3 text-xs ${isDark ? 'bg-[#1E293B] border-[#2C2C2E]' : 'bg-white border-gray-200 shadow-xs text-gray-900'}`}>
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Warehouse Selector */}
-          <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+          <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#1E293B] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
             <Filter className="w-3.5 h-3.5 opacity-60" />
             <select
               value={whFilter}
               onChange={(e) => setWhFilter(e.target.value)}
-              className="bg-transparent outline-none cursor-pointer text-xs dark:bg-[#0F172A] dark:text-white"
+              className="bg-transparent outline-none cursor-pointer text-xs dark:bg-[#1E293B] dark:text-white"
             >
               <option value="all" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">{isBn ? 'সব ওয়্যারহাউজ হাব (All Hubs)' : 'All Warehouse Hubs'}</option>
               {safeWarehouses.map((w) => (
@@ -278,12 +278,12 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
           </div>
 
           {/* Shipment Mode Selector */}
-          <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+          <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#1E293B] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
             <Plane className="w-3.5 h-3.5 opacity-60" />
             <select
               value={modeFilter}
               onChange={(e) => setModeFilter(e.target.value)}
-              className="bg-transparent outline-none cursor-pointer text-xs dark:bg-[#0F172A] dark:text-white"
+              className="bg-transparent outline-none cursor-pointer text-xs dark:bg-[#1E293B] dark:text-white"
             >
               <option value="all" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">{isBn ? 'সব মোড (Air & Sea)' : 'All Modes (Air & Sea)'}</option>
               <option value="air" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">Air Freight (এয়ার কার্গো)</option>
@@ -294,7 +294,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
           <div className={`w-px h-5 mx-0.5 hidden md:block ${isDark ? 'bg-[#2C2C2E]' : 'bg-gray-200'}`} />
 
           {/* 📅 Smart Date Filter Selector */}
-          <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+          <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#1E293B] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
             <Calendar className="w-3.5 h-3.5 text-emerald-500" />
             <select
               value={dateFilterType}
@@ -313,82 +313,82 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
 
           {/* Dynamic Input Controls Based on Date Filter Type */}
           {dateFilterType === 'single_date' && (
-            <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+            <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#1E293B] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
               <span className="text-[11px] font-medium opacity-80">{isBn ? 'তারিখ:' : 'Date:'}</span>
               <input
                 type="date"
                 value={singleDate}
                 onChange={(e) => setSingleDate(e.target.value)}
-                className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
+                className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#1E293B] dark:text-white"
               />
             </div>
           )}
 
           {dateFilterType === 'date_range' && (
             <div className="flex items-center space-x-2">
-              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#1E293B] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
                 <span className="text-[11px] font-medium opacity-80">{isBn ? 'হতে:' : 'From:'}</span>
                 <input
                   type="date"
                   value={startDate}
                   onChange={(e) => setStartDate(e.target.value)}
-                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
+                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#1E293B] dark:text-white"
                 />
               </div>
-              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#1E293B] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
                 <span className="text-[11px] font-medium opacity-80">{isBn ? 'পর্যন্ত:' : 'To:'}</span>
                 <input
                   type="date"
                   value={endDate}
                   onChange={(e) => setEndDate(e.target.value)}
-                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
+                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#1E293B] dark:text-white"
                 />
               </div>
             </div>
           )}
 
           {dateFilterType === 'single_month' && (
-            <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+            <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#1E293B] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
               <span className="text-[11px] font-medium opacity-80">{isBn ? 'মাস:' : 'Month:'}</span>
               <input
                 type="month"
                 value={singleMonth}
                 onChange={(e) => setSingleMonth(e.target.value)}
-                className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
+                className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#1E293B] dark:text-white"
               />
             </div>
           )}
 
           {dateFilterType === 'month_range' && (
             <div className="flex items-center space-x-2">
-              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#1E293B] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
                 <span className="text-[11px] font-medium opacity-80">{isBn ? 'শুরু মাস:' : 'Start Mth:'}</span>
                 <input
                   type="month"
                   value={startMonth}
                   onChange={(e) => setStartMonth(e.target.value)}
-                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
+                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#1E293B] dark:text-white"
                 />
               </div>
-              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#1E293B] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
                 <span className="text-[11px] font-medium opacity-80">{isBn ? 'শেষ মাস:' : 'End Mth:'}</span>
                 <input
                   type="month"
                   value={endMonth}
                   onChange={(e) => setEndMonth(e.target.value)}
-                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
+                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#1E293B] dark:text-white"
                 />
               </div>
             </div>
           )}
 
           {dateFilterType === 'single_year' && (
-            <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+            <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#1E293B] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
               <span className="text-[11px] font-medium opacity-80">{isBn ? 'বছর:' : 'Year:'}</span>
               <select
                 value={singleYear}
                 onChange={(e) => setSingleYear(e.target.value)}
-                className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
+                className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#1E293B] dark:text-white"
               >
                 <option value="" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">বছর নির্বাচন</option>
                 {['2026', '2025', '2024', '2023', '2022'].map((yr) => (
@@ -400,12 +400,12 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
 
           {dateFilterType === 'year_range' && (
             <div className="flex items-center space-x-2">
-              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#1E293B] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
                 <span className="text-[11px] font-medium opacity-80">{isBn ? 'হতে বছর:' : 'From Yr:'}</span>
                 <select
                   value={startYear}
                   onChange={(e) => setStartYear(e.target.value)}
-                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
+                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#1E293B] dark:text-white"
                 >
                   <option value="" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">শুরু</option>
                   {['2022', '2023', '2024', '2025', '2026'].map((yr) => (
@@ -413,12 +413,12 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
                   ))}
                 </select>
               </div>
-              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#1E293B] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
                 <span className="text-[11px] font-medium opacity-80">{isBn ? 'পর্যন্ত বছর:' : 'To Yr:'}</span>
                 <select
                   value={endYear}
                   onChange={(e) => setEndYear(e.target.value)}
-                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
+                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#1E293B] dark:text-white"
                 >
                   <option value="" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">শেষ</option>
                   {['2022', '2023', '2024', '2025', '2026'].map((yr) => (
@@ -435,7 +435,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
               onClick={resetDateFilters}
               className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center space-x-1.5 cursor-pointer outline-none transition-all ${
                 isDark
-                  ? 'bg-[#0F172A] hover:bg-[#2C2C2E] border-[#2C2C2E] text-rose-400'
+                  ? 'bg-[#1E293B] hover:bg-[#2C2C2E] border-[#2C2C2E] text-rose-400'
                   : 'bg-white hover:bg-slate-50 border-gray-200 text-rose-600 shadow-xs'
               }`}
               title={isBn ? 'তারিখ ফিল্টার রিসেট' : 'Reset Date Filter'}
@@ -447,7 +447,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
         </div>
 
         {/* Search Field */}
-        <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 min-w-[280px] ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+        <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 min-w-[280px] ${isDark ? 'bg-[#1E293B] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
           <Search className="w-4 h-4 opacity-50 shrink-0" />
           <input
             type="text"
@@ -485,7 +485,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
               stageFilter === 'booking'
                 ? 'border-amber-500 bg-amber-500/10 ring-2 ring-amber-500/20'
                 : isDark
-                ? 'bg-[#0F172A] border-[#2C2C2E] hover:border-amber-500/50 text-white'
+                ? 'bg-[#1E293B] border-[#2C2C2E] hover:border-amber-500/50 text-white'
                 : 'bg-white border-gray-200 hover:border-amber-400 text-gray-900 shadow-xs'
             }`}
           >
@@ -503,7 +503,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
               stageFilter === 'proposal'
                 ? 'border-blue-500 bg-blue-500/10 ring-2 ring-blue-500/20'
                 : isDark
-                ? 'bg-[#0F172A] border-[#2C2C2E] hover:border-blue-500/50 text-white'
+                ? 'bg-[#1E293B] border-[#2C2C2E] hover:border-blue-500/50 text-white'
                 : 'bg-white border-gray-200 hover:border-blue-400 text-gray-900 shadow-xs'
             }`}
           >
@@ -521,7 +521,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
               stageFilter === 'transit'
                 ? 'border-purple-500 bg-purple-500/10 ring-2 ring-purple-500/20'
                 : isDark
-                ? 'bg-[#0F172A] border-[#2C2C2E] hover:border-purple-500/50 text-white'
+                ? 'bg-[#1E293B] border-[#2C2C2E] hover:border-purple-500/50 text-white'
                 : 'bg-white border-gray-200 hover:border-purple-400 text-gray-900 shadow-xs'
             }`}
           >
@@ -539,7 +539,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
               stageFilter === 'received'
                 ? 'border-emerald-500 bg-emerald-500/10 ring-2 ring-emerald-500/20'
                 : isDark
-                ? 'bg-[#0F172A] border-[#2C2C2E] hover:border-emerald-500/50 text-white'
+                ? 'bg-[#1E293B] border-[#2C2C2E] hover:border-emerald-500/50 text-white'
                 : 'bg-white border-gray-200 hover:border-emerald-400 text-gray-900 shadow-xs'
             }`}
           >
@@ -557,7 +557,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
               stageFilter === 'delivered'
                 ? 'border-teal-500 bg-teal-500/10 ring-2 ring-teal-500/20'
                 : isDark
-                ? 'bg-[#0F172A] border-[#2C2C2E] hover:border-teal-500/50 text-white'
+                ? 'bg-[#1E293B] border-[#2C2C2E] hover:border-teal-500/50 text-white'
                 : 'bg-white border-gray-200 hover:border-teal-400 text-gray-900 shadow-xs'
             }`}
           >
@@ -575,7 +575,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
               stageFilter === 'all'
                 ? 'border-[#00897B] bg-[#00897B]/10 ring-2 ring-[#00897B]/20'
                 : isDark
-                ? 'bg-[#0F172A] border-[#2C2C2E] hover:border-[#00897B]/50 text-white'
+                ? 'bg-[#1E293B] border-[#2C2C2E] hover:border-[#00897B]/50 text-white'
                 : 'bg-white border-gray-200 hover:border-[#00897B] text-gray-900 shadow-xs'
             }`}
           >
@@ -592,7 +592,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
       <div className="space-y-4">
         {/* Header Bar & View Switcher */}
         <div className={`p-4 rounded-none border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-          isDark ? 'bg-[#0F172A] border-slate-800 text-white' : 'bg-white border-slate-300 text-slate-900 shadow-xs'
+          isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-300 text-slate-900 shadow-xs'
         }`}>
           <div className="flex items-center space-x-2.5">
             <div className="p-2 rounded-none bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
@@ -612,7 +612,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
           </div>
 
           {/* View Mode Toggle Buttons */}
-          <div className={`flex items-center border rounded-none p-0.5 ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-slate-100 border-slate-300'}`}>
+          <div className={`flex items-center border rounded-none p-0.5 ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-100 border-slate-300'}`}>
             <button
               type="button"
               onClick={() => setViewLayout('cards')}
@@ -645,7 +645,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
         {viewLayout === 'cards' && (
           <div className="space-y-4">
             {approvedProposals.length === 0 ? (
-              <div className={`p-10 text-center rounded-none border text-xs ${isDark ? 'bg-[#0F172A] border-slate-800 text-slate-400' : 'bg-white border-slate-300 text-slate-600'}`}>
+              <div className={`p-10 text-center rounded-none border text-xs ${isDark ? 'bg-[#1E293B] border-slate-700 text-slate-400' : 'bg-white border-slate-300 text-slate-600'}`}>
                 <Plane className="w-8 h-8 mx-auto mb-2 text-slate-400 opacity-60" />
                 <p className="font-medium text-slate-800 dark:text-slate-200">
                   {isBn ? 'কোনো অনুমোদিত ফাইনাল ফ্লাইং ডাটা পাওয়া যায়নি' : 'No Approved Final Flying List Found'}
@@ -667,14 +667,14 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
                     key={prop.id}
                     className={`p-5 rounded-none border transition-all space-y-4 ${
                       isArrived
-                        ? isDark ? 'bg-[#0F172A] border-emerald-800/60 text-white' : 'bg-white border-emerald-300 text-slate-900 shadow-xs'
+                        ? isDark ? 'bg-[#1E293B] border-emerald-800/60 text-white' : 'bg-white border-emerald-300 text-slate-900 shadow-xs'
                         : isDispatched
-                        ? isDark ? 'bg-[#0F172A] border-blue-800/60 text-white' : 'bg-white border-blue-300 text-slate-900 shadow-xs'
-                        : isDark ? 'bg-[#0F172A] border-slate-800 text-white' : 'bg-white border-slate-300 text-slate-900 shadow-xs'
+                        ? isDark ? 'bg-[#1E293B] border-blue-800/60 text-white' : 'bg-white border-blue-300 text-slate-900 shadow-xs'
+                        : isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-300 text-slate-900 shadow-xs'
                     }`}
                   >
                     {/* Card Top Header */}
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3 border-slate-200 dark:border-slate-800">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3 border-slate-200 dark:border-slate-700">
                       <div className="flex items-center space-x-3">
                         <div className="p-2 rounded-none bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
                           <Plane className="w-5 h-5" />
@@ -717,22 +717,22 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
 
                     {/* Card Metrics Grid */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-light">
-                      <div className={`p-3 rounded-none border ${isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+                      <div className={`p-3 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                         <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">{isBn ? 'মোট কার্টুন:' : 'Total Cartons:'}</span>
                         <span className="font-mono font-medium text-sm text-slate-900 dark:text-white block mt-0.5">{prop.items_count} {isBn ? 'টি কার্টুন' : 'cartons'}</span>
                       </div>
 
-                      <div className={`p-3 rounded-none border ${isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+                      <div className={`p-3 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                         <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">{isBn ? 'মোট গ্রস ওজন:' : 'Gross Weight:'}</span>
                         <span className="font-mono font-medium text-sm text-emerald-600 dark:text-emerald-400 block mt-0.5">{prop.total_weight.toFixed(1)} kg</span>
                       </div>
 
-                      <div className={`p-3 rounded-none border ${isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+                      <div className={`p-3 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                         <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">{isBn ? 'মোট সিবিএম ভলিউম:' : 'Total Volume:'}</span>
                         <span className="font-mono font-medium text-sm text-purple-600 dark:text-purple-400 block mt-0.5">{prop.total_cbm.toFixed(2)} CBM</span>
                       </div>
 
-                      <div className={`p-3 rounded-none border ${isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+                      <div className={`p-3 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                         <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase">{isBn ? 'অনুমোদন তারিখ ও এডমিন:' : 'Approval & Admin:'}</span>
                         <span className="font-mono text-xs text-slate-800 dark:text-slate-200 block mt-0.5">{prop.date}</span>
                         <span className="text-[10px] text-slate-500 block truncate">{prop.finalized_by || 'Tanvir Ahmed (Super Admin)'}</span>
@@ -747,7 +747,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
                           <span
                             key={c.id}
                             className={`px-2 py-0.5 rounded-none text-[10px] font-mono border ${
-                              isDark ? 'bg-slate-900 text-teal-400 border-slate-800' : 'bg-slate-100 text-teal-700 border-slate-200'
+                              isDark ? 'bg-slate-900 text-teal-400 border-slate-700' : 'bg-slate-100 text-teal-700 border-slate-200'
                             }`}
                           >
                             {c.ctn_no} ({c.gross_weight}kg)
@@ -762,7 +762,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
                         <button
                           type="button"
                           onClick={() => setPrintManifestProposal(prop)}
-                          className="px-3.5 py-1.5 rounded-none bg-slate-800 hover:bg-slate-900 active:bg-slate-950 text-white text-xs font-medium transition-all cursor-pointer flex items-center space-x-1.5 shadow-xs border-0 outline-none"
+                          className="px-3.5 py-1.5 rounded-none bg-slate-800 hover:bg-slate-900 active:bg-slate-900 text-white text-xs font-medium transition-all cursor-pointer flex items-center space-x-1.5 shadow-xs border-0 outline-none"
                         >
                           <Printer className="w-3.5 h-3.5 text-slate-300" />
                           <span>{isBn ? 'ম্যানিফেস্ট প্রিন্ট' : 'Print Manifest'}</span>
@@ -802,7 +802,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs border-collapse">
-            <thead className={`uppercase text-[10px] tracking-wider font-semibold border-b ${isDark ? 'bg-[#0F172A] text-[#9E9E9E] border-[#2C2C2E]' : 'bg-gray-100 text-gray-700 border-gray-200'}`}>
+            <thead className={`uppercase text-[10px] tracking-wider font-semibold border-b ${isDark ? 'bg-[#1E293B] text-[#9E9E9E] border-[#2C2C2E]' : 'bg-gray-100 text-gray-700 border-gray-200'}`}>
               <tr>
                 <th className="p-3 text-center border-r border-gray-200 dark:border-[#2C2C2E]/60 w-12">SL/NO</th>
                 <th className="p-3 border-r border-gray-200 dark:border-[#2C2C2E]/60 whitespace-nowrap">ENTRY DATE</th>
@@ -970,9 +970,9 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
       {selectedProposalModal && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50">
           <div className={`w-full max-w-3xl rounded-none border p-6 space-y-4 max-h-[85vh] overflow-y-auto shadow-2xl ${
-            isDark ? 'bg-[#0F172A] border-slate-800 text-white' : 'bg-white border-slate-300 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-300 text-slate-900'
           }`}>
-            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
               <div className="flex items-center space-x-2">
                 <Package className="w-5 h-5 text-blue-500" />
                 <h3 className="font-medium text-base">
@@ -989,27 +989,27 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
             </div>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-light">
-              <div className={`p-3 rounded-none border ${isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                 <span className="text-[10px] text-slate-500 block">{isBn ? 'এয়ারলাইন / ফ্লাইট:' : 'Airline / Flight:'}</span>
                 <span className="font-mono font-medium text-blue-500 text-sm block mt-0.5">{selectedProposalModal.flight_number || 'N/A'}</span>
               </div>
-              <div className={`p-3 rounded-none border ${isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                 <span className="text-[10px] text-slate-500 block">{isBn ? 'মোট কার্টুন:' : 'Total Cartons:'}</span>
                 <span className="font-mono font-medium text-emerald-500 text-sm block mt-0.5">{selectedProposalModal.items_count} cartons</span>
               </div>
-              <div className={`p-3 rounded-none border ${isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                 <span className="text-[10px] text-slate-500 block">{isBn ? 'মোট গ্রস ওজন:' : 'Total Gross Wt:'}</span>
                 <span className="font-mono font-medium text-emerald-500 text-sm block mt-0.5">{selectedProposalModal.total_weight} kg</span>
               </div>
-              <div className={`p-3 rounded-none border ${isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                 <span className="text-[10px] text-slate-500 block">{isBn ? 'মোট ভলিউম:' : 'Total Volume:'}</span>
                 <span className="font-mono font-medium text-purple-500 text-sm block mt-0.5">{selectedProposalModal.total_cbm} CBM</span>
               </div>
             </div>
 
-            <div className="overflow-x-auto border border-slate-200 dark:border-slate-800">
+            <div className="overflow-x-auto border border-slate-200 dark:border-slate-700">
               <table className="w-full text-left text-xs border-collapse font-mono">
-                <thead className={`uppercase text-[10px] border-b ${isDark ? 'bg-[#0F172A] text-slate-400 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-200'}`}>
+                <thead className={`uppercase text-[10px] border-b ${isDark ? 'bg-[#1E293B] text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-700 border-slate-200'}`}>
                   <tr>
                     <th className="p-2.5">CTN NO</th>
                     <th className="p-2.5">SHIPPING MARK</th>
@@ -1270,7 +1270,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
                     <div className={`flex-1 p-3.5 rounded-2xl border transition-all ${
                       selectedCartonTimeline.status !== 'booked'
                         ? isDark ? 'bg-[#1E293B]/90 border-blue-500/40' : 'bg-white border-blue-200 shadow-xs'
-                        : isDark ? 'bg-[#0F172A]/50 border-[#2C2C2E] opacity-60' : 'bg-slate-50 border-gray-200 opacity-60'
+                        : isDark ? 'bg-[#1E293B]/50 border-[#2C2C2E] opacity-60' : 'bg-slate-50 border-gray-200 opacity-60'
                     }`}>
                       <div className="flex items-center justify-between flex-wrap gap-1">
                         <h4 className={`text-xs font-bold ${selectedCartonTimeline.status !== 'booked' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-500'}`}>
@@ -1302,7 +1302,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
                     <div className={`flex-1 p-3.5 rounded-2xl border transition-all ${
                       selectedCartonTimeline.status === 'in_transit' || selectedCartonTimeline.status === 'received' || selectedCartonTimeline.status === 'delivered'
                         ? isDark ? 'bg-[#1E293B]/90 border-purple-500/40' : 'bg-white border-purple-200 shadow-xs'
-                        : isDark ? 'bg-[#0F172A]/50 border-[#2C2C2E] opacity-60' : 'bg-slate-50 border-gray-200 opacity-60'
+                        : isDark ? 'bg-[#1E293B]/50 border-[#2C2C2E] opacity-60' : 'bg-slate-50 border-gray-200 opacity-60'
                     }`}>
                       <div className="flex items-center justify-between flex-wrap gap-1">
                         <h4 className={`text-xs font-bold ${
@@ -1336,7 +1336,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
                     <div className={`flex-1 p-3.5 rounded-2xl border transition-all ${
                       selectedCartonTimeline.status === 'received' || selectedCartonTimeline.status === 'delivered'
                         ? isDark ? 'bg-[#1E293B]/90 border-emerald-500/40' : 'bg-white border-emerald-200 shadow-xs'
-                        : isDark ? 'bg-[#0F172A]/50 border-[#2C2C2E] opacity-60' : 'bg-slate-50 border-gray-200 opacity-60'
+                        : isDark ? 'bg-[#1E293B]/50 border-[#2C2C2E] opacity-60' : 'bg-slate-50 border-gray-200 opacity-60'
                     }`}>
                       <div className="flex items-center justify-between flex-wrap gap-1">
                         <h4 className={`text-xs font-bold ${
@@ -1372,7 +1372,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
                     <div className={`flex-1 p-3.5 rounded-2xl border transition-all ${
                       selectedCartonTimeline.status === 'delivered'
                         ? isDark ? 'bg-[#1E293B]/90 border-teal-500/40' : 'bg-white border-teal-200 shadow-xs'
-                        : isDark ? 'bg-[#0F172A]/50 border-[#2C2C2E] opacity-60' : 'bg-slate-50 border-gray-200 opacity-60'
+                        : isDark ? 'bg-[#1E293B]/50 border-[#2C2C2E] opacity-60' : 'bg-slate-50 border-gray-200 opacity-60'
                     }`}>
                       <div className="flex items-center justify-between flex-wrap gap-1">
                         <h4 className={`text-xs font-bold ${selectedCartonTimeline.status === 'delivered' ? 'text-teal-600 dark:text-teal-400' : 'text-gray-500'}`}>
@@ -1396,7 +1396,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
             </div>
 
             {/* Modal Footer Controls (Cascading Item 12) */}
-            <div className="p-4 px-6 border-t border-gray-200/80 dark:border-[#2C2C2E] flex items-center justify-between flex-wrap gap-3 bg-slate-50 dark:bg-[#0F172A]/80 animate-cascade-12">
+            <div className="p-4 px-6 border-t border-gray-200/80 dark:border-[#2C2C2E] flex items-center justify-between flex-wrap gap-3 bg-slate-50 dark:bg-[#1E293B]/80 animate-cascade-12">
               <button
                 onClick={() => window.print()}
                 className="px-3.5 py-2 rounded-xl text-xs font-bold border border-emerald-500/30 text-emerald-500 bg-emerald-500/10 hover:bg-emerald-500/20 hover:scale-105 transition-all flex items-center space-x-1.5 cursor-pointer outline-none"

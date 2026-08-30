@@ -189,7 +189,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header
       className={`h-14 border-b flex items-center justify-between px-4 md:px-6 sticky top-0 z-50 font-sans transition-colors duration-200 ${
         isDark
-          ? 'bg-[#0F172A] border-slate-700/80 text-white'
+          ? 'bg-[#1E293B] border-slate-700/80 text-white'
           : 'bg-white border-gray-200 text-gray-900 shadow-xs'
       }`}
     >
@@ -370,7 +370,7 @@ export const Header: React.FC<HeaderProps> = ({
                 }`}
               >
                 {/* Header Info */}
-                <div className={`p-3.5 border-b ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
+                <div className={`p-3.5 border-b ${isDark ? 'border-slate-700' : 'border-slate-100'}`}>
                   <p className="font-semibold text-xs text-slate-900 dark:text-white truncate">
                     {badgeConfig.label}
                   </p>

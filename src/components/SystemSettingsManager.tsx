@@ -261,7 +261,7 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
       </div>
 
       {/* Sub-Nav Bar (General, API & Budget Settings Tabs - rounded-none & font-light) */}
-      <div className="border-b border-slate-200 dark:border-slate-800">
+      <div className="border-b border-slate-200 dark:border-slate-700">
         <div className="flex flex-wrap gap-2 pb-1">
           <button
             type="button"
@@ -1009,7 +1009,7 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                   onChange={(e) => setResetConfirmInput(e.target.value)}
                   placeholder="RESET"
                   className={`w-full border rounded-xl py-2 px-3 text-xs font-mono font-bold tracking-widest uppercase outline-none ${
-                    isDark ? 'bg-[#0F172A] border-rose-900 text-rose-400 focus:border-rose-500' : 'bg-rose-50 border-rose-300 text-rose-700 focus:border-rose-500'
+                    isDark ? 'bg-[#1E293B] border-rose-900 text-rose-400 focus:border-rose-500' : 'bg-rose-50 border-rose-300 text-rose-700 focus:border-rose-500'
                   }`}
                 />
               </div>

@@ -69,7 +69,7 @@ export const SleekLineChart: React.FC<SleekLineChartProps> = ({
 
   return (
     <div className={`p-6 rounded-3xl border transition-all ${
-      isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900 shadow-2xs'
+      isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900 shadow-2xs'
     }`}>
       {/* Title & Tooltip Header */}
       <div className="flex items-center justify-between mb-4">

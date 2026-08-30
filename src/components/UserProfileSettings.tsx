@@ -204,7 +204,7 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
   return (
     <div className="max-w-5xl mx-auto space-y-6 font-sans">
       {/* Page Title */}
-      <div className="flex items-center space-x-2 border-b pb-3 border-slate-200/80 dark:border-slate-800/80">
+      <div className="flex items-center space-x-2 border-b pb-3 border-slate-200/80 dark:border-slate-700/80">
         <UserIcon className="w-5 h-5 text-[#EA580C]" />
         <h2 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
           {isBn ? 'প্রোফাইল ও সেটিংস' : 'Profile & Settings'}
@@ -227,7 +227,7 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
       {/* CARD 1: PROFILE INFORMATION */}
       <div
         className={`border rounded-2xl p-6 shadow-2xs transition-all ${
-          isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}
       >
         <h3 className="text-xs font-bold text-slate-800 dark:text-white mb-5 uppercase tracking-wide">
@@ -312,7 +312,7 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
       {/* CARD 2: PREFERENCES & MULTI-LANGUAGE SETTINGS */}
       <div
         className={`border rounded-2xl p-6 shadow-2xs transition-all ${
-          isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}
       >
         <h3 className="text-xs font-bold text-slate-800 dark:text-white mb-5 uppercase tracking-wide">
@@ -332,7 +332,7 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
                 onChange={(e) => handleLanguageChange(e.target.value)}
                 className={`w-full border rounded-xl py-2 pl-9 pr-8 text-xs font-normal outline-none appearance-none cursor-pointer ${
                   isDark
-                    ? 'bg-[#0F172A] border-slate-700 text-white'
+                    ? 'bg-[#1E293B] border-slate-700 text-white'
                     : 'bg-slate-50/80 border-slate-200 text-slate-900'
                 }`}
               >
@@ -393,7 +393,7 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
       {/* CARD 3: CHANGE PASSWORD */}
       <div
         className={`border rounded-2xl p-6 shadow-2xs transition-all ${
-          isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}
       >
         <h3 className="text-xs font-bold text-slate-800 dark:text-white mb-5 uppercase tracking-wide">
@@ -411,7 +411,7 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
               onChange={(e) => setNewPassword(e.target.value)}
               placeholder="••••••••"
               className={`w-full border rounded-xl py-2 px-3 text-xs outline-none ${
-                isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-slate-50/80 border-slate-200 text-slate-900'
+                isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50/80 border-slate-200 text-slate-900'
               }`}
             />
           </div>
@@ -426,7 +426,7 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
               className={`w-full border rounded-xl py-2 px-3 text-xs outline-none ${
-                isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-slate-50/80 border-slate-200 text-slate-900'
+                isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50/80 border-slate-200 text-slate-900'
               }`}
             />
           </div>

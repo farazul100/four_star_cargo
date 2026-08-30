@@ -580,11 +580,11 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       <div
         className={`p-6 rounded-xl border transition-all shadow-2xs space-y-6 ${
           isDark
-            ? 'bg-[#1E293B] border-slate-800 text-white'
+            ? 'bg-[#1E293B] border-slate-700 text-white'
             : 'bg-white border-slate-200/90 text-slate-900'
         }`}
       >
-        <div className="flex flex-col md:flex-row md:items-center justify-between border-b pb-4 border-slate-200 dark:border-slate-800 gap-4">
+        <div className="flex flex-col md:flex-row md:items-center justify-between border-b pb-4 border-slate-200 dark:border-slate-700 gap-4">
           <div>
             <h2 className={`text-lg font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
               {isBn ? 'কাস্টমার বুকিং এন্ট্রি পোর্টাল' : 'Cargo Booking Entry Portal'}
@@ -600,7 +600,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
           <div className="flex flex-wrap items-center gap-3">
             <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono ${
               isDark
-                ? 'bg-slate-900 border-slate-800 text-slate-300'
+                ? 'bg-slate-900 border-slate-700 text-slate-300'
                 : 'bg-blue-50/80 border-blue-200 text-slate-800'
             }`}>
               <Building2 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
@@ -706,7 +706,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
                 {showSuggestions && matchingCustomers.length > 0 && (
                   <div className={`absolute z-30 top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto border rounded-xl shadow-xl divide-y ${
-                    isDark ? 'bg-slate-900 border-slate-800 divide-slate-800' : 'bg-white border-slate-200 divide-slate-100'
+                    isDark ? 'bg-slate-900 border-slate-700 divide-slate-800' : 'bg-white border-slate-200 divide-slate-100'
                   }`}>
                     {matchingCustomers.map((c) => (
                       <div
@@ -791,7 +791,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         </div>
 
         {/* Section B: Product & Batch Specification Form */}
-        <div className="border-t pt-5 border-slate-200 dark:border-slate-800 space-y-4">
+        <div className="border-t pt-5 border-slate-200 dark:border-slate-700 space-y-4">
           <div className="text-xs font-medium text-blue-600 dark:text-blue-400 uppercase tracking-wider">
             {isBn ? '📦 কার্টুন ও পণ্যের বিবরণ (Batch Specification Form)' : 'Batch Product & Carton Specification Form'}
           </div>
@@ -957,7 +957,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         {/* ------------------------------------------------------------- */}
         <div
           className={`p-4 rounded-xl border space-y-3 ${
-            isDark ? 'bg-slate-900/80 border-slate-800' : 'bg-blue-50/50 border-blue-100'
+            isDark ? 'bg-slate-900/80 border-slate-700' : 'bg-blue-50/50 border-blue-100'
           }`}
         >
           <div className="flex items-center justify-between">
@@ -975,7 +975,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
             {/* Net Weight Sequence Paste */}
             <div className={`p-3 rounded-lg border space-y-2 ${
-              isDark ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-200'
+              isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'
             }`}>
               <div>
                 <label className="block text-[11px] font-medium text-slate-700 dark:text-slate-300">
@@ -1009,7 +1009,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
             {/* Gross Weight Sequence Paste */}
             <div className={`p-3 rounded-lg border space-y-2 ${
-              isDark ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-200'
+              isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'
             }`}>
               <div>
                 <label className="block text-[11px] font-medium text-slate-700 dark:text-slate-300">
@@ -1046,7 +1046,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         {/* Section D: Shared Photo Attachment & Generate Preview Button */}
         <div className={`p-4 rounded-xl border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
           isDark
-            ? 'bg-slate-900/60 border-slate-800 text-white'
+            ? 'bg-slate-900/60 border-slate-700 text-white'
             : 'bg-slate-50 border-slate-200 text-slate-900'
         }`}>
           <div>
@@ -1116,11 +1116,11 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         <div
           className={`rounded-xl border transition-all shadow-2xs overflow-hidden ${
             isDark
-              ? 'bg-[#1E293B] border-slate-800 text-white'
+              ? 'bg-[#1E293B] border-slate-700 text-white'
               : 'bg-white border-slate-200/90 text-slate-900'
           }`}
         >
-          <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div className="flex items-center space-x-2">
               <FileCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               <h3 className={`text-xs font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -1137,7 +1137,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
           {/* Clean Fixed Width Grid Table */}
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse border border-slate-200 dark:border-slate-800 table-fixed min-w-[1200px]">
+            <table className="w-full text-left text-xs border-collapse border border-slate-200 dark:border-slate-700 table-fixed min-w-[1200px]">
               <colgroup>
                 <col style={{ width: '45px' }} />
                 <col style={{ width: '120px' }} />
@@ -1152,33 +1152,33 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 <col style={{ width: '90px' }} />
                 <col style={{ width: '55px' }} />
               </colgroup>
-              <thead className={`uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-slate-800 font-medium ${
+              <thead className={`uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-slate-700 font-medium ${
                 isDark ? 'bg-slate-900 text-slate-300' : 'bg-slate-100 text-slate-700'
               }`}>
                 <tr>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-800 text-center font-medium">SL</th>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-800 font-medium">ENTRY DATE</th>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-800 font-medium">CTN NO.</th>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-800 font-medium">SHIPPING MARK</th>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-800 font-medium">PRODUCT NAME (EN & CN)</th>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-800 text-center font-medium">QTY (PCS)</th>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-800 text-center font-medium">N.WEIGHT</th>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-800 text-center font-medium">G.WEIGHT</th>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-800 text-center font-medium">CBM</th>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-800 font-medium">TRACKING NUM</th>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-800 text-center font-medium">PROOF</th>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-800 text-center font-medium">ACTION</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">SL</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">ENTRY DATE</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">CTN NO.</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">SHIPPING MARK</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">PRODUCT NAME (EN & CN)</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">QTY (PCS)</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">N.WEIGHT</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">G.WEIGHT</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">CBM</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">TRACKING NUM</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">PROOF</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">ACTION</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                 {previewRows.map((r, idx) => (
                   <tr key={r.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-900/40 transition-colors">
-                    <td className="p-2 text-center font-mono text-slate-400 border border-slate-200 dark:border-slate-800">
+                    <td className="p-2 text-center font-mono text-slate-400 border border-slate-200 dark:border-slate-700">
                       {idx + 1}
                     </td>
 
                     {/* Entry Date */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-800 overflow-hidden">
+                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden">
                       <input
                         type="date"
                         value={r.entry_date}
@@ -1190,7 +1190,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     </td>
 
                     {/* Carton No */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-800 overflow-hidden">
+                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden">
                       <input
                         type="text"
                         value={r.ctn_no}
@@ -1202,7 +1202,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     </td>
 
                     {/* Customer Shipping Mark */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-800 overflow-hidden">
+                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden">
                       <input
                         type="text"
                         value={r.shipping_mark}
@@ -1213,14 +1213,14 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     </td>
 
                     {/* Product Name (EN & CN) */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-800 overflow-hidden">
+                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden">
                       <div className="space-y-1">
                         <input
                           type="text"
                           value={r.product_name_en}
                           onChange={(e) => handleRowUpdate(r.id, 'product_name_en', e.target.value)}
                           placeholder="Product English Name"
-                          className={`w-full bg-transparent border-0 border-b border-slate-200/60 dark:border-slate-800 outline-none text-xs font-normal px-1 py-0.5 focus:bg-blue-500/10 truncate ${
+                          className={`w-full bg-transparent border-0 border-b border-slate-200/60 dark:border-slate-700 outline-none text-xs font-normal px-1 py-0.5 focus:bg-blue-500/10 truncate ${
                             isDark ? 'text-white' : 'text-slate-900'
                           }`}
                         />
@@ -1237,7 +1237,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     </td>
 
                     {/* Quantity/CTN */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-800 text-center overflow-hidden">
+                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden">
                       <input
                         type="number"
                         min={1}
@@ -1250,7 +1250,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     </td>
 
                     {/* N. Weight (KG) */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-800 text-center overflow-hidden">
+                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden">
                       <input
                         type="number"
                         step="0.1"
@@ -1264,7 +1264,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     </td>
 
                     {/* G. Weight (KG) */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-800 text-center overflow-hidden">
+                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden">
                       <input
                         type="number"
                         step="0.1"
@@ -1281,7 +1281,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     </td>
 
                     {/* CBM/CTN */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-800 text-center overflow-hidden">
+                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden">
                       <input
                         type="number"
                         step="0.01"
@@ -1293,7 +1293,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     </td>
 
                     {/* TRACKING NUM */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-800 overflow-hidden">
+                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden">
                       <input
                         type="text"
                         value={masterTrackingNumber}
@@ -1305,7 +1305,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     </td>
 
                     {/* Photo Proof Column */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-800 text-center overflow-hidden">
+                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden">
                       {r.photo_url ? (
                         <div className="flex items-center justify-center space-x-1">
                           <button
@@ -1333,7 +1333,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     </td>
 
                     {/* Action Remove */}
-                    <td className="p-1.5 border border-slate-200 dark:border-slate-800 text-center overflow-hidden">
+                    <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden">
                       <button
                         type="button"
                         onClick={() => handleRemovePreviewRow(r.id)}
@@ -1351,7 +1351,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
           {/* Footer Actions */}
           <div className={`p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 ${
-            isDark ? 'bg-slate-900/60 border-slate-800' : 'bg-slate-50/90 border-slate-200/90'
+            isDark ? 'bg-slate-900/60 border-slate-700' : 'bg-slate-50/90 border-slate-200/90'
           }`}>
             <button
               type="button"
@@ -1383,7 +1383,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         </div>
       ) : (
         <div className={`p-8 rounded-xl border text-center space-y-3 ${
-          isDark ? 'bg-[#1E293B] border-slate-800 text-slate-400' : 'bg-white border-slate-200 text-slate-500'
+          isDark ? 'bg-[#1E293B] border-slate-700 text-slate-400' : 'bg-white border-slate-200 text-slate-500'
         }`}>
           <FileCheck className="w-8 h-8 text-slate-400 mx-auto opacity-50" />
           <div className="text-xs font-medium">
@@ -1400,7 +1400,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       {/* ------------------------------------------------------------- */}
       {/* 3. CENTRAL BOOKED CARTONS INVENTORY HUB (LIST & CUSTOMER CARDS) */}
       {/* ------------------------------------------------------------- */}
-      <div className="pt-6 border-t border-slate-200 dark:border-slate-800">
+      <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
         <BookedCartonsHub
           cartons={allSavedCartons}
           warehouses={warehouses}
@@ -1425,9 +1425,9 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       {previewPhotoModalUrl && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
           <div className={`rounded-2xl max-w-2xl w-full p-6 space-y-4 border shadow-2xl ${
-            isDark ? 'bg-slate-900 text-white border-slate-800' : 'bg-white text-slate-900 border-slate-200'
+            isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-900 border-slate-200'
           }`}>
-            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
               <h3 className={`text-sm font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 <span>{isBn ? 'প্যাকেজিং স্লিপ ও প্রোডাক্ট প্রমাণ ছবি' : 'Packaging Proof Image Preview'}</span>
               </h3>
@@ -1439,7 +1439,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
               </button>
             </div>
 
-            <div className="max-h-[60vh] overflow-y-auto flex items-center justify-center bg-slate-950 rounded-xl p-2">
+            <div className="max-h-[60vh] overflow-y-auto flex items-center justify-center bg-slate-900 rounded-xl p-2">
               <img
                 src={previewPhotoModalUrl}
                 alt="Proof Slip"

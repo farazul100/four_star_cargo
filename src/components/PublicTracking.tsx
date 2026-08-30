@@ -73,7 +73,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
 
       {/* Top Header Bar (Full Width across viewport) */}
       <header className={`w-full px-6 md:px-12 py-5 z-20 border-b flex items-center justify-between backdrop-blur-md transition-colors ${
-        isDark ? 'bg-[#080E17]/80 border-slate-800' : 'bg-white/80 border-slate-200 shadow-xs'
+        isDark ? 'bg-[#080E17]/80 border-slate-700' : 'bg-white/80 border-slate-200 shadow-xs'
       }`}>
         {/* Company Brand Logo & Title */}
         <div className="flex items-center space-x-3">
@@ -153,7 +153,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                 placeholder={isBn ? 'ট্র্যাকিং আইডি দিন (যেমন: EXP-994801, CTN-01, SM-DHAKA-88...)' : 'Type Tracking ID (e.g. EXP-994801, CTN-01, SM-DHAKA-88...)'}
                 className={`w-full rounded-2xl py-3 pl-12 pr-4 text-xs md:text-sm outline-none transition-all font-mono font-medium ${
                   isDark
-                    ? 'bg-[#080E17] border border-slate-800 text-white placeholder-slate-500 focus:border-[#00897B]'
+                    ? 'bg-[#080E17] border border-slate-700 text-white placeholder-slate-500 focus:border-[#00897B]'
                     : 'bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 focus:border-[#00897B]'
                 }`}
               />
@@ -220,7 +220,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                         <div className={`p-4 rounded-2xl border transition-all flex items-center space-x-3 ${
                           bookedCount > 0
                             ? isDark ? 'bg-amber-500/10 border-amber-500/40 text-amber-300' : 'bg-amber-50 border-amber-300 text-amber-900'
-                            : isDark ? 'bg-slate-800/40 border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
+                            : isDark ? 'bg-slate-800/40 border-slate-700 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
                         }`}>
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${
                             bookedCount > 0 ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-700/40 text-slate-400'
@@ -241,7 +241,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                         <div className={`p-4 rounded-2xl border transition-all flex items-center space-x-3 ${
                           transitCount > 0
                             ? isDark ? 'bg-blue-500/10 border-blue-500/40 text-blue-300' : 'bg-blue-50 border-blue-300 text-blue-900'
-                            : isDark ? 'bg-slate-800/40 border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
+                            : isDark ? 'bg-slate-800/40 border-slate-700 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
                         }`}>
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${
                             transitCount > 0 ? 'bg-blue-500 text-white shadow-md animate-pulse' : 'bg-slate-700/40 text-slate-400'
@@ -262,7 +262,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                         <div className={`p-4 rounded-2xl border transition-all flex items-center space-x-3 ${
                           receivedCount > 0
                             ? isDark ? 'bg-teal-500/10 border-teal-500/40 text-teal-300' : 'bg-teal-50 border-teal-300 text-teal-900'
-                            : isDark ? 'bg-slate-800/40 border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
+                            : isDark ? 'bg-slate-800/40 border-slate-700 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
                         }`}>
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${
                             receivedCount > 0 ? 'bg-[#00897B] text-white shadow-md' : 'bg-slate-700/40 text-slate-400'
@@ -283,7 +283,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                         <div className={`p-4 rounded-2xl border transition-all flex items-center space-x-3 ${
                           deliveredCount > 0
                             ? isDark ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300' : 'bg-emerald-50 border-emerald-300 text-emerald-900'
-                            : isDark ? 'bg-slate-800/40 border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
+                            : isDark ? 'bg-slate-800/40 border-slate-700 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
                         }`}>
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${
                             deliveredCount > 0 ? 'bg-emerald-500 text-white shadow-md' : 'bg-slate-700/40 text-slate-400'
@@ -313,7 +313,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                         key={carton.id}
                         className={`w-full rounded-3xl p-6 sm:p-8 border-2 shadow-xl space-y-8 transition-all ${
                           isDark
-                            ? 'bg-[#0E1726] border-slate-800 text-white'
+                            ? 'bg-[#0E1726] border-slate-700 text-white'
                             : 'bg-white border-slate-200 text-slate-900 shadow-slate-200/60'
                         }`}
                       >
@@ -433,7 +433,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
 
                         {/* Non-Sensitive Specifications Grid */}
                         <div className={`grid grid-cols-2 sm:grid-cols-4 gap-4 p-5 rounded-2xl text-xs border ${
-                          isDark ? 'bg-[#080E17] border-slate-800' : 'bg-slate-50 border-slate-200'
+                          isDark ? 'bg-[#080E17] border-slate-700' : 'bg-slate-50 border-slate-200'
                         }`}>
                           <div>
                             <span className="text-slate-400 block text-[11px] uppercase font-bold">{isBn ? 'পণ্য (Product)' : 'Product Name'}</span>
@@ -474,7 +474,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
             ) : (
               /* Graceful Not Found State */
               <div className={`w-full rounded-3xl p-12 text-center space-y-4 border ${
-                isDark ? 'bg-[#0E1726] border-slate-800 text-slate-400' : 'bg-white border-slate-200 text-slate-600'
+                isDark ? 'bg-[#0E1726] border-slate-700 text-slate-400' : 'bg-white border-slate-200 text-slate-600'
               }`}>
                 <Package className="w-12 h-12 text-slate-400 mx-auto opacity-40" />
                 <h3 className={`text-lg font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -493,7 +493,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
 
       {/* Footer (Full Width) */}
       <footer className={`w-full text-center text-xs py-5 z-10 border-t ${
-        isDark ? 'bg-[#080E17] border-slate-800 text-slate-500' : 'bg-white border-slate-200 text-slate-500'
+        isDark ? 'bg-[#080E17] border-slate-700 text-slate-500' : 'bg-white border-slate-200 text-slate-500'
       }`}>
         © 2026 M/S Four Star Cargo Express Tracking System — All Rights Reserved.
       </footer>

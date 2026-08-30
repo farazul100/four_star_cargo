@@ -205,7 +205,7 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
 
       {/* Header Banner */}
       <div className={`p-6 rounded-none border ${
-        isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+        isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
       } flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
         <div className="flex items-center space-x-3">
           <div className="p-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-none">
@@ -241,7 +241,7 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
 
       {/* Payment Classification Filter Bar */}
       <div className={`p-4 rounded-none border ${
-        isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+        isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'
       } flex flex-wrap items-center justify-between gap-3`}>
         <div className="flex items-center space-x-2">
           <span className="text-xs text-slate-500 dark:text-slate-400 font-light">{isBn ? 'পেমেন্ট ধরন ফিল্টার:' : 'Filter Payment:'}</span>
@@ -288,9 +288,9 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
 
       {/* Ready Cartons Table */}
       <div className={`rounded-none border overflow-hidden ${
-        isDark ? 'bg-slate-900 border-slate-800' : 'bg-white border-slate-200'
+        isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'
       }`}>
-        <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
           <h3 className="text-sm font-normal text-slate-900 dark:text-white flex items-center space-x-2">
             <Package className="w-4 h-4 text-emerald-500" />
             <span>{isBn ? 'ডেলিভারির জন্য প্রস্তুত কার্টুনসমূহ (Received Stock)' : 'Ready for Customer Delivery'}</span>
@@ -300,7 +300,7 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-light">
-            <thead className="bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-slate-800">
+            <thead className="bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-slate-700">
               <tr>
                 <th className="p-3">
                   <input
@@ -393,10 +393,10 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
           <form
             onSubmit={handleConfirmDelivery}
             className={`p-6 max-w-lg w-full space-y-5 rounded-none border ${
-              isDark ? 'bg-slate-900 border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+              isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
             } shadow-2xl animate-in zoom-in-95`}
           >
-            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
               <h3 className="text-base font-normal tracking-wide flex items-center space-x-2">
                 <Truck className="w-5 h-5 text-emerald-500" />
                 <span>{isBn ? 'ডেলিভারি ও ক্যাশ কালেকশন ফরম' : 'Delivery & Cash Collection Form'}</span>

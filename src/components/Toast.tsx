@@ -44,9 +44,9 @@ const ToastItem: React.FC<{ toast: ToastMessage; onDismiss: (id: string) => void
   };
 
   const bgStyles = {
-    success: 'bg-[#0F172A] border-l-4 border-l-emerald-500 border-t border-r border-b border-slate-700/80 text-white shadow-2xl',
-    error: 'bg-[#0F172A] border-l-4 border-l-red-500 border-t border-r border-b border-slate-700/80 text-white shadow-2xl',
-    info: 'bg-[#0F172A] border-l-4 border-l-cyan-500 border-t border-r border-b border-slate-700/80 text-white shadow-2xl',
+    success: 'bg-[#1E293B] border-l-4 border-l-emerald-500 border-t border-r border-b border-slate-700/80 text-white shadow-2xl',
+    error: 'bg-[#1E293B] border-l-4 border-l-red-500 border-t border-r border-b border-slate-700/80 text-white shadow-2xl',
+    info: 'bg-[#1E293B] border-l-4 border-l-cyan-500 border-t border-r border-b border-slate-700/80 text-white shadow-2xl',
   };
 
   return (

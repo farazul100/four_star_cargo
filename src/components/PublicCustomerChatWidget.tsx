@@ -247,7 +247,7 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
 
           {/* Form State (If user has not set their name yet) */}
           {!guestName ? (
-            <div className="flex-1 p-6 bg-slate-950 flex flex-col justify-center space-y-5 text-white">
+            <div className="flex-1 p-6 bg-slate-900 flex flex-col justify-center space-y-5 text-white">
               <div className="text-center space-y-2">
                 <div className="w-14 h-14 rounded-2xl bg-[#00897B]/20 text-[#1FB6A8] flex items-center justify-center mx-auto border border-[#00897B]/40">
                   <User className="w-7 h-7" />
@@ -301,7 +301,7 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
             </div>
           ) : (
             /* Active Live Support Thread */
-            <div className="flex-1 flex flex-col bg-slate-950 overflow-hidden">
+            <div className="flex-1 flex flex-col bg-slate-900 overflow-hidden">
               {/* Message List */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {messages.length === 0 ? (
@@ -356,7 +356,7 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
                   e.preventDefault();
                   handleSendMessage();
                 }}
-                className="p-3 bg-slate-900 border-t border-slate-800 flex items-center space-x-2 shrink-0"
+                className="p-3 bg-slate-900 border-t border-slate-700 flex items-center space-x-2 shrink-0"
               >
                 <input
                   type="file"
@@ -380,7 +380,7 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
                   value={messageInput}
                   onChange={(e) => setMessageInput(e.target.value)}
                   placeholder={isBn ? 'আপনার মেসেজ লিখুন...' : 'Type a message...'}
-                  className="flex-1 bg-slate-950 border border-slate-800 focus:border-[#00897B] rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 outline-none transition-colors"
+                  className="flex-1 bg-slate-900 border border-slate-700 focus:border-[#00897B] rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 outline-none transition-colors"
                 />
 
                 <button

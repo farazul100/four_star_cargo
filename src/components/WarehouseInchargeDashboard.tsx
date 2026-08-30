@@ -448,7 +448,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
     return (
       <div className="space-y-6 font-sans">
         <ToastContainer toasts={toasts} onDismiss={dismissToast} />
-        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-4">
+        <div className="flex items-center justify-between border-b border-slate-200 dark:border-slate-700 pb-4">
           <div>
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white flex items-center space-x-2">
               <Truck className="w-5 h-5 text-blue-600 dark:text-blue-400" />
@@ -476,8 +476,8 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
         </div>
 
         {incomingCartons.length > 0 ? (
-          <div className="bg-white dark:bg-[#1E293B] rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs">
-            <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
+          <div className="bg-white dark:bg-[#1E293B] rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-2xs">
+            <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
               <button
                 onClick={toggleSelectAllReceiving}
                 className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
@@ -493,7 +493,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-normal">
-                <thead className="bg-slate-100 dark:bg-slate-900 uppercase text-[10px] text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-800">
+                <thead className="bg-slate-100 dark:bg-slate-900 uppercase text-[10px] text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
                   <tr>
                     <th className="p-3 w-10 text-center font-normal">Select</th>
                     <th className="p-3 font-normal">CTN NO</th>
@@ -552,7 +552,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
             </div>
           </div>
         ) : (
-          <div className="p-12 text-center bg-white dark:bg-[#1E293B] rounded-3xl border border-slate-200 dark:border-slate-800 space-y-3 shadow-2xs">
+          <div className="p-12 text-center bg-white dark:bg-[#1E293B] rounded-3xl border border-slate-200 dark:border-slate-700 space-y-3 shadow-2xs">
             <Truck className="w-10 h-10 mx-auto text-slate-300 dark:text-slate-600" />
             <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
               {isBn ? 'বর্তমানে কোনো ইনকামিং ট্রানজিট শিপমেন্ট নেই' : 'No Incoming Transit Cargo At This Moment'}
@@ -681,7 +681,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
         <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
         {/* Page Header Banner */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-800 pb-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 dark:border-slate-700 pb-4">
           <div className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-none bg-gradient-to-tr from-blue-600 to-indigo-500 text-white flex items-center justify-center shadow-md shadow-blue-500/20">
               <Plane className="w-5 h-5" />
@@ -707,10 +707,10 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
           <form
             onSubmit={handleCreateFlightBatch}
             className={`p-6 rounded-none border shadow-2xs space-y-6 ${
-              isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+              isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
             }`}
           >
-            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
+            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
               <h3 className="text-xs font-semibold text-slate-900 dark:text-white flex items-center space-x-2">
                 <span className="w-6 h-6 rounded-none bg-blue-600 text-white flex items-center justify-center text-xs font-mono">1</span>
                 <span>{isBn ? 'নতুন ফ্লাইট প্রোপোজাল ব্যাচ তৈরি করুন (Advanced Flight Creator)' : '1. Configure Flight Proposal Batch'}</span>
@@ -783,9 +783,9 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
           <div className="space-y-6">
             {/* Active Flight Header Card */}
             <div className={`p-6 rounded-none border shadow-2xs space-y-6 ${
-              isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+              isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
             }`}>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-800">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-700">
                 <div>
                   <div className="flex items-center space-x-2">
                     <span className="px-2.5 py-0.5 rounded-none text-[10px] font-mono bg-blue-500/10 text-blue-600 dark:text-blue-400 font-semibold uppercase border border-blue-500/20">
@@ -825,7 +825,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
               {/* KPI STATS BAR FOR ACTIVE BATCH */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className={`p-4 rounded-none border transition-all ${
-                  isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-300'
+                  isDark ? 'bg-slate-900/90 border-slate-700' : 'bg-white border-slate-300'
                 }`}>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 dark:text-slate-400 block text-xs font-normal">{isBn ? 'ইম্পোর্টকৃত কার্টুন' : 'Imported Cartons'}</span>
@@ -839,7 +839,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                 </div>
 
                 <div className={`p-4 rounded-none border transition-all ${
-                  isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-300'
+                  isDark ? 'bg-slate-900/90 border-slate-700' : 'bg-white border-slate-300'
                 }`}>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 dark:text-slate-400 block text-xs font-normal">{isBn ? 'মোট গ্রস ওজন' : 'Total Gross Weight'}</span>
@@ -853,7 +853,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                 </div>
 
                 <div className={`p-4 rounded-none border transition-all ${
-                  isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-300'
+                  isDark ? 'bg-slate-900/90 border-slate-700' : 'bg-white border-slate-300'
                 }`}>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 dark:text-slate-400 block text-xs font-normal">{isBn ? 'মোট ভলিউমেট্রিক সিবিএম' : 'Total CBM Volume'}</span>
@@ -875,10 +875,10 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                 </h4>
 
                 {selectedCartonsList.length > 0 ? (
-                  <div className="overflow-x-auto rounded-none border border-slate-200 dark:border-slate-800">
+                  <div className="overflow-x-auto rounded-none border border-slate-200 dark:border-slate-700">
                     <table className="w-full text-left text-xs font-normal">
                       <thead className={`uppercase text-[10px] tracking-wider border-b ${
-                        isDark ? 'bg-slate-950 text-slate-400 border-slate-800' : 'bg-slate-100 text-slate-600 border-slate-200'
+                        isDark ? 'bg-slate-900 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-600 border-slate-200'
                       }`}>
                         <tr>
                           <th className="p-3 font-normal">CTN NO</th>
@@ -928,7 +928,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                     </table>
                   </div>
                 ) : (
-                  <div className="p-10 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-none space-y-3">
+                  <div className="p-10 text-center border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-none space-y-3">
                     <div className="w-12 h-12 rounded-none bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mx-auto border border-blue-500/20">
                       <Download className="w-6 h-6" />
                     </div>
@@ -955,7 +955,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
               </div>
 
               {/* ACTION FOOTER */}
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-4 border-t border-slate-200 dark:border-slate-700">
                 <div className="text-xs text-slate-500 font-normal">
                   {isBn ? 'সকল প্রস্তুতকৃত ডাটা প্রোপোজাল হিসেবে সরাসরি ডিরেক্টর ও এডমিনের কাছে প্রেরিত হবে' : 'Submitting will immediately send this flight proposal batch to Director & Admin'}
                 </div>
@@ -980,13 +980,13 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
 
         {/* STOCK CARTONS SELECTION & IMPORT MODAL WINDOW (Zero Border-Radius & Clean White Theme Badges) */}
         {showStockImportModal && (
-          <div className="fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
+          <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
             <div className={`w-full max-w-6xl max-h-[92vh] flex flex-col rounded-none border shadow-2xl overflow-hidden font-sans ${
-              isDark ? 'bg-[#0F172A] border-slate-800 text-slate-100' : 'bg-white border-slate-300 text-slate-800'
+              isDark ? 'bg-[#1E293B] border-slate-700 text-slate-100' : 'bg-white border-slate-300 text-slate-800'
             }`}>
               {/* Modal Header */}
               <div className={`p-4 sm:p-5 border-b flex items-center justify-between ${
-                isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-200'
+                isDark ? 'bg-slate-900/90 border-slate-700' : 'bg-white border-slate-200'
               }`}>
                 <div className="flex items-center space-x-3">
                   <div className="w-9 h-9 rounded-none bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center border border-slate-300 dark:border-slate-700">
@@ -1024,7 +1024,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
 
               {/* Modal Toolbar (Search & Select Controls) */}
               <div className={`p-3.5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                isDark ? 'bg-slate-900/40 border-slate-800' : 'bg-white border-slate-200'
+                isDark ? 'bg-slate-900/40 border-slate-700' : 'bg-white border-slate-200'
               }`}>
                 <div className="relative flex-1 max-w-md">
                   <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -1034,7 +1034,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                     value={proposalCartonSearch}
                     onChange={(e) => setProposalCartonSearch(e.target.value)}
                     className={`w-full pl-8 pr-7 py-2 rounded-none border text-xs outline-none transition-all font-light ${
-                      isDark ? 'bg-slate-950 border-slate-700 text-white focus:border-blue-500' : 'bg-white border-slate-300 text-slate-800 focus:border-blue-500'
+                      isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-blue-500' : 'bg-white border-slate-300 text-slate-800 focus:border-blue-500'
                     }`}
                   />
                   {proposalCartonSearch && (
@@ -1068,10 +1068,10 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
 
               {/* Modal Table Content (Full Complete Data Table with Pure White Badges) */}
               <div className="p-3 sm:p-4 overflow-y-auto max-h-[58vh] space-y-3">
-                <div className="overflow-x-auto rounded-none border border-slate-200 dark:border-slate-800">
+                <div className="overflow-x-auto rounded-none border border-slate-200 dark:border-slate-700">
                   <table className="min-w-max w-full text-left text-xs font-light">
                     <thead className={`uppercase text-[10px] tracking-wider border-b ${
-                      isDark ? 'bg-slate-900 text-slate-400 border-slate-800' : 'bg-white text-slate-600 border-slate-200'
+                      isDark ? 'bg-slate-900 text-slate-400 border-slate-700' : 'bg-white text-slate-600 border-slate-200'
                     }`}>
                       <tr>
                         <th className="p-3 w-10 text-center font-normal">
@@ -1171,7 +1171,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                 </div>
 
                 {searchFilteredStockCartons.length === 0 && (
-                  <div className="p-8 text-center text-xs text-slate-400 border border-dashed border-slate-300 dark:border-slate-800 rounded-none space-y-1.5 font-light">
+                  <div className="p-8 text-center text-xs text-slate-400 border border-dashed border-slate-300 dark:border-slate-700 rounded-none space-y-1.5 font-light">
                     <Box className="w-6 h-6 mx-auto text-slate-300 dark:text-slate-600" />
                     <div>
                       {proposalCartonSearch
@@ -1184,7 +1184,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
 
               {/* Modal Footer Action (Clean White Theme Badges) */}
               <div className={`p-3.5 sm:p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-3 ${
-                isDark ? 'bg-slate-900/90 border-slate-800' : 'bg-white border-slate-200'
+                isDark ? 'bg-slate-900/90 border-slate-700' : 'bg-white border-slate-200'
               }`}>
                 <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-slate-600 dark:text-slate-400 font-light">
                   <span className="px-2.5 py-1 rounded-none bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-normal border border-slate-300 dark:border-slate-700">
@@ -1229,7 +1229,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
 
         {/* Read-Only Submitted Proposals History Table */}
         <div className={`p-6 rounded-none border shadow-2xs space-y-4 ${
-          isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}>
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-semibold text-slate-900 dark:text-white flex items-center space-x-2">
@@ -1241,10 +1241,10 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
             </span>
           </div>
 
-          <div className="overflow-x-auto rounded-none border border-slate-200 dark:border-slate-800">
+          <div className="overflow-x-auto rounded-none border border-slate-200 dark:border-slate-700">
             <table className="w-full text-left text-xs font-normal">
               <thead className={`uppercase text-[10px] tracking-wider border-b ${
-                isDark ? 'bg-slate-950 text-slate-400 border-slate-800' : 'bg-slate-100 text-slate-600 border-slate-200'
+                isDark ? 'bg-slate-900 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-600 border-slate-200'
               }`}>
                 <tr>
                   <th className="p-3 font-normal">FLIGHT / BATCH NAME</th>

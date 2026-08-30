@@ -223,7 +223,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
               placeholder={isBn ? 'উদাহরণ: TRK98421039 বা FSC-2026-0891 বা SM-DHAKA-88...' : 'e.g. TRK98421039 or FSC-2026-0891...'}
               className={`w-full border rounded-xl py-3 pl-12 pr-4 text-sm outline-none transition-all font-mono font-medium ${
                 isDark
-                  ? 'bg-slate-950 border-slate-600 focus:border-teal-400 text-white placeholder:text-slate-300'
+                  ? 'bg-slate-900 border-slate-600 focus:border-teal-400 text-white placeholder:text-slate-300'
                   : 'bg-white border-slate-300 focus:border-teal-600 text-slate-900 placeholder-slate-400'
               }`}
             />
@@ -315,7 +315,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
 
                   {/* HIGHLY EXPLICIT LOCATION BREAKDOWN KPI DASHBOARD */}
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between border-b pb-2 border-slate-200 dark:border-slate-800">
+                    <div className="flex items-center justify-between border-b pb-2 border-slate-200 dark:border-slate-700">
                       <h4 className={`text-xs font-bold uppercase tracking-wider flex items-center space-x-1.5 ${
                         isDark ? 'text-teal-400' : 'text-[#00897B]'
                       }`}>
@@ -424,7 +424,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
 
                   {/* Itemized Linked Cartons Breakdown Table */}
                   <div className="space-y-3 pt-2">
-                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-2 border-slate-200 dark:border-slate-800">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b pb-2 border-slate-200 dark:border-slate-700">
                       <h4 className={`text-xs font-bold uppercase tracking-wider flex items-center space-x-1.5 ${
                         isDark ? 'text-slate-300' : 'text-slate-800'
                       }`}>
@@ -444,7 +444,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                           className={`px-2.5 py-1 text-[11px] font-mono border transition-all cursor-pointer ${
                             locationFilter === 'all'
                               ? 'bg-[#00897B] text-white border-[#00897B] font-bold'
-                              : isDark ? 'bg-[#1E293B] text-slate-400 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-300'
+                              : isDark ? 'bg-[#1E293B] text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-700 border-slate-300'
                           }`}
                         >
                           সকল ({shipment.totalCartons})
@@ -455,7 +455,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                           className={`px-2.5 py-1 text-[11px] font-mono border transition-all cursor-pointer ${
                             locationFilter === 'china'
                               ? 'bg-amber-500 text-slate-950 border-amber-600 font-bold'
-                              : isDark ? 'bg-[#1E293B] text-amber-400 border-slate-800' : 'bg-amber-50 text-amber-800 border-amber-200'
+                              : isDark ? 'bg-[#1E293B] text-amber-400 border-slate-700' : 'bg-amber-50 text-amber-800 border-amber-200'
                           }`}
                         >
                           🇨🇳 চায়না ({chinaStockCartons.length})
@@ -466,7 +466,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                           className={`px-2.5 py-1 text-[11px] font-mono border transition-all cursor-pointer ${
                             locationFilter === 'transit'
                               ? 'bg-blue-600 text-white border-blue-700 font-bold'
-                              : isDark ? 'bg-[#1E293B] text-blue-400 border-slate-800' : 'bg-blue-50 text-blue-800 border-blue-200'
+                              : isDark ? 'bg-[#1E293B] text-blue-400 border-slate-700' : 'bg-blue-50 text-blue-800 border-blue-200'
                           }`}
                         >
                           ✈️ ফ্লাইটে ({inTransitCartons.length})
@@ -477,7 +477,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                           className={`px-2.5 py-1 text-[11px] font-mono border transition-all cursor-pointer ${
                             locationFilter === 'bd_hub'
                               ? 'bg-teal-600 text-white border-teal-700 font-bold'
-                              : isDark ? 'bg-[#1E293B] text-teal-400 border-slate-800' : 'bg-teal-50 text-teal-800 border-teal-200'
+                              : isDark ? 'bg-[#1E293B] text-teal-400 border-slate-700' : 'bg-teal-50 text-teal-800 border-teal-200'
                           }`}
                         >
                           🏢 বিডি হাব ({bdHubCartons.length})
@@ -485,7 +485,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                       </div>
                     </div>
 
-                    <div className="overflow-x-auto border border-slate-200 dark:border-slate-800">
+                    <div className="overflow-x-auto border border-slate-200 dark:border-slate-700">
                       <table className="w-full text-left text-xs font-mono">
                         <thead className={`border-b text-[11px] ${
                           isDark ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
