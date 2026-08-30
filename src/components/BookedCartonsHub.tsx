@@ -262,12 +262,12 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900/70 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
             <div className="text-[10px] text-slate-500 font-mono uppercase">{isBn ? 'মোট কাস্টমার' : 'Total Customers'}</div>
-            <div className="text-sm font-bold text-blue-600 dark:text-blue-400 mt-0.5 font-mono">{customerGroupKeys.length} জন</div>
+            <div className="text-sm font-bold text-blue-600 dark:text-blue-400 mt-0.5 font-mono">{customerGroupKeys.length} {isBn ? 'জন' : 'Customers'}</div>
           </div>
 
           <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900/70 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
             <div className="text-[10px] text-slate-500 font-mono uppercase">{isBn ? 'মোট কার্টুন সংখ্যা' : 'Total Cartons'}</div>
-            <div className={`text-sm font-bold mt-0.5 font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>{totalCartonCount} টি</div>
+            <div className={`text-sm font-bold mt-0.5 font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>{totalCartonCount} {isBn ? 'টি' : 'Cartons'}</div>
           </div>
 
           <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-900/70 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
@@ -324,7 +324,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 ).length;
                 return (
                   <option key={w.id} value={w.id}>
-                    {w.name} ({count}টি কার্টুন)
+                    {w.name} ({count} {isBn ? 'টি কার্টুন' : 'Cartons'})
                   </option>
                 );
               })}
@@ -353,7 +353,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 const destCount = accessibleCartons.filter((c) => c.destination_warehouse_id === w.id).length;
                 return (
                   <option key={`dest-${w.id}`} value={w.id}>
-                    {w.name} ({destCount}টি কার্টুন)
+                    {w.name} ({destCount} {isBn ? 'টি কার্টুন' : 'Cartons'})
                   </option>
                 );
               })}
@@ -679,19 +679,19 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             {/* Customer Batch Summary Badges */}
             <div className="grid grid-cols-3 gap-3">
               <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-                <div className="text-[10px] text-slate-500 font-mono">মোট কার্টুন সংখ্যা</div>
-                <div className="text-sm font-bold text-blue-600 dark:text-blue-400 font-mono">{activeCustomerCartons.length} টি</div>
+                <div className="text-[10px] text-slate-500 font-mono">{isBn ? 'মোট কার্টুন সংখ্যা' : 'Total Cartons'}</div>
+                <div className="text-sm font-bold text-blue-600 dark:text-blue-400 font-mono">{activeCustomerCartons.length} {isBn ? 'টি' : 'Cartons'}</div>
               </div>
 
               <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-                <div className="text-[10px] text-slate-500 font-mono">মোট ও গ্রস ওজন</div>
+                <div className="text-[10px] text-slate-500 font-mono">{isBn ? 'মোট গ্রস ওজন' : 'Total Gross Weight'}</div>
                 <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 font-mono">
                   {activeCustomerCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0).toFixed(1)} KG
                 </div>
               </div>
 
               <div className={`p-3 rounded-none-none border ${isDark ? 'bg-slate-950 border-slate-800' : 'bg-slate-50 border-slate-200'}`}>
-                <div className="text-[10px] text-slate-500 font-mono">মোট ভলিউম CBM</div>
+                <div className="text-[10px] text-slate-500 font-mono">{isBn ? 'মোট ভলিউম CBM' : 'Total CBM Volume'}</div>
                 <div className="text-sm font-bold text-purple-600 dark:text-purple-400 font-mono">
                   {activeCustomerCartons.reduce((sum, c) => sum + (c.cbm || 0), 0).toFixed(2)} CBM
                 </div>
