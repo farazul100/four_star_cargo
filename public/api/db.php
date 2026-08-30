@@ -46,7 +46,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $existingApiKey = $existing['fsc_vps_settings']['gemini_api_key'];
             }
             
-            $merged = array_merge($existing, $decoded);
+            $merged = is_array($existing) ? $existing : [];
+            foreach ($decoded as $k => $v) {
+                $merged[$k] = $v;
+            }
 
             // 1.1 Strict Factory Reset Mode: Wipe all transactional keys on Hostinger disk
             if (!empty($decoded['is_factory_reset'])) {
