@@ -4,7 +4,7 @@ import { DashboardLayout } from '../components/DashboardLayout';
 import { WarehouseInchargeDashboard } from '../components/WarehouseInchargeDashboard';
 import { useAuth } from '../hooks/useAuth';
 import { useTranslation } from '../hooks/useTranslation';
-import { getHostingerDbData, subscribeToDbUpdates } from '../lib/db';
+import { getHostingerDbData, subscribeToDbUpdates, formatWarehouseNameEn } from '../lib/db';
 
 export const WarehouseDashboardPage: React.FC = () => {
   const { user } = useAuth();
@@ -107,7 +107,7 @@ export const WarehouseDashboardPage: React.FC = () => {
       subtitle: '',
     },
     inventory: {
-      title: lang === 'bn' ? `${myWh?.name || 'ওয়্যারহাউজ'} ইনভেন্টরি পণ্য` : 'Warehouse Inventory Stock',
+      title: lang === 'bn' ? `${formatWarehouseNameEn(myWh?.name)} ইনভেন্টরি পণ্য` : 'Warehouse Inventory Stock',
       subtitle: lang === 'bn' ? 'শুধুমাত্র আপনার ওয়্যারহাউজের স্টক ও কার্টুন ডাটা' : 'Live inventory stock scoped strictly to your assigned warehouse',
     },
     booking_entry: {

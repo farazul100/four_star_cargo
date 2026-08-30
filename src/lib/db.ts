@@ -31,6 +31,15 @@ export const DB_KEYS = {
   CALLS: 'fsc_vps_calls',
 };
 
+export const formatWarehouseNameEn = (name?: string): string => {
+  if (!name) return 'Air Cargo Hub';
+  if (name.includes('Guangzhou') || name.includes('গুয়াংজু') || name.includes('গুয়াংজু') || name.includes('চায়না') || name.includes('চায়না')) return 'Guangzhou Air Cargo Hub';
+  if (name.includes('Dhaka') || name.includes('বাংলাদেশ') || name.includes('Tejgaon') || name.includes('DAC')) return 'Dhaka Central Freight Hub';
+  if (name.includes('Hong Kong') || name.includes('হংকং') || name.includes('HKG')) return 'Hong Kong Cargo Terminal';
+  if (name.includes('Dubai') || name.includes('দুবাই') || name.includes('DXB')) return 'Dubai Cargo Village Hub';
+  return name.replace(/[\u0980-\u09FF]+/g, '').trim() || 'Air Cargo Hub';
+};
+
 // Reset DB helper for live testing - Clears all demo cartons & proposals completely
 export const resetHostingerDbToDefault = () => {
   localStorage.setItem(DB_KEYS.USERS, JSON.stringify(INITIAL_USERS));
@@ -84,8 +93,26 @@ export const initHostingerDb = () => {
     usersList.unshift(INITIAL_USERS[0]);
   }
   localStorage.setItem(DB_KEYS.USERS, JSON.stringify(usersList));
-  if (!localStorage.getItem(DB_KEYS.WAREHOUSES)) {
+
+  const existingWhRaw = localStorage.getItem(DB_KEYS.WAREHOUSES);
+  if (!existingWhRaw) {
     localStorage.setItem(DB_KEYS.WAREHOUSES, JSON.stringify(INITIAL_WAREHOUSES));
+  } else {
+    try {
+      const parsedWhs: Warehouse[] = JSON.parse(existingWhRaw);
+      let whChanged = false;
+      const sanitizedWhs = parsedWhs.map((w) => {
+        const cleanName = formatWarehouseNameEn(w.name);
+        if (cleanName !== w.name) {
+          whChanged = true;
+          return { ...w, name: cleanName };
+        }
+        return w;
+      });
+      if (whChanged) {
+        localStorage.setItem(DB_KEYS.WAREHOUSES, JSON.stringify(sanitizedWhs));
+      }
+    } catch (e) {}
   }
   if (!localStorage.getItem(DB_KEYS.LEDGER)) {
     localStorage.setItem(DB_KEYS.LEDGER, JSON.stringify([]));

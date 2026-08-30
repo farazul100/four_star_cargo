@@ -15,12 +15,12 @@ import {
   Calendar,
   Zap,
   ArrowUpRight,
-  ArrowDownRight,
   ShieldCheck,
   ChevronRight,
 } from 'lucide-react';
 import { Carton, Warehouse, User, Language } from '../types';
 import { useTheme } from '../context/ThemeContext';
+import { formatWarehouseNameEn } from '../lib/db';
 
 interface WarehouseAnalyticsDashboardProps {
   cartons: Carton[];
@@ -138,7 +138,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
             <div>
               <div className="flex items-center space-x-2.5">
                 <h2 className="text-xl font-medium text-slate-900 dark:text-white">
-                  {myWh.name}
+                  {formatWarehouseNameEn(myWh.name)}
                 </h2>
                 <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center space-x-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -631,11 +631,11 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
               </div>
               <div className="flex-1">
                 <div className="flex items-center justify-between">
-                  <span className="font-medium text-slate-900 dark:text-white">বাংলাদেশ এয়ারপোর্টে রিসিভড</span>
+                  <span className="font-medium text-slate-900 dark:text-white">Arrived at Bangladesh Airport</span>
                   <span className="text-[10px] font-mono text-slate-400">2h ago</span>
                 </div>
                 <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  ফ্লাইট <strong className="font-mono text-slate-700 dark:text-slate-300">BS-201</strong> ল্যান্ড করেছে ও ওজন পুনর্নির্ধারণ করা হয়েছে
+                  Flight <strong className="font-mono text-slate-700 dark:text-slate-300">BS-201</strong> landed & payload weight verified
                 </p>
               </div>
             </div>

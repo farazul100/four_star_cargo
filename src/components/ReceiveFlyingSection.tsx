@@ -13,7 +13,7 @@ import {
 import { FlyingProposal, Carton, Warehouse, User, Language } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
-import { getHostingerDbData, saveHostingerDbData, saveHostingerDbMultiData, logSystemAuditAction } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, saveHostingerDbMultiData, logSystemAuditAction, formatWarehouseNameEn } from '../lib/db';
 
 interface ReceiveFlyingSectionProps {
   proposals?: FlyingProposal[];
@@ -177,8 +177,8 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
         flight_number: p.flight_number || p.flying_name || 'BS-206',
         awb_number: p.awb_number || '157-884120',
         date: p.date,
-        warehouse_name: p.warehouse_name || 'গুয়াংজু ওয়্যারহাউজ',
-        destination_warehouse_name: p.destination_warehouse_name || 'ঢাকা সেন্ট্রাল',
+        warehouse_name: formatWarehouseNameEn(p.warehouse_name) || 'Guangzhou Air Cargo Hub',
+        destination_warehouse_name: formatWarehouseNameEn(p.destination_warehouse_name) || 'Dhaka Central Freight Hub',
         status: p.status,
         proposal_ids: [p.id],
         carton_ids: p.carton_ids ? [...p.carton_ids] : [],

@@ -33,7 +33,7 @@ import { DeliveredProductsSection } from './DeliveredProductsSection';
 import { WarehouseAnalyticsDashboard } from './WarehouseAnalyticsDashboard';
 import { BookedCartonsHub } from './BookedCartonsHub';
 import { ToastContainer, ToastMessage } from './Toast';
-import { saveHostingerDbData, saveHostingerDbMultiData, getHostingerDbData, logSystemAuditAction, subscribeToDbUpdates } from '../lib/db';
+import { saveHostingerDbData, saveHostingerDbMultiData, getHostingerDbData, logSystemAuditAction, subscribeToDbUpdates, formatWarehouseNameEn } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { PublicTracking } from './PublicTracking';
 import { CargoSearchTracker } from './CargoSearchTracker';
