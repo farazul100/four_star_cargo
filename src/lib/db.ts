@@ -519,7 +519,11 @@ const pushFullDbToServer = (immediate: boolean = false) => {
         settingsObj.gemini_api_key = localApiKey;
       }
 
+      const nowTs = Date.now();
+      lastLocalMutationTime = nowTs;
+
       const fullDb: any = {
+        _updated_at: nowTs,
         [DB_KEYS.CARTONS]: JSON.parse(localStorage.getItem(DB_KEYS.CARTONS) || '[]'),
         [DB_KEYS.PROPOSALS]: JSON.parse(localStorage.getItem(DB_KEYS.PROPOSALS) || '[]'),
         [DB_KEYS.USERS]: JSON.parse(localStorage.getItem(DB_KEYS.USERS) || '[]'),
@@ -550,7 +554,6 @@ const pushFullDbToServer = (immediate: boolean = false) => {
         headers: { 'Content-Type': 'application/json' },
         body: payloadStr,
       });
-      lastLocalMutationTime = Date.now();
     } catch {} finally {
       isPushing = false;
     }
@@ -570,14 +573,8 @@ export const saveHostingerDbData = (key: string, data: any) => {
   if (key === DB_KEYS.CARTONS && Array.isArray(data)) {
     const cartonMap = new Map<string, Carton>();
     data.forEach((item: Carton) => {
-      if (item) {
-        const itemKey = item.id || item.ctn_no;
-        if (itemKey) {
-          const existing = cartonMap.get(itemKey);
-          if (!existing || item.status === 'received' || item.status === 'delivered' || item.current_warehouse_id === 'wh-bd') {
-            cartonMap.set(itemKey, item);
-          }
-        }
+      if (item && item.id) {
+        cartonMap.set(item.id, item);
       }
     });
     data = Array.from(cartonMap.values());
@@ -652,14 +649,19 @@ let isFetchingSync = false;
 // Helper to fetch latest server disk DB (/api/db.php) and sync to LocalStorage across different browsers
 export const fetchServerDbAndSync = async () => {
   if (typeof window === 'undefined' || isFetchingSync) return;
-  // MUTATION GUARD: Do not overwrite local state if a local save/delete action occurred within 4000ms or push is in progress
-  if (isPushing || (Date.now() - lastLocalMutationTime < 4000)) return;
+  // MUTATION GUARD: Do not overwrite local state if a local save/delete action occurred within 6000ms or push is in progress
+  if (isPushing || (Date.now() - lastLocalMutationTime < 6000)) return;
 
   isFetchingSync = true;
   try {
-    const endpoint = getPrimaryServerEndpoint();
+    const endpoint = `${getPrimaryServerEndpoint()}?t=${Date.now()}`;
     const res = await fetch(endpoint, {
-      headers: { Accept: 'application/json' },
+      headers: {
+        'Accept': 'application/json',
+        'Cache-Control': 'no-cache',
+        'Pragma': 'no-cache',
+      },
+      cache: 'no-store',
     });
 
     if (res && res.ok) {
@@ -667,6 +669,10 @@ export const fetchServerDbAndSync = async () => {
       if (contentType.includes('application/json')) {
         const serverDb = await res.json();
         if (serverDb && typeof serverDb === 'object') {
+          const serverTs = Number(serverDb._updated_at || 0);
+          if (serverTs > 0 && lastLocalMutationTime > 0 && serverTs < lastLocalMutationTime) {
+            return;
+          }
           let hasChanges = false;
 
           Object.keys(serverDb).forEach((key) => {
