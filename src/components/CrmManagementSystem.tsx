@@ -614,9 +614,11 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
         <div className="space-y-3.5 w-full">
           {/* Header Info & Country Filters Bar */}
           <div className={`border rounded-xl p-4 shadow-sm space-y-3 ${
-            isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-400 text-black'
+            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-400 text-black'
           }`}>
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-300 pb-3 dark:border-slate-800">
+            <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3 ${
+              isDark ? 'border-slate-700' : 'border-slate-300'
+            }`}>
               <div className="flex items-center space-x-2.5">
                 <div className={`w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs ${
                   activeStageTab === 'followup' ? 'bg-rose-500' : activeStageTab === 'order_complete' ? 'bg-blue-600' : 'bg-slate-700'
@@ -626,14 +628,18 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                   {activeStageTab === 'important_regular' && '⚫'}
                 </div>
                 <div>
-                  <h3 className="text-xs font-semibold text-black dark:text-slate-100 flex items-center space-x-2">
+                  <h3 className={`text-xs font-semibold flex items-center space-x-2 ${
+                    isDark ? 'text-white' : 'text-black'
+                  }`}>
                     <span>
                       {activeStageTab === 'followup' && (isBn ? '🔴 ফলো আপ কাস্টমার ডাটা টেবিল (Follow-Up)' : 'Follow-Up Customer Table')}
                       {activeStageTab === 'order_complete' && (isBn ? '🔵 নতুন কাস্টমার ডাটা টেবিল (New Customer)' : 'New Customer Table')}
                       {activeStageTab === 'important_regular' && (isBn ? '⚫ রেগুলার কাস্টমার ডাটা টেবিল (Regular Customer)' : 'Regular Customer Table')}
                     </span>
                   </h3>
-                  <p className="text-[11px] text-black/80 dark:text-slate-300 font-normal mt-0.5">
+                  <p className={`text-[11px] font-normal mt-0.5 ${
+                    isDark ? 'text-slate-300' : 'text-black/80'
+                  }`}>
                     {activeStageTab === 'followup' && (isBn ? 'ফলো আপ থেকে পরবর্তীতে "নতুন কাস্টমারে" কনভার্ট করা যাবে' : 'Convert to New Customer upon booking')}
                     {activeStageTab === 'order_complete' && (isBn ? 'নতুন কাস্টমার থেকে পরবর্তীতে "রেগুলার কাস্টমারে" কনভার্ট করা যাবে' : 'Convert to Regular Customer upon repeat bookings')}
                     {activeStageTab === 'important_regular' && (isBn ? 'শুধুমাত্র এখান থেকেই অপারেশনে হ্যান্ড ওভার সম্পন্ন করা যাবে' : 'Handover to operations allowed here only')}
@@ -641,7 +647,9 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                 </div>
               </div>
 
-              <span className="text-xs font-mono px-3 py-1 bg-slate-100 dark:bg-slate-800 text-black dark:text-slate-200 rounded-lg border border-slate-400 dark:border-slate-700 font-medium self-start sm:self-auto">
+              <span className={`text-xs font-mono px-3 py-1 rounded-lg border font-medium self-start sm:self-auto ${
+                isDark ? 'bg-slate-800 border-slate-700 text-slate-200' : 'bg-slate-100 border-slate-400 text-black'
+              }`}>
                 {filteredCustomers.length} জন কাস্টমার
               </span>
             </div>
@@ -664,8 +672,8 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     onClick={() => setSelectedCountryTab(tab.id)}
                     className={`px-3 py-1 rounded-lg text-xs font-medium transition-all cursor-pointer ${
                       selectedCountryTab === tab.id
-                        ? 'bg-black text-white dark:bg-teal-600 shadow-2xs'
-                        : 'bg-white border border-slate-400 text-black hover:bg-slate-100 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-300'
+                        ? isDark ? 'bg-teal-600 text-white shadow-sm' : 'bg-black text-white shadow-sm'
+                        : isDark ? 'bg-slate-800 border border-slate-700 text-slate-200 hover:bg-slate-700' : 'bg-white border border-slate-400 text-black hover:bg-slate-100'
                     }`}
                   >
                     {tab.label}
@@ -675,14 +683,14 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
 
               {/* Search */}
               <div className="relative">
-                <Search className="w-3.5 h-3.5 absolute left-3 top-2.5 text-black" />
+                <Search className={`w-3.5 h-3.5 absolute left-3 top-2.5 ${isDark ? 'text-slate-400' : 'text-black'}`} />
                 <input
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={isBn ? 'নাম, ফোন বা কোম্পানি...' : 'Search name/phone/company...'}
                   className={`pl-8 pr-3 py-1.5 border rounded-lg text-xs font-medium outline-none transition-all ${
-                    isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-600 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                    isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-600 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
                   }`}
                 />
               </div>
@@ -691,22 +699,22 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
 
           {/* STAGE TABLE */}
           <div className={`border rounded-xl shadow-sm overflow-hidden ${
-            isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-400 text-black'
+            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-400 text-black'
           }`}>
             {filteredCustomers.length === 0 ? (
               <div className="text-center py-14 px-4">
-                <Users className="w-9 h-9 text-slate-500 dark:text-slate-600 mx-auto mb-2" />
-                <h4 className="text-xs font-semibold text-black dark:text-slate-400">
+                <Users className={`w-9 h-9 mx-auto mb-2 ${isDark ? 'text-slate-500' : 'text-slate-600'}`} />
+                <h4 className={`text-xs font-semibold ${isDark ? 'text-slate-200' : 'text-black'}`}>
                   {isBn ? 'এই ট্যাবে কোনো কাস্টমার ডাটা পাওয়া যায়নি' : 'No customer records in this section'}
                 </h4>
-                <p className="text-xs text-black/80 font-normal mt-1">
+                <p className={`text-xs font-normal mt-1 ${isDark ? 'text-slate-400' : 'text-black/80'}`}>
                   {isBn ? 'বাম সাইডবারের "➕ নতুন কাস্টমার তৈরি" মেনুতে গিয়ে কাস্টমার এন্ট্রি দিন' : 'Use "➕ Create Customer" tab to onboard clients'}
                 </p>
               </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left border-collapse font-normal">
-                  <thead className={`border-b ${isDark ? 'bg-slate-900/90 border-slate-800 text-slate-300' : 'bg-slate-100 border-slate-400 text-black font-semibold'}`}>
+                  <thead className={`border-b ${isDark ? 'bg-slate-900/90 border-slate-700 text-slate-200 font-semibold' : 'bg-slate-100 border-slate-400 text-black font-semibold'}`}>
                     <tr>
                       <th className="py-2.5 px-3.5 font-semibold">#</th>
                       <th className="py-2.5 px-3.5 font-semibold">{isBn ? 'কাস্টমার নাম ও যোগাযোগ' : 'Customer & Contact'}</th>
@@ -716,17 +724,17 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                       <th className="py-2.5 px-3.5 font-semibold text-right">{isBn ? 'স্টেজ রূপান্তর ও হ্যান্ড ওভার' : 'Action / Handover'}</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y border-slate-300 dark:divide-slate-800">
+                  <tbody className={`divide-y ${isDark ? 'divide-slate-800 border-slate-700' : 'divide-slate-200 border-slate-300'}`}>
                     {filteredCustomers.map((cust, idx) => (
-                      <tr key={cust.id} className={isDark ? 'hover:bg-slate-900/40 transition-colors' : 'hover:bg-slate-50 transition-colors'}>
-                        <td className="py-3 px-3.5 font-mono text-black dark:text-slate-400 font-medium">
+                      <tr key={cust.id} className={isDark ? 'hover:bg-slate-900/50 transition-colors' : 'hover:bg-slate-50 transition-colors'}>
+                        <td className={`py-3 px-3.5 font-mono font-medium ${isDark ? 'text-slate-400' : 'text-black'}`}>
                           {idx + 1}
                         </td>
                         <td className="py-3 px-3.5">
-                          <p className="font-semibold text-black dark:text-white text-xs flex items-center space-x-1">
+                          <p className={`font-semibold text-xs flex items-center space-x-1 ${isDark ? 'text-white' : 'text-black'}`}>
                             <span>{cust.name}</span>
                             {cust.company_name && (
-                              <span className="text-[10px] text-black font-medium bg-slate-100 dark:bg-slate-800 px-1.5 py-0.2 rounded border border-slate-400 dark:border-slate-700">
+                              <span className={`text-[10px] font-medium px-1.5 py-0.2 rounded border ${isDark ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-400 text-black'}`}>
                                 🏢 {cust.company_name}
                               </span>
                             )}
