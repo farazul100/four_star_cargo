@@ -529,12 +529,17 @@ const pushFullDbToServer = (immediate: boolean = false) => {
       const nowTs = Date.now();
       lastLocalMutationTime = nowTs;
 
+      const userPayload = JSON.parse(localStorage.getItem(DB_KEYS.USERS) || localStorage.getItem('users') || '[]');
+      const whPayload = JSON.parse(localStorage.getItem(DB_KEYS.WAREHOUSES) || localStorage.getItem('warehouses') || '[]');
+
       const fullDb: any = {
         _updated_at: nowTs,
+        users: userPayload,
+        fsc_vps_users: userPayload,
+        warehouses: whPayload,
+        fsc_vps_warehouses: whPayload,
         [DB_KEYS.CARTONS]: JSON.parse(localStorage.getItem(DB_KEYS.CARTONS) || '[]'),
         [DB_KEYS.PROPOSALS]: JSON.parse(localStorage.getItem(DB_KEYS.PROPOSALS) || '[]'),
-        [DB_KEYS.USERS]: JSON.parse(localStorage.getItem(DB_KEYS.USERS) || '[]'),
-        [DB_KEYS.WAREHOUSES]: JSON.parse(localStorage.getItem(DB_KEYS.WAREHOUSES) || '[]'),
         [DB_KEYS.CUSTOMERS]: JSON.parse(localStorage.getItem(DB_KEYS.CUSTOMERS) || '[]'),
         [DB_KEYS.LEDGER]: JSON.parse(localStorage.getItem(DB_KEYS.LEDGER) || '[]'),
         [DB_KEYS.AUDIT]: JSON.parse(localStorage.getItem(DB_KEYS.AUDIT) || '[]'),
@@ -598,6 +603,14 @@ export const saveHostingerDbData = (key: string, data: any) => {
 
   try {
     localStorage.setItem(key, JSON.stringify(data));
+    if (key === DB_KEYS.USERS || key === 'users') {
+      localStorage.setItem(DB_KEYS.USERS, JSON.stringify(data));
+      localStorage.setItem('users', JSON.stringify(data));
+    }
+    if (key === DB_KEYS.WAREHOUSES || key === 'warehouses') {
+      localStorage.setItem(DB_KEYS.WAREHOUSES, JSON.stringify(data));
+      localStorage.setItem('warehouses', JSON.stringify(data));
+    }
     // If saving ledger, update both key variants for 100% backward and forward compatibility
     if (key === DB_KEYS.LEDGER || key === 'fsc_vps_ledger_entries') {
       localStorage.setItem('fsc_vps_ledger', JSON.stringify(data));
@@ -634,6 +647,14 @@ export const saveHostingerDbMultiData = (entries: Record<string, any>) => {
     }
     try {
       localStorage.setItem(key, JSON.stringify(data));
+      if (key === DB_KEYS.USERS || key === 'users') {
+        localStorage.setItem(DB_KEYS.USERS, JSON.stringify(data));
+        localStorage.setItem('users', JSON.stringify(data));
+      }
+      if (key === DB_KEYS.WAREHOUSES || key === 'warehouses') {
+        localStorage.setItem(DB_KEYS.WAREHOUSES, JSON.stringify(data));
+        localStorage.setItem('warehouses', JSON.stringify(data));
+      }
       if (key === DB_KEYS.LEDGER || key === 'fsc_vps_ledger_entries') {
         localStorage.setItem('fsc_vps_ledger', JSON.stringify(data));
         localStorage.setItem('fsc_vps_ledger_entries', JSON.stringify(data));
@@ -766,6 +787,36 @@ export const fetchServerDbAndSync = async () => {
                 if (localRaw !== mergedStr) {
                   localStorage.setItem(key, mergedStr);
                   localStorage.setItem('fsc_vps_notifications', mergedStr);
+                  hasChanges = true;
+                }
+              } else if (key === DB_KEYS.USERS || key === 'users') {
+                const localUsers: User[] = localRaw ? JSON.parse(localRaw) : [];
+                const serverUsers: User[] = serverData;
+                const userMap = new Map<string, User>();
+
+                // 1. Add server users
+                serverUsers.forEach((u) => {
+                  if (u && (u.id || u.email)) {
+                    const uKey = u.id || (u.email || '').toLowerCase().trim();
+                    userMap.set(uKey, u);
+                  }
+                });
+
+                // 2. Preserve any newly created local users
+                localUsers.forEach((u) => {
+                  if (u && (u.id || u.email)) {
+                    const uKey = u.id || (u.email || '').toLowerCase().trim();
+                    if (!userMap.has(uKey)) {
+                      userMap.set(uKey, u);
+                    }
+                  }
+                });
+
+                const mergedUsers = Array.from(userMap.values());
+                const mergedStr = JSON.stringify(mergedUsers);
+                if (localRaw !== mergedStr) {
+                  localStorage.setItem(DB_KEYS.USERS, mergedStr);
+                  localStorage.setItem('users', mergedStr);
                   hasChanges = true;
                 }
               } else {
