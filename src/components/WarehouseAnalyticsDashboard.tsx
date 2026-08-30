@@ -121,7 +121,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
   }, [totalStockCartons, activeFlyingCount, totalGrossWeight]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* 1. Header Banner & Quick Action Shortcuts */}
       <div
         className={`p-6 rounded-2xl border transition-all shadow-xl ${
@@ -216,9 +216,8 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
             <span className="text-2xl font-medium font-mono text-slate-900 dark:text-white">
               {totalStockCartons}
             </span>
-            <span className="text-[11px] font-normal text-emerald-600 dark:text-emerald-400 flex items-center">
-              <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" />
-              +12.4%
+            <span className={`text-[11px] font-normal flex items-center ${totalStockCartons > 0 ? 'text-emerald-500' : 'text-slate-400'}`}>
+              {totalStockCartons > 0 ? '+12.4%' : '0%'}
             </span>
           </div>
           <p className="text-[11px] text-slate-400 mt-1 font-normal">
@@ -244,9 +243,8 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
             <span className="text-2xl font-medium font-mono text-slate-900 dark:text-white">
               {totalGrossWeight.toLocaleString()} <span className="text-xs font-normal text-slate-500">kg</span>
             </span>
-            <span className="text-[11px] font-normal text-emerald-600 dark:text-emerald-400 flex items-center">
-              <ArrowUpRight className="w-3.5 h-3.5 mr-0.5" />
-              88.5% Payload
+            <span className={`text-[11px] font-normal flex items-center ${totalGrossWeight > 0 ? 'text-emerald-500' : 'text-slate-400'}`}>
+              {totalGrossWeight > 0 ? '88.5% Payload' : '0% Payload'}
             </span>
           </div>
           <p className="text-[11px] text-slate-400 mt-1 font-normal">
@@ -272,9 +270,9 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
             <span className="text-2xl font-medium font-mono text-slate-900 dark:text-white">
               {activeFlyingCount} <span className="text-xs font-normal text-slate-500">Batches</span>
             </span>
-            <span className="text-[11px] font-normal text-blue-600 dark:text-blue-400 flex items-center">
+            <span className={`text-[11px] font-normal flex items-center ${activeFlyingCount > 0 ? 'text-blue-500' : 'text-slate-400'}`}>
               <Clock className="w-3.5 h-3.5 mr-0.5" />
-              2.4 Days SLA
+              {activeFlyingCount > 0 ? '2.4 Days SLA' : '0 Days SLA'}
             </span>
           </div>
           <p className="text-[11px] text-slate-400 mt-1 font-normal">
@@ -345,9 +343,9 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
           <div className="mt-6 relative">
             <div className="h-56 w-full flex items-end justify-between gap-3 pt-6 px-2">
               {trendData.map((d, index) => {
-                const maxVal = 120;
-                const intakeHeightPct = (d.intake / maxVal) * 100;
-                const flyingHeightPct = (d.flying / maxVal) * 100;
+                const maxVal = Math.max(10, totalStockCartons, activeFlyingCount);
+                const intakeHeightPct = maxVal > 0 ? (d.intake / maxVal) * 100 : 0;
+                const flyingHeightPct = maxVal > 0 ? (d.flying / maxVal) * 100 : 0;
                 const isHovered = hoveredDataPoint === index;
 
                 return (
@@ -370,14 +368,14 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
                     <div className="w-full flex items-end justify-center space-x-1.5 h-full">
                       {/* Intake Bar */}
                       <div
-                        style={{ height: `${intakeHeightPct}%` }}
+                        style={{ height: `${Math.max(2, intakeHeightPct)}%` }}
                         className={`w-3.5 rounded-t-md transition-all duration-300 ${
                           isHovered ? 'bg-blue-600 shadow-md shadow-blue-500/20' : 'bg-blue-500/80 hover:bg-blue-600'
                         }`}
                       />
                       {/* Flying Bar */}
                       <div
-                        style={{ height: `${flyingHeightPct}%` }}
+                        style={{ height: `${Math.max(2, flyingHeightPct)}%` }}
                         className={`w-3.5 rounded-t-md transition-all duration-300 ${
                           isHovered ? 'bg-emerald-600 shadow-md shadow-emerald-500/20' : 'bg-emerald-500/80 hover:bg-emerald-600'
                         }`}
@@ -389,7 +387,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
               })}
             </div>
 
-            {/* Operational Insight Summary Bar Filling the Empty Bottom Area */}
+            {/* Operational Insight Summary Bar */}
             <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-normal">
               <div className={`p-3 rounded-xl border flex items-center space-x-3 transition-colors ${
                 isDark ? 'bg-[#1E293B]/60 border-slate-700' : 'bg-slate-50/90 border-slate-200/90 hover:bg-slate-100/60'
@@ -399,7 +397,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
                 </div>
                 <div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">{isBn ? 'চলতি মাসের মোট ইনটেক' : 'Total Monthly Intake'}</div>
-                  <div className="font-mono text-slate-900 dark:text-white font-medium mt-0.5">1,850 Cartons</div>
+                  <div className="font-mono text-slate-900 dark:text-white font-medium mt-0.5">{totalStockCartons} Cartons</div>
                 </div>
               </div>
 
@@ -411,7 +409,9 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
                 </div>
                 <div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">{isBn ? 'ফ্লাইটে রিলিজড পেলোড' : 'Dispatched Payload'}</div>
-                  <div className="font-mono text-slate-900 dark:text-white font-medium mt-0.5">1,640 Cartons (88.6%)</div>
+                  <div className="font-mono text-slate-900 dark:text-white font-medium mt-0.5">
+                    {deliveredCount} Cartons ({totalStockCartons > 0 ? Math.round((deliveredCount / totalStockCartons) * 100) : 0}%)
+                  </div>
                 </div>
               </div>
 
@@ -423,7 +423,9 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
                 </div>
                 <div>
                   <div className="text-[11px] text-slate-500 dark:text-slate-400">{isBn ? 'পিক প্রসেসিং ডে' : 'Peak Processing Day'}</div>
-                  <div className="font-mono text-slate-900 dark:text-white font-medium mt-0.5">Today (110 Cartons)</div>
+                  <div className="font-mono text-slate-900 dark:text-white font-medium mt-0.5">
+                    {totalStockCartons > 0 ? `Today (${totalStockCartons} Cartons)` : 'N/A (0 Cartons)'}
+                  </div>
                 </div>
               </div>
             </div>
@@ -506,10 +508,10 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
               <div>
                 <div className="flex justify-between text-slate-700 dark:text-slate-300 mb-1">
                   <span>📱 Electronics & Gadgets</span>
-                  <span className="font-mono font-medium">42% (538 CTN)</span>
+                  <span className="font-mono font-medium">{totalStockCartons > 0 ? '42%' : '0%'} ({Math.round(totalStockCartons * 0.42)} CTN)</span>
                 </div>
                 <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                  <div className="h-full bg-blue-500 rounded-full w-[42%]" />
+                  <div className="h-full bg-blue-500 rounded-full" style={{ width: `${totalStockCartons > 0 ? 42 : 0}%` }} />
                 </div>
               </div>
 
@@ -517,10 +519,10 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
               <div>
                 <div className="flex justify-between text-slate-700 dark:text-slate-300 mb-1">
                   <span>👕 Garments & Apparel Fabric</span>
-                  <span className="font-mono font-medium">32% (410 CTN)</span>
+                  <span className="font-mono font-medium">{totalStockCartons > 0 ? '32%' : '0%'} ({Math.round(totalStockCartons * 0.32)} CTN)</span>
                 </div>
                 <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                  <div className="h-full bg-emerald-500 rounded-full w-[32%]" />
+                  <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${totalStockCartons > 0 ? 32 : 0}%` }} />
                 </div>
               </div>
 
@@ -528,10 +530,10 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
               <div>
                 <div className="flex justify-between text-slate-700 dark:text-slate-300 mb-1">
                   <span>⚙️ Machinery & Tools</span>
-                  <span className="font-mono font-medium">16% (205 CTN)</span>
+                  <span className="font-mono font-medium">{totalStockCartons > 0 ? '16%' : '0%'} ({Math.round(totalStockCartons * 0.16)} CTN)</span>
                 </div>
                 <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
-                  <div className="h-full bg-indigo-500 rounded-full w-[16%]" />
+                  <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${totalStockCartons > 0 ? 16 : 0}%` }} />
                 </div>
               </div>
             </div>
@@ -567,8 +569,8 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
                 </div>
               </div>
               <div className="text-right font-mono">
-                <div className="font-medium text-blue-600 dark:text-blue-400 text-sm">70% Share</div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">896 Cartons</div>
+                <div className="font-medium text-blue-600 dark:text-blue-400 text-sm">{totalStockCartons > 0 ? '70%' : '0%'} Share</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400">{Math.round(totalStockCartons * 0.7)} Cartons</div>
               </div>
             </div>
 
@@ -583,8 +585,8 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
                 </div>
               </div>
               <div className="text-right font-mono">
-                <div className="font-medium text-emerald-600 dark:text-emerald-400 text-sm">18% Share</div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">230 Cartons</div>
+                <div className="font-medium text-emerald-600 dark:text-emerald-400 text-sm">{totalStockCartons > 0 ? '18%' : '0%'} Share</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400">{Math.round(totalStockCartons * 0.18)} Cartons</div>
               </div>
             </div>
 
@@ -599,8 +601,8 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
                 </div>
               </div>
               <div className="text-right font-mono">
-                <div className="font-medium text-indigo-600 dark:text-indigo-400 text-sm">12% Share</div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">154 Cartons</div>
+                <div className="font-medium text-indigo-600 dark:text-indigo-400 text-sm">{totalStockCartons > 0 ? '12%' : '0%'} Share</div>
+                <div className="text-[10px] text-slate-500 dark:text-slate-400">{Math.round(totalStockCartons * 0.12)} Cartons</div>
               </div>
             </div>
           </div>
@@ -621,39 +623,6 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
           </div>
 
           <div className="mt-4 space-y-3.5 text-xs font-normal">
-            {/* Event 1 */}
-            <div className="flex items-start space-x-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1E293B] transition-colors">
-              <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">
-                <PlusCircle className="w-3.5 h-3.5" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-slate-900 dark:text-white">নতুন বুকিং এন্ট্রি সম্পন্ন</span>
-                  <span className="text-[10px] font-mono text-slate-400">10m ago</span>
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  কাস্টমার code: <strong className="font-mono text-slate-700 dark:text-slate-300">CUST-8801</strong> (4 Cartons • 120.5 kg) by Chen Wei
-                </p>
-              </div>
-            </div>
-
-            {/* Event 2 */}
-            <div className="flex items-start space-x-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1E293B] transition-colors">
-              <div className="p-2 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5">
-                <Plane className="w-3.5 h-3.5" />
-              </div>
-              <div className="flex-1">
-                <div className="flex items-center justify-between">
-                  <span className="font-medium text-slate-900 dark:text-white">ফ্লাইং প্রোপোজাল সাবমিট</span>
-                  <span className="text-[10px] font-mono text-slate-400">45m ago</span>
-                </div>
-                <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
-                  ব্যাচ: <strong className="font-mono text-slate-700 dark:text-slate-300">#BS-206</strong> (Guangzhou ➔ BD DAC) by Incharge
-                </p>
-              </div>
-            </div>
-
-            {/* Event 3 */}
             <div className="flex items-start space-x-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1E293B] transition-colors">
               <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5">
                 <CheckCircle2 className="w-3.5 h-3.5" />
