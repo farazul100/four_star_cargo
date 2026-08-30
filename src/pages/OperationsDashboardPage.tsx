@@ -18,6 +18,7 @@ export const OperationsDashboardPage: React.FC = () => {
     if (path.includes('/live-lifecycle')) return 'live_lifecycle';
     if (path.includes('/data-tracker')) return 'data_tracker';
     if (path.includes('/notifications')) return 'notifications';
+    if (path.includes('/proposal-create')) return 'proposal_create';
     if (path.includes('/proposals')) return 'proposals';
     if (path.includes('/final-flying-list')) return 'final_flying_list';
     if (path.includes('/cartons')) return 'cartons';
@@ -54,6 +55,9 @@ export const OperationsDashboardPage: React.FC = () => {
         break;
       case 'notifications':
         navigate('/operations/notifications');
+        break;
+      case 'proposal_create':
+        navigate('/operations/proposal-create');
         break;
       case 'proposals':
         navigate('/operations/proposals');

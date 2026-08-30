@@ -660,8 +660,8 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
     );
   }
 
-  // TAB 2: PENDING PROPOSALS REVIEW & DISPATCH
-  if (activeTab === 'proposals') {
+  // TAB 2: PENDING PROPOSALS REVIEW & DISPATCH / CREATE
+  if (activeTab === 'proposals' || activeTab === 'proposal_create') {
     return <FlightProposalsManager language={language} theme={theme} />;
   }
 

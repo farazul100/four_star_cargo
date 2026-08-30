@@ -168,18 +168,20 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
               <PlusCircle className="w-4 h-4" />
               <span>{isBn ? '+ নতুন এন্ট্রি' : '+ New Booking'}</span>
             </button>
-            <button
-              type="button"
-              onClick={() => onNavigateTab('proposal_create')}
-              className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all border flex items-center space-x-1.5 cursor-pointer select-none ${
-                isDark
-                  ? 'bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border-blue-500/30'
-                  : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
-              }`}
-            >
-              <Plane className="w-4 h-4 text-blue-600 dark:text-blue-400" />
-              <span>{isBn ? 'ফ্লাইং প্রোপোজাল' : 'Create Flying'}</span>
-            </button>
+            {(currentUser.role === 'operation_director' || currentUser.role === 'super_admin') && (
+              <button
+                type="button"
+                onClick={() => onNavigateTab('proposal_create')}
+                className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all border flex items-center space-x-1.5 cursor-pointer select-none ${
+                  isDark
+                    ? 'bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border-blue-500/30'
+                    : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
+                }`}
+              >
+                <Plane className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <span>{isBn ? 'ফ্লাইং প্রোপোজাল' : 'Create Flying'}</span>
+              </button>
+            )}
             <button
               type="button"
               onClick={() => onNavigateTab('history')}

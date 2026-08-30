@@ -299,6 +299,17 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   }
 
   // --------------------------------------------------------------------------
+  // TAB: FLYING PROPOSALS & APPROVALS
+  // --------------------------------------------------------------------------
+  if (activeTab === 'proposals') {
+    return <FlightProposalsManager language={language} theme={activeTheme} />;
+  }
+
+  if (activeTab === 'final_flying_list') {
+    return <FinalFlyingListSection language={language} theme={activeTheme} />;
+  }
+
+  // --------------------------------------------------------------------------
   // TAB: BUDGET & EXPENSE MANAGEMENT VIEW
   // --------------------------------------------------------------------------
   if (activeTab === 'budget') {

@@ -124,6 +124,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
             items: [
               { id: 'dashboard', label: isBn ? 'অপারেশনস ড্যাশবোর্ড' : 'Operations Dashboard', icon: LayoutDashboard },
               { id: 'system_chat', label: isBn ? 'চ্যাট' : 'Chat', icon: MessageSquare },
+              { id: 'proposal_create', label: isBn ? 'ফ্লাইং প্রস্তাবনা তৈরি' : 'Create Flying Proposal', icon: Plane },
+              { id: 'proposals', label: isBn ? 'পেন্ডিং ফ্লাইং লিস্ট' : 'Pending Flying Lists', icon: Plane },
+              { id: 'final_flying_list', label: isBn ? 'ফাইনাল ফ্লাইং লিস্ট' : 'Final Flying List', icon: Send },
+              { id: 'cartons', label: isBn ? 'অল বুকিং লিস্ট' : 'All Booking List', icon: Package },
               { id: 'crm_create', label: isBn ? 'নতুন কাস্টমার তৈরি' : 'Create Customer', icon: UserPlus },
               { id: 'crm_followup', label: isBn ? 'ফলো আপ কাস্টমার' : 'Follow-Up Customers', icon: Clock },
               { id: 'crm_new', label: isBn ? 'নতুন কাস্টমার' : 'New Customers', icon: CheckCircle2 },
@@ -131,9 +135,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               { id: 'live_lifecycle', label: isBn ? 'কার্গো লাইফসাইকেল মনিটর' : 'Cargo Live Lifecycle', icon: Activity },
               { id: 'cargo_search', label: isBn ? 'কার্গো ট্র্যাকিং সার্চ' : 'Cargo Tracking Search', icon: Search },
               { id: 'notifications', label: isBn ? 'নোটিফিকেশন' : 'Notifications', icon: Bell },
-              { id: 'proposals', label: isBn ? 'পেন্ডিং ফ্লাইং লিস্ট' : 'Pending Flying Lists', icon: Plane },
-              { id: 'final_flying_list', label: isBn ? 'ফাইনাল ফ্লাইং লিস্ট' : 'Final Flying List', icon: Send },
-              { id: 'cartons', label: isBn ? 'অল বুকিং লিস্ট' : 'All Booking List', icon: Package },
             ],
           },
           {
@@ -157,7 +158,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
               { id: 'notifications', label: isBn ? 'নোটিফিকেশন' : 'Notifications', icon: Bell },
               { id: 'booking_entry', label: isBn ? 'নতুন কার্টুন এন্ট্রি' : 'New Carton Booking', icon: PlusCircle },
               { id: 'inventory', label: isBn ? 'ইনভেন্টরি পণ্য' : 'Current Stock Items', icon: Package },
-              { id: 'proposal_create', label: isBn ? 'ফ্লাইং প্রস্তাবনা তৈরি' : 'Create Flying Proposal', icon: Plane },
               { id: 'final_flying_list', label: isBn ? 'ফাইনাল ফ্লাইং লিস্ট' : 'Final Flying List', icon: Send },
               { id: 'history', label: isBn ? 'রিসিভ ফ্লাইং' : 'Receive Flying', icon: Truck },
               { id: 'receive_incoming', label: isBn ? 'ইনকামিং কার্গো গ্রহণ' : 'Receive Incoming Cargo', icon: Package },
