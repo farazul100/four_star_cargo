@@ -58,9 +58,9 @@ export const LoginModal: React.FC<LoginModalProps> = ({
       <div className="absolute -top-32 -left-32 w-96 h-96 bg-[#1FB6A8]/10 rounded-full blur-3xl" />
       <div className="absolute -bottom-32 -right-32 w-96 h-96 bg-[#1B4F91]/20 rounded-full blur-3xl" />
 
-      <div className="w-full max-w-4xl bg-[#11202F] border border-[#1E3247] rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2 z-10">
+      <div className="w-full max-w-4xl bg-[#1E293B] border border-[#1E3247] rounded-3xl shadow-2xl overflow-hidden grid grid-cols-1 md:grid-cols-2 z-10">
         {/* Left Side: Brand Panel */}
-        <div className="bg-gradient-to-br from-[#0F2D52] via-[#11202F] to-[#0B1622] p-8 md:p-10 flex flex-col justify-between border-b md:border-b-0 md:border-r border-[#1E3247] relative">
+        <div className="bg-gradient-to-br from-[#0F2D52] via-[#1E293B] to-[#0B1622] p-8 md:p-10 flex flex-col justify-between border-b md:border-b-0 md:border-r border-[#1E3247] relative">
           <div>
             <button
               onClick={onBack}

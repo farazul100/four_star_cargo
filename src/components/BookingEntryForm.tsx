@@ -580,7 +580,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       <div
         className={`p-6 rounded-xl border transition-all shadow-2xs space-y-6 ${
           isDark
-            ? 'bg-[#1C1C1E] border-slate-800 text-white'
+            ? 'bg-[#1E293B] border-slate-800 text-white'
             : 'bg-white border-slate-200/90 text-slate-900'
         }`}
       >
@@ -1116,7 +1116,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         <div
           className={`rounded-xl border transition-all shadow-2xs overflow-hidden ${
             isDark
-              ? 'bg-[#1C1C1E] border-slate-800 text-white'
+              ? 'bg-[#1E293B] border-slate-800 text-white'
               : 'bg-white border-slate-200/90 text-slate-900'
           }`}
         >
@@ -1383,7 +1383,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         </div>
       ) : (
         <div className={`p-8 rounded-xl border text-center space-y-3 ${
-          isDark ? 'bg-[#1C1C1E] border-slate-800 text-slate-400' : 'bg-white border-slate-200 text-slate-500'
+          isDark ? 'bg-[#1E293B] border-slate-800 text-slate-400' : 'bg-white border-slate-200 text-slate-500'
         }`}>
           <FileCheck className="w-8 h-8 text-slate-400 mx-auto opacity-50" />
           <div className="text-xs font-medium">

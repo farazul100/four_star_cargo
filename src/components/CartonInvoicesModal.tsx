@@ -102,7 +102,7 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
 
       <div className="w-full max-w-5xl bg-slate-900 border-2 border-[#00897B] rounded-none shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Top Modal Control Bar (Screen Only) */}
-        <div className="no-print p-4 bg-[#121214] border-b border-slate-800 flex items-center justify-between shrink-0">
+        <div className="no-print p-4 bg-[#0F172A] border-b border-slate-800 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-3">
             <div className="w-9 h-9 rounded-none bg-[#00897B]/20 text-[#26A69A] border border-[#00897B]/40 flex items-center justify-center font-bold">
               <Package className="w-5 h-5" />

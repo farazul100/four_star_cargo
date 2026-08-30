@@ -482,7 +482,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
       {/* Filter & Search Toolbar */}
       <div className={`p-4 rounded-none border flex flex-col md:flex-row md:items-center justify-between gap-3 ${
-        isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'
+        isDark ? 'bg-[#1E293B] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'
       }`}>
         {/* Search */}
         <div className="relative flex-1 max-w-md">
@@ -547,7 +547,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       {/* Main Flights Table */}
       <div
         className={`border rounded-none overflow-hidden shadow-2xs ${
-          isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}
       >
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">

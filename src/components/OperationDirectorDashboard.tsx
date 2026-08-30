@@ -756,25 +756,25 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
 
       {/* 1. Top Executive Operational KPI Summary Cards (All Light Font) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'}`}>
+        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'}`}>
           <span className="text-xs text-slate-500 dark:text-slate-400 font-normal block">{isBn ? 'গড় ফ্রেইট ট্রানজিট সময়:' : 'Avg Air Transit Time:'}</span>
           <span className="text-xl font-medium font-mono text-[#1D4ED8] mt-1 block">2.4 {isBn ? 'দিন' : 'Days'}</span>
           <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal mt-0.5 block">⚡ Fast Air Freight SLA</span>
         </div>
 
-        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'}`}>
+        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'}`}>
           <span className="text-xs text-slate-500 dark:text-slate-400 font-normal block">{isBn ? 'অন-টাইম ডিসপ্যাচ রেট:' : 'On-Time Dispatch Rate:'}</span>
           <span className="text-xl font-medium font-mono text-emerald-600 dark:text-emerald-400 mt-1 block">98.5%</span>
           <span className="text-[10px] text-slate-400 font-normal mt-0.5 block">Target &gt; 95.0%</span>
         </div>
 
-        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'}`}>
+        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'}`}>
           <span className="text-xs text-slate-500 dark:text-slate-400 font-normal block">{isBn ? 'ফ্লাইট ক্যাপাসিটি ইউটিলাইজেশন:' : 'Air Payload Utilization:'}</span>
           <span className="text-xl font-medium font-mono text-purple-600 dark:text-purple-400 mt-1 block">92.8%</span>
           <span className="text-[10px] text-purple-500 font-normal mt-0.5 block">High Volume Efficiency</span>
         </div>
 
-        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'}`}>
+        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'}`}>
           <span className="text-xs text-slate-500 dark:text-slate-400 font-normal block">{isBn ? 'সেফ হ্যান্ডলিং স্কোর:' : 'Safe Handling Score:'}</span>
           <span className="text-xl font-medium font-mono text-amber-600 dark:text-amber-400 mt-1 block">99.9%</span>
           <span className="text-[10px] text-amber-500 font-normal mt-0.5 block">Zero Damage Record</span>
@@ -806,7 +806,7 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
         {/* Origin Hub Volume Share Box */}
         <div
           className={`border rounded-none p-6 space-y-4 shadow-2xs ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
           }`}
         >
           <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
@@ -855,7 +855,7 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Airline Partner Carrier Performance Table (Spans 2 Columns) */}
         <div className={`lg:col-span-2 border rounded-none p-6 space-y-4 shadow-2xs ${
-          isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}>
           <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
             <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">
@@ -868,7 +868,7 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs whitespace-nowrap">
               <thead className={`uppercase text-[10px] tracking-wider border-b ${
-                isDark ? 'bg-[#121214] text-slate-400 border-slate-800' : 'bg-slate-50 text-slate-500 border-slate-200'
+                isDark ? 'bg-[#0F172A] text-slate-400 border-slate-800' : 'bg-slate-50 text-slate-500 border-slate-200'
               }`}>
                 <tr>
                   <th className="p-3 font-normal">AIRLINE CARRIER</th>
@@ -922,7 +922,7 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
 
         {/* Goods Category Cargo Breakdown */}
         <div className={`border rounded-none p-6 space-y-4 shadow-2xs ${
-          isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}>
           <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
             <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">

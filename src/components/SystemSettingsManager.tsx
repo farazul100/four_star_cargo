@@ -321,7 +321,7 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
       {activeTab === 'general' && (
         <div
           className={`border rounded-none p-6 space-y-6 shadow-sm ${
-            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}
         >
           <h2 className="text-xs font-normal text-slate-800 dark:text-white uppercase tracking-wider border-b pb-3 dark:border-[#1E3247]">
@@ -568,7 +568,7 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
       {activeTab === 'api' && (
         <div
           className={`border rounded-none p-6 space-y-6 shadow-sm ${
-            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}
         >
           <div className="flex items-center justify-between border-b pb-3 dark:border-[#1E3247]">
@@ -748,7 +748,7 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
       {activeTab === 'budget_rates' && (
         <div
           className={`border rounded-none p-6 space-y-6 shadow-sm ${
-            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}
         >
           <div className="flex items-center justify-between border-b pb-3 dark:border-[#1E3247]">
@@ -975,7 +975,7 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
       {showResetModal && (
         <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
           <div className={`max-w-md w-full border rounded-2xl p-6 space-y-5 shadow-2xl ${
-            isDark ? 'bg-[#1C1C1E] border-rose-800 text-white' : 'bg-white border-rose-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-rose-800 text-white' : 'bg-white border-rose-200 text-slate-900'
           }`}>
             <div className="flex items-center justify-between border-b border-rose-500/20 pb-3">
               <div className="flex items-center space-x-2 text-rose-500">
@@ -1009,7 +1009,7 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
                   onChange={(e) => setResetConfirmInput(e.target.value)}
                   placeholder="RESET"
                   className={`w-full border rounded-xl py-2 px-3 text-xs font-mono font-bold tracking-widest uppercase outline-none ${
-                    isDark ? 'bg-[#121214] border-rose-900 text-rose-400 focus:border-rose-500' : 'bg-rose-50 border-rose-300 text-rose-700 focus:border-rose-500'
+                    isDark ? 'bg-[#0F172A] border-rose-900 text-rose-400 focus:border-rose-500' : 'bg-rose-50 border-rose-300 text-rose-700 focus:border-rose-500'
                   }`}
                 />
               </div>

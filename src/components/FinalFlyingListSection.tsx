@@ -295,7 +295,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
       {/* 2. Light Modern KPI Summary Cards (Zero Border-Radius, Light Font, Hairline Borders) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div className={`p-4 rounded-none border transition-all ${
-          isDark ? 'bg-[#18181B] border-slate-800' : 'bg-white border-slate-300'
+          isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-white border-slate-300'
         }`}>
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-500 dark:text-slate-400 font-light">{isBn ? 'অনুমোদিত ফ্লাইং ব্যাচ:' : 'Approved Flying Batches:'}</span>
@@ -310,7 +310,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
         </div>
 
         <div className={`p-4 rounded-none border transition-all ${
-          isDark ? 'bg-[#18181B] border-slate-800' : 'bg-white border-slate-300'
+          isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-white border-slate-300'
         }`}>
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-500 dark:text-slate-400 font-light">{isBn ? 'মোট ফ্লাইং কার্টুন:' : 'Total Cartons Count:'}</span>
@@ -325,7 +325,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
         </div>
 
         <div className={`p-4 rounded-none border transition-all ${
-          isDark ? 'bg-[#18181B] border-slate-800' : 'bg-white border-slate-300'
+          isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-white border-slate-300'
         }`}>
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-500 dark:text-slate-400 font-light">{isBn ? 'মোট গ্রস ওজন:' : 'Total Gross Weight:'}</span>
@@ -340,7 +340,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
         </div>
 
         <div className={`p-4 rounded-none border transition-all ${
-          isDark ? 'bg-[#18181B] border-slate-800' : 'bg-white border-slate-300'
+          isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-white border-slate-300'
         }`}>
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-500 dark:text-slate-400 font-light">{isBn ? 'মোট সিবিএম (CBM):' : 'Total Volume:'}</span>
@@ -356,7 +356,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
       </div>
 
       {/* 3. Smart Multi-Filter Control Bar (Zero Border-Radius, Light Font) */}
-      <div className={`p-4 rounded-none border space-y-3 ${isDark ? 'bg-[#18181B] border-slate-800' : 'bg-white border-slate-300'}`}>
+      <div className={`p-4 rounded-none border space-y-3 ${isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-white border-slate-300'}`}>
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2 text-xs font-normal text-slate-700 dark:text-slate-300">
             <Filter className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
@@ -472,7 +472,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
 
       {/* 4. Main Section: Cards View OR Table Grid View */}
       {filteredProposals.length === 0 ? (
-        <div className={`p-12 text-center rounded-none border ${isDark ? 'bg-[#18181B] border-slate-800' : 'bg-white border-slate-300'}`}>
+        <div className={`p-12 text-center rounded-none border ${isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-white border-slate-300'}`}>
           <Plane className="w-10 h-10 text-slate-300 dark:text-slate-600 mx-auto mb-3" />
           <h3 className="text-sm font-normal text-slate-700 dark:text-slate-300">
             {isBn ? 'কোন অনুমোদিত ফাইনাল ফ্লাইং লিস্ট পাওয়া যায়নি' : 'No Approved Flying List Found'}
@@ -494,8 +494,8 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
                 key={prop.id}
                 className={`p-5 rounded-none border transition-all space-y-4 ${
                   isDispatched
-                    ? (isDark ? 'bg-[#18181B] border-emerald-800/60' : 'bg-white border-emerald-300')
-                    : (isDark ? 'bg-[#18181B] border-blue-800/60' : 'bg-white border-blue-300')
+                    ? (isDark ? 'bg-[#0F172A] border-emerald-800/60' : 'bg-white border-emerald-300')
+                    : (isDark ? 'bg-[#0F172A] border-blue-800/60' : 'bg-white border-blue-300')
                 }`}
               >
                 {/* Header Row */}
@@ -635,7 +635,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
         </div>
       ) : (
         /* COMPACT TABLE GRID VIEW MODE */
-        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#18181B] border-slate-800' : 'bg-white border-slate-300'}`}>
+        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-white border-slate-300'}`}>
           <div className="overflow-x-auto border border-slate-200 dark:border-slate-800 rounded-none">
             <table className="w-full text-left text-xs font-light">
               <thead className={`uppercase text-[10px] tracking-wider border-b sticky top-0 ${
@@ -720,7 +720,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
       {/* 5. FINISH & LAUNCH SUCCESS NOTIFICATION MODAL */}
       {finishSuccessProposal && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-xs z-50 flex items-center justify-center p-4 font-sans animate-backdrop-blur-fade">
-          <div className="bg-white dark:bg-[#18181B] text-slate-900 dark:text-white rounded-none max-w-lg w-full p-6 space-y-5 border border-emerald-500/50 shadow-2xl">
+          <div className="bg-white dark:bg-[#0F172A] text-slate-900 dark:text-white rounded-none max-w-lg w-full p-6 space-y-5 border border-emerald-500/50 shadow-2xl">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-none bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/30">
                 <CheckCircle2 className="w-6 h-6" />
@@ -764,7 +764,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
         <div className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4 font-sans">
           <div
             className={`w-full max-w-6xl max-h-[92vh] rounded-none p-5 overflow-hidden flex flex-col border shadow-2xl ${
-              isDark ? 'bg-[#18181B] text-white border-slate-800' : 'bg-white text-slate-900 border-slate-300'
+              isDark ? 'bg-[#0F172A] text-white border-slate-800' : 'bg-white text-slate-900 border-slate-300'
             }`}
           >
             {/* Modal Header */}

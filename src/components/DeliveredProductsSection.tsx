@@ -399,7 +399,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
 
       {/* Summary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-2xs'}`}>
+        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-2xs'}`}>
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">{isBn ? 'মোট বিলিকৃত কার্টুন' : 'Total Delivered Cartons'}</span>
             <PackageCheck className="w-4 h-4 text-emerald-500" />
@@ -408,7 +408,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
           <p className="text-[11px] text-slate-400 mt-0.5 font-normal">{isBn ? 'ওয়্যারহাউজে স্টক রিসিভড' : 'Received into BD Warehouse'}</p>
         </div>
 
-        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-2xs'}`}>
+        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-2xs'}`}>
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">{isBn ? 'মোট চূড়ান্ত মেপে পাওয়া ওজন' : 'Total Calibrated Gross Weight'}</span>
             <Scale className="w-4 h-4 text-blue-500" />
@@ -417,7 +417,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
           <p className="text-[11px] text-slate-400 mt-0.5 font-normal">{isBn ? 'চূড়ান্ত সত্য বিলিং ওজন' : 'Final official billable weight'}</p>
         </div>
 
-        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-2xs'}`}>
+        <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-2xs'}`}>
           <div className="flex items-center justify-between">
             <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">{isBn ? 'মোট আয়তন (Volume)' : 'Total Volume (CBM)'}</span>
             <Building2 className="w-4 h-4 text-purple-500" />
@@ -429,7 +429,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
 
       {/* Filter & Search Toolbar */}
       <div className={`p-4 rounded-none border flex flex-col md:flex-row md:items-center justify-between gap-3 ${
-        isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'
+        isDark ? 'bg-[#1E293B] border-slate-800' : 'bg-white border-slate-200/90 shadow-2xs'
       }`}>
         {/* Search */}
         <div className="relative flex-1 max-w-md">
@@ -466,7 +466,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
       {/* Main Delivered Cartons Table */}
       <div
         className={`border rounded-none overflow-hidden shadow-2xs ${
-          isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}
       >
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
@@ -630,7 +630,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
       {selectedPathaoCarton && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
           <div className={`w-full max-w-lg rounded-none border p-6 shadow-2xl space-y-5 ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
             <div className="flex items-center justify-between border-b pb-3 dark:border-slate-800">
               <div className="flex items-center space-x-2">
@@ -780,7 +780,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
       {selectedManualCarton && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
           <div className={`w-full max-w-md rounded-none border p-6 shadow-2xl space-y-5 ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
             <div className="flex items-center justify-between border-b pb-3 dark:border-slate-800">
               <div className="flex items-center space-x-2">

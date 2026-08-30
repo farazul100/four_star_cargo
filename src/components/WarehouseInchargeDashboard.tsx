@@ -476,7 +476,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
         </div>
 
         {incomingCartons.length > 0 ? (
-          <div className="bg-white dark:bg-[#1C1C1E] rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs">
+          <div className="bg-white dark:bg-[#1E293B] rounded-3xl border border-slate-200 dark:border-slate-800 overflow-hidden shadow-2xs">
             <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
               <button
                 onClick={toggleSelectAllReceiving}
@@ -552,7 +552,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
             </div>
           </div>
         ) : (
-          <div className="p-12 text-center bg-white dark:bg-[#1C1C1E] rounded-3xl border border-slate-200 dark:border-slate-800 space-y-3 shadow-2xs">
+          <div className="p-12 text-center bg-white dark:bg-[#1E293B] rounded-3xl border border-slate-200 dark:border-slate-800 space-y-3 shadow-2xs">
             <Truck className="w-10 h-10 mx-auto text-slate-300 dark:text-slate-600" />
             <h4 className="text-sm font-semibold text-slate-900 dark:text-white">
               {isBn ? 'বর্তমানে কোনো ইনকামিং ট্রানজিট শিপমেন্ট নেই' : 'No Incoming Transit Cargo At This Moment'}
@@ -568,7 +568,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
         {/* Confirmation Modal */}
         {showConfirmReceiveModal && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-            <div className="bg-[#11202F] border border-[#1FB6A8]/40 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl">
+            <div className="bg-[#1E293B] border border-[#1FB6A8]/40 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl">
               <h3 className="text-base font-bold text-white flex items-center space-x-2">
                 <CheckCircle2 className="w-5 h-5 text-[#1FB6A8]" />
                 <span>{isBn ? 'পণ্য রিসিভড নিশ্চিতকরণ' : 'Confirm Receiving Cargo'}</span>
@@ -707,7 +707,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
           <form
             onSubmit={handleCreateFlightBatch}
             className={`p-6 rounded-none border shadow-2xs space-y-6 ${
-              isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+              isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
             }`}
           >
             <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
@@ -783,7 +783,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
           <div className="space-y-6">
             {/* Active Flight Header Card */}
             <div className={`p-6 rounded-none border shadow-2xs space-y-6 ${
-              isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+              isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
             }`}>
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-800">
                 <div>
@@ -982,7 +982,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
         {showStockImportModal && (
           <div className="fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
             <div className={`w-full max-w-6xl max-h-[92vh] flex flex-col rounded-none border shadow-2xl overflow-hidden font-sans ${
-              isDark ? 'bg-[#18181B] border-slate-800 text-slate-100' : 'bg-white border-slate-300 text-slate-800'
+              isDark ? 'bg-[#0F172A] border-slate-800 text-slate-100' : 'bg-white border-slate-300 text-slate-800'
             }`}>
               {/* Modal Header */}
               <div className={`p-4 sm:p-5 border-b flex items-center justify-between ${
@@ -1229,7 +1229,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
 
         {/* Read-Only Submitted Proposals History Table */}
         <div className={`p-6 rounded-none border shadow-2xs space-y-4 ${
-          isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}>
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-semibold text-slate-900 dark:text-white flex items-center space-x-2">

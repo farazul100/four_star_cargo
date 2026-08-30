@@ -178,7 +178,7 @@ export const LandingPortal: React.FC<LandingPortalProps> = ({
         </div>
 
         {/* Public Tracking Banner Card */}
-        <div className="mt-10 bg-gradient-to-r from-[#11202F] via-[#1B4F91]/40 to-[#11202F] rounded-2xl p-6 border border-[#1FB6A8]/30 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
+        <div className="mt-10 bg-gradient-to-r from-[#1E293B] via-[#1B4F91]/40 to-[#1E293B] rounded-2xl p-6 border border-[#1FB6A8]/30 flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
           <div className="flex items-center space-x-4">
             <div className="p-3.5 rounded-2xl bg-[#1FB6A8]/20 text-[#1FB6A8] shrink-0">
               <Search className="w-7 h-7" />

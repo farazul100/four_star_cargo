@@ -221,7 +221,7 @@ export const Header: React.FC<HeaderProps> = ({
             {unreadCount > 0 && (
               <span
                 style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}
-                className="absolute -top-1.5 -right-2 min-w-[20px] h-[20px] px-1 text-[11px] font-black leading-none flex items-center justify-center rounded-full border-2 border-white dark:border-[#141414] shadow-lg z-20 pointer-events-none select-none"
+                className="absolute -top-1.5 -right-2 min-w-[20px] h-[20px] px-1 text-[11px] font-black leading-none flex items-center justify-center rounded-full border-2 border-white dark:border-[#1E293B] shadow-lg z-20 pointer-events-none select-none"
               >
                 {unreadCount > 99 ? '99+' : unreadCount}
               </span>
@@ -232,13 +232,13 @@ export const Header: React.FC<HeaderProps> = ({
           {showNotifications && (
             <div
               className={`absolute right-0 top-10 w-80 sm:w-96 border rounded-xl shadow-2xl z-50 overflow-hidden text-left font-sans ${
-                isDark ? 'bg-[#1C1C1E] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xl'
+                isDark ? 'bg-[#1E293B] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xl'
               }`}
             >
               {/* Header */}
               <div
                 className={`px-4 py-3 border-b flex items-center justify-between ${
-                  isDark ? 'border-[#2C2C2E] bg-[#141414]' : 'border-gray-200 bg-gray-50'
+                  isDark ? 'border-[#2C2C2E] bg-[#1E293B]' : 'border-gray-200 bg-gray-50'
                 }`}
               >
                 <div className="flex items-center space-x-2">
@@ -302,7 +302,7 @@ export const Header: React.FC<HeaderProps> = ({
               </div>
 
               {/* Footer */}
-              <div className={`p-2.5 border-t text-center ${isDark ? 'border-[#2C2C2E] bg-[#141414]' : 'border-gray-200 bg-gray-50'}`}>
+              <div className={`p-2.5 border-t text-center ${isDark ? 'border-[#2C2C2E] bg-[#1E293B]' : 'border-gray-200 bg-gray-50'}`}>
                 <button
                   onClick={() => {
                     setShowNotifications(false);
@@ -366,7 +366,7 @@ export const Header: React.FC<HeaderProps> = ({
             {showProfileMenu && (
               <div
                 className={`absolute right-0 top-11 w-52 border rounded-2xl shadow-xl z-50 overflow-hidden text-left font-sans transition-all ${
-                  isDark ? 'bg-[#1C1C1E] border-slate-700/80 text-white' : 'bg-white border-slate-200 text-gray-900 shadow-2xl'
+                  isDark ? 'bg-[#1E293B] border-slate-700/80 text-white' : 'bg-white border-slate-200 text-gray-900 shadow-2xl'
                 }`}
               >
                 {/* Header Info */}

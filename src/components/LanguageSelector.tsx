@@ -104,7 +104,7 @@ export const LanguageSelector: React.FC<LanguageSelectorProps> = ({ onLanguageCh
         <div
           className={`absolute right-0 mt-3 w-52 rounded-2xl p-2 shadow-2xl backdrop-blur-xl border transition-all animate-in fade-in zoom-in-95 max-h-72 overflow-y-auto ${
             isDark
-              ? 'bg-[#1C1C1E]/95 border-[#2C2C2E] text-white'
+              ? 'bg-[#1E293B]/95 border-[#2C2C2E] text-white'
               : 'bg-white/95 border-[#E4E9EC] text-[#0F2D52]'
           }`}
         >

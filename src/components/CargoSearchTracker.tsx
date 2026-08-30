@@ -444,7 +444,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                           className={`px-2.5 py-1 text-[11px] font-mono border transition-all cursor-pointer ${
                             locationFilter === 'all'
                               ? 'bg-[#00897B] text-white border-[#00897B] font-bold'
-                              : isDark ? 'bg-[#0E0E10] text-slate-400 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-300'
+                              : isDark ? 'bg-[#1E293B] text-slate-400 border-slate-800' : 'bg-slate-100 text-slate-700 border-slate-300'
                           }`}
                         >
                           সকল ({shipment.totalCartons})
@@ -455,7 +455,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                           className={`px-2.5 py-1 text-[11px] font-mono border transition-all cursor-pointer ${
                             locationFilter === 'china'
                               ? 'bg-amber-500 text-slate-950 border-amber-600 font-bold'
-                              : isDark ? 'bg-[#0E0E10] text-amber-400 border-slate-800' : 'bg-amber-50 text-amber-800 border-amber-200'
+                              : isDark ? 'bg-[#1E293B] text-amber-400 border-slate-800' : 'bg-amber-50 text-amber-800 border-amber-200'
                           }`}
                         >
                           🇨🇳 চায়না ({chinaStockCartons.length})
@@ -466,7 +466,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                           className={`px-2.5 py-1 text-[11px] font-mono border transition-all cursor-pointer ${
                             locationFilter === 'transit'
                               ? 'bg-blue-600 text-white border-blue-700 font-bold'
-                              : isDark ? 'bg-[#0E0E10] text-blue-400 border-slate-800' : 'bg-blue-50 text-blue-800 border-blue-200'
+                              : isDark ? 'bg-[#1E293B] text-blue-400 border-slate-800' : 'bg-blue-50 text-blue-800 border-blue-200'
                           }`}
                         >
                           ✈️ ফ্লাইটে ({inTransitCartons.length})
@@ -477,7 +477,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                           className={`px-2.5 py-1 text-[11px] font-mono border transition-all cursor-pointer ${
                             locationFilter === 'bd_hub'
                               ? 'bg-teal-600 text-white border-teal-700 font-bold'
-                              : isDark ? 'bg-[#0E0E10] text-teal-400 border-slate-800' : 'bg-teal-50 text-teal-800 border-teal-200'
+                              : isDark ? 'bg-[#1E293B] text-teal-400 border-slate-800' : 'bg-teal-50 text-teal-800 border-teal-200'
                           }`}
                         >
                           🏢 বিডি হাব ({bdHubCartons.length})
@@ -573,7 +573,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
           ) : (
             /* Graceful Empty State */
             <div className={`border rounded-none p-10 text-center space-y-3 ${
-              isDark ? 'bg-[#11202F] border-[#1E3247]' : 'bg-white border-slate-300'
+              isDark ? 'bg-[#1E293B] border-[#1E3247]' : 'bg-white border-slate-300'
             }`}>
               <Package className="w-10 h-10 text-slate-400 mx-auto opacity-50" />
               <h3 className={`text-base font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>

@@ -446,7 +446,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
         {/* Quick Action Navigation & Input Bar */}
         <div className={`border rounded-none p-5 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <div>
             <span className={`text-xs font-mono uppercase font-light ${isDark ? 'text-[#1FB6A8]' : 'text-[#00897B]'}`}>
@@ -495,7 +495,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Card 1: Total Customer Dues */}
           <div className={`border rounded-none p-5 space-y-2 ${
-            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+            isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
           }`}>
             <div className="flex items-center justify-between">
               <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'সর্বমোট বকেয়া (Total Dues)' : 'Total Dues Outstanding'}</span>
@@ -510,7 +510,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
           {/* Card 2: Total Cash Collected */}
           <div className={`border rounded-none p-5 space-y-2 ${
-            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+            isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
           }`}>
             <div className="flex items-center justify-between">
               <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'মোট আদায়কৃত ক্যাশ (Collected)' : 'Total Cash Collected'}</span>
@@ -525,7 +525,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
           {/* Card 3: Operational Expenses Vouchers */}
           <div className={`border rounded-none p-5 space-y-2 ${
-            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+            isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
           }`}>
             <div className="flex items-center justify-between">
               <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'কোম্পানি খরচ (Super Admin Sync)' : 'Operational Expenses'}</span>
@@ -545,7 +545,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
           {/* Card 4: Net Cashflow */}
           <div className={`border rounded-none p-5 space-y-2 ${
-            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+            isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
           }`}>
             <div className="flex items-center justify-between">
               <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'নিট অপারেটিং ক্যাশফ্লো' : 'Net Operating Cashflow'}</span>
@@ -565,7 +565,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left 2 Cols: Category Expenses Breakdown */}
           <div className={`lg:col-span-2 border rounded-none p-6 space-y-4 shadow-sm ${
-            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
             <div className={`flex items-center justify-between border-b pb-3 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
               <h3 className="text-sm font-bold flex items-center space-x-2">
@@ -656,7 +656,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
           {/* Right 1 Col: Customer Payment Collection Progress & Direct Actions */}
           <div className={`border rounded-none p-6 space-y-4 shadow-sm flex flex-col justify-between ${
-            isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
             <div>
               <h3 className={`text-sm font-bold flex items-center space-x-2 border-b pb-3 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
@@ -709,7 +709,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
         {/* Recent Financial Audit Stream Table */}
         <div className={`border rounded-none overflow-hidden shadow-sm ${
-          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
             <h3 className="text-sm font-bold flex items-center space-x-2">
@@ -765,7 +765,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
             <form
               onSubmit={handleSaveExpenseVoucher}
               className={`border rounded-none p-6 max-w-md w-full space-y-4 shadow-2xl animate-in zoom-in-95 ${
-                isDark ? 'bg-[#11202F] border-[#1FB6A8]/40 text-white' : 'bg-white border-slate-300 text-slate-900'
+                isDark ? 'bg-[#1E293B] border-[#1FB6A8]/40 text-white' : 'bg-white border-slate-300 text-slate-900'
               }`}
             >
               <h3 className="text-base font-bold flex items-center space-x-2">
@@ -904,7 +904,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         </div>
 
         <div className={`border rounded-none p-6 space-y-4 shadow-sm ${
-          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <div className={`flex items-center justify-between border-b pb-3 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
             <h3 className="text-sm font-bold flex items-center space-x-2">
@@ -1014,7 +1014,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
         {/* Date Filter Bar */}
         <div className={`border rounded-none p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs ${
-          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+          isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
         }`}>
           <div>
             <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'শুরূতের তারিখ' : 'Start Date'}</label>
@@ -1061,7 +1061,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
         {/* Reports Table */}
         <div className={`border rounded-none overflow-hidden shadow-sm ${
-          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
             <h3 className="text-sm font-bold">{isBn ? 'ফিল্টারড ট্রানজ্যাকশন এন্ট্রি' : 'Filtered Transaction Entries'}</h3>
@@ -1176,7 +1176,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         {/* Customer Balance Header Card */}
         <div className={`border rounded-none p-6 shadow-sm grid grid-cols-1 sm:grid-cols-3 gap-6 ${
           isDark
-            ? 'bg-gradient-to-r from-[#11202F] via-[#0F2D52] to-[#11202F] border-[#1FB6A8]/30 text-white'
+            ? 'bg-gradient-to-r from-[#1E293B] via-[#0F2D52] to-[#1E293B] border-[#1FB6A8]/30 text-white'
             : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <div>
@@ -1215,7 +1215,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
         {/* Timeline Ledger Entries Detailed Audit Statement Table */}
         <div className={`border rounded-none p-6 space-y-4 shadow-sm ${
-          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-[#1E3247]">
             <h3 className="text-sm font-bold flex items-center space-x-2">
@@ -1348,7 +1348,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
             <form
               onSubmit={handleSaveLedgerEntry}
               className={`border rounded-none p-6 max-w-lg w-full space-y-4 shadow-2xl animate-in zoom-in-95 ${
-                isDark ? 'bg-[#11202F] border-[#1FB6A8]/40 text-white' : 'bg-white border-slate-300 text-slate-900'
+                isDark ? 'bg-[#1E293B] border-[#1FB6A8]/40 text-white' : 'bg-white border-slate-300 text-slate-900'
               }`}
             >
               <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-[#1E3247]">
@@ -1630,7 +1630,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
       {/* Overview Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className={`border rounded-none p-5 space-y-2 ${
-          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+          isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
         }`}>
           <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'সর্বমোট বকেয়া (Total Dues)' : 'Total Outstanding Dues'}</span>
           <div className={`text-2xl font-bold font-poppins ${isDark ? 'text-[#1FB6A8]' : 'text-[#007791]'}`}>৳{totalCompanyDue.toLocaleString()}</div>
@@ -1638,7 +1638,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         </div>
 
         <div className={`border rounded-none p-5 space-y-2 ${
-          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+          isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
         }`}>
           <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'কোম্পানি বাজেট ও খরচ' : 'Budget & Expense Vouchers'}</span>
           <button
@@ -1650,7 +1650,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         </div>
 
         <div className={`border rounded-none p-5 space-y-2 ${
-          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+          isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
         }`}>
           <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'রিপোর্ট মোড' : 'Quick Reports'}</span>
           <button
@@ -1662,7 +1662,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         </div>
 
         <div className={`border rounded-none p-5 space-y-2 flex flex-col justify-between ${
-          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+          isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
         }`}>
           <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'কাস্টমার অ্যাকশন' : 'Customer Directory Action'}</span>
           <button
@@ -1677,7 +1677,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
       {/* Search & Sort Controls Bar */}
       <div className={`border rounded-none p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-        isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+        isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
       }`}>
         <div className="relative flex-1 max-w-xs">
           <Search className={`w-4 h-4 absolute left-3 top-2.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-400'}`} />
@@ -1710,7 +1710,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
       {/* Customer Directory Table */}
       <div className={`border rounded-none overflow-hidden shadow-sm ${
-        isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+        isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
       }`}>
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
@@ -1807,7 +1807,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
           <form
             onSubmit={handleSaveNewCustomer}
             className={`border rounded-none p-6 max-w-md w-full space-y-4 shadow-2xl animate-in zoom-in-95 ${
-              isDark ? 'bg-[#11202F] border-[#1FB6A8]/40 text-white' : 'bg-white border-slate-300 text-slate-900'
+              isDark ? 'bg-[#1E293B] border-[#1FB6A8]/40 text-white' : 'bg-white border-slate-300 text-slate-900'
             }`}
           >
             <h3 className="text-base font-bold flex items-center space-x-2">

@@ -285,7 +285,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           ? 'bg-[#28282A] text-white font-semibold shadow-xs'
                           : 'bg-slate-100 text-slate-900 font-semibold shadow-xs'
                         : isDark
-                        ? 'text-[#A0A0A0] hover:text-white hover:bg-[#1C1C1E]'
+                        ? 'text-[#A0A0A0] hover:text-white hover:bg-[#1E293B]'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                   >
@@ -319,7 +319,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
             }}
             className={`w-full flex items-center justify-center space-x-2 py-2 px-3 rounded-xl text-xs font-medium transition-all cursor-pointer ${
               isDark
-                ? 'bg-[#1C1C1E] hover:bg-[#28282A] text-[#A0A0A0] hover:text-white'
+                ? 'bg-[#1E293B] hover:bg-[#28282A] text-[#A0A0A0] hover:text-white'
                 : 'bg-gray-100 hover:bg-gray-200 text-gray-700 hover:text-gray-900'
             }`}
           >

@@ -14,7 +14,7 @@ export const ForgotPasswordModal: React.FC<ForgotPasswordModalProps> = ({ isOpen
 
   return (
     <div className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-      <div className="bg-[#11202F] border border-[#1FB6A8]/40 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl relative animate-in fade-in zoom-in-95">
+      <div className="bg-[#1E293B] border border-[#1FB6A8]/40 rounded-3xl p-6 max-w-md w-full space-y-4 shadow-2xl relative animate-in fade-in zoom-in-95">
         <button
           onClick={onClose}
           className="absolute top-4 right-4 text-[#8FA3AD] hover:text-white p-1 rounded-lg hover:bg-[#1E3247]"

@@ -316,7 +316,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
 
       {/* 1. Header & Actions Bar */}
       <div className={`p-4 rounded-none border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-        isDark ? 'bg-[#1C1C1E] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
+        isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
       }`}>
         <div className="flex items-center space-x-3">
           <div className="w-10 h-10 rounded-none bg-teal-50 border border-teal-200 text-[#00897B] dark:bg-teal-950/60 dark:border-teal-800 dark:text-teal-400 flex items-center justify-center">
@@ -360,10 +360,10 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
 
       {/* 3. Search & Filter Bar */}
       <div className={`p-3.5 rounded-none border flex flex-wrap items-center justify-between gap-3 text-xs ${
-        isDark ? 'bg-[#1C1C1E] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
+        isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
       }`}>
         <div className="flex items-center space-x-2">
-          <div className={`flex rounded-none p-0.5 border ${isDark ? 'bg-[#121214] border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
+          <div className={`flex rounded-none p-0.5 border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-slate-100 border-slate-200'}`}>
             <button
               onClick={() => setStatusFilter('all')}
               className={`px-3 py-1 rounded-none text-xs font-light transition-all cursor-pointer ${
@@ -411,7 +411,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={isBn ? 'ওয়্যারহাউজের নাম, কোড বা দেশ সার্চ করুন...' : 'Search warehouse name, code, country...'}
             className={`w-full border rounded-none py-1.5 pl-8 pr-3 text-xs outline-none font-light ${
-              isDark ? 'bg-[#121214] border-slate-700 text-white placeholder-gray-400' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
+              isDark ? 'bg-[#0F172A] border-slate-700 text-white placeholder-gray-400' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
             }`}
           />
           {searchQuery && (
@@ -426,7 +426,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredWarehouses.length === 0 ? (
           <div className={`col-span-full p-10 rounded-none border text-center text-xs ${
-            isDark ? 'bg-[#1C1C1E] border-slate-700 text-gray-400' : 'bg-white border-slate-200 text-slate-700'
+            isDark ? 'bg-[#1E293B] border-slate-700 text-gray-400' : 'bg-white border-slate-200 text-slate-700'
           }`}>
             <Building2 className="w-8 h-8 mx-auto mb-2 text-slate-400 opacity-60" />
             <p className={`font-light ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>{isBn ? 'কোনো ওয়্যারহাউজ পাওয়া যায়নি' : 'No warehouses found'}</p>
@@ -442,7 +442,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
               <div
                 key={wh.id}
                 className={`p-5 rounded-none border flex flex-col justify-between space-y-4 transition-all ${
-                  isDark ? 'bg-[#1C1C1E] border-slate-700 text-white hover:border-slate-600' : 'bg-white border-slate-200 text-slate-900 shadow-xs hover:shadow-sm'
+                  isDark ? 'bg-[#1E293B] border-slate-700 text-white hover:border-slate-600' : 'bg-white border-slate-200 text-slate-900 shadow-xs hover:shadow-sm'
                 }`}
               >
                 <div>
@@ -556,7 +556,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
                     <div className="space-y-1.5">
                       {staffList.length === 0 ? (
                         <div className={`p-2.5 rounded-none border text-center text-xs font-light ${
-                          isDark ? 'bg-[#121214] border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
+                          isDark ? 'bg-[#0F172A] border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
                         }`}>
                           {isBn ? 'কোনো ইনচার্জ কর্মকর্তা বরাদ্দ নেই। নিচে যোগ করুন।' : 'No incharge assigned. Add below.'}
                         </div>
@@ -565,7 +565,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
                           <div
                             key={stf.id}
                             className={`p-2 rounded-none border flex items-center justify-between text-xs transition-colors ${
-                              isDark ? 'bg-[#121214] border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                              isDark ? 'bg-[#0F172A] border-slate-800 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
                             }`}
                           >
                             <div className="min-w-0 pr-2">
@@ -611,7 +611,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
       {showAddWhModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
           <div className={`w-full max-w-lg rounded-none border p-6 space-y-5 shadow-2xl ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
             {/* Modal Header */}
             <div className={`flex items-center justify-between border-b pb-4 ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
@@ -656,7 +656,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
                     placeholder={isBn ? 'যেমন: গুয়াংজু হাব-২' : 'e.g. Guangzhou Hub 2'}
                     className={`w-full border rounded-none py-2.5 px-3.5 outline-none font-light transition-all ${
                       isDark
-                        ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500'
+                        ? 'bg-[#0F172A] border-slate-700 text-white focus:border-teal-500'
                         : 'bg-slate-50/70 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
                     }`}
                   />
@@ -674,7 +674,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
                     placeholder={isBn ? 'যেমন: CAN-02' : 'e.g. CAN-02'}
                     className={`w-full border rounded-none py-2.5 px-3.5 outline-none font-mono uppercase font-light transition-all ${
                       isDark
-                        ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500'
+                        ? 'bg-[#0F172A] border-slate-700 text-white focus:border-teal-500'
                         : 'bg-slate-50/70 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
                     }`}
                   />
@@ -691,7 +691,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
                     onChange={(e) => setNewWhCountry(e.target.value)}
                     className={`w-full border rounded-none py-2.5 px-3.5 outline-none font-light cursor-pointer transition-all ${
                       isDark
-                        ? 'bg-[#121214] border-slate-700 text-white'
+                        ? 'bg-[#0F172A] border-slate-700 text-white'
                         : 'bg-slate-50/70 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
                     }`}
                   >
@@ -713,7 +713,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
                     onChange={(e) => setNewWhHubType(e.target.value as any)}
                     className={`w-full border rounded-none py-2.5 px-3.5 outline-none font-light cursor-pointer transition-all ${
                       isDark
-                        ? 'bg-[#121214] border-slate-700 text-white'
+                        ? 'bg-[#0F172A] border-slate-700 text-white'
                         : 'bg-slate-50/70 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
                     }`}
                   >
@@ -734,7 +734,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
                   placeholder={isBn ? 'লজিস্টিক পার্কের ঠিকানা...' : 'Full logistics hub location address...'}
                   className={`w-full border rounded-none py-2.5 px-3.5 outline-none font-light transition-all ${
                     isDark
-                      ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500'
+                      ? 'bg-[#0F172A] border-slate-700 text-white focus:border-teal-500'
                       : 'bg-slate-50/70 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
                   }`}
                 />
@@ -751,7 +751,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
                   placeholder="+86 20 8800-0000"
                   className={`w-full border rounded-none py-2.5 px-3.5 outline-none font-mono font-light transition-all ${
                     isDark
-                      ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500'
+                      ? 'bg-[#0F172A] border-slate-700 text-white focus:border-teal-500'
                       : 'bg-slate-50/70 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
                   }`}
                 />
@@ -763,7 +763,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
                   onClick={() => setShowAddWhModal(false)}
                   className={`px-4 py-2 rounded-none text-xs font-light border transition-all cursor-pointer ${
                     isDark
-                      ? 'bg-[#121214] border-slate-700 text-slate-300 hover:bg-slate-800'
+                      ? 'bg-[#0F172A] border-slate-700 text-slate-300 hover:bg-slate-800'
                       : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700'
                   }`}
                 >
@@ -788,7 +788,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
       {targetWhForIncharge && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
           <div className={`w-full max-w-lg rounded-none border p-6 space-y-4 shadow-2xl ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
             {/* Modal Header */}
             <div className={`flex items-center justify-between border-b pb-4 ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
@@ -832,7 +832,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
                   placeholder={isBn ? 'যেমন: আরিফুর রহমান' : 'e.g. Arifur Rahman'}
                   className={`w-full border rounded-none py-2.5 px-3.5 outline-none font-light transition-all ${
                     isDark
-                      ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500'
+                      ? 'bg-[#0F172A] border-slate-700 text-white focus:border-teal-500'
                       : 'bg-slate-50/70 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
                   }`}
                 />
@@ -851,7 +851,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
                     placeholder="incharge@fourstarcargo.com"
                     className={`w-full border rounded-none py-2.5 px-3.5 outline-none font-mono font-light transition-all ${
                       isDark
-                        ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500'
+                        ? 'bg-[#0F172A] border-slate-700 text-white focus:border-teal-500'
                         : 'bg-slate-50/70 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
                     }`}
                   />
@@ -868,7 +868,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
                     placeholder="+880 1700-000000"
                     className={`w-full border rounded-none py-2.5 px-3.5 outline-none font-mono font-light transition-all ${
                       isDark
-                        ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500'
+                        ? 'bg-[#0F172A] border-slate-700 text-white focus:border-teal-500'
                         : 'bg-slate-50/70 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
                     }`}
                   />
@@ -887,7 +887,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
                   placeholder="••••••••"
                   className={`w-full border rounded-none py-2.5 px-3.5 outline-none font-mono font-light transition-all ${
                     isDark
-                      ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500'
+                      ? 'bg-[#0F172A] border-slate-700 text-white focus:border-teal-500'
                       : 'bg-slate-50/70 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
                   }`}
                 />
@@ -914,7 +914,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
                   onClick={() => setTargetWhForIncharge(null)}
                   className={`px-4 py-2 rounded-none text-xs font-light border transition-all cursor-pointer ${
                     isDark
-                      ? 'bg-[#121214] border-slate-700 text-slate-300 hover:bg-slate-800'
+                      ? 'bg-[#0F172A] border-slate-700 text-slate-300 hover:bg-slate-800'
                       : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700'
                   }`}
                 >

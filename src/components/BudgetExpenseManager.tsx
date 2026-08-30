@@ -276,7 +276,7 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
           {/* Card 1: Total Income */}
           <div className={`p-5 rounded-none border transition-all ${
             isDark
-              ? 'bg-[#11202F] border-[#1E3247] text-white'
+              ? 'bg-[#1E293B] border-[#1E3247] text-white'
               : 'bg-white border-slate-200 text-slate-900 shadow-sm'
           }`}>
             <div className="flex items-center justify-between">
@@ -292,7 +292,7 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
           {/* Card 2: Total Expense */}
           <div className={`p-5 rounded-none border transition-all ${
             isDark
-              ? 'bg-[#11202F] border-[#1E3247] text-white'
+              ? 'bg-[#1E293B] border-[#1E3247] text-white'
               : 'bg-white border-slate-200 text-slate-900 shadow-sm'
           }`}>
             <div className="flex items-center justify-between">
@@ -310,7 +310,7 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
           {/* Card 3: Net Profit / Difference */}
           <div className={`p-5 rounded-none border transition-all ${
             isDark
-              ? 'bg-[#11202F] border-[#1E3247] text-white'
+              ? 'bg-[#1E293B] border-[#1E3247] text-white'
               : 'bg-white border-slate-200 text-slate-900 shadow-sm'
           }`}>
             <div className="flex items-center justify-between">
@@ -330,7 +330,7 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
           {/* Card 4: Expense Ratio */}
           <div className={`p-5 rounded-none border ${
             isDark
-              ? 'bg-[#11202F] border-[#1E3247] text-white'
+              ? 'bg-[#1E293B] border-[#1E3247] text-white'
               : 'bg-white border-slate-200 text-slate-900 shadow-sm'
           }`}>
             <div className="flex items-center justify-between">
@@ -346,7 +346,7 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
 
         {/* 3. Smart Date Filter Bar */}
         <div className={`p-4 rounded-none border flex flex-wrap items-center justify-between gap-3 text-xs ${
-          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
+          isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
         }`}>
           <div className="flex flex-wrap items-center gap-2">
             {/* Search Box */}
@@ -460,7 +460,7 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
 
         {/* 4. Category Wise Breakdown */}
         <div className={`p-5 rounded-none border space-y-4 shadow-sm ${
-          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <div className="flex items-center justify-between border-b border-slate-200 dark:border-[#1E3247] pb-3">
             <h2 className="text-sm font-bold flex items-center space-x-2">
@@ -493,7 +493,7 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                   </div>
 
                   {/* Progress bar */}
-                  <div className={`w-full h-2 rounded-none mt-3.5 overflow-hidden ${isDark ? 'bg-[#11202F]' : 'bg-slate-200'}`}>
+                  <div className={`w-full h-2 rounded-none mt-3.5 overflow-hidden ${isDark ? 'bg-[#1E293B]' : 'bg-slate-200'}`}>
                     <div className="h-full bg-[#00897B] rounded-none transition-all duration-300" style={{ width: `${pct}%` }} />
                   </div>
                 </div>
@@ -504,7 +504,7 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
 
         {/* 5. Daily / Monthly / Yearly Financial Report Statement Tabs */}
         <div className={`p-5 rounded-none border space-y-4 shadow-sm ${
-          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-[#1E3247] pb-3">
             <div className="flex items-center space-x-2">
@@ -632,7 +632,7 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
 
         {/* 6. Itemized Expenses Audit Ledger Table */}
         <div className={`border rounded-none overflow-hidden shadow-sm ${
-          isDark ? 'bg-[#11202F] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <div className="p-4 border-b border-slate-200 dark:border-[#1E3247] flex items-center justify-between">
             <h2 className="text-sm font-bold flex items-center space-x-2">
@@ -697,7 +697,7 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
         {showAddModal && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 z-50">
             <div className={`w-full max-w-lg border rounded-none p-6 space-y-4 shadow-2xl relative ${
-              isDark ? 'bg-[#11202F] border-[#1FB6A8]/40 text-white' : 'bg-white border-slate-300 text-slate-900'
+              isDark ? 'bg-[#1E293B] border-[#1FB6A8]/40 text-white' : 'bg-white border-slate-300 text-slate-900'
             }`}>
               <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-[#1E3247]">
                 <h3 className="text-base font-bold flex items-center space-x-2">

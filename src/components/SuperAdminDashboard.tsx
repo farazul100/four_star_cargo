@@ -437,7 +437,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
         {/* 📅 Top Controls & Smart Date Filter Bar */}
         <div className={`p-4 rounded-2xl border flex flex-wrap items-center justify-between gap-3 text-xs ${
-          isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900 shadow-xs'
+          isDark ? 'bg-[#1E293B] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900 shadow-xs'
         }`}>
           <div className="flex flex-wrap items-center gap-2.5">
             {/* Search Box */}
@@ -449,7 +449,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                 onChange={(e) => setCartonSearch(e.target.value)}
                 placeholder={isBn ? 'সিটিএন, ট্র্যাকিং, মার্ক বা পণ্য খুঁজুন...' : 'Search CTN, tracking, mark or product...'}
                 className={`w-full border rounded-xl py-1.5 pl-9 pr-3 text-xs outline-none ${
-                  isDark ? 'bg-[#121214] border-[#2C2C2E] text-white placeholder-[#9E9E9E]' : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 shadow-xs'
+                  isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white placeholder-[#9E9E9E]' : 'bg-white border-slate-200 text-slate-900 placeholder-slate-400 shadow-xs'
                 }`}
               />
               {cartonSearch && (
@@ -460,124 +460,124 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
             </div>
 
             {/* Status Filter */}
-            <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+            <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
               <Filter className="w-3.5 h-3.5 opacity-60" />
               <select
                 value={cartonStatusFilter}
                 onChange={(e) => setCartonStatusFilter(e.target.value)}
-                className="bg-transparent outline-none cursor-pointer text-xs dark:bg-[#121214] dark:text-white"
+                className="bg-transparent outline-none cursor-pointer text-xs dark:bg-[#0F172A] dark:text-white"
               >
-                <option value="all" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">{isBn ? 'সব স্ট্যাটাস (All Status)' : 'All Status'}</option>
-                <option value="booked" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">Booked (বুকড)</option>
-                <option value="proposed" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">Proposed (প্রস্তাবিত)</option>
-                <option value="in_transit" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">In Transit (ট্রানজিট)</option>
-                <option value="received" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">Received BD Hub (রিসিভড)</option>
-                <option value="delivered" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">Delivered (ডেলিভার্ড)</option>
+                <option value="all" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">{isBn ? 'সব স্ট্যাটাস (All Status)' : 'All Status'}</option>
+                <option value="booked" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">Booked (বুকড)</option>
+                <option value="proposed" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">Proposed (প্রস্তাবিত)</option>
+                <option value="in_transit" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">In Transit (ট্রানজিট)</option>
+                <option value="received" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">Received BD Hub (রিসিভড)</option>
+                <option value="delivered" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">Delivered (ডেলিভার্ড)</option>
               </select>
             </div>
 
             <div className={`w-px h-5 mx-0.5 hidden md:block ${isDark ? 'bg-[#2C2C2E]' : 'bg-gray-200'}`} />
 
             {/* Smart Date Filter Dropdown */}
-            <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+            <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
               <Calendar className="w-3.5 h-3.5 text-emerald-500" />
               <select
                 value={cartonDateFilterType}
                 onChange={(e) => setCartonDateFilterType(e.target.value as DateFilterMode)}
                 className="bg-transparent outline-none cursor-pointer text-xs font-semibold text-emerald-600 dark:text-emerald-400"
               >
-                <option value="all" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">{isBn ? '📅 সব সময় (All Time)' : '📅 All Time'}</option>
-                <option value="single_date" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">{isBn ? '📅 নির্দিষ্ট তারিখ (Specific Date)' : '📅 Specific Date'}</option>
-                <option value="date_range" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">{isBn ? '📆 তারিখ থেকে তারিখ (Date Range)' : '📆 Date Range'}</option>
-                <option value="single_month" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">{isBn ? '🗓️ নির্দিষ্ট মাস (Specific Month)' : '🗓️ Specific Month'}</option>
-                <option value="month_range" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">{isBn ? '🗓️ মাস থেকে মাস (Month Range)' : '🗓️ Month Range'}</option>
-                <option value="single_year" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">{isBn ? '📊 নির্দিষ্ট বছর (Specific Year)' : '📊 Specific Year'}</option>
-                <option value="year_range" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">{isBn ? '📊 বছর থেকে বছর (Year Range)' : '📊 Year Range'}</option>
+                <option value="all" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">{isBn ? '📅 সব সময় (All Time)' : '📅 All Time'}</option>
+                <option value="single_date" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">{isBn ? '📅 নির্দিষ্ট তারিখ (Specific Date)' : '📅 Specific Date'}</option>
+                <option value="date_range" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">{isBn ? '📆 তারিখ থেকে তারিখ (Date Range)' : '📆 Date Range'}</option>
+                <option value="single_month" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">{isBn ? '🗓️ নির্দিষ্ট মাস (Specific Month)' : '🗓️ Specific Month'}</option>
+                <option value="month_range" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">{isBn ? '🗓️ মাস থেকে মাস (Month Range)' : '🗓️ Month Range'}</option>
+                <option value="single_year" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">{isBn ? '📊 নির্দিষ্ট বছর (Specific Year)' : '📊 Specific Year'}</option>
+                <option value="year_range" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">{isBn ? '📊 বছর থেকে বছর (Year Range)' : '📊 Year Range'}</option>
               </select>
             </div>
 
             {/* Dynamic Input Controls Based on Date Filter Type */}
             {cartonDateFilterType === 'single_date' && (
-              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
                 <span className="text-[11px] font-medium opacity-80">{isBn ? 'তারিখ:' : 'Date:'}</span>
                 <input
                   type="date"
                   value={cartonSingleDate}
                   onChange={(e) => setCartonSingleDate(e.target.value)}
-                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#121214] dark:text-white"
+                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
                 />
               </div>
             )}
 
             {cartonDateFilterType === 'date_range' && (
               <div className="flex items-center space-x-2">
-                <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+                <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
                   <span className="text-[11px] font-medium opacity-80">{isBn ? 'হতে:' : 'From:'}</span>
                   <input
                     type="date"
                     value={cartonStartDate}
                     onChange={(e) => setCartonStartDate(e.target.value)}
-                    className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#121214] dark:text-white"
+                    className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
                   />
                 </div>
-                <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+                <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
                   <span className="text-[11px] font-medium opacity-80">{isBn ? 'পর্যন্ত:' : 'To:'}</span>
                   <input
                     type="date"
                     value={cartonEndDate}
                     onChange={(e) => setCartonEndDate(e.target.value)}
-                    className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#121214] dark:text-white"
+                    className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
                   />
                 </div>
               </div>
             )}
 
             {cartonDateFilterType === 'single_month' && (
-              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
                 <span className="text-[11px] font-medium opacity-80">{isBn ? 'মাস:' : 'Month:'}</span>
                 <input
                   type="month"
                   value={cartonSingleMonth}
                   onChange={(e) => setCartonSingleMonth(e.target.value)}
-                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#121214] dark:text-white"
+                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
                 />
               </div>
             )}
 
             {cartonDateFilterType === 'month_range' && (
               <div className="flex items-center space-x-2">
-                <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+                <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
                   <span className="text-[11px] font-medium opacity-80">{isBn ? 'শুরু মাস:' : 'Start Mth:'}</span>
                   <input
                     type="month"
                     value={cartonStartMonth}
                     onChange={(e) => setCartonStartMonth(e.target.value)}
-                    className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#121214] dark:text-white"
+                    className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
                   />
                 </div>
-                <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+                <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
                   <span className="text-[11px] font-medium opacity-80">{isBn ? 'শেষ মাস:' : 'End Mth:'}</span>
                   <input
                     type="month"
                     value={cartonEndMonth}
                     onChange={(e) => setCartonEndMonth(e.target.value)}
-                    className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#121214] dark:text-white"
+                    className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
                   />
                 </div>
               </div>
             )}
 
             {cartonDateFilterType === 'single_year' && (
-              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+              <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
                 <span className="text-[11px] font-medium opacity-80">{isBn ? 'বছর:' : 'Year:'}</span>
                 <select
                   value={cartonSingleYear}
                   onChange={(e) => setCartonSingleYear(e.target.value)}
-                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#121214] dark:text-white"
+                  className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
                 >
-                  <option value="" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">বছর নির্বাচন</option>
+                  <option value="" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">বছর নির্বাচন</option>
                   {['2026', '2025', '2024', '2023', '2022'].map((yr) => (
-                    <option key={yr} value={yr} className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">{yr}</option>
+                    <option key={yr} value={yr} className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">{yr}</option>
                   ))}
                 </select>
               </div>
@@ -585,29 +585,29 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
             {cartonDateFilterType === 'year_range' && (
               <div className="flex items-center space-x-2">
-                <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+                <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
                   <span className="text-[11px] font-medium opacity-80">{isBn ? 'হতে বছর:' : 'From Yr:'}</span>
                   <select
                     value={cartonStartYear}
                     onChange={(e) => setCartonStartYear(e.target.value)}
-                    className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#121214] dark:text-white"
+                    className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
                   >
-                    <option value="" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">শুরু</option>
+                    <option value="" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">শুরু</option>
                     {['2022', '2023', '2024', '2025', '2026'].map((yr) => (
-                      <option key={yr} value={yr} className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">{yr}</option>
+                      <option key={yr} value={yr} className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">{yr}</option>
                     ))}
                   </select>
                 </div>
-                <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
+                <div className={`flex items-center space-x-2 border rounded-xl px-3 py-1.5 ${isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-white border-gray-200 text-gray-900 shadow-xs'}`}>
                   <span className="text-[11px] font-medium opacity-80">{isBn ? 'পর্যন্ত বছর:' : 'To Yr:'}</span>
                   <select
                     value={cartonEndYear}
                     onChange={(e) => setCartonEndYear(e.target.value)}
-                    className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#121214] dark:text-white"
+                    className="bg-transparent outline-none text-xs font-mono cursor-pointer dark:bg-[#0F172A] dark:text-white"
                   >
-                    <option value="" className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">শেষ</option>
+                    <option value="" className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">শেষ</option>
                     {['2022', '2023', '2024', '2025', '2026'].map((yr) => (
-                      <option key={yr} value={yr} className="bg-white text-gray-900 dark:bg-[#1C1C1E] dark:text-white">{yr}</option>
+                      <option key={yr} value={yr} className="bg-white text-gray-900 dark:bg-[#1E293B] dark:text-white">{yr}</option>
                     ))}
                   </select>
                 </div>
@@ -620,7 +620,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                 onClick={resetCartonDateFilters}
                 className={`px-3 py-1.5 rounded-xl border text-xs font-semibold flex items-center space-x-1.5 cursor-pointer outline-none transition-all ${
                   isDark
-                    ? 'bg-[#121214] hover:bg-[#2C2C2E] border-[#2C2C2E] text-rose-400'
+                    ? 'bg-[#0F172A] hover:bg-[#2C2C2E] border-[#2C2C2E] text-rose-400'
                     : 'bg-white hover:bg-slate-50 border-gray-200 text-rose-600 shadow-xs'
                 }`}
                 title={isBn ? 'তারিখ ফিল্টার রিসেট' : 'Reset Date Filter'}
@@ -634,12 +634,12 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
         {/* Master Cartons Table with Super Admin Status Editor */}
         <div className={`border rounded-2xl overflow-hidden shadow-xs ${
-          isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}>
           <div className="overflow-x-auto">
             <table className={`w-full text-left text-xs ${isDark ? 'text-white' : 'text-slate-900'}`}>
               <thead className={`uppercase text-[10px] tracking-wider border-b ${
-                isDark ? 'bg-[#121214] text-[#9E9E9E] border-[#2C2C2E]' : 'bg-slate-50 text-slate-600 border-slate-200'
+                isDark ? 'bg-[#0F172A] text-[#9E9E9E] border-[#2C2C2E]' : 'bg-slate-50 text-slate-600 border-slate-200'
               }`}>
                 <tr>
                   <th className="p-3.5">CTN No</th>
@@ -687,11 +687,11 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                           }`}
                           title="Super Admin: Click to change status"
                         >
-                          <option value="booked" className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>Booked (অরিজিন বুকিং)</option>
-                          <option value="proposed" className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>Proposed (ফ্লাইং প্রস্তাবনা)</option>
-                          <option value="in_transit" className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>In Transit (ফ্লাইটে ট্রানজিট)</option>
-                          <option value="received" className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>Received BD Hub (রিসিভড)</option>
-                          <option value="delivered" className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>Delivered (ডেলিভার্ড)</option>
+                          <option value="booked" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-slate-900'}>Booked (অরিজিন বুকিং)</option>
+                          <option value="proposed" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-slate-900'}>Proposed (ফ্লাইং প্রস্তাবনা)</option>
+                          <option value="in_transit" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-slate-900'}>In Transit (ফ্লাইটে ট্রানজিট)</option>
+                          <option value="received" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-slate-900'}>Received BD Hub (রিসিভড)</option>
+                          <option value="delivered" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-slate-900'}>Delivered (ডেলিভার্ড)</option>
                         </select>
                       </td>
 
@@ -700,7 +700,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                         <button
                           onClick={() => setSelectedCartonForTimeline(c)}
                           className={`p-2 rounded-xl font-medium text-xs text-[#00897B] flex items-center space-x-1.5 ml-auto transition-all cursor-pointer ${
-                            isDark ? 'bg-[#121214] hover:bg-[#2C2C2E] border border-[#2C2C2E]' : 'bg-slate-100 hover:bg-slate-200 border border-slate-200'
+                            isDark ? 'bg-[#0F172A] hover:bg-[#2C2C2E] border border-[#2C2C2E]' : 'bg-slate-100 hover:bg-slate-200 border border-slate-200'
                           }`}
                           title="View Complete Lifecycle Timeline"
                         >
@@ -720,7 +720,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
         {selectedCartonForTimeline && (
           <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 z-50 animate-backdrop-blur-fade">
             <div className={`w-full max-w-2xl border rounded-2xl p-6 space-y-5 shadow-2xl relative max-h-[90vh] overflow-y-auto animate-modal-pop-bounce ${
-              isDark ? 'bg-[#1C1C1E] border-[#2C2C2E] text-white' : 'bg-white border-slate-200 text-slate-900'
+              isDark ? 'bg-[#1E293B] border-[#2C2C2E] text-white' : 'bg-white border-slate-200 text-slate-900'
             }`}>
               {/* Header */}
               <div className="flex items-start justify-between border-b pb-4">
@@ -739,7 +739,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                 <button
                   onClick={() => setSelectedCartonForTimeline(null)}
                   className={`p-1.5 rounded-xl border transition-colors cursor-pointer ${
-                    isDark ? 'bg-[#121214] border-[#2C2C2E] text-gray-400 hover:text-white' : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900'
+                    isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-gray-400 hover:text-white' : 'bg-slate-100 border-slate-200 text-slate-600 hover:text-slate-900'
                   }`}
                 >
                   <XCircle className="w-5 h-5" />
@@ -748,7 +748,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
               {/* Status Indicator & Super Admin Quick Editor */}
               <div className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                isDark ? 'bg-[#121214] border-[#2C2C2E]' : 'bg-slate-50 border-slate-200'
+                isDark ? 'bg-[#0F172A] border-[#2C2C2E]' : 'bg-slate-50 border-slate-200'
               }`}>
                 <div>
                   <p className={`text-[11px] ${isDark ? 'text-gray-400' : 'text-slate-600'}`}>{isBn ? 'বর্তমান স্ট্যাটাস:' : 'Current Status:'}</p>
@@ -761,7 +761,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                     value={selectedCartonForTimeline.status}
                     onChange={(e) => handleUpdateCartonStatus(selectedCartonForTimeline, e.target.value as Carton['status'])}
                     className={`px-3 py-1.5 rounded-xl text-xs font-bold border outline-none cursor-pointer ${
-                      isDark ? 'bg-[#1C1C1E] border-[#2C2C2E] text-white' : 'bg-white border-slate-300 text-slate-900 shadow-xs'
+                      isDark ? 'bg-[#1E293B] border-[#2C2C2E] text-white' : 'bg-white border-slate-300 text-slate-900 shadow-xs'
                     }`}
                   >
                     <option value="booked">Booked (অরিজিন বুকিং)</option>
@@ -780,7 +780,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                 <div className="relative pl-6 space-y-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-[#00897B]/30">
                   {/* Step 1 */}
                   <div className="relative">
-                    <div className="absolute -left-[23px] top-0 w-4 h-4 rounded-full bg-[#00897B] border-2 border-white dark:border-[#1C1C1E]" />
+                    <div className="absolute -left-[23px] top-0 w-4 h-4 rounded-full bg-[#00897B] border-2 border-white dark:border-[#1E293B]" />
                     <p className="text-xs font-bold">{isBn ? 'অরিজিন বুকিং এন্ট্রি (Booking Entry)' : 'Origin Booking Entry'}</p>
                     <p className={`text-[11px] mt-0.5 ${isDark ? 'text-gray-400' : 'text-slate-600'}`}>
                       {selectedCartonForTimeline.created_at ? (selectedCartonForTimeline.created_at.includes('T') ? selectedCartonForTimeline.created_at.split('T')[0] : selectedCartonForTimeline.created_at) : '2026-08-15'} — Booked by: {selectedCartonForTimeline.booked_by || 'Warehouse Staff'}
@@ -791,7 +791,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                   <div className="relative">
                     <div className={`absolute -left-[23px] top-0 w-4 h-4 rounded-full ${
                       ['proposed', 'in_transit', 'received', 'delivered'].includes(selectedCartonForTimeline.status) ? 'bg-[#00897B]' : 'bg-gray-400'
-                    } border-2 border-white dark:border-[#1C1C1E]`} />
+                    } border-2 border-white dark:border-[#1E293B]`} />
                     <p className="text-xs font-bold">{isBn ? 'ফ্লাইং প্রস্তাবনা জমা (Proposal Submitted)' : 'Flying Proposal Submitted'}</p>
                     <p className={`text-[11px] mt-0.5 ${isDark ? 'text-gray-400' : 'text-slate-600'}`}>
                       {selectedCartonForTimeline.flying_date ? (selectedCartonForTimeline.flying_date.includes('T') ? selectedCartonForTimeline.flying_date.split('T')[0] : selectedCartonForTimeline.flying_date) : 'Pending Flight Assignment'}
@@ -802,7 +802,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                   <div className="relative">
                     <div className={`absolute -left-[23px] top-0 w-4 h-4 rounded-full ${
                       ['in_transit', 'received', 'delivered'].includes(selectedCartonForTimeline.status) ? 'bg-[#00897B]' : 'bg-gray-400'
-                    } border-2 border-white dark:border-[#1C1C1E]`} />
+                    } border-2 border-white dark:border-[#1E293B]`} />
                     <p className="text-xs font-bold">{isBn ? 'ফ্লাইটে ট্রানজিট (In-Transit Air Flight)' : 'In-Transit Air Cargo Flight'}</p>
                     <p className={`text-[11px] mt-0.5 ${isDark ? 'text-gray-400' : 'text-slate-600'}`}>
                       Origin Hub: China Central ➔ Flight: CZ-304
@@ -813,7 +813,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                   <div className="relative">
                     <div className={`absolute -left-[23px] top-0 w-4 h-4 rounded-full ${
                       ['received', 'delivered'].includes(selectedCartonForTimeline.status) ? 'bg-[#00897B]' : 'bg-gray-400'
-                    } border-2 border-white dark:border-[#1C1C1E]`} />
+                    } border-2 border-white dark:border-[#1E293B]`} />
                     <p className="text-xs font-bold">{isBn ? 'বাংলাদেশ ওয়্যারহাউজ রিসিভড (BD Hub Arrival)' : 'BD Hub Warehouse Received'}</p>
                     <p className={`text-[11px] mt-0.5 ${isDark ? 'text-gray-400' : 'text-slate-600'}`}>
                       Destination Hub: {selectedCartonForTimeline.destination_warehouse_name || 'Dhaka Central Hub'}
@@ -824,7 +824,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                   <div className="relative">
                     <div className={`absolute -left-[23px] top-0 w-4 h-4 rounded-full ${
                       selectedCartonForTimeline.status === 'delivered' ? 'bg-[#00897B]' : 'bg-gray-400'
-                    } border-2 border-white dark:border-[#1C1C1E]`} />
+                    } border-2 border-white dark:border-[#1E293B]`} />
                     <p className="text-xs font-bold">{isBn ? 'কাস্টমার ডেলিভারি সম্পন্ন (Delivery Settled)' : 'Final Customer Delivery & Settlement'}</p>
                     <p className={`text-[11px] mt-0.5 ${isDark ? 'text-gray-400' : 'text-slate-600'}`}>
                       Status: {selectedCartonForTimeline.status === 'delivered' ? 'Completed' : 'Awaiting Final Delivery'}
@@ -835,7 +835,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
               {/* Carton Details Grid */}
               <div className={`p-4 rounded-xl border grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs ${
-                isDark ? 'bg-[#121214] border-[#2C2C2E]' : 'bg-slate-50 border-slate-200'
+                isDark ? 'bg-[#0F172A] border-[#2C2C2E]' : 'bg-slate-50 border-slate-200'
               }`}>
                 <div>
                   <p className={`text-[10px] ${isDark ? 'text-gray-400' : 'text-slate-600'}`}>Product Name (EN):</p>
@@ -905,7 +905,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
         {/* Controls */}
         <div className={`border rounded-2xl p-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs ${
-          isDark ? 'bg-[#1C1C1E] border-slate-800/80 text-white' : 'bg-white border-slate-200/80 text-slate-900 shadow-2xs'
+          isDark ? 'bg-[#1E293B] border-slate-800/80 text-white' : 'bg-white border-slate-200/80 text-slate-900 shadow-2xs'
         }`}>
           <div className="relative flex-1 max-w-xs">
             <Search className={`w-3.5 h-3.5 absolute left-3 top-2.5 ${isDark ? 'text-slate-400' : 'text-slate-400'}`} />
@@ -918,7 +918,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
               }}
               placeholder={isBn ? 'কর্মকর্তা বা একশন খুঁজুন...' : 'Search staff or action...'}
               className={`w-full border rounded-xl py-1.5 pl-8 pr-3 text-xs outline-none font-normal ${
-                isDark ? 'bg-[#121214] border-slate-700/80 text-white placeholder-slate-400' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
+                isDark ? 'bg-[#0F172A] border-slate-700/80 text-white placeholder-slate-400' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
               }`}
             />
           </div>
@@ -931,7 +931,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
                 setAuditPage(1);
               }}
               className={`border rounded-xl px-2.5 py-1 text-xs outline-none font-medium cursor-pointer ${
-                isDark ? 'bg-[#121214] border-slate-700/80 text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-700'
+                isDark ? 'bg-[#0F172A] border-slate-700/80 text-slate-200' : 'bg-slate-50 border-slate-200 text-slate-700'
               }`}
             >
               <option value={25}>25 {isBn ? 'টি প্রতি পৃষ্ঠায়' : 'per page'}</option>
@@ -959,7 +959,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
         {/* Audit Logs Table */}
         <div className={`border rounded-2xl overflow-hidden shadow-2xs ${
-          isDark ? 'bg-[#1C1C1E] border-slate-800/80 text-white' : 'bg-white border-slate-200/80 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-slate-800/80 text-white' : 'bg-white border-slate-200/80 text-slate-900'
         }`}>
           <div className={`divide-y ${isDark ? 'divide-slate-800/80' : 'divide-slate-100'}`}>
             {paginatedAuditLogs.length === 0 ? (
@@ -1112,11 +1112,11 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
       {/* 2. Top Filter Bar (Cargo System Filters) */}
       <div className={`border rounded-none p-2.5 flex flex-wrap items-center gap-2.5 text-xs shadow-none ${
-        isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+        isDark ? 'bg-[#1E293B] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
       }`}>
         {/* Date Range Selector */}
         <div className={`flex items-center space-x-2 border rounded-none px-2.5 py-1 ${
-          isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+          isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
         }`}>
           <Calendar className="w-3.5 h-3.5 opacity-60" />
           <select
@@ -1124,9 +1124,9 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
             onChange={(e) => setDashDateFilter(e.target.value)}
             className="bg-transparent outline-none text-xs cursor-pointer font-light"
           >
-            <option value="month" className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>{isBn ? 'এই মাস' : 'This Month'}</option>
-            <option value="today" className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>{isBn ? 'আজকে' : 'Today'}</option>
-            <option value="year" className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>{isBn ? 'এই বছর' : 'This Year'}</option>
+            <option value="month" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-slate-900'}>{isBn ? 'এই মাস' : 'This Month'}</option>
+            <option value="today" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-slate-900'}>{isBn ? 'আজকে' : 'Today'}</option>
+            <option value="year" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-slate-900'}>{isBn ? 'এই বছর' : 'This Year'}</option>
           </select>
         </div>
 
@@ -1139,12 +1139,12 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
           value={dashWhFilter}
           onChange={(e) => setDashWhFilter(e.target.value)}
           className={`border rounded-none px-3 py-1 outline-none min-w-[140px] cursor-pointer font-light ${
-            isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+            isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
           }`}
         >
-          <option value="all" className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>{isBn ? 'সব ওয়্যারহাউজ হাব' : 'All Warehouse Hubs'}</option>
+          <option value="all" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-slate-900'}>{isBn ? 'সব ওয়্যারহাউজ হাব' : 'All Warehouse Hubs'}</option>
           {warehouses.map((w) => (
-            <option key={w.id} value={w.id} className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>
+            <option key={w.id} value={w.id} className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-slate-900'}>
               {w.name}
             </option>
           ))}
@@ -1155,12 +1155,12 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
           value={dashModeFilter}
           onChange={(e) => setDashModeFilter(e.target.value)}
           className={`border rounded-none px-3 py-1 outline-none cursor-pointer font-light ${
-            isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+            isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
           }`}
         >
-          <option value="all" className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>{isBn ? 'সব মোড (Air & Sea)' : 'All Modes (Air & Sea)'}</option>
-          <option value="air" className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>{isBn ? 'এিয়ার ফ্রেইট (Air Cargo)' : 'Air Cargo'}</option>
-          <option value="sea" className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>{isBn ? 'সি ফ্রেইট (Sea Cargo)' : 'Sea Cargo'}</option>
+          <option value="all" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-slate-900'}>{isBn ? 'সব মোড (Air & Sea)' : 'All Modes (Air & Sea)'}</option>
+          <option value="air" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-slate-900'}>{isBn ? 'এিয়ার ফ্রেইট (Air Cargo)' : 'Air Cargo'}</option>
+          <option value="sea" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-slate-900'}>{isBn ? 'সি ফ্রেইট (Sea Cargo)' : 'Sea Cargo'}</option>
         </select>
 
         {/* Customer Category Selector */}
@@ -1168,12 +1168,12 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
           value={dashSourceFilter}
           onChange={(e) => setDashSourceFilter(e.target.value)}
           className={`border rounded-none px-3 py-1 outline-none cursor-pointer font-light ${
-            isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+            isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
           }`}
         >
-          <option value="all" className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>{isBn ? 'সব কাস্টমার টাইপ' : 'All Customer Types'}</option>
-          <option value="b2b" className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>{isBn ? 'বিটুবি কমার্শিয়াল' : 'B2B Commercial'}</option>
-          <option value="personal" className={isDark ? 'bg-[#1C1C1E] text-white' : 'bg-white text-slate-900'}>{isBn ? 'পার্সোনাল কার্গো' : 'Personal Cargo'}</option>
+          <option value="all" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-slate-900'}>{isBn ? 'সব কাস্টমার টাইপ' : 'All Customer Types'}</option>
+          <option value="b2b" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-slate-900'}>{isBn ? 'বিটুবি কমার্শিয়াল' : 'B2B Commercial'}</option>
+          <option value="personal" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-slate-900'}>{isBn ? 'পার্সোনাল কার্গো' : 'Personal Cargo'}</option>
         </select>
       </div>
 
@@ -1181,7 +1181,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
         {/* Card 1: Total Cargo Volume */}
         <div className={`border rounded-none p-4 flex items-start space-x-3 transition-colors ${
-          isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white hover:border-[#3A3A3C]' : 'bg-white border-slate-200/90 text-slate-900 hover:border-slate-300'
+          isDark ? 'bg-[#1E293B] border-[#2C2C2E]/80 text-white hover:border-[#3A3A3C]' : 'bg-white border-slate-200/90 text-slate-900 hover:border-slate-300'
         }`}>
           <div className="w-10 h-10 rounded-none bg-[#00897B]/15 flex items-center justify-center text-[#00897B] shrink-0">
             <Package className="w-5 h-5" />
@@ -1197,7 +1197,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
         {/* Card 2: Flight & Sea Shipments */}
         <div className={`border rounded-none p-4 flex items-start space-x-3 transition-colors ${
-          isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white hover:border-[#3A3A3C]' : 'bg-white border-slate-200/90 text-slate-900 hover:border-slate-300'
+          isDark ? 'bg-[#1E293B] border-[#2C2C2E]/80 text-white hover:border-[#3A3A3C]' : 'bg-white border-slate-200/90 text-slate-900 hover:border-slate-300'
         }`}>
           <div className="w-10 h-10 rounded-none bg-[#22C55E]/15 flex items-center justify-center text-[#22C55E] shrink-0">
             <Plane className="w-5 h-5" />
@@ -1215,7 +1215,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
         {/* Card 3: Pending Flying Proposals */}
         <div className={`border rounded-none p-4 flex items-start space-x-3 transition-colors ${
-          isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white hover:border-[#3A3A3C]' : 'bg-white border-slate-200/90 text-slate-900 hover:border-slate-300'
+          isDark ? 'bg-[#1E293B] border-[#2C2C2E]/80 text-white hover:border-[#3A3A3C]' : 'bg-white border-slate-200/90 text-slate-900 hover:border-slate-300'
         }`}>
           <div className="w-10 h-10 rounded-none bg-[#1E88E5]/15 flex items-center justify-center text-[#1E88E5] shrink-0">
             <Truck className="w-5 h-5" />
@@ -1231,7 +1231,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
         {/* Card 4: Customer Dues Ledger */}
         <div className={`border rounded-none p-4 flex items-start space-x-3 transition-colors ${
-          isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white hover:border-[#3A3A3C]' : 'bg-white border-slate-200/90 text-slate-900 hover:border-slate-300'
+          isDark ? 'bg-[#1E293B] border-[#2C2C2E]/80 text-white hover:border-[#3A3A3C]' : 'bg-white border-slate-200/90 text-slate-900 hover:border-slate-300'
         }`}>
           <div className="w-10 h-10 rounded-none bg-[#F59E0B]/15 flex items-center justify-center text-[#F59E0B] shrink-0">
             <Wallet className="w-5 h-5" />
@@ -1248,7 +1248,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
         {/* Column 1: Freight Revenue Summary */}
         <div className={`border rounded-none p-5 space-y-3.5 ${
-          isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}>
           <h3 className={`text-xs font-light flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
             <DollarSign className="w-4 h-4 text-[#EA580C]" />
@@ -1289,7 +1289,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
         {/* Column 2: Network & Warehouse Hub Health */}
         <div className={`border rounded-none p-5 space-y-3.5 ${
-          isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}>
           <h3 className={`text-xs font-light flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
             <Activity className="w-4 h-4 text-[#00897B]" />
@@ -1325,7 +1325,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
         {/* Column 3: Cargo Stock & Inventory Status (With Database Speed Indicator) */}
         <div className={`border rounded-none p-5 space-y-3.5 ${
-          isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}>
           <div className="flex items-center justify-between">
             <h3 className={`text-xs font-light flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -1342,25 +1342,25 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
           <div className="grid grid-cols-2 gap-2">
             <div className={`border rounded-none p-2.5 text-center ${
-              isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+              isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
             }`}>
               <p className={`text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'মোট কার্টুন' : 'Total Cartons'}</p>
               <p className="text-sm font-light font-hind mt-0.5">{totalCartonCount}</p>
             </div>
             <div className={`border rounded-none p-2.5 text-center ${
-              isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+              isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
             }`}>
               <p className={`text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'মোট CBM' : 'Total CBM'}</p>
               <p className="text-sm font-light text-[#F59E0B] font-hind mt-0.5">{totalCbm.toFixed(2)}</p>
             </div>
             <div className={`border rounded-none p-2.5 text-center ${
-              isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+              isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
             }`}>
               <p className={`text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'মোট চার্জেবল ওয়েট' : 'Chargeable Wt'}</p>
               <p className="text-xs font-light text-[#22C55E] font-hind mt-0.5">{(totalGrossWeight * 1.05).toFixed(1)} kg</p>
             </div>
             <div className={`border rounded-none p-2.5 text-center ${
-              isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+              isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
             }`}>
               <p className={`text-[10px] font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'হোল্ড কার্টুন' : 'Held Cartons'}</p>
               <p className="text-sm font-light text-[#22C55E] font-hind mt-0.5">0</p>
@@ -1387,13 +1387,13 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
       {/* 5. Employee Overview (Matching Image 2) */}
       <div className={`border rounded-none p-6 space-y-4 ${
-        isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+        isDark ? 'bg-[#1E293B] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
       }`}>
         <h3 className={`text-sm font-light ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'কর্মী সারসংক্ষেপ' : 'Employee Overview'}</h3>
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           <div className={`border rounded-none p-3 flex items-center space-x-3 ${
-            isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+            isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
           }`}>
             <Users className="w-4 h-4 text-[#EA580C]" />
             <div>
@@ -1403,7 +1403,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
           </div>
 
           <div className={`border rounded-none p-3 flex items-center space-x-3 ${
-            isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+            isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
           }`}>
             <UserCheck className="w-4 h-4 text-[#22C55E]" />
             <div>
@@ -1415,7 +1415,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
           </div>
 
           <div className={`border rounded-none p-3 flex items-center space-x-3 ${
-            isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+            isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
           }`}>
             <UserX className="w-4 h-4 text-[#EF4444]" />
             <div>
@@ -1427,7 +1427,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
           </div>
 
           <div className={`border rounded-none p-3 flex items-center space-x-3 ${
-            isDark ? 'bg-[#121214] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+            isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
           }`}>
             <Clock className="w-4 h-4 text-[#F59E0B]" />
             <div>
@@ -1440,7 +1440,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
         {/* Panel Distribution Bar */}
         <div className="space-y-1.5 pt-2">
           <p className={`text-xs font-light ${isDark ? 'text-gray-400' : 'text-slate-500'}`}>{isBn ? 'প্যানেল অনুযায়ী' : 'By Panel'}</p>
-          <div className={`flex h-2.5 rounded-none overflow-hidden ${isDark ? 'bg-[#121214]' : 'bg-slate-100'}`}>
+          <div className={`flex h-2.5 rounded-none overflow-hidden ${isDark ? 'bg-[#0F172A]' : 'bg-slate-100'}`}>
             <div className="w-1/4 bg-[#1E88E5]" title="HR/Ops (1)" />
             <div className="w-3/4 bg-[#00897B]" title="Super Admin (1)" />
           </div>
@@ -1459,7 +1459,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
       {/* 6. Pending Approvals Inbox (Matching Image 2 & 3) */}
       <div className={`border rounded-none p-6 space-y-4 ${
-        isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+        isDark ? 'bg-[#1E293B] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
       }`}>
         <h3 className={`text-sm font-light flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
           <Target className="w-4 h-4 text-[#7C3AED]" />
@@ -1467,7 +1467,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
         </h3>
 
         <div className={`py-8 text-center text-xs border rounded-none font-light ${
-          isDark ? 'bg-[#121214] border-[#2C2C2E] text-gray-400' : 'bg-slate-50 border-slate-200 text-slate-500'
+          isDark ? 'bg-[#0F172A] border-[#2C2C2E] text-gray-400' : 'bg-slate-50 border-slate-200 text-slate-500'
         }`}>
           {isBn ? 'কোনো পেন্ডিং অনুমোদন নেই' : 'No pending approvals'}
         </div>
@@ -1475,7 +1475,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
 
       {/* 7. Quick Links Bar (Matching Image 3 EXACTLY) */}
       <div className={`border rounded-none p-6 space-y-4 ${
-        isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+        isDark ? 'bg-[#1E293B] border-[#2C2C2E]/80 text-white' : 'bg-white border-slate-200/90 text-slate-900'
       }`}>
         <h3 className={`text-sm font-light ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'দ্রুত লিংক' : 'Quick Links'}</h3>
 
@@ -1486,7 +1486,7 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
               <button
                 key={link.label}
                 className={`flex flex-col items-center gap-2.5 p-4 rounded-none border transition-all group cursor-pointer ${
-                  isDark ? 'bg-[#121214] hover:bg-[#222224] border-[#2C2C2E] text-gray-300' : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800'
+                  isDark ? 'bg-[#0F172A] hover:bg-[#222224] border-[#2C2C2E] text-gray-300' : 'bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-800'
                 }`}
               >
                 <div

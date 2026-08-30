@@ -379,7 +379,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
             onClick={() => setSelectedUserForAnalytics(null)}
             className={`px-4 py-2 rounded-xl text-xs font-normal border transition-all cursor-pointer flex items-center space-x-2 shadow-xs ${
               isDark
-                ? 'bg-[#1C1C1E] border-slate-700 text-white hover:bg-slate-800'
+                ? 'bg-[#1E293B] border-slate-700 text-white hover:bg-slate-800'
                 : 'bg-white border-slate-200 text-slate-800 hover:bg-slate-50'
             }`}
           >
@@ -398,7 +398,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
 
         {/* 2. Executive Employee Profile Card */}
         <div className={`p-6 rounded-2xl border flex flex-col md:flex-row md:items-center justify-between gap-6 shadow-xs ${
-          isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <div className="flex items-center space-x-4">
             <div className="relative">
@@ -407,7 +407,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
               }`}>
                 {selectedUserForAnalytics.name.charAt(0)}
               </div>
-              <span className="w-4 h-4 rounded-full bg-emerald-500 border-2 border-white dark:border-[#1C1C1E] absolute -bottom-0.5 -right-0.5" title="Active & Connected" />
+              <span className="w-4 h-4 rounded-full bg-emerald-500 border-2 border-white dark:border-[#1E293B] absolute -bottom-0.5 -right-0.5" title="Active & Connected" />
             </div>
 
             <div className="space-y-1">
@@ -436,7 +436,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
           </div>
 
           <div className={`p-3.5 rounded-xl border flex items-center space-x-4 text-xs ${
-            isDark ? 'bg-[#121214] border-slate-800' : 'bg-slate-50 border-slate-200'
+            isDark ? 'bg-[#0F172A] border-slate-800' : 'bg-slate-50 border-slate-200'
           }`}>
             <div>
               <span className="text-[11px] font-normal text-slate-500 block">{isBn ? 'কর্মদক্ষতা স্কোর:' : 'Efficiency Score:'}</span>
@@ -452,7 +452,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
 
         {/* 3. Time Filter Bar */}
         <div className={`p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs ${
-          isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
+          isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
         }`}>
           <span className={`flex items-center space-x-2 font-medium ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
             <Calendar className="w-4 h-4 text-[#00897B]" />
@@ -466,7 +466,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
                 analyticsDatePreset === 'today'
                   ? 'bg-[#00897B] text-white shadow-xs'
                   : isDark
-                  ? 'bg-[#121214] text-slate-400 hover:text-white'
+                  ? 'bg-[#0F172A] text-slate-400 hover:text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
@@ -478,7 +478,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
                 analyticsDatePreset === 'month'
                   ? 'bg-[#00897B] text-white shadow-xs'
                   : isDark
-                  ? 'bg-[#121214] text-slate-400 hover:text-white'
+                  ? 'bg-[#0F172A] text-slate-400 hover:text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
@@ -490,7 +490,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
                 analyticsDatePreset === 'year'
                   ? 'bg-[#00897B] text-white shadow-xs'
                   : isDark
-                  ? 'bg-[#121214] text-slate-400 hover:text-white'
+                  ? 'bg-[#0F172A] text-slate-400 hover:text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
@@ -502,7 +502,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
                 analyticsDatePreset === 'all'
                   ? 'bg-[#00897B] text-white shadow-xs'
                   : isDark
-                  ? 'bg-[#121214] text-slate-400 hover:text-white'
+                  ? 'bg-[#0F172A] text-slate-400 hover:text-white'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
               }`}
             >
@@ -514,7 +514,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
         {/* 4. Top 3 Performance Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className={`p-5 rounded-2xl border space-y-2 shadow-xs ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
             <span className="text-xs font-medium text-slate-500 flex items-center justify-between">
               <span>{isBn ? 'মোট সিস্টেম কার্যসম্পাদন' : 'Total System Operations'}</span>
@@ -525,7 +525,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
           </div>
 
           <div className={`p-5 rounded-2xl border space-y-2 shadow-xs ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
             <span className="text-xs font-medium text-slate-500 flex items-center justify-between">
               <span>{isBn ? 'প্রসেসকৃত ফ্রেইট ওজন' : 'Processed Freight Weight'}</span>
@@ -536,7 +536,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
           </div>
 
           <div className={`p-5 rounded-2xl border space-y-2 shadow-xs ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
             <span className="text-xs font-medium text-slate-500 flex items-center justify-between">
               <span>{isBn ? 'হ্যান্ডলড কার্গো ভলিউম' : 'Handled Volume'}</span>
@@ -549,7 +549,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
 
         {/* 5. Live Activity Stream Feed */}
         <div className={`p-6 rounded-2xl border space-y-4 shadow-xs ${
-          isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+          isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <div className="flex items-center justify-between border-b pb-3.5 dark:border-slate-800">
             <h3 className={`text-sm font-bold flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -571,7 +571,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
                 <div
                   key={log.id}
                   className={`p-3.5 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs transition-colors ${
-                    isDark ? 'bg-[#121214] border-slate-800 hover:border-slate-700' : 'bg-slate-50 border-slate-200/90 hover:bg-slate-100/60'
+                    isDark ? 'bg-[#0F172A] border-slate-800 hover:border-slate-700' : 'bg-slate-50 border-slate-200/90 hover:bg-slate-100/60'
                   }`}
                 >
                   <div className="space-y-1">
@@ -602,7 +602,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
 
       {/* 1. Header & Quick Actions Bar */}
       <div className={`p-4 rounded-xl border flex flex-col sm:flex-row sm:items-center justify-between gap-4 ${
-        isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
+        isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
       }`}>
         <div className="flex items-center space-x-3">
           <div className={`w-10 h-10 rounded-xl border flex items-center justify-center font-medium text-sm ${
@@ -633,7 +633,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
 
       {/* 2. Filters & Search Controls */}
       <div className={`p-3.5 rounded-xl border flex flex-wrap items-center justify-between gap-3 text-xs ${
-        isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
+        isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
       }`}>
         {/* Role Filter Tabs */}
         <div className="flex items-center space-x-1.5 flex-wrap gap-1">
@@ -643,7 +643,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
               roleFilter === 'all'
                 ? 'bg-[#00897B] text-white shadow-xs'
                 : isDark
-                ? 'bg-[#121214] text-slate-400 hover:text-white'
+                ? 'bg-[#0F172A] text-slate-400 hover:text-white'
                 : 'bg-slate-100 text-slate-700 hover:text-slate-900'
             }`}
           >
@@ -655,7 +655,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
               roleFilter === 'warehouse_incharge'
                 ? 'bg-[#00897B] text-white shadow-xs'
                 : isDark
-                ? 'bg-[#121214] text-slate-400 hover:text-white'
+                ? 'bg-[#0F172A] text-slate-400 hover:text-white'
                 : 'bg-slate-100 text-slate-700 hover:text-slate-900'
             }`}
           >
@@ -667,7 +667,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
               roleFilter === 'operation_director'
                 ? 'bg-[#00897B] text-white shadow-xs'
                 : isDark
-                ? 'bg-[#121214] text-slate-400 hover:text-white'
+                ? 'bg-[#0F172A] text-slate-400 hover:text-white'
                 : 'bg-slate-100 text-slate-700 hover:text-slate-900'
             }`}
           >
@@ -679,7 +679,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
               roleFilter === 'accountant'
                 ? 'bg-[#00897B] text-white shadow-xs'
                 : isDark
-                ? 'bg-[#121214] text-slate-400 hover:text-white'
+                ? 'bg-[#0F172A] text-slate-400 hover:text-white'
                 : 'bg-slate-100 text-slate-700 hover:text-slate-900'
             }`}
           >
@@ -696,7 +696,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder={isBn ? 'ইউজারের নাম, ইমেইল বা ওয়্যারহাউজ খুঁজুন...' : 'Search user name, email, hub...'}
             className={`w-full border rounded-lg py-1.5 pl-8 pr-3 text-xs outline-none font-normal ${
-              isDark ? 'bg-[#121214] border-slate-700 text-white placeholder-slate-400' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
+              isDark ? 'bg-[#0F172A] border-slate-700 text-white placeholder-slate-400' : 'bg-slate-50 border-slate-200 text-slate-900 placeholder-slate-400'
             }`}
           />
           {searchQuery && (
@@ -709,12 +709,12 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
 
       {/* 3. User Directory Table */}
       <div className={`border rounded-2xl overflow-hidden shadow-xs ${
-        isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+        isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
       }`}>
         <div className="overflow-x-auto">
           <table className={`w-full text-left text-xs ${isDark ? 'text-white' : 'text-slate-900'}`}>
             <thead className={`uppercase text-[10px] tracking-wider border-b font-medium ${
-              isDark ? 'bg-[#121214] text-slate-400 border-slate-800' : 'bg-slate-50 text-slate-600 border-slate-200'
+              isDark ? 'bg-[#0F172A] text-slate-400 border-slate-800' : 'bg-slate-50 text-slate-600 border-slate-200'
             }`}>
               <tr>
                 <th className="p-3.5">User Identity & Name</th>
@@ -843,7 +843,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
       {showAddUserModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-backdrop-blur-fade">
           <div className={`w-full max-w-lg rounded-2xl border p-6 space-y-5 shadow-2xl animate-modal-pop-bounce ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
             {/* Modal Header */}
             <div className={`flex items-center justify-between border-b pb-4 ${isDark ? 'border-slate-800' : 'border-slate-100'}`}>
@@ -887,7 +887,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
                   placeholder={isBn ? 'যেমন: রফিকুল ইসলাম' : 'e.g. Rafiqul Islam'}
                   className={`w-full border rounded-xl py-2.5 px-3.5 outline-none font-normal transition-all ${
                     isDark
-                      ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500'
+                      ? 'bg-[#0F172A] border-slate-700 text-white focus:border-teal-500'
                       : 'bg-slate-50/70 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/15'
                   }`}
                 />
@@ -906,7 +906,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
                     placeholder="user@fourstarcargo.com"
                     className={`w-full border rounded-xl py-2.5 px-3.5 outline-none font-mono transition-all ${
                       isDark
-                        ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500'
+                        ? 'bg-[#0F172A] border-slate-700 text-white focus:border-teal-500'
                         : 'bg-slate-50/70 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/15'
                     }`}
                   />
@@ -923,7 +923,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
                     placeholder="+880 1700-000000"
                     className={`w-full border rounded-xl py-2.5 px-3.5 outline-none font-mono transition-all ${
                       isDark
-                        ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500'
+                        ? 'bg-[#0F172A] border-slate-700 text-white focus:border-teal-500'
                         : 'bg-slate-50/70 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/15'
                     }`}
                   />
@@ -939,7 +939,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
                   onChange={(e) => setNewUserRole(e.target.value as UserRole)}
                   className={`w-full border rounded-xl py-2.5 px-3.5 outline-none cursor-pointer transition-all ${
                     isDark
-                      ? 'bg-[#121214] border-slate-700 text-white'
+                      ? 'bg-[#0F172A] border-slate-700 text-white'
                       : 'bg-slate-50/70 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
                   }`}
                 >
@@ -961,7 +961,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
                     onChange={(e) => setNewUserWhId(e.target.value)}
                     className={`w-full border rounded-xl py-2.5 px-3.5 outline-none cursor-pointer transition-all ${
                       isDark
-                        ? 'bg-[#121214] border-slate-700 text-white'
+                        ? 'bg-[#0F172A] border-slate-700 text-white'
                         : 'bg-slate-50/70 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B]'
                     }`}
                   >
@@ -984,7 +984,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
                   placeholder="••••••••"
                   className={`w-full border rounded-xl py-2.5 px-3.5 outline-none font-mono transition-all ${
                     isDark
-                      ? 'bg-[#121214] border-slate-700 text-white focus:border-teal-500'
+                      ? 'bg-[#0F172A] border-slate-700 text-white focus:border-teal-500'
                       : 'bg-slate-50/70 border-slate-200 text-slate-900 focus:bg-white focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/15'
                   }`}
                 />
@@ -996,7 +996,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
                   onClick={() => setShowAddUserModal(false)}
                   className={`px-4 py-2 rounded-xl text-xs font-normal border transition-all cursor-pointer ${
                     isDark
-                      ? 'bg-[#121214] border-slate-700 text-slate-300 hover:bg-slate-800'
+                      ? 'bg-[#0F172A] border-slate-700 text-slate-300 hover:bg-slate-800'
                       : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700'
                   }`}
                 >
@@ -1021,7 +1021,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
       {userToDelete && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-backdrop-blur-fade">
           <div className={`w-full max-w-md rounded-2xl border p-6 space-y-4 shadow-2xl animate-modal-pop-bounce ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
             <div className="flex items-center space-x-3 text-rose-600">
               <div className="w-10 h-10 rounded-xl bg-rose-50 border border-rose-200 dark:bg-rose-950/60 dark:border-rose-800 flex items-center justify-center">
@@ -1039,7 +1039,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
             </p>
 
             <div className={`p-3 rounded-xl border text-xs space-y-1 ${
-              isDark ? 'bg-[#121214] border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-700'
+              isDark ? 'bg-[#0F172A] border-slate-800 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-700'
             }`}>
               <div className="flex items-center justify-between">
                 <span>User Name:</span>
@@ -1061,7 +1061,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
                 onClick={() => setUserToDelete(null)}
                 className={`px-4 py-2 rounded-xl text-xs font-normal border transition-all cursor-pointer ${
                   isDark
-                    ? 'bg-[#121214] border-slate-700 text-slate-300 hover:bg-slate-800'
+                    ? 'bg-[#0F172A] border-slate-700 text-slate-300 hover:bg-slate-800'
                     : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700'
                 }`}
               >

@@ -135,7 +135,7 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({ language, 
           onClick={markAllRead}
           className={`flex items-center space-x-1.5 px-4 py-2 rounded-none text-xs font-semibold border transition-all cursor-pointer ${
             isDark
-              ? 'bg-[#1C1C1E] text-white border-[#2C2C2E] hover:bg-[#2C2C2E]'
+              ? 'bg-[#1E293B] text-white border-[#2C2C2E] hover:bg-[#2C2C2E]'
               : 'bg-white text-gray-800 border-gray-300 hover:bg-gray-100 shadow-xs'
           }`}
         >
@@ -153,7 +153,7 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({ language, 
             onChange={(e) => setTypeFilter(e.target.value)}
             className={`px-3 py-2 text-xs rounded-none border outline-none font-medium appearance-none pr-8 cursor-pointer ${
               isDark
-                ? 'bg-[#1C1C1E] text-white border-[#2C2C2E] hover:border-gray-600'
+                ? 'bg-[#1E293B] text-white border-[#2C2C2E] hover:border-gray-600'
                 : 'bg-white text-gray-800 border-gray-300 hover:border-gray-400 shadow-xs'
             }`}
           >
@@ -172,7 +172,7 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({ language, 
           onChange={(e) => setReadFilter(e.target.value)}
           className={`px-3 py-2 text-xs rounded-none border outline-none font-medium cursor-pointer ${
             isDark
-              ? 'bg-[#1C1C1E] text-white border-[#2C2C2E] hover:border-gray-600'
+              ? 'bg-[#1E293B] text-white border-[#2C2C2E] hover:border-gray-600'
               : 'bg-white text-gray-800 border-gray-300 hover:border-gray-400 shadow-xs'
           }`}
         >
@@ -183,7 +183,7 @@ export const NotificationsPage: React.FC<NotificationsPageProps> = ({ language, 
       </div>
 
       {/* Notifications Card List Container */}
-      <div className={`rounded-none border ${isDark ? 'bg-[#1C1C1E] border-[#2C2C2E]' : 'bg-white border-gray-200 shadow-xs'} overflow-hidden`}>
+      <div className={`rounded-none border ${isDark ? 'bg-[#1E293B] border-[#2C2C2E]' : 'bg-white border-gray-200 shadow-xs'} overflow-hidden`}>
         {filteredNotifications.length === 0 ? (
           <div className="p-12 text-center">
             <Bell className={`w-10 h-10 mx-auto mb-3 ${isDark ? 'text-[#3A3A3C]' : 'text-gray-300'}`} />

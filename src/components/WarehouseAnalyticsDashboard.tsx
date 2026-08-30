@@ -435,7 +435,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
           {/* Storage Capacity Gauge Card */}
           <div
             className={`p-6 rounded-xl border transition-all shadow-2xs ${
-              isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90'
+              isDark ? 'bg-[#1E293B] border-slate-800' : 'bg-white border-slate-200/90'
             }`}
           >
             <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
@@ -493,7 +493,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
           {/* Product Category Distribution */}
           <div
             className={`p-6 rounded-xl border transition-all shadow-2xs ${
-              isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90'
+              isDark ? 'bg-[#1E293B] border-slate-800' : 'bg-white border-slate-200/90'
             }`}
           >
             <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2 border-b pb-3 border-slate-200 dark:border-slate-800">
@@ -544,7 +544,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
         {/* Destination Breakdown Leaderboard */}
         <div
           className={`p-6 rounded-xl border transition-all shadow-2xs ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90'
+            isDark ? 'bg-[#1E293B] border-slate-800' : 'bg-white border-slate-200/90'
           }`}
         >
           <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">
@@ -609,7 +609,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
         {/* Live Warehouse Movement Activity Feed */}
         <div
           className={`p-6 rounded-xl border transition-all shadow-2xs ${
-            isDark ? 'bg-[#1C1C1E] border-slate-800' : 'bg-white border-slate-200/90'
+            isDark ? 'bg-[#1E293B] border-slate-800' : 'bg-white border-slate-200/90'
           }`}
         >
           <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-800">

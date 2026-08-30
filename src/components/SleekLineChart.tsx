@@ -69,7 +69,7 @@ export const SleekLineChart: React.FC<SleekLineChartProps> = ({
 
   return (
     <div className={`p-6 rounded-3xl border transition-all ${
-      isDark ? 'bg-[#1C1C1E] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900 shadow-2xs'
+      isDark ? 'bg-[#1E293B] border-slate-800 text-white' : 'bg-white border-slate-200/90 text-slate-900 shadow-2xs'
     }`}>
       {/* Title & Tooltip Header */}
       <div className="flex items-center justify-between mb-4">
@@ -177,7 +177,7 @@ export const SleekLineChart: React.FC<SleekLineChartProps> = ({
               cy={pt.y}
               r={hoveredPoint?.date === pt.data.date ? '5.5' : '3.5'}
               fill={color}
-              stroke={isDark ? '#1C1C1E' : '#FFFFFF'}
+              stroke={isDark ? '#1E293B' : '#FFFFFF'}
               strokeWidth="2"
               className="cursor-pointer transition-all hover:r-6"
               onMouseEnter={() => setHoveredPoint(pt.data)}
