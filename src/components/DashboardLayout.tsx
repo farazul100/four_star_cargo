@@ -36,7 +36,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
   return (
     <div
       className={`h-screen flex flex-col overflow-hidden transition-colors duration-200 ${
-        isDark ? 'bg-[#141414] text-white' : 'bg-[#F4F5F7] text-gray-900'
+        isDark ? 'bg-[#1E293B] text-white' : 'bg-[#F4F5F7] text-gray-900'
       } ${theme}`}
     >
       {/* Top Navbar */}
@@ -75,7 +75,7 @@ export const DashboardLayout: React.FC<DashboardLayoutProps> = ({
         <main
           className={`flex-1 overflow-y-auto transition-colors duration-200 ${
             activeTab === 'system_chat' ? 'p-0 flex flex-col h-[calc(100vh-3.5rem)]' : 'p-4 md:px-6 md:py-4'
-          } ${isDark ? 'bg-[#141414]' : 'bg-[#F4F5F7]'}`}
+          } ${isDark ? 'bg-[#1E293B]' : 'bg-[#F4F5F7]'}`}
         >
           <div className={activeTab === 'system_chat' ? 'w-full h-full' : 'max-w-7xl mx-auto space-y-5'}>
             {/* Header Pattern: Title + Subtitle (Only render if pageTitle exists and not notifications/profile/chat) */}

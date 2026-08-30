@@ -189,7 +189,7 @@ export const Header: React.FC<HeaderProps> = ({
     <header
       className={`h-14 border-b flex items-center justify-between px-4 md:px-6 sticky top-0 z-50 font-sans transition-colors duration-200 ${
         isDark
-          ? 'bg-[#141414] border-[#2C2C2E]/80 text-white'
+          ? 'bg-[#0F172A] border-slate-700/80 text-white'
           : 'bg-white border-gray-200 text-gray-900 shadow-xs'
       }`}
     >
