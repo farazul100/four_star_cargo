@@ -56,8 +56,7 @@ export function App() {
         <Route path="/track" element={<PublicTrackingPage />} />
         <Route path="/tracking" element={<PublicTrackingPage />} />
         <Route path="/cargo-track" element={<PublicTrackingPage />} />
-        <Route path="/search" element={<PublicTrackingPage />} />
-        <Route path="/crm/search" element={<PublicTrackingPage />} />
+        <Route path="/public-search" element={<PublicTrackingPage />} />
 
         {/* Dedicated Role Login Screens — Auto-redirects if already logged in */}
         <Route
