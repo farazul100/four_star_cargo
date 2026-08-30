@@ -51,8 +51,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const signOut = async () => {
     setUser(null);
-    localStorage.removeItem('fsc_active_user');
-    sessionStorage.removeItem('fsc_active_user');
+    try {
+      localStorage.removeItem('fsc_active_user');
+      sessionStorage.removeItem('fsc_active_user');
+      localStorage.removeItem('active_user');
+      sessionStorage.removeItem('active_user');
+      localStorage.removeItem('user');
+      sessionStorage.removeItem('user');
+    } catch (e) {}
+    if (typeof window !== 'undefined') {
+      window.location.href = '/';
+    }
   };
 
 
