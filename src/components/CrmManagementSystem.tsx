@@ -148,6 +148,8 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
 
   // Customer Entry Form Expanded States
+  const [customerCustomId, setCustomerCustomId] = useState('');
+  const [shippingMark, setShippingMark] = useState('');
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
   const [companyName, setCompanyName] = useState('');
@@ -167,6 +169,8 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
 
     const newCust: CrmCustomer = {
       id: `crm-cust-${Date.now()}`,
+      customer_custom_id: customerCustomId.trim() || undefined,
+      shipping_mark: shippingMark.trim() || undefined,
       name: name.trim(),
       phone: phone.trim(),
       company_name: companyName.trim() || undefined,
@@ -217,6 +221,8 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
     setActiveStageTab(initialCategory);
 
     // Reset Form
+    setCustomerCustomId('');
+    setShippingMark('');
     setName('');
     setPhone('');
     setCompanyName('');
@@ -357,37 +363,100 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
 
       {/* VIEW 1: DEDICATED EXPANDED CUSTOMER CREATION FORM PAGE */}
       {activeStageTab === 'create_customer' && (
-        <div className={`border rounded-xl p-6 shadow-sm space-y-6 transition-all max-w-4xl mx-auto ${
-          isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-400 text-black'
+        <div className={`border rounded-2xl p-6 sm:p-8 shadow-md space-y-6 transition-all max-w-4xl mx-auto ${
+          isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-300 text-black'
         }`}>
-          <div className={`border-b pb-4 flex items-center space-x-3 ${isDark ? 'border-slate-700' : 'border-slate-300'}`}>
-            <div className="w-9 h-9 rounded-lg bg-[#00897B]/10 text-[#00897B] flex items-center justify-center">
-              <UserPlus className="w-5 h-5 text-[#00897B]" />
+          {/* Header Card */}
+          <div className={`border-b pb-5 flex items-center space-x-3.5 ${isDark ? 'border-slate-700' : 'border-slate-200'}`}>
+            <div className="w-11 h-11 rounded-xl bg-teal-500/10 border border-teal-500/20 text-[#00897B] dark:text-teal-400 flex items-center justify-center shadow-2xs">
+              <UserPlus className="w-6 h-6 text-[#00897B] dark:text-teal-400" />
             </div>
             <div>
-              <h3 className={`text-sm font-semibold ${isDark ? 'text-white' : 'text-black'}`}>
-                {isBn ? 'নতুন কাস্টমার অনবোর্ডিং ফর্ম (Full Customer Profile Onboarding)' : 'Full Customer Profile Onboarding Form'}
+              <h3 className={`text-base font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                {isBn ? 'নতুন কাস্টমার অনবোর্ডিং পোর্টাল (Full Customer Profile Onboarding)' : 'Full Customer Profile Onboarding Form'}
               </h3>
-              <p className={`text-xs font-normal mt-0.5 ${isDark ? 'text-slate-300' : 'text-black/80'}`}>
-                {isBn ? 'কাস্টমারের বিবরণ পূরণ করে নির্দিষ্ট স্টেজ সিলেক্ট করে সেভ করুন' : 'Fill detailed customer information and select target stage'}
+              <p className={`text-xs font-normal mt-0.5 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                {isBn ? 'কাস্টমার আইডি, শিপিং মার্ক ও বিবরণ পূরণ করে নির্দিষ্ট স্টেজ সিলেক্ট করে সেভ করুন' : 'Enter customer ID, shipping mark, contact details and target pipeline stage'}
               </p>
             </div>
           </div>
 
-          <form onSubmit={handleCreateCustomer} className="space-y-5">
-            {/* Section 1: Basic Contact Information */}
+          <form onSubmit={handleCreateCustomer} className="space-y-6">
+            {/* Section 1: Customer ID & Shipping Mark Identification */}
             <div className="space-y-3">
-              <h4 className={`text-xs font-semibold uppercase tracking-wider border-b pb-1 flex items-center space-x-1.5 ${
-                isDark ? 'text-teal-400 border-slate-700' : 'text-black border-slate-400'
-              }`}>
-                <Users className="w-3.5 h-3.5 text-[#00897B]" />
-                <span>{isBn ? '১. প্রাথমিক যোগাযোগের তথ্য (Basic Information)' : '1. Basic Information'}</span>
-              </h4>
+              <div className="flex items-center space-x-2 border-b pb-1.5 border-teal-500/20">
+                <span className="px-2 py-0.5 text-[11px] font-bold rounded bg-teal-500/10 text-[#00897B] dark:text-teal-400 border border-teal-500/20">
+                  SECTION 1
+                </span>
+                <h4 className={`text-xs font-bold uppercase tracking-wider ${
+                  isDark ? 'text-teal-400' : 'text-slate-900'
+                }`}>
+                  {isBn ? 'কাস্টমার ইউনিক আইডি ও শিপিং মার্ক (Identification & Marking)' : 'Customer ID & Shipping Mark'}
+                </h4>
+              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Customer Custom ID */}
+                <div className="space-y-1">
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
+                    {isBn ? 'কাস্টমার আইডি (Customer ID)' : 'Customer ID (Client Code)'}
+                  </label>
+                  <input
+                    type="text"
+                    value={customerCustomId}
+                    onChange={(e) => setCustomerCustomId(e.target.value)}
+                    placeholder="e.g. FSC-1082 / CID-501"
+                    className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-medium outline-none transition-all ${
+                      isDark
+                        ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20'
+                        : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-600 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
+                    }`}
+                  />
+                  <p className={`text-[10px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                    {isBn ? 'ম্যানুয়াল কাস্টমার অনন্য আইডি (যেমন: FSC-1082)' : 'Unique custom customer code identifier'}
+                  </p>
+                </div>
+
+                {/* Shipping Mark */}
+                <div className="space-y-1">
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
+                    {isBn ? 'শিপিং মার্ক (Shipping Mark)' : 'Shipping Mark / Code'}
+                  </label>
+                  <input
+                    type="text"
+                    value={shippingMark}
+                    onChange={(e) => setShippingMark(e.target.value)}
+                    placeholder="e.g. SM-DHAKA-88 / FSC/MASUKA"
+                    className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-medium outline-none transition-all ${
+                      isDark
+                        ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20'
+                        : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-600 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
+                    }`}
+                  />
+                  <p className={`text-[10px] ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                    {isBn ? 'কার্গো কার্টুন ট্র্যাকিং শিপিং মার্ক (যেমন: SM-DHAKA-88)' : 'Carton mark code used for cargo tracking'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Section 2: Basic Contact Information */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2 border-b pb-1.5 border-teal-500/20">
+                <span className="px-2 py-0.5 text-[11px] font-bold rounded bg-teal-500/10 text-[#00897B] dark:text-teal-400 border border-teal-500/20">
+                  SECTION 2
+                </span>
+                <h4 className={`text-xs font-bold uppercase tracking-wider ${
+                  isDark ? 'text-teal-400' : 'text-slate-900'
+                }`}>
+                  {isBn ? 'প্রাথমিক যোগাযোগের তথ্য (Basic Information)' : 'Basic Information'}
+                </h4>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {/* Customer Name */}
                 <div className="space-y-1">
-                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
                     {isBn ? 'কাস্টমারের নাম (Name) *' : 'Customer Name *'}
                   </label>
                   <input
@@ -396,15 +465,17 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Masuka Begum"
-                    className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none transition-all ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                    className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
+                      isDark
+                        ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20'
+                        : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-600 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                     }`}
                   />
                 </div>
 
                 {/* Phone Number */}
                 <div className="space-y-1">
-                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
                     {isBn ? 'ফোন নম্বর (Phone Number) *' : 'Phone Number *'}
                   </label>
                   <input
@@ -413,31 +484,35 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="01828661711"
-                    className={`w-full border rounded-lg py-2 px-3 text-xs font-mono font-medium outline-none transition-all ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                    className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-medium outline-none transition-all ${
+                      isDark
+                        ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20'
+                        : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-600 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                     }`}
                   />
                 </div>
 
                 {/* Company Name */}
                 <div className="space-y-1">
-                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
                     {isBn ? 'কোম্পানি / ব্যবসার নাম (Company)' : 'Company / Business'}
                   </label>
                   <input
                     type="text"
                     value={companyName}
                     onChange={(e) => setCompanyName(e.target.value)}
-                    placeholder="e.g. Four Star Fashion"
-                    className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none transition-all ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                    placeholder="e.g. Four Star Fashion Ltd"
+                    className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
+                      isDark
+                        ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20'
+                        : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-600 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                     }`}
                   />
                 </div>
 
                 {/* Email Address */}
                 <div className="space-y-1">
-                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
                     {isBn ? 'ইমেইল এড্রেস (Email Address)' : 'Email Address'}
                   </label>
                   <input
@@ -445,43 +520,51 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="client@gmail.com"
-                    className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none transition-all ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                    className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
+                      isDark
+                        ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20'
+                        : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-600 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                     }`}
                   />
                 </div>
 
                 {/* Address / Location */}
                 <div className="space-y-1 md:col-span-2">
-                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
                     {isBn ? 'ঠিকানা / লোকেশন (Address)' : 'Address / Location'}
                   </label>
                   <input
                     type="text"
                     value={address}
                     onChange={(e) => setAddress(e.target.value)}
-                    placeholder="e.g. Uttara Sector 7, Dhaka"
-                    className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none transition-all ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                    placeholder="e.g. House 14, Road 5, Uttara Sector 7, Dhaka"
+                    className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
+                      isDark
+                        ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20'
+                        : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-600 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                     }`}
                   />
                 </div>
               </div>
             </div>
 
-            {/* Section 2: Cargo & Shipment Details */}
+            {/* Section 3: Cargo & Shipment Details */}
             <div className="space-y-3">
-              <h4 className={`text-xs font-semibold uppercase tracking-wider border-b pb-1 flex items-center space-x-1.5 ${
-                isDark ? 'text-teal-400 border-slate-700' : 'text-black border-slate-400'
-              }`}>
-                <Package className="w-3.5 h-3.5 text-[#00897B]" />
-                <span>{isBn ? '২. শিপমেন্ট ও কার্গো ইনকোয়ারি (Cargo Info)' : '2. Cargo Info'}</span>
-              </h4>
+              <div className="flex items-center space-x-2 border-b pb-1.5 border-teal-500/20">
+                <span className="px-2 py-0.5 text-[11px] font-bold rounded bg-teal-500/10 text-[#00897B] dark:text-teal-400 border border-teal-500/20">
+                  SECTION 3
+                </span>
+                <h4 className={`text-xs font-bold uppercase tracking-wider ${
+                  isDark ? 'text-teal-400' : 'text-slate-900'
+                }`}>
+                  {isBn ? 'শিপমেন্ট ও কার্গো ইনকোয়ারি (Cargo Info)' : 'Cargo Info'}
+                </h4>
+              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {/* Product / Cargo Type */}
                 <div className="space-y-1">
-                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
                     {isBn ? 'পণ্য বা কার্গো টাইপ (Product Type)' : 'Product / Cargo Type'}
                   </label>
                   <input
@@ -489,15 +572,17 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     value={productType}
                     onChange={(e) => setProductType(e.target.value)}
                     placeholder="e.g. Garments Fabrics / Electronics"
-                    className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none transition-all ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                    className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
+                      isDark
+                        ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20'
+                        : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-600 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                     }`}
                   />
                 </div>
 
                 {/* Estimated Weight */}
                 <div className="space-y-1">
-                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
                     {isBn ? 'আনুমানিক ওজন/ভলিউম (Est. Weight)' : 'Estimated Weight/Volume'}
                   </label>
                   <input
@@ -505,15 +590,17 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     value={estWeight}
                     onChange={(e) => setEstWeight(e.target.value)}
                     placeholder="e.g. 150 kg / 2 CBM"
-                    className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none transition-all ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                    className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
+                      isDark
+                        ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20'
+                        : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-600 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                     }`}
                   />
                 </div>
 
                 {/* Social Media Link / WeChat */}
                 <div className="space-y-1">
-                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
                     {isBn ? 'ফেসবুক/উইচ্যাট পেজ (Social / WeChat)' : 'Social Link / WeChat'}
                   </label>
                   <input
@@ -521,34 +608,40 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     value={socialLink}
                     onChange={(e) => setSocialLink(e.target.value)}
                     placeholder="fb.com/page or wxid_..."
-                    className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none transition-all ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                    className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
+                      isDark
+                        ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20'
+                        : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-600 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                     }`}
                   />
                 </div>
               </div>
             </div>
 
-            {/* Section 3: Country Category & Stage Selection */}
+            {/* Section 4: Country Category & Stage Selection */}
             <div className="space-y-3">
-              <h4 className={`text-xs font-semibold uppercase tracking-wider border-b pb-1 flex items-center space-x-1.5 ${
-                isDark ? 'text-teal-400 border-slate-700' : 'text-black border-slate-400'
-              }`}>
-                <Globe className="w-3.5 h-3.5 text-[#00897B]" />
-                <span>{isBn ? '৩. কান্ট্রি শট ও স্টেজ সিলেক্ট (Country & Target Stage)' : '3. Country & Target Stage'}</span>
-              </h4>
+              <div className="flex items-center space-x-2 border-b pb-1.5 border-teal-500/20">
+                <span className="px-2 py-0.5 text-[11px] font-bold rounded bg-teal-500/10 text-[#00897B] dark:text-teal-400 border border-teal-500/20">
+                  SECTION 4
+                </span>
+                <h4 className={`text-xs font-bold uppercase tracking-wider ${
+                  isDark ? 'text-teal-400' : 'text-slate-900'
+                }`}>
+                  {isBn ? 'কান্ট্রি শট ও স্টেজ সিলেক্ট (Country & Target Stage)' : 'Country & Target Stage'}
+                </h4>
+              </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Country Sheet Category */}
                 <div className="space-y-1">
-                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
                     {isBn ? 'কান্ট্রি ক্যাটাগরি (Country Sheet)' : 'Country Category'}
                   </label>
                   <select
                     value={countryCategory}
                     onChange={(e) => setCountryCategory(e.target.value as any)}
-                    className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none cursor-pointer ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-white border-slate-400 text-black focus:border-[#00897B]'
+                    className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none cursor-pointer ${
+                      isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-slate-50 border-slate-300 text-black focus:border-[#00897B] focus:bg-white'
                     }`}
                   >
                     <option value="CN_New" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>CN New</option>
@@ -562,14 +655,14 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
 
                 {/* Target Stage Selection */}
                 <div className="space-y-1">
-                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
+                  <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
                     {isBn ? 'কাস্টমার কোন টেবিলে যুক্ত হবে? (Target Table Stage) *' : 'Target Table Stage *'}
                   </label>
                   <select
                     value={initialCategory}
                     onChange={(e) => setInitialCategory(e.target.value as any)}
-                    className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none cursor-pointer ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-white border-slate-400 text-black focus:border-[#00897B]'
+                    className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none cursor-pointer ${
+                      isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-[#00897B]' : 'bg-slate-50 border-slate-300 text-black focus:border-[#00897B] focus:bg-white'
                     }`}
                   >
                     <option value="followup" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>🔴 ফলো আপ কাস্টমার (Follow Up Table)</option>
@@ -580,29 +673,59 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
               </div>
             </div>
 
-            {/* Section 4: Inquiry Notes */}
-            <div className="space-y-1">
-              <label className={`text-xs font-medium block ${isDark ? 'text-slate-100' : 'text-black'}`}>
-                {isBn ? 'নোট বা ইনকোয়ারি তথ্য (Notes)' : 'Inquiry / Notes'}
-              </label>
+            {/* Section 5: Inquiry Notes */}
+            <div className="space-y-3">
+              <div className="flex items-center space-x-2 border-b pb-1.5 border-teal-500/20">
+                <span className="px-2 py-0.5 text-[11px] font-bold rounded bg-teal-500/10 text-[#00897B] dark:text-teal-400 border border-teal-500/20">
+                  SECTION 5
+                </span>
+                <h4 className={`text-xs font-bold uppercase tracking-wider ${
+                  isDark ? 'text-teal-400' : 'text-slate-900'
+                }`}>
+                  {isBn ? 'নোট বা ইনকোয়ারি তথ্য (Notes)' : 'Inquiry / Notes'}
+                </h4>
+              </div>
+
               <textarea
                 rows={2.5}
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="e.g. Guangzhou air freight quote given $8.5/kg..."
-                className={`w-full border rounded-lg py-2 px-3 text-xs font-medium outline-none transition-all ${
-                  isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                placeholder="e.g. Guangzhou air freight quote given $8.5/kg. Flight expected next Monday..."
+                className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
+                  isDark
+                    ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20'
+                    : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-600 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                 }`}
               />
             </div>
 
-            <div className="pt-2 flex justify-end">
+            {/* Action Submit Button Bar */}
+            <div className="pt-3 border-t border-slate-200 dark:border-slate-700 flex justify-end space-x-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setCustomerCustomId('');
+                  setShippingMark('');
+                  setName('');
+                  setPhone('');
+                  setCompanyName('');
+                  setEmail('');
+                  setAddress('');
+                  setProductType('');
+                  setEstWeight('');
+                  setSocialLink('');
+                  setNotes('');
+                }}
+                className="py-2.5 px-5 rounded-xl border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 text-xs font-medium transition-all cursor-pointer"
+              >
+                {isBn ? 'রিসেট ফর্ম' : 'Reset Form'}
+              </button>
               <button
                 type="submit"
-                className="py-2.5 px-6 rounded-lg bg-[#00897B] hover:bg-[#00796B] text-white font-normal text-xs shadow-2xs flex items-center space-x-1.5 transition-all cursor-pointer"
+                className="py-2.5 px-7 rounded-xl bg-[#00897B] hover:bg-[#00796B] active:scale-95 text-white font-medium text-xs shadow-md flex items-center space-x-2 transition-all cursor-pointer"
               >
                 <Plus className="w-4 h-4 text-white" />
-                <span>{isBn ? 'কাস্টমার সেভ করুন' : 'Save & Add Customer'}</span>
+                <span>{isBn ? 'কাস্টমার সেভ করুন' : 'Save & Onboard Customer'}</span>
               </button>
             </div>
           </form>
@@ -731,24 +854,36 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                           {idx + 1}
                         </td>
                         <td className="py-3 px-3.5">
-                          <p className={`font-semibold text-xs flex items-center space-x-1 ${isDark ? 'text-white' : 'text-black'}`}>
-                            <span>{cust.name}</span>
-                            {cust.company_name && (
-                              <span className={`text-[10px] font-medium px-1.5 py-0.2 rounded border ${isDark ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-400 text-black'}`}>
-                                🏢 {cust.company_name}
-                              </span>
-                            )}
-                          </p>
-                          <p className="text-[11px] font-mono text-teal-800 dark:text-teal-400 font-medium flex items-center space-x-1 mt-0.5">
-                            <Phone className="w-3 h-3 text-teal-700" />
-                            <span>{cust.phone}</span>
-                          </p>
-                          {cust.address && (
-                            <p className="text-[10px] text-black/90 font-normal flex items-center space-x-1 mt-0.5">
-                              <MapPin className="w-2.5 h-2.5 text-black" />
-                              <span>{cust.address}</span>
+                          <div className="space-y-0.5">
+                            <p className={`font-semibold text-xs flex flex-wrap items-center gap-1.5 ${isDark ? 'text-white' : 'text-black'}`}>
+                              <span>{cust.name}</span>
+                              {cust.customer_custom_id && (
+                                <span className={`text-[10px] font-mono font-medium px-1.5 py-0.2 rounded border ${isDark ? 'bg-teal-950/80 text-teal-300 border-teal-800' : 'bg-teal-50 text-teal-900 border-teal-300'}`}>
+                                  🆔 {cust.customer_custom_id}
+                                </span>
+                              )}
+                              {cust.shipping_mark && (
+                                <span className={`text-[10px] font-mono font-medium px-1.5 py-0.2 rounded border ${isDark ? 'bg-amber-950/80 text-amber-300 border-amber-800' : 'bg-amber-50 text-amber-900 border-amber-300'}`}>
+                                  🏷️ {cust.shipping_mark}
+                                </span>
+                              )}
+                              {cust.company_name && (
+                                <span className={`text-[10px] font-medium px-1.5 py-0.2 rounded border ${isDark ? 'bg-slate-800 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-400 text-black'}`}>
+                                  🏢 {cust.company_name}
+                                </span>
+                              )}
                             </p>
-                          )}
+                            <p className={`text-[11px] font-mono font-medium flex items-center space-x-1 ${isDark ? 'text-teal-400' : 'text-teal-800'}`}>
+                              <Phone className={`w-3 h-3 ${isDark ? 'text-teal-400' : 'text-teal-700'}`} />
+                              <span>{cust.phone}</span>
+                            </p>
+                            {cust.address && (
+                              <p className={`text-[10px] font-normal flex items-center space-x-1 ${isDark ? 'text-slate-300' : 'text-black/90'}`}>
+                                <MapPin className={`w-2.5 h-2.5 ${isDark ? 'text-slate-400' : 'text-black'}`} />
+                                <span>{cust.address}</span>
+                              </p>
+                            )}
+                          </div>
                         </td>
                         <td className="py-3 px-3.5">
                           <span className="px-2 py-0.5 bg-slate-100 dark:bg-slate-800 text-black dark:text-slate-300 font-mono font-medium rounded-md border border-slate-400 dark:border-slate-700 text-[11px]">

@@ -8,6 +8,8 @@ export type Theme = 'dark' | 'light';
 
 export interface CrmCustomer {
   id: string;
+  customer_custom_id?: string;
+  shipping_mark?: string;
   name: string;
   phone: string;
   company_name?: string;
