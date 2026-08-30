@@ -754,30 +754,44 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
         </div>
       </div>
 
-      {/* 1. Top Executive Operational KPI Summary Cards (All Light Font) */}
+      {/* 1. Top Executive Operational KPI Summary Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90 shadow-2xs'}`}>
           <span className="text-xs text-slate-500 dark:text-slate-400 font-normal block">{isBn ? 'গড় ফ্রেইট ট্রানজিট সময়:' : 'Avg Air Transit Time:'}</span>
-          <span className="text-xl font-medium font-mono text-[#1D4ED8] mt-1 block">2.4 {isBn ? 'দিন' : 'Days'}</span>
-          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal mt-0.5 block">⚡ Fast Air Freight SLA</span>
+          <span className="text-xl font-medium font-mono text-[#1D4ED8] mt-1 block">
+            {cartons.length > 0 ? '2.4 Days' : '0 Days'}
+          </span>
+          <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-normal mt-0.5 block">
+            {cartons.length > 0 ? '⚡ Fast Air Freight SLA' : '0 SLA'}
+          </span>
         </div>
 
         <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90 shadow-2xs'}`}>
           <span className="text-xs text-slate-500 dark:text-slate-400 font-normal block">{isBn ? 'অন-টাইম ডিসপ্যাচ রেট:' : 'On-Time Dispatch Rate:'}</span>
-          <span className="text-xl font-medium font-mono text-emerald-600 dark:text-emerald-400 mt-1 block">98.5%</span>
+          <span className="text-xl font-medium font-mono text-emerald-600 dark:text-emerald-400 mt-1 block">
+            {cartons.length > 0 ? '98.5%' : '0%'}
+          </span>
           <span className="text-[10px] text-slate-400 font-normal mt-0.5 block">Target &gt; 95.0%</span>
         </div>
 
         <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90 shadow-2xs'}`}>
           <span className="text-xs text-slate-500 dark:text-slate-400 font-normal block">{isBn ? 'ফ্লাইট ক্যাপাসিটি ইউটিলাইজেশন:' : 'Air Payload Utilization:'}</span>
-          <span className="text-xl font-medium font-mono text-purple-600 dark:text-purple-400 mt-1 block">92.8%</span>
-          <span className="text-[10px] text-purple-500 font-normal mt-0.5 block">High Volume Efficiency</span>
+          <span className="text-xl font-medium font-mono text-purple-600 dark:text-purple-400 mt-1 block">
+            {cartons.length > 0 ? '92.8%' : '0%'}
+          </span>
+          <span className="text-[10px] text-purple-500 font-normal mt-0.5 block">
+            {cartons.length > 0 ? 'High Volume Efficiency' : '0 kg Payload'}
+          </span>
         </div>
 
         <div className={`p-4 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90 shadow-2xs'}`}>
           <span className="text-xs text-slate-500 dark:text-slate-400 font-normal block">{isBn ? 'সেফ হ্যান্ডলিং স্কোর:' : 'Safe Handling Score:'}</span>
-          <span className="text-xl font-medium font-mono text-amber-600 dark:text-amber-400 mt-1 block">99.9%</span>
-          <span className="text-[10px] text-amber-500 font-normal mt-0.5 block">Zero Damage Record</span>
+          <span className="text-xl font-medium font-mono text-amber-600 dark:text-amber-400 mt-1 block">
+            {cartons.length > 0 ? '99.9%' : '0%'}
+          </span>
+          <span className="text-[10px] text-amber-500 font-normal mt-0.5 block">
+            {cartons.length > 0 ? 'Zero Damage Record' : 'No Cargo Records'}
+          </span>
         </div>
       </div>
 
@@ -787,71 +801,98 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
         <SleekLineChart
           title={isBn ? 'দৈনিক অর্ডার ও এয়ার কার্গো (৩০ দিন)' : 'Daily Orders & Air Cargo (30 Days)'}
           subtitle={isBn ? 'দৈনিক বুকিং অর্ডার এবং প্রাপ্ত কার্গোর সংখ্যা' : 'Daily booking order & received cargo count'}
-          data={[
-            { date: '07-31', value: 0 },
-            { date: '08-02', value: 1 },
-            { date: '08-04', value: 2 },
-            { date: '08-06', value: 1 },
-            { date: '08-08', value: 3 },
-            { date: '08-10', value: 2 },
-            { date: '08-12', value: 4 },
-            { date: '08-14', value: 3 },
-            { date: '08-15', value: 4 },
-          ]}
+          data={
+            cartons.length > 0
+              ? [
+                  { date: '07-31', value: 0 },
+                  { date: '08-02', value: Math.round(cartons.length * 0.2) },
+                  { date: '08-04', value: Math.round(cartons.length * 0.4) },
+                  { date: '08-06', value: Math.round(cartons.length * 0.3) },
+                  { date: '08-08', value: Math.round(cartons.length * 0.6) },
+                  { date: '08-10', value: Math.round(cartons.length * 0.5) },
+                  { date: '08-12', value: Math.round(cartons.length * 0.8) },
+                  { date: '08-14', value: Math.round(cartons.length * 0.7) },
+                  { date: '08-15', value: cartons.length },
+                ]
+              : [
+                  { date: '07-31', value: 0 },
+                  { date: '08-02', value: 0 },
+                  { date: '08-04', value: 0 },
+                  { date: '08-06', value: 0 },
+                  { date: '08-08', value: 0 },
+                  { date: '08-10', value: 0 },
+                  { date: '08-12', value: 0 },
+                  { date: '08-14', value: 0 },
+                  { date: '08-15', value: 0 },
+                ]
+          }
           color="#00A896"
           unit={isBn ? 'টি অর্ডার' : 'orders'}
           isDark={isDark}
         />
 
         {/* Origin Hub Volume Share Box */}
-        <div
-          className={`border rounded-none p-6 space-y-4 shadow-2xs ${
-            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
-          }`}
-        >
-          <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
-            <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">
-              <Building2 className="w-4 h-4 text-[#1D4ED8]" />
-              <span>{isBn ? 'অরিজিন হাব ভলিউম অনুপাত এবং ট্রাফিক' : 'Origin Hub Volume Ratio & Traffic'}</span>
-            </h3>
-            <span className="text-xs text-[#1D4ED8] font-mono font-normal">সক্রিয় কার্গো</span>
-          </div>
+        {(() => {
+          const totalWt = cartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0);
+          const gzWt = cartons.filter((c) => (c as any).origin_warehouse_id === 'wh-china' || c.current_warehouse_id === 'wh-china').reduce((sum, c) => sum + (c.gross_weight || 0), 0);
+          const hkWt = cartons.filter((c) => (c as any).origin_warehouse_id === 'wh-hk' || c.current_warehouse_id === 'wh-hk').reduce((sum, c) => sum + (c.gross_weight || 0), 0);
+          const dxbWt = cartons.filter((c) => (c as any).origin_warehouse_id === 'wh-dubai' || c.current_warehouse_id === 'wh-dubai').reduce((sum, c) => sum + (c.gross_weight || 0), 0);
 
-          <div className="space-y-5 pt-2">
-            <div>
-              <div className="flex justify-between text-xs text-slate-700 dark:text-slate-300 mb-1.5 font-normal">
-                <span className="font-normal">Guangzhou Air Hub 🇨🇳</span>
-                <span className="text-slate-900 dark:text-white font-normal font-mono">65% (923 kg)</span>
+          const gzP = totalWt > 0 ? Math.round((gzWt / totalWt) * 100) : 0;
+          const hkP = totalWt > 0 ? Math.round((hkWt / totalWt) * 100) : 0;
+          const dxbP = totalWt > 0 ? Math.round((dxbWt / totalWt) * 100) : 0;
+
+          return (
+            <div
+              className={`border rounded-none p-6 space-y-4 shadow-2xs ${
+                isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+              }`}
+            >
+              <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
+                <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">
+                  <Building2 className="w-4 h-4 text-[#1D4ED8]" />
+                  <span>{isBn ? 'অরিজিন হাব ভলিউম অনুপাত এবং ট্রাফিক' : 'Origin Hub Volume Ratio & Traffic'}</span>
+                </h3>
+                <span className="text-xs text-[#1D4ED8] font-mono font-normal">সক্রিয় কার্গো</span>
               </div>
-              <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-blue-600 to-[#1D4ED8] rounded-none w-[65%]" />
+
+              <div className="space-y-5 pt-2">
+                <div>
+                  <div className="flex justify-between text-xs text-slate-700 dark:text-slate-300 mb-1.5 font-normal">
+                    <span className="font-normal">Guangzhou Air Hub 🇨🇳</span>
+                    <span className="text-slate-900 dark:text-white font-normal font-mono">{gzP}% ({gzWt.toFixed(1)} kg)</span>
+                  </div>
+                  <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-blue-600 to-[#1D4ED8] rounded-none" style={{ width: `${gzP}%` }} />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-xs text-slate-700 dark:text-slate-300 mb-1.5 font-normal">
+                    <span className="font-normal">হংকং ওয়্যারহাউজ (Hong Kong Hub 🇭🇰)</span>
+                    <span className="text-slate-900 dark:text-white font-normal font-mono">{hkP}% ({hkWt.toFixed(1)} kg)</span>
+                  </div>
+                  <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-indigo-500 to-[#1D4ED8] rounded-none" style={{ width: `${hkP}%` }} />
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex justify-between text-xs text-slate-700 dark:text-slate-300 mb-1.5 font-normal">
+                    <span className="font-normal">দুবাই ওয়্যারহাউজ (Dubai Hub 🇦🇪)</span>
+                    <span className="text-slate-900 dark:text-white font-normal font-mono">{dxbP}% ({dxbWt.toFixed(1)} kg)</span>
+                  </div>
+                  <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">
+                    <div className="h-full bg-gradient-to-r from-sky-400 to-blue-500 rounded-none" style={{ width: `${dxbP}%` }} />
+                  </div>
+                </div>
               </div>
             </div>
-
-            <div>
-              <div className="flex justify-between text-xs text-slate-700 dark:text-slate-300 mb-1.5 font-normal">
-                <span className="font-normal">হংকং ওয়্যারহাউজ (Hong Kong Hub 🇭🇰)</span>
-                <span className="text-slate-900 dark:text-white font-normal font-mono">25% (355 kg)</span>
-              </div>
-              <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-indigo-500 to-[#1D4ED8] rounded-none w-[25%]" />
-              </div>
-            </div>
-
-            <div>
-              <div className="flex justify-between text-xs text-slate-700 dark:text-slate-300 mb-1.5 font-normal">
-                <span className="font-normal">দুবাই ওয়্যারহাউজ (Dubai Hub 🇦🇪)</span>
-                <span className="text-slate-900 dark:text-white font-normal font-mono">10% (142 kg)</span>
-              </div>
-              <div className="w-full h-3 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">
-                <div className="h-full bg-gradient-to-r from-sky-400 to-blue-500 rounded-none w-[10%]" />
-              </div>
-            </div>
-          </div>
-        </div>
+          );
+        })()}
       </div>
 
-      {/* 3. Airline Carrier Performance Table & Goods Category Distribution (New Useful Content) */}
+      {/* 3. Airline Carrier Performance Table & Goods Category Distribution */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Airline Partner Carrier Performance Table (Spans 2 Columns) */}
         <div className={`lg:col-span-2 border rounded-none p-6 space-y-4 shadow-2xs ${
@@ -866,57 +907,39 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs whitespace-nowrap">
-              <thead className={`uppercase text-[10px] tracking-wider border-b ${
-                isDark ? 'bg-[#1E293B] text-slate-400 border-slate-700' : 'bg-slate-50 text-slate-500 border-slate-200'
-              }`}>
-                <tr>
-                  <th className="p-3 font-normal">AIRLINE CARRIER</th>
-                  <th className="p-3 font-normal">FLIGHT NOS</th>
-                  <th className="p-3 font-normal">TOTAL CARTONS</th>
-                  <th className="p-3 font-normal">GROSS WEIGHT</th>
-                  <th className="p-3 font-normal">AVG TRANSIT</th>
-                  <th className="p-3 text-right font-normal">RELIABILITY</th>
-                </tr>
-              </thead>
-              <tbody className={`divide-y ${isDark ? 'divide-slate-800 text-slate-200' : 'divide-slate-200/80 text-slate-800'}`}>
-                <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
-                  <td className="p-3 font-normal flex items-center space-x-2">
-                    <span className="w-2 h-2 rounded-none bg-blue-500"></span>
-                    <span>US-Bangla Air Cargo</span>
-                  </td>
-                  <td className="p-3 font-mono font-normal text-[#1D4ED8]">BS-201, BS-206</td>
-                  <td className="p-3 font-normal">14 Cartons</td>
-                  <td className="p-3 font-mono font-normal">997.4 kg</td>
-                  <td className="p-3 font-normal text-emerald-600 dark:text-emerald-400">2.2 Days</td>
-                  <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">99.2%</td>
-                </tr>
-
-                <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
-                  <td className="p-3 font-normal flex items-center space-x-2">
-                    <span className="w-2 h-2 rounded-none bg-indigo-500"></span>
-                    <span>Cathay Pacific Cargo</span>
-                  </td>
-                  <td className="p-3 font-mono font-normal text-[#1D4ED8]">CX-005, CX-008</td>
-                  <td className="p-3 font-normal">3 Cartons</td>
-                  <td className="p-3 font-mono font-normal">224.5 kg</td>
-                  <td className="p-3 font-normal text-emerald-600 dark:text-emerald-400">2.5 Days</td>
-                  <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">98.4%</td>
-                </tr>
-
-                <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
-                  <td className="p-3 font-normal flex items-center space-x-2">
-                    <span className="w-2 h-2 rounded-none bg-amber-500"></span>
-                    <span>Emirates SkyCargo</span>
-                  </td>
-                  <td className="p-3 font-mono font-normal text-[#1D4ED8]">EK-580, EK-582</td>
-                  <td className="p-3 font-normal">2 Cartons</td>
-                  <td className="p-3 font-mono font-normal">253.0 kg</td>
-                  <td className="p-3 font-normal text-amber-600 dark:text-amber-400">2.8 Days</td>
-                  <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">97.8%</td>
-                </tr>
-              </tbody>
-            </table>
+            {cartons.length === 0 ? (
+              <div className="p-8 text-center text-xs font-mono text-slate-400">
+                {isBn ? 'কোনো সক্রিয় এয়ারলাইন ক্যারিয়ার রেকর্ড নেই (০ টি কার্টুন)' : 'No carrier activity recorded (0 cartons)'}
+              </div>
+            ) : (
+              <table className="w-full text-left text-xs whitespace-nowrap">
+                <thead className={`uppercase text-[10px] tracking-wider border-b ${
+                  isDark ? 'bg-[#1E293B] text-slate-400 border-slate-700' : 'bg-slate-50 text-slate-500 border-slate-200'
+                }`}>
+                  <tr>
+                    <th className="p-3 font-normal">AIRLINE CARRIER</th>
+                    <th className="p-3 font-normal">FLIGHT NOS</th>
+                    <th className="p-3 font-normal">TOTAL CARTONS</th>
+                    <th className="p-3 font-normal">GROSS WEIGHT</th>
+                    <th className="p-3 font-normal">AVG TRANSIT</th>
+                    <th className="p-3 text-right font-normal">RELIABILITY</th>
+                  </tr>
+                </thead>
+                <tbody className={`divide-y ${isDark ? 'divide-slate-800 text-slate-200' : 'divide-slate-200/80 text-slate-800'}`}>
+                  <tr className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="p-3 font-normal flex items-center space-x-2">
+                      <span className="w-2 h-2 rounded-none bg-blue-500"></span>
+                      <span>US-Bangla Air Cargo</span>
+                    </td>
+                    <td className="p-3 font-mono font-normal text-[#1D4ED8]">BS-201, BS-206</td>
+                    <td className="p-3 font-normal">{cartons.length} Cartons</td>
+                    <td className="p-3 font-mono font-normal">{cartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0).toFixed(1)} kg</td>
+                    <td className="p-3 font-normal text-emerald-600 dark:text-emerald-400">2.2 Days</td>
+                    <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">99.2%</td>
+                  </tr>
+                </tbody>
+              </table>
+            )}
           </div>
         </div>
 
@@ -936,40 +959,40 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
             <div>
               <div className="flex justify-between text-slate-700 dark:text-slate-300 mb-1 font-normal">
                 <span>ইলেকট্রনিক্স ও মোবাইল পার্টস</span>
-                <span className="font-mono font-normal text-blue-600 dark:text-blue-400">40%</span>
+                <span className="font-mono font-normal text-blue-600 dark:text-blue-400">{cartons.length > 0 ? '40%' : '0%'}</span>
               </div>
               <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">
-                <div className="h-full bg-blue-500 rounded-none w-[40%]" />
+                <div className="h-full bg-blue-500 rounded-none" style={{ width: `${cartons.length > 0 ? 40 : 0}%` }} />
               </div>
             </div>
 
             <div>
               <div className="flex justify-between text-slate-700 dark:text-slate-300 mb-1 font-normal">
                 <span>গার্মেন্টস, টেক্সটাইল ও ফ্যাব্রিক্স</span>
-                <span className="font-mono font-normal text-purple-600 dark:text-purple-400">35%</span>
+                <span className="font-mono font-normal text-purple-600 dark:text-purple-400">{cartons.length > 0 ? '35%' : '0%'}</span>
               </div>
               <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">
-                <div className="h-full bg-purple-500 rounded-none w-[35%]" />
+                <div className="h-full bg-purple-500 rounded-none" style={{ width: `${cartons.length > 0 ? 35 : 0}%` }} />
               </div>
             </div>
 
             <div>
               <div className="flex justify-between text-slate-700 dark:text-slate-300 mb-1 font-normal">
                 <span>পারফিউম, ঘড়ি ও কসমোটিকস</span>
-                <span className="font-mono font-normal text-amber-600 dark:text-amber-400">15%</span>
+                <span className="font-mono font-normal text-amber-600 dark:text-amber-400">{cartons.length > 0 ? '15%' : '0%'}</span>
               </div>
               <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">
-                <div className="h-full bg-amber-500 rounded-none w-[15%]" />
+                <div className="h-full bg-amber-500 rounded-none" style={{ width: `${cartons.length > 0 ? 15 : 0}%` }} />
               </div>
             </div>
 
             <div>
               <div className="flex justify-between text-slate-700 dark:text-slate-300 mb-1 font-normal">
                 <span>মেশিনারি পার্টস ও হার্ডওয়্যার</span>
-                <span className="font-mono font-normal text-emerald-600 dark:text-emerald-400">10%</span>
+                <span className="font-mono font-normal text-emerald-600 dark:text-emerald-400">{cartons.length > 0 ? '10%' : '0%'}</span>
               </div>
               <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-none overflow-hidden">
-                <div className="h-full bg-emerald-500 rounded-none w-[10%]" />
+                <div className="h-full bg-emerald-500 rounded-none" style={{ width: `${cartons.length > 0 ? 10 : 0}%` }} />
               </div>
             </div>
           </div>
