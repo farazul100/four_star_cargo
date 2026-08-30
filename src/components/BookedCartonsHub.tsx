@@ -85,6 +85,58 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     });
   }, []);
 
+  // CARTON BATCH & SINGLE CARTON DELETION HANDLERS
+  const handleDeleteSingleCarton = (cartonId: string) => {
+    if (!window.confirm(isBn ? 'আপনি কি নিশ্চিত যে এই কার্টুনটি ডিলিট করতে চান?' : 'Are you sure you want to delete this carton?')) {
+      return;
+    }
+
+    const dbData = getHostingerDbData();
+    const updatedCartons = (dbData.cartons || []).filter((c) => c.id !== cartonId);
+    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+    setLiveRealtimeCartons(updatedCartons);
+
+    if (onDeleteCarton) {
+      onDeleteCarton(cartonId);
+    }
+
+    logSystemAuditAction(
+      currentUser,
+      'DELETE_CARTON',
+      'carton',
+      cartonId,
+      `কার্টুন আইডি ${cartonId} মুছে ফেলা হয়েছে`
+    );
+  };
+
+  const handleDeleteCartonGroup = (groupCartons: Carton[], groupName: string) => {
+    if (!window.confirm(isBn ? `আপনি কি নিশ্চিত যে "${groupName}" এর সকল (${groupCartons.length}টি) কার্টুন সম্পূর্ণ ডিলিট করতে চান?` : `Are you sure you want to delete all ${groupCartons.length} cartons for "${groupName}"?`)) {
+      return;
+    }
+
+    const idsToDelete = new Set(groupCartons.map((c) => c.id));
+    const dbData = getHostingerDbData();
+    const updatedCartons = (dbData.cartons || []).filter((c) => !idsToDelete.has(c.id));
+    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+    setLiveRealtimeCartons(updatedCartons);
+
+    groupCartons.forEach((c) => {
+      if (onDeleteCarton) onDeleteCarton(c.id);
+    });
+
+    if (activeCustomerModalMark === groupName) {
+      setActiveCustomerModalMark(null);
+    }
+
+    logSystemAuditAction(
+      currentUser,
+      'DELETE_CARTON_BATCH',
+      'carton',
+      groupName,
+      `কার্টুন ব্যাচ ${groupName} (${groupCartons.length}টি কার্টুন) মুছে ফেলা হয়েছে`
+    );
+  };
+
   // Check if current user is restricted to their assigned warehouse only (Warehouse Incharge)
   const isWarehouseIncharge =
     currentUser?.role === 'warehouse_incharge' ||
@@ -417,9 +469,22 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           </h3>
                         </div>
 
-                        <span className="px-2.5 py-1 rounded-none-none text-[10px] font-mono font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-                          {groupCartons.length} Cartons
-                        </span>
+                        <div className="flex items-center space-x-2">
+                          <span className="px-2.5 py-1 rounded text-[10px] font-mono font-bold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+                            {groupCartons.length} Cartons
+                          </span>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteCartonGroup(groupCartons, mark);
+                            }}
+                            className="p-1 rounded bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 border border-red-500/20 transition-all cursor-pointer"
+                            title={isBn ? 'এই সম্পূর্ণ কার্টুন ব্যাচ ডিলেট করুন' : 'Delete Entire Carton Batch'}
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
                       </div>
 
                       {/* Customer Card Details Grid */}
@@ -447,18 +512,34 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                     </div>
 
                     {/* Card Action Footer */}
-                    <div className="pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs">
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedCartonsForInvoiceModal(groupCartons);
-                        }}
-                        className="px-2.5 py-1 bg-[#00897B] hover:bg-[#00796B] text-white text-[11px] font-bold rounded-none flex items-center space-x-1 cursor-pointer transition-all shadow-xs"
-                      >
-                        <Printer className="w-3.5 h-3.5" />
-                        <span>{isBn ? 'ইনভয়েস প্রিন্ট' : 'Print Invoices'}</span>
-                      </button>
+                    <div className="pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs gap-2">
+                      <div className="flex items-center space-x-2">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCartonsForInvoiceModal(groupCartons);
+                          }}
+                          className="px-2.5 py-1 bg-[#00897B] hover:bg-[#00796B] text-white text-[11px] font-bold rounded flex items-center space-x-1 cursor-pointer transition-all shadow-xs"
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>{isBn ? 'ইনভয়েস প্রিন্ট' : 'Print Invoices'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteCartonGroup(groupCartons, mark);
+                          }}
+                          className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold rounded flex items-center space-x-1 cursor-pointer transition-all shadow-xs"
+                          title={isBn ? 'সম্পূর্ণ কার্টুন ব্যাচ ডিলেট করুন' : 'Delete Batch'}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>{isBn ? 'ডিলেট' : 'Delete'}</span>
+                        </button>
+                      </div>
+
                       <div className="flex items-center space-x-1 text-blue-600 dark:text-blue-400 font-medium">
                         <span>{isBn ? 'বিস্তারিত' : 'View Details'}</span>
                         <ChevronRight className="w-4 h-4" />
@@ -629,16 +710,14 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                         >
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
-                        {onDeleteCarton && (
-                          <button
-                            type="button"
-                            onClick={() => onDeleteCarton(c.id)}
-                            className="p-1 text-slate-400 hover:text-red-600 cursor-pointer"
-                            title="Delete Carton"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
-                        )}
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSingleCarton(c.id)}
+                          className="p-1 text-slate-400 hover:text-red-600 cursor-pointer"
+                          title={isBn ? 'কার্টুন ডিলেট করুন' : 'Delete Carton'}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -654,7 +733,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       {/* ------------------------------------------------------------- */}
       {activeCustomerModalMark && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className={`rounded-none-none max-w-4xl w-full p-6 space-y-5 border shadow-2xl ${
+          <div className={`rounded-xl max-w-4xl w-full p-6 space-y-5 border shadow-2xl ${
             isDark ? 'bg-[#1E293B] text-white border-slate-700' : 'bg-white text-slate-900 border-slate-200'
           }`}>
             <div className="flex items-center justify-between border-b pb-4 border-slate-200 dark:border-slate-700">
@@ -662,7 +741,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 <div className="text-xs font-mono text-blue-600 dark:text-blue-400 font-bold uppercase flex items-center space-x-2">
                   <span>Tracking ID: {activeCustomerCartons[0]?.tracking_number || activeCustomerModalMark}</span>
                   {activeCustomerCartons[0]?.shipping_mark && (
-                    <span className="px-2 py-0.5 rounded-none text-[10px] bg-blue-500/10 text-blue-500 border border-blue-500/20 font-normal">
+                    <span className="px-2 py-0.5 rounded text-[10px] bg-blue-500/10 text-blue-500 border border-blue-500/20 font-normal">
                       Mark: {activeCustomerCartons[0]?.shipping_mark}
                     </span>
                   )}
@@ -672,30 +751,42 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 </h3>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setActiveCustomerModalMark(null)}
-                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-none-none cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={() => handleDeleteCartonGroup(activeCustomerCartons, activeCustomerModalMark)}
+                  className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded flex items-center space-x-1.5 cursor-pointer shadow-xs transition-all"
+                  title={isBn ? 'এই সম্পূর্ণ কার্টুন ব্যাচ ডিলেট করুন' : 'Delete Entire Batch'}
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>{isBn ? 'ডিলেট ব্যাচ' : 'Delete Batch'}</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setActiveCustomerModalMark(null)}
+                  className="p-1.5 text-slate-400 hover:text-slate-600 rounded cursor-pointer"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Customer Batch Summary Badges */}
             <div className="grid grid-cols-3 gap-3">
-              <div className={`p-3 rounded-none-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3 rounded border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="text-[10px] text-slate-500 font-mono">{isBn ? 'মোট কার্টুন সংখ্যা' : 'Total Cartons'}</div>
                 <div className="text-sm font-bold text-blue-600 dark:text-blue-400 font-mono">{activeCustomerCartons.length} {isBn ? 'টি' : 'Cartons'}</div>
               </div>
 
-              <div className={`p-3 rounded-none-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3 rounded border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="text-[10px] text-slate-500 font-mono">{isBn ? 'মোট গ্রস ওজন' : 'Total Gross Weight'}</div>
                 <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 font-mono">
                   {activeCustomerCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0).toFixed(1)} KG
                 </div>
               </div>
 
-              <div className={`p-3 rounded-none-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+              <div className={`p-3 rounded border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                 <div className="text-[10px] text-slate-500 font-mono">{isBn ? 'মোট ভলিউম CBM' : 'Total CBM Volume'}</div>
                 <div className="text-sm font-bold text-purple-600 dark:text-purple-400 font-mono">
                   {activeCustomerCartons.reduce((sum, c) => sum + (c.cbm || 0), 0).toFixed(2)} CBM
@@ -704,7 +795,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             </div>
 
             {/* Customer Cartons Detailed Table */}
-            <div className="max-h-[50vh] overflow-y-auto border border-slate-200 dark:border-slate-700 rounded-none-none">
+            <div className="max-h-[50vh] overflow-y-auto border border-slate-200 dark:border-slate-700 rounded">
               <table className="w-full text-left text-xs border-collapse min-w-[700px]">
                 <thead className={`uppercase text-[10px] tracking-wider border-b font-medium ${
                   isDark ? 'bg-[#1E293B] text-slate-300 border-slate-700' : 'bg-slate-100 text-slate-700 border-slate-200'
@@ -719,6 +810,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                     <th className="p-3 text-center">G.WEIGHT</th>
                     <th className="p-3 text-center">CBM</th>
                     <th className="p-3 text-center">PROOF</th>
+                    <th className="p-3 text-center">ACTION</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
@@ -740,7 +832,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           <button
                             type="button"
                             onClick={() => setPreviewPhotoUrl(c.photo_url!)}
-                            className="px-2 py-1 rounded-none text-[10px] font-mono bg-blue-500/10 text-blue-500 hover:underline cursor-pointer"
+                            className="px-2 py-1 rounded text-[10px] font-mono bg-blue-500/10 text-blue-500 hover:underline cursor-pointer"
                           >
                             View Photo
                           </button>
@@ -748,17 +840,36 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           <span className="text-[10px] text-slate-400">No Photo</span>
                         )}
                       </td>
+                      <td className="p-3 text-center">
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteSingleCarton(c.id)}
+                          className="p-1 text-slate-400 hover:text-red-600 cursor-pointer"
+                          title={isBn ? 'কার্টুন ডিলেট করুন' : 'Delete Carton'}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
                     </tr>
                   ))}
                 </tbody>
               </table>
             </div>
 
-            <div className="flex justify-end pt-2">
+            <div className="flex justify-between items-center pt-2">
+              <button
+                type="button"
+                onClick={() => handleDeleteCartonGroup(activeCustomerCartons, activeCustomerModalMark)}
+                className="px-3.5 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-bold rounded flex items-center space-x-1 cursor-pointer transition-all shadow-xs"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{isBn ? 'সম্পূর্ণ কার্টুন ব্যাচ ডিলেট করুন' : 'Delete Entire Batch'}</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => setActiveCustomerModalMark(null)}
-                className={`px-4 py-2 rounded-none-none text-xs font-normal cursor-pointer ${
+                className={`px-4 py-2 rounded text-xs font-normal cursor-pointer ${
                   isDark ? 'bg-slate-800 text-slate-200 hover:bg-slate-700' : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
                 }`}
               >
