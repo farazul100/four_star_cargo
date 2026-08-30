@@ -158,9 +158,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               { id: 'notifications', label: isBn ? 'নোটিফিকেশন' : 'Notifications', icon: Bell },
               { id: 'booking_entry', label: isBn ? 'নতুন কার্টুন এন্ট্রি' : 'New Carton Booking', icon: PlusCircle },
               { id: 'inventory', label: isBn ? 'ইনভেন্টরি পণ্য' : 'Current Stock Items', icon: Package },
-              { id: 'final_flying_list', label: isBn ? 'ফাইনাল ফ্লাইং লিস্ট' : 'Final Flying List', icon: Send },
               { id: 'history', label: isBn ? 'রিসিভ ফ্লাইং' : 'Receive Flying', icon: Truck },
-              { id: 'receive_incoming', label: isBn ? 'ইনকামিং কার্গো গ্রহণ' : 'Receive Incoming Cargo', icon: Package },
             ],
           },
           {

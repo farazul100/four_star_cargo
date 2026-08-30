@@ -601,9 +601,35 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
     );
   }
 
-  // TAB: FINAL FLYING LIST & HISTORICAL ARCHIVE
+  // TAB: FINAL FLYING LIST & HISTORICAL ARCHIVE (Moved to Operations Director & Super Admin)
   if (activeTab === 'final_flying_list') {
-    return <FinalFlyingListSection language={language} />;
+    return (
+      <div className="space-y-6 font-sans">
+        <div className={`p-6 rounded-2xl border ${isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'}`}>
+          <div className="flex items-center space-x-3 text-blue-500 mb-2">
+            <Plane className="w-6 h-6" />
+            <h2 className="text-base font-semibold">
+              {isBn ? 'ফাইনাল ফ্লাইং ম্যানেজমেন্ট' : 'Final Flying Management'}
+            </h2>
+          </div>
+          <p className="text-xs text-slate-400 font-light">
+            {isBn
+              ? 'নিয়ম অনুসারে ফাইনাল ফ্লাইং লিস্ট ও ডেসপ্যাচ ম্যানেজমেন্ট অপারেশনস ডিরেক্টর ও সুপার এডমিন কর্তৃক পরিচালিত হয়। ওয়্যারহাউজ ইনচার্জ শুধু নতুন কার্টুন বুকিং এন্ট্রি ও আগত ফ্লাইটের রিসিভ গ্রহণ পরিচালনা করবেন।'
+              : 'Final Flying List & Dispatch Release are managed exclusively by Operations Director & Super Admin. Warehouse Incharge handles New Carton Booking and Receive Flying.'}
+          </p>
+        </div>
+        <BookingEntryForm
+          warehouses={warehouses}
+          currentUser={currentUser}
+          language={language}
+          onSaveCartons={(newCartons) => {
+            const updated = [...cartons, ...newCartons];
+            setCartons(updated);
+            saveHostingerDbData('fsc_vps_cartons', updated);
+          }}
+        />
+      </div>
+    );
   }
 
   // TAB: DAILY FLYING PROPOSAL CREATION (Moved to Operations Director)
