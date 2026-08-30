@@ -21,6 +21,7 @@ import {
   ListFilter,
   LayoutGrid,
   Printer,
+  GitFork,
 } from 'lucide-react';
 import { Carton, Warehouse, User as UserType, Language, Customer } from '../types';
 import { useTheme } from '../context/ThemeContext';
@@ -78,33 +79,25 @@ export const getCartonRowSpanInfo = (cartons: Carton[], index: number) => {
   const current = cartons[index];
   if (!current) return { isFirst: true, rowSpan: 1, isMerged: false };
 
-  // Case 1: Merged by explicit master_group_id
-  if (current.master_group_id) {
-    const groupRows = cartons.filter((c) => c.master_group_id === current.master_group_id);
-    const count = groupRows.length;
+  // Group key: master_group_id OR uppercase ctn_no
+  const groupKey = current.master_group_id || (current.ctn_no ? current.ctn_no.trim().toUpperCase() : null);
 
-    if (count > 1) {
-      const firstIdx = cartons.findIndex((c) => c.master_group_id === current.master_group_id);
+  if (groupKey) {
+    const matchingIndices: number[] = [];
+    cartons.forEach((c, idx) => {
+      const k = c.master_group_id || (c.ctn_no ? c.ctn_no.trim().toUpperCase() : null);
+      if (k === groupKey) {
+        matchingIndices.push(idx);
+      }
+    });
+
+    if (matchingIndices.length > 1) {
+      const firstIdx = matchingIndices[0];
       if (index === firstIdx) {
-        return { isFirst: true, rowSpan: count, isMerged: true };
+        return { isFirst: true, rowSpan: matchingIndices.length, isMerged: true };
       }
       return { isFirst: false, rowSpan: 0, isMerged: true };
     }
-  }
-
-  // Case 2: Merged by identical ctn_no (consecutive rows)
-  const isSameAsPrev = index > 0 && cartons[index - 1].ctn_no === current.ctn_no;
-  if (isSameAsPrev) {
-    return { isFirst: false, rowSpan: 0, isMerged: true };
-  }
-
-  let count = 1;
-  while (index + count < cartons.length && cartons[index + count].ctn_no === current.ctn_no) {
-    count++;
-  }
-
-  if (count > 1) {
-    return { isFirst: true, rowSpan: count, isMerged: true };
   }
 
   return { isFirst: true, rowSpan: 1, isMerged: false };
@@ -219,6 +212,54 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       'carton',
       groupName,
       `কার্টুন ব্যাচ ${groupName} (${groupCartons.length}টি কার্টুন) মুছে ফেলা হয়েছে`
+    );
+  };
+
+  // ADD SUB-SHIPPING MARK / MERGE CARTON IN HUB VIEW
+  const handleAddSubItemToCarton = (targetCarton: Carton) => {
+    const defaultMark = `${targetCarton.shipping_mark}-2`;
+    const markInput = window.prompt(
+      isBn
+        ? `কার্টুন (${targetCarton.ctn_no}) এ মার্জ করার জন্য নতুন সাব-শিপিং মার্ক লিখুন:`
+        : `Enter Sub-Shipping Mark to merge into carton (${targetCarton.ctn_no}):`,
+      defaultMark
+    );
+
+    if (!markInput || !markInput.trim()) return;
+
+    const masterGroupId = targetCarton.master_group_id || `grp-${targetCarton.ctn_no}-${Date.now()}`;
+
+    const newSubCarton: Carton = {
+      ...targetCarton,
+      id: `fsc-carton-sub-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      shipping_mark: markInput.trim(),
+      master_group_id: masterGroupId,
+      is_merged: true,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+
+    const dbData = getHostingerDbData();
+    const updatedCartons = (dbData.cartons || []).map((c) =>
+      c.id === targetCarton.id || c.ctn_no === targetCarton.ctn_no
+        ? { ...c, master_group_id: masterGroupId, is_merged: true }
+        : c
+    );
+
+    const fullCartonsList = [newSubCarton, ...updatedCartons];
+    saveHostingerDbData('fsc_vps_cartons', fullCartonsList);
+    setLiveRealtimeCartons(fullCartonsList);
+
+    if (onUpdateCarton) {
+      onUpdateCarton({ ...targetCarton, master_group_id: masterGroupId, is_merged: true });
+    }
+
+    logSystemAuditAction(
+      currentUser,
+      'MERGE_CARTON_SUB_ITEM',
+      'carton',
+      targetCarton.ctn_no,
+      `কার্টুন ${targetCarton.ctn_no} এ সাব-শিপিং মার্ক ${markInput.trim()} মার্জ করা হয়েছে`
     );
   };
 
@@ -845,6 +886,14 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           </button>
                           <button
                             type="button"
+                            onClick={() => handleAddSubItemToCarton(c)}
+                            className="p-1 text-indigo-500 hover:text-indigo-700 cursor-pointer"
+                            title={isBn ? 'এই কার্টুনে নতুন সাব-মার্ক যোগ/মার্জ করুন' : 'Add Sub-Mark / Merge Carton'}
+                          >
+                            <GitFork className="w-3.5 h-3.5" />
+                          </button>
+                          <button
+                            type="button"
                             onClick={() => handleDeleteSingleCarton(c.id)}
                             className="p-1 text-slate-400 hover:text-red-600 cursor-pointer"
                             title={isBn ? 'কার্টুন ডিলেট করুন' : 'Delete Carton'}
@@ -1027,14 +1076,24 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           )}
                         </td>
                         <td className="p-3 text-center border border-slate-200 dark:border-slate-700">
-                          <button
-                            type="button"
-                            onClick={() => handleDeleteSingleCarton(c.id)}
-                            className="p-1 text-slate-400 hover:text-red-600 cursor-pointer"
-                            title={isBn ? 'কার্টুন ডিলেট করুন' : 'Delete Carton'}
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                          </button>
+                          <div className="flex items-center justify-center space-x-1">
+                            <button
+                              type="button"
+                              onClick={() => handleAddSubItemToCarton(c)}
+                              className="p-1 text-indigo-500 hover:text-indigo-700 cursor-pointer"
+                              title={isBn ? 'এই কার্টুনে নতুন সাব-মার্ক যোগ/মার্জ করুন' : 'Add Sub-Mark / Merge Carton'}
+                            >
+                              <GitFork className="w-3.5 h-3.5" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteSingleCarton(c.id)}
+                              className="p-1 text-slate-400 hover:text-red-600 cursor-pointer"
+                              title={isBn ? 'কার্টুন ডিলেট করুন' : 'Delete Carton'}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
