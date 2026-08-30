@@ -477,7 +477,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
 
         {incomingCartons.length > 0 ? (
           <div className="bg-white dark:bg-[#1E293B] rounded-3xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-2xs">
-            <div className="p-4 bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
+            <div className="p-4 bg-slate-50 dark:bg-[#1E293B]/50 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
               <button
                 onClick={toggleSelectAllReceiving}
                 className="text-xs font-semibold text-blue-600 dark:text-blue-400 hover:underline cursor-pointer"
@@ -493,7 +493,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-normal">
-                <thead className="bg-slate-100 dark:bg-slate-900 uppercase text-[10px] text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
+                <thead className="bg-slate-100 dark:bg-[#1E293B] uppercase text-[10px] text-slate-500 dark:text-slate-400 border-b border-slate-200 dark:border-slate-700">
                   <tr>
                     <th className="p-3 w-10 text-center font-normal">Select</th>
                     <th className="p-3 font-normal">CTN NO</th>
@@ -511,7 +511,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                       <tr
                         key={c.id}
                         onClick={() => toggleSelectReceiving(c.id)}
-                        className={`hover:bg-slate-50 dark:hover:bg-slate-900/50 cursor-pointer ${
+                        className={`hover:bg-slate-50 dark:hover:bg-[#1E293B]/50 cursor-pointer ${
                           isSel ? 'bg-blue-500/10' : ''
                         }`}
                       >
@@ -728,7 +728,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                   value={flyingNameInput}
                   onChange={(e) => setFlyingNameInput(e.target.value)}
                   className={`w-full border rounded-none p-3 outline-none transition-all font-normal focus:ring-2 focus:ring-blue-500/20 ${
-                    isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
+                    isDark ? 'bg-[#1E293B] border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
                   }`}
                 />
               </div>
@@ -741,7 +741,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                   value={batchDestWhId}
                   onChange={(e) => setBatchDestWhId(e.target.value)}
                   className={`w-full border rounded-none p-3 outline-none transition-all font-normal focus:ring-2 focus:ring-blue-500/20 ${
-                    isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
+                    isDark ? 'bg-[#1E293B] border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
                   }`}
                 >
                   {warehouses.map((w) => (
@@ -761,7 +761,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                   value={proposalDate}
                   onChange={(e) => setProposalDate(e.target.value)}
                   className={`w-full border rounded-none p-3 font-mono outline-none transition-all font-normal focus:ring-2 focus:ring-blue-500/20 ${
-                    isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
+                    isDark ? 'bg-[#1E293B] border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
                   }`}
                 />
               </div>
@@ -825,7 +825,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
               {/* KPI STATS BAR FOR ACTIVE BATCH */}
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div className={`p-4 rounded-none border transition-all ${
-                  isDark ? 'bg-slate-900/90 border-slate-700' : 'bg-white border-slate-300'
+                  isDark ? 'bg-[#1E293B]/90 border-slate-700' : 'bg-white border-slate-300'
                 }`}>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 dark:text-slate-400 block text-xs font-normal">{isBn ? 'ইম্পোর্টকৃত কার্টুন' : 'Imported Cartons'}</span>
@@ -839,7 +839,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                 </div>
 
                 <div className={`p-4 rounded-none border transition-all ${
-                  isDark ? 'bg-slate-900/90 border-slate-700' : 'bg-white border-slate-300'
+                  isDark ? 'bg-[#1E293B]/90 border-slate-700' : 'bg-white border-slate-300'
                 }`}>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 dark:text-slate-400 block text-xs font-normal">{isBn ? 'মোট গ্রস ওজন' : 'Total Gross Weight'}</span>
@@ -853,7 +853,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                 </div>
 
                 <div className={`p-4 rounded-none border transition-all ${
-                  isDark ? 'bg-slate-900/90 border-slate-700' : 'bg-white border-slate-300'
+                  isDark ? 'bg-[#1E293B]/90 border-slate-700' : 'bg-white border-slate-300'
                 }`}>
                   <div className="flex items-center justify-between">
                     <span className="text-slate-500 dark:text-slate-400 block text-xs font-normal">{isBn ? 'মোট ভলিউমেট্রিক সিবিএম' : 'Total CBM Volume'}</span>
@@ -878,7 +878,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                   <div className="overflow-x-auto rounded-none border border-slate-200 dark:border-slate-700">
                     <table className="w-full text-left text-xs font-normal">
                       <thead className={`uppercase text-[10px] tracking-wider border-b ${
-                        isDark ? 'bg-slate-900 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-600 border-slate-200'
+                        isDark ? 'bg-[#1E293B] text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-600 border-slate-200'
                       }`}>
                         <tr>
                           <th className="p-3 font-normal">CTN NO</th>
@@ -891,7 +891,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                       </thead>
                       <tbody className={`divide-y ${isDark ? 'divide-slate-800 text-slate-200' : 'divide-slate-200 text-slate-800'}`}>
                         {selectedCartonsList.map((c: Carton) => (
-                          <tr key={c.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
+                          <tr key={c.id} className="hover:bg-slate-50/50 dark:hover:bg-[#1E293B]/50 transition-colors">
                             <td className="p-3 font-mono font-medium text-slate-900 dark:text-white">
                               <span className="px-2 py-0.5 rounded-none bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-mono text-[11px] border border-slate-300 dark:border-slate-700">
                                 {c.ctn_no}
@@ -980,16 +980,16 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
 
         {/* STOCK CARTONS SELECTION & IMPORT MODAL WINDOW (Zero Border-Radius & Clean White Theme Badges) */}
         {showStockImportModal && (
-          <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
+          <div className="fixed inset-0 z-50 bg-[#1E293B]/50 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4">
             <div className={`w-full max-w-6xl max-h-[92vh] flex flex-col rounded-none border shadow-2xl overflow-hidden font-sans ${
               isDark ? 'bg-[#1E293B] border-slate-700 text-slate-100' : 'bg-white border-slate-300 text-slate-800'
             }`}>
               {/* Modal Header */}
               <div className={`p-4 sm:p-5 border-b flex items-center justify-between ${
-                isDark ? 'bg-slate-900/90 border-slate-700' : 'bg-white border-slate-200'
+                isDark ? 'bg-[#1E293B]/90 border-slate-700' : 'bg-white border-slate-200'
               }`}>
                 <div className="flex items-center space-x-3">
-                  <div className="w-9 h-9 rounded-none bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 flex items-center justify-center border border-slate-300 dark:border-slate-700">
+                  <div className="w-9 h-9 rounded-none bg-white dark:bg-[#1E293B] text-slate-700 dark:text-slate-300 flex items-center justify-center border border-slate-300 dark:border-slate-700">
                     <Download className="w-4 h-4 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div>
@@ -1001,11 +1001,11 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                         Target Flight: <strong className="text-blue-600 dark:text-blue-400 font-mono font-normal">{activeFlightBatch?.name || 'Flight Batch'}</strong>
                       </span>
                       <span className="text-slate-300 dark:text-slate-700">•</span>
-                      <span className="px-2 py-0.5 rounded-none text-[11px] font-mono font-light bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
+                      <span className="px-2 py-0.5 rounded-none text-[11px] font-mono font-light bg-white dark:bg-[#1E293B] text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
                         {isBn ? `মোট স্টক: ${stockBookedCartons.length} টি` : `Total Available: ${stockBookedCartons.length} CTNs`}
                       </span>
                       {proposalCartonSearch && (
-                        <span className="px-2 py-0.5 rounded-none text-[11px] font-mono font-medium bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400 border border-blue-500 dark:border-blue-700">
+                        <span className="px-2 py-0.5 rounded-none text-[11px] font-mono font-medium bg-white dark:bg-[#1E293B] text-blue-700 dark:text-blue-400 border border-blue-500 dark:border-blue-700">
                           {isBn ? `ফিল্টারকৃত: ${searchFilteredStockCartons.length} টি` : `Filtered: ${searchFilteredStockCartons.length} Items`}
                         </span>
                       )}
@@ -1024,7 +1024,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
 
               {/* Modal Toolbar (Search & Select Controls) */}
               <div className={`p-3.5 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                isDark ? 'bg-slate-900/40 border-slate-700' : 'bg-white border-slate-200'
+                isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200'
               }`}>
                 <div className="relative flex-1 max-w-md">
                   <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -1034,7 +1034,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                     value={proposalCartonSearch}
                     onChange={(e) => setProposalCartonSearch(e.target.value)}
                     className={`w-full pl-8 pr-7 py-2 rounded-none border text-xs outline-none transition-all font-light ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-blue-500' : 'bg-white border-slate-300 text-slate-800 focus:border-blue-500'
+                      isDark ? 'bg-[#1E293B] border-slate-700 text-white focus:border-blue-500' : 'bg-white border-slate-300 text-slate-800 focus:border-blue-500'
                     }`}
                   />
                   {proposalCartonSearch && (
@@ -1052,7 +1052,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                   <button
                     type="button"
                     onClick={toggleSelectAll}
-                    className="px-3.5 py-2 rounded-none border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-200 font-light hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer text-xs"
+                    className="px-3.5 py-2 rounded-none border border-slate-300 dark:border-slate-700 bg-white dark:bg-[#1E293B] text-slate-700 dark:text-slate-200 font-light hover:bg-slate-50 dark:hover:bg-slate-800 transition-all cursor-pointer text-xs"
                   >
                     <span>
                       {selectedProposalCartonIds.length === searchFilteredStockCartons.length && searchFilteredStockCartons.length > 0
@@ -1060,7 +1060,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                         : (isBn ? `সব সিলেক্ট করুন (${searchFilteredStockCartons.length} টি)` : `Select All (${searchFilteredStockCartons.length} CTNs)`)}
                     </span>
                   </button>
-                  <span className="px-3.5 py-2 rounded-none text-xs font-mono font-medium bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400 border border-blue-500 dark:border-blue-700">
+                  <span className="px-3.5 py-2 rounded-none text-xs font-mono font-medium bg-white dark:bg-[#1E293B] text-blue-700 dark:text-blue-400 border border-blue-500 dark:border-blue-700">
                     {selectedProposalCartonIds.length} / {stockBookedCartons.length} {isBn ? 'টি সিলেক্টেড' : 'Selected'}
                   </span>
                 </div>
@@ -1071,7 +1071,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                 <div className="overflow-x-auto rounded-none border border-slate-200 dark:border-slate-700">
                   <table className="min-w-max w-full text-left text-xs font-light">
                     <thead className={`uppercase text-[10px] tracking-wider border-b ${
-                      isDark ? 'bg-slate-900 text-slate-400 border-slate-700' : 'bg-white text-slate-600 border-slate-200'
+                      isDark ? 'bg-[#1E293B] text-slate-400 border-slate-700' : 'bg-white text-slate-600 border-slate-200'
                     }`}>
                       <tr>
                         <th className="p-3 w-10 text-center font-normal">
@@ -1100,7 +1100,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                           <tr
                             key={c.id}
                             onClick={() => toggleSelectProposalCarton(c.id)}
-                            className={`hover:bg-blue-50/40 dark:hover:bg-slate-900/60 cursor-pointer transition-colors ${
+                            className={`hover:bg-blue-50/40 dark:hover:bg-[#1E293B]/60 cursor-pointer transition-colors ${
                               isSelected ? (isDark ? 'bg-blue-950/30' : 'bg-blue-50/70') : ''
                             }`}
                           >
@@ -1113,17 +1113,17 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                               />
                             </td>
                             <td className="p-3 font-mono whitespace-nowrap">
-                              <span className="px-2.5 py-1 rounded-none bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-mono text-[11px] font-normal border border-slate-300 dark:border-slate-700">
+                              <span className="px-2.5 py-1 rounded-none bg-white dark:bg-[#1E293B] text-slate-800 dark:text-slate-200 font-mono text-[11px] font-normal border border-slate-300 dark:border-slate-700">
                                 {c.ctn_no}
                               </span>
                             </td>
                             <td className="p-3 font-mono whitespace-nowrap">
-                              <span className="px-2.5 py-1 rounded-none bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 font-mono text-[11px] border border-slate-300 dark:border-slate-700 font-light">
+                              <span className="px-2.5 py-1 rounded-none bg-white dark:bg-[#1E293B] text-slate-700 dark:text-slate-300 font-mono text-[11px] border border-slate-300 dark:border-slate-700 font-light">
                                 {c.tracking_number}
                               </span>
                             </td>
                             <td className="p-3 font-mono whitespace-nowrap">
-                              <span className="px-2.5 py-1 rounded-none bg-white dark:bg-slate-900 text-blue-700 dark:text-blue-400 font-mono text-[11px] font-medium border border-blue-500 dark:border-blue-700">
+                              <span className="px-2.5 py-1 rounded-none bg-white dark:bg-[#1E293B] text-blue-700 dark:text-blue-400 font-mono text-[11px] font-medium border border-blue-500 dark:border-blue-700">
                                 {c.shipping_mark}
                               </span>
                             </td>
@@ -1138,7 +1138,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                               )}
                             </td>
                             <td className="p-3 whitespace-nowrap font-light">
-                              <span className="px-2.5 py-1 rounded-none bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 text-[11px] border border-slate-300 dark:border-slate-700">
+                              <span className="px-2.5 py-1 rounded-none bg-white dark:bg-[#1E293B] text-slate-700 dark:text-slate-300 text-[11px] border border-slate-300 dark:border-slate-700">
                                 {c.destination_warehouse_name || 'ঢাকা সেন্ট্রাল (DAC-01)'}
                               </span>
                             </td>
@@ -1155,10 +1155,10 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                             <td className="p-3 text-center whitespace-nowrap">
                               <span className={`px-2.5 py-1 rounded-none text-[10px] font-normal uppercase ${
                                 c.status === 'booked'
-                                  ? 'bg-white text-slate-700 border border-slate-300 dark:bg-slate-900 dark:text-slate-300 dark:border-slate-700'
+                                  ? 'bg-white text-slate-700 border border-slate-300 dark:bg-[#1E293B] dark:text-slate-300 dark:border-slate-700'
                                   : c.status === 'received'
-                                  ? 'bg-white text-emerald-700 border border-emerald-500 dark:bg-slate-900 dark:text-emerald-400 dark:border-emerald-700'
-                                  : 'bg-white text-amber-700 border border-amber-500 dark:bg-slate-900 dark:text-amber-400 dark:border-amber-700'
+                                  ? 'bg-white text-emerald-700 border border-emerald-500 dark:bg-[#1E293B] dark:text-emerald-400 dark:border-emerald-700'
+                                  : 'bg-white text-amber-700 border border-amber-500 dark:bg-[#1E293B] dark:text-amber-400 dark:border-amber-700'
                               }`}>
                                 {c.status}
                               </span>
@@ -1184,10 +1184,10 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
 
               {/* Modal Footer Action (Clean White Theme Badges) */}
               <div className={`p-3.5 sm:p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-3 ${
-                isDark ? 'bg-slate-900/90 border-slate-700' : 'bg-white border-slate-200'
+                isDark ? 'bg-[#1E293B]/90 border-slate-700' : 'bg-white border-slate-200'
               }`}>
                 <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-slate-600 dark:text-slate-400 font-light">
-                  <span className="px-2.5 py-1 rounded-none bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-normal border border-slate-300 dark:border-slate-700">
+                  <span className="px-2.5 py-1 rounded-none bg-white dark:bg-[#1E293B] text-slate-800 dark:text-slate-200 font-normal border border-slate-300 dark:border-slate-700">
                     📦 {selectedProposalCartonIds.length} {isBn ? 'টি কার্টুন' : 'Cartons'}
                   </span>
                   <span>
@@ -1244,7 +1244,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
           <div className="overflow-x-auto rounded-none border border-slate-200 dark:border-slate-700">
             <table className="w-full text-left text-xs font-normal">
               <thead className={`uppercase text-[10px] tracking-wider border-b ${
-                isDark ? 'bg-slate-900 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-600 border-slate-200'
+                isDark ? 'bg-[#1E293B] text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-600 border-slate-200'
               }`}>
                 <tr>
                   <th className="p-3 font-normal">FLIGHT / BATCH NAME</th>
@@ -1258,7 +1258,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
               </thead>
               <tbody className={`divide-y ${isDark ? 'divide-slate-800 text-slate-200' : 'divide-slate-200 text-slate-800'}`}>
                 {proposalHistory.map((ph) => (
-                  <tr key={ph.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
+                  <tr key={ph.id} className="hover:bg-slate-50/50 dark:hover:bg-[#1E293B]/50 transition-colors">
                     <td className="p-3 font-mono font-medium text-blue-600 dark:text-blue-400">{ph.flying_name || ph.flight_number || 'Flight Batch'}</td>
                     <td className="p-3 font-mono text-slate-500">{ph.date}</td>
                     <td className="p-3 text-center font-mono font-medium">{ph.items_count} Cartons</td>

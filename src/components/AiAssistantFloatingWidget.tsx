@@ -101,13 +101,13 @@ export const AiAssistantFloatingWidget: React.FC<AiAssistantFloatingWidgetProps>
         <button
           type="button"
           onClick={() => setIsOpen(true)}
-          className="relative group p-1.5 rounded-full bg-slate-900 border-2 border-[#00897B] shadow-2xl hover:shadow-[#00897B]/50 transition-all duration-300 transform hover:scale-110 cursor-pointer flex items-center justify-center"
+          className="relative group p-1.5 rounded-full bg-[#1E293B] border-2 border-[#00897B] shadow-2xl hover:shadow-[#00897B]/50 transition-all duration-300 transform hover:scale-110 cursor-pointer flex items-center justify-center"
           title={isBn ? 'Four Star Cargo AI Copilot' : 'Four Star Cargo AI Assistant'}
         >
           {/* Outer Glowing Pulse Ring */}
           <span className="absolute -inset-1 rounded-full bg-gradient-to-r from-[#00897B] to-[#1FB6A8] opacity-75 blur-sm group-hover:opacity-100 transition duration-300 animate-pulse" />
           
-          <div className="relative w-12 h-12 rounded-full bg-slate-900 flex items-center justify-center p-2 overflow-hidden border border-white/20">
+          <div className="relative w-12 h-12 rounded-full bg-[#1E293B] flex items-center justify-center p-2 overflow-hidden border border-white/20">
             <Logo size="sm" />
           </div>
 
@@ -120,11 +120,11 @@ export const AiAssistantFloatingWidget: React.FC<AiAssistantFloatingWidgetProps>
 
       {/* Floating AI Copilot Drawer / Window */}
       {isOpen && (
-        <div className="w-[360px] sm:w-[410px] h-[540px] bg-slate-900 border-2 border-[#00897B] rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 duration-300 text-white">
+        <div className="w-[360px] sm:w-[410px] h-[540px] bg-[#1E293B] border-2 border-[#00897B] rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 duration-300 text-white">
           {/* Header Bar */}
           <div className="p-4 bg-gradient-to-r from-[#0F2D52] via-[#00897B] to-[#00796B] border-b border-[#00897B]/40 flex items-center justify-between text-white shrink-0">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-2xl bg-slate-900 border border-white/30 p-1 flex items-center justify-center shadow-md overflow-hidden shrink-0">
+              <div className="w-10 h-10 rounded-2xl bg-[#1E293B] border border-white/30 p-1 flex items-center justify-center shadow-md overflow-hidden shrink-0">
                 <Logo size="sm" />
               </div>
               <div>
@@ -168,7 +168,7 @@ export const AiAssistantFloatingWidget: React.FC<AiAssistantFloatingWidgetProps>
               /* Welcome Screen with Centered Logo & Suggestion Chips */
               <div className="flex flex-col items-center justify-center h-full text-center space-y-5 py-4">
                 <div className="relative">
-                  <div className="w-20 h-20 rounded-3xl bg-slate-900 border-2 border-[#00897B]/50 p-3 shadow-xl flex items-center justify-center mx-auto">
+                  <div className="w-20 h-20 rounded-3xl bg-[#1E293B] border-2 border-[#00897B]/50 p-3 shadow-xl flex items-center justify-center mx-auto">
                     <Logo size="lg" />
                   </div>
                   <span className="absolute -top-1 -right-1 p-1 bg-[#00897B] rounded-full text-white shadow-md">
@@ -194,7 +194,7 @@ export const AiAssistantFloatingWidget: React.FC<AiAssistantFloatingWidgetProps>
                       key={idx}
                       type="button"
                       onClick={() => handleQuickChipClick(chip.prompt)}
-                      className="w-full p-3 rounded-2xl bg-slate-900/90 hover:bg-[#00897B]/20 border border-slate-700 hover:border-[#00897B]/50 text-left text-xs text-slate-200 transition-all duration-200 flex items-center justify-between group cursor-pointer"
+                      className="w-full p-3 rounded-2xl bg-[#1E293B]/90 hover:bg-[#00897B]/20 border border-slate-700 hover:border-[#00897B]/50 text-left text-xs text-slate-200 transition-all duration-200 flex items-center justify-between group cursor-pointer"
                     >
                       <span className="font-medium group-hover:text-[#1FB6A8] transition-colors">
                         {chip.label}
@@ -227,7 +227,7 @@ export const AiAssistantFloatingWidget: React.FC<AiAssistantFloatingWidgetProps>
                       className={`max-w-[88%] p-3.5 rounded-2xl text-xs leading-relaxed ${
                         isUser
                           ? 'bg-[#00897B] text-white rounded-tr-none shadow-md font-medium'
-                          : 'bg-slate-900 text-slate-100 rounded-tl-none border border-slate-700 shadow-md whitespace-pre-wrap'
+                          : 'bg-[#1E293B] text-slate-100 rounded-tl-none border border-slate-700 shadow-md whitespace-pre-wrap'
                       }`}
                     >
                       {m.content}
@@ -246,7 +246,7 @@ export const AiAssistantFloatingWidget: React.FC<AiAssistantFloatingWidgetProps>
                   </div>
                   <span>Four Star Cargo AI</span>
                 </div>
-                <div className="p-3.5 rounded-2xl bg-slate-900 text-slate-300 rounded-tl-none border border-slate-700 flex items-center space-x-2">
+                <div className="p-3.5 rounded-2xl bg-[#1E293B] text-slate-300 rounded-tl-none border border-slate-700 flex items-center space-x-2">
                   <div className="w-2 h-2 rounded-full bg-[#00897B] animate-bounce" />
                   <div className="w-2 h-2 rounded-full bg-[#00897B] animate-bounce [animation-delay:0.2s]" />
                   <div className="w-2 h-2 rounded-full bg-[#00897B] animate-bounce [animation-delay:0.4s]" />
@@ -261,7 +261,7 @@ export const AiAssistantFloatingWidget: React.FC<AiAssistantFloatingWidgetProps>
           </div>
 
           {/* Footer Input Bar */}
-          <div className="p-3 bg-slate-900 border-t border-slate-700 shrink-0 space-y-1.5">
+          <div className="p-3 bg-[#1E293B] border-t border-slate-700 shrink-0 space-y-1.5">
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -274,7 +274,7 @@ export const AiAssistantFloatingWidget: React.FC<AiAssistantFloatingWidgetProps>
                 value={inputQuery}
                 onChange={(e) => setInputQuery(e.target.value)}
                 placeholder={isBn ? 'প্রশ্ন লিখুন...' : 'Type your cargo query...'}
-                className="flex-1 px-4 py-2.5 bg-slate-900 border border-slate-700 focus:border-[#00897B] rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition-colors"
+                className="flex-1 px-4 py-2.5 bg-[#1E293B] border border-slate-700 focus:border-[#00897B] rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none transition-colors"
                 disabled={loading}
               />
               <button

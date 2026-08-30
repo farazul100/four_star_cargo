@@ -217,11 +217,11 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
 
       {/* Floating Support Chat Drawer / Window */}
       {isOpen && (
-        <div className="w-[360px] sm:w-[400px] h-[520px] bg-slate-900 border-2 border-[#00897B] rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 duration-300">
+        <div className="w-[360px] sm:w-[400px] h-[520px] bg-[#1E293B] border-2 border-[#00897B] rounded-3xl shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 duration-300">
           {/* Header Bar */}
           <div className="p-4 bg-gradient-to-r from-[#0F2D52] to-[#00897B] border-b border-[#00897B]/40 flex items-center justify-between text-white shrink-0">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-2xl bg-slate-900 flex items-center justify-center shadow-md border border-white/30 p-1 shrink-0 overflow-hidden">
+              <div className="w-10 h-10 rounded-2xl bg-[#1E293B] flex items-center justify-center shadow-md border border-white/30 p-1 shrink-0 overflow-hidden">
                 <Logo size="sm" />
               </div>
               <div>
@@ -247,7 +247,7 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
 
           {/* Form State (If user has not set their name yet) */}
           {!guestName ? (
-            <div className="flex-1 p-6 bg-slate-900 flex flex-col justify-center space-y-5 text-white">
+            <div className="flex-1 p-6 bg-[#1E293B] flex flex-col justify-center space-y-5 text-white">
               <div className="text-center space-y-2">
                 <div className="w-14 h-14 rounded-2xl bg-[#00897B]/20 text-[#1FB6A8] flex items-center justify-center mx-auto border border-[#00897B]/40">
                   <User className="w-7 h-7" />
@@ -273,7 +273,7 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
                     value={inputName}
                     onChange={(e) => setInputName(e.target.value)}
                     placeholder={isBn ? 'উদাহরণ: মোঃ রহমত উল্লাহ' : 'e.g. Rahmat Ullah'}
-                    className="w-full bg-slate-900 border border-slate-700 focus:border-[#00897B] rounded-xl py-2.5 px-3.5 text-xs text-white placeholder-slate-500 outline-none transition-colors"
+                    className="w-full bg-[#1E293B] border border-slate-700 focus:border-[#00897B] rounded-xl py-2.5 px-3.5 text-xs text-white placeholder-slate-500 outline-none transition-colors"
                   />
                 </div>
 
@@ -286,7 +286,7 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
                     value={inputPhone}
                     onChange={(e) => setInputPhone(e.target.value)}
                     placeholder={isBn ? '01700000000 বা EXP-994801' : '01700000000 or EXP-994801'}
-                    className="w-full bg-slate-900 border border-slate-700 focus:border-[#00897B] rounded-xl py-2.5 px-3.5 text-xs text-white placeholder-slate-500 outline-none transition-colors"
+                    className="w-full bg-[#1E293B] border border-slate-700 focus:border-[#00897B] rounded-xl py-2.5 px-3.5 text-xs text-white placeholder-slate-500 outline-none transition-colors"
                   />
                 </div>
 
@@ -301,7 +301,7 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
             </div>
           ) : (
             /* Active Live Support Thread */
-            <div className="flex-1 flex flex-col bg-slate-900 overflow-hidden">
+            <div className="flex-1 flex flex-col bg-[#1E293B] overflow-hidden">
               {/* Message List */}
               <div className="flex-1 overflow-y-auto p-4 space-y-3">
                 {messages.length === 0 ? (
@@ -356,7 +356,7 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
                   e.preventDefault();
                   handleSendMessage();
                 }}
-                className="p-3 bg-slate-900 border-t border-slate-700 flex items-center space-x-2 shrink-0"
+                className="p-3 bg-[#1E293B] border-t border-slate-700 flex items-center space-x-2 shrink-0"
               >
                 <input
                   type="file"
@@ -380,7 +380,7 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
                   value={messageInput}
                   onChange={(e) => setMessageInput(e.target.value)}
                   placeholder={isBn ? 'আপনার মেসেজ লিখুন...' : 'Type a message...'}
-                  className="flex-1 bg-slate-900 border border-slate-700 focus:border-[#00897B] rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 outline-none transition-colors"
+                  className="flex-1 bg-[#1E293B] border border-slate-700 focus:border-[#00897B] rounded-xl py-2 px-3 text-xs text-white placeholder-slate-500 outline-none transition-colors"
                 />
 
                 <button

@@ -359,7 +359,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
                   >
                     {/* Tooltip on Hover */}
                     {isHovered && (
-                      <div className="absolute -top-12 z-20 px-3 py-1.5 rounded-xl bg-slate-900 text-white text-[10px] font-mono shadow-lg border border-slate-700 whitespace-nowrap animate-in fade-in zoom-in-95">
+                      <div className="absolute -top-12 z-20 px-3 py-1.5 rounded-xl bg-[#1E293B] text-white text-[10px] font-mono shadow-lg border border-slate-700 whitespace-nowrap animate-in fade-in zoom-in-95">
                         <div>Intake: {d.intake} Cartons</div>
                         <div className="text-emerald-400">Flying: {d.flying} Cartons</div>
                         <div className="text-slate-400">Weight: {d.weight} kg</div>
@@ -392,7 +392,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
             {/* Operational Insight Summary Bar Filling the Empty Bottom Area */}
             <div className="mt-6 pt-5 border-t border-slate-200 dark:border-slate-700 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-normal">
               <div className={`p-3 rounded-xl border flex items-center space-x-3 transition-colors ${
-                isDark ? 'bg-slate-900/60 border-slate-700' : 'bg-slate-50/90 border-slate-200/90 hover:bg-slate-100/60'
+                isDark ? 'bg-[#1E293B]/60 border-slate-700' : 'bg-slate-50/90 border-slate-200/90 hover:bg-slate-100/60'
               }`}>
                 <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
                   <Package className="w-4 h-4" />
@@ -404,7 +404,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
               </div>
 
               <div className={`p-3 rounded-xl border flex items-center space-x-3 transition-colors ${
-                isDark ? 'bg-slate-900/60 border-slate-700' : 'bg-slate-50/90 border-slate-200/90 hover:bg-slate-100/60'
+                isDark ? 'bg-[#1E293B]/60 border-slate-700' : 'bg-slate-50/90 border-slate-200/90 hover:bg-slate-100/60'
               }`}>
                 <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
                   <Plane className="w-4 h-4" />
@@ -416,7 +416,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
               </div>
 
               <div className={`p-3 rounded-xl border flex items-center space-x-3 transition-colors ${
-                isDark ? 'bg-slate-900/60 border-slate-700' : 'bg-slate-50/90 border-slate-200/90 hover:bg-slate-100/60'
+                isDark ? 'bg-[#1E293B]/60 border-slate-700' : 'bg-slate-50/90 border-slate-200/90 hover:bg-slate-100/60'
               }`}>
                 <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
                   <TrendingUp className="w-4 h-4" />
@@ -557,7 +557,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
 
           <div className="mt-4 space-y-4 text-xs font-normal">
             <div className={`p-3.5 rounded-xl border flex items-center justify-between transition-colors ${
-              isDark ? 'bg-slate-900/60 border-slate-700' : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100/60'
+              isDark ? 'bg-[#1E293B]/60 border-slate-700' : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100/60'
             }`}>
               <div className="flex items-center space-x-3">
                 <span className="text-xl">🇧🇩</span>
@@ -573,7 +573,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
             </div>
 
             <div className={`p-3.5 rounded-xl border flex items-center justify-between transition-colors ${
-              isDark ? 'bg-slate-900/60 border-slate-700' : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100/60'
+              isDark ? 'bg-[#1E293B]/60 border-slate-700' : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100/60'
             }`}>
               <div className="flex items-center space-x-3">
                 <span className="text-xl">🚢</span>
@@ -589,7 +589,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
             </div>
 
             <div className={`p-3.5 rounded-xl border flex items-center justify-between transition-colors ${
-              isDark ? 'bg-slate-900/60 border-slate-700' : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100/60'
+              isDark ? 'bg-[#1E293B]/60 border-slate-700' : 'bg-slate-50 border-slate-200/80 hover:bg-slate-100/60'
             }`}>
               <div className="flex items-center space-x-3">
                 <span className="text-xl">✈️</span>
@@ -622,7 +622,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
 
           <div className="mt-4 space-y-3.5 text-xs font-normal">
             {/* Event 1 */}
-            <div className="flex items-start space-x-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
+            <div className="flex items-start space-x-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1E293B] transition-colors">
               <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">
                 <PlusCircle className="w-3.5 h-3.5" />
               </div>
@@ -638,7 +638,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
             </div>
 
             {/* Event 2 */}
-            <div className="flex items-start space-x-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
+            <div className="flex items-start space-x-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1E293B] transition-colors">
               <div className="p-2 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 shrink-0 mt-0.5">
                 <Plane className="w-3.5 h-3.5" />
               </div>
@@ -654,7 +654,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
             </div>
 
             {/* Event 3 */}
-            <div className="flex items-start space-x-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900/40 transition-colors">
+            <div className="flex items-start space-x-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1E293B] transition-colors">
               <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0 mt-0.5">
                 <CheckCircle2 className="w-3.5 h-3.5" />
               </div>

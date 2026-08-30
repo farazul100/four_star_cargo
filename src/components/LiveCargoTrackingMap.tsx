@@ -137,9 +137,9 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
   const awb = currentProposal?.awb_number || '157-889120';
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl border ${isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-900 border-slate-700 text-white'} shadow-2xl font-sans`}>
+    <div className={`relative overflow-hidden rounded-2xl border ${isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-[#1E293B] border-slate-700 text-white'} shadow-2xl font-sans`}>
       {/* Top Header Section */}
-      <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-4 border-b border-slate-700/80 bg-slate-900/90 backdrop-blur-md">
+      <div className="flex flex-wrap items-center justify-between gap-4 px-5 py-4 border-b border-slate-700/80 bg-[#1E293B]/90 backdrop-blur-md">
         <div>
           <div className="flex items-center gap-2">
             <span className="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
@@ -258,7 +258,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             }}
           >
             {/* FLOATING FLIGHT NAME BADGE POSITIONED ABSOLUTELY ABOVE AIRPLANE */}
-            <div className="absolute -top-11 left-1/2 -translate-x-1/2 whitespace-nowrap bg-slate-900/90 text-white border border-amber-500/80 px-3 py-1 rounded-xl shadow-2xl backdrop-blur-md flex items-center gap-2 animate-bounce z-40">
+            <div className="absolute -top-11 left-1/2 -translate-x-1/2 whitespace-nowrap bg-[#1E293B]/90 text-white border border-amber-500/80 px-3 py-1 rounded-xl shadow-2xl backdrop-blur-md flex items-center gap-2 animate-bounce z-40">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
               <span className="text-[11px] font-black text-amber-400 uppercase tracking-widest">
                 ✈️ #{flightName}
@@ -283,7 +283,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
           </div>
         ) : (
           /* NO DISPATCHED FLIGHT NOTIFICATION BANNER OVERLAY */
-          <div className="absolute z-30 bg-slate-900/90 border border-amber-500/80 rounded-2xl px-5 py-3 shadow-2xl backdrop-blur-md text-center max-w-sm">
+          <div className="absolute z-30 bg-[#1E293B]/90 border border-amber-500/80 rounded-2xl px-5 py-3 shadow-2xl backdrop-blur-md text-center max-w-sm">
             <div className="flex items-center justify-center gap-2 text-amber-400 text-sm font-black mb-1">
               <Plane className="w-5 h-5 animate-pulse" />
               <span>{isBn ? 'কোনো ফ্লাইট রিলিজ করা হয়নি' : 'No Flight Currently Dispatched'}</span>
@@ -297,7 +297,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
         )}
 
         {/* FLOATING DETAIL CARD 1: ORIGIN CHINA (Top Right Overlay) */}
-        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 w-52 sm:w-60 bg-slate-900/85 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3 shadow-2xl text-white">
+        <div className="absolute top-3 right-3 sm:top-4 sm:right-4 z-20 w-52 sm:w-60 bg-[#1E293B]/85 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3 shadow-2xl text-white">
           <div className="flex items-center justify-between pb-1.5 border-b border-slate-700">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
               Origin
@@ -331,7 +331,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
         </div>
 
         {/* FLOATING DETAIL CARD 2: DESTINATION BANGLADESH (Top Left Overlay) */}
-        <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 w-52 sm:w-60 bg-slate-900/85 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3 shadow-2xl text-white">
+        <div className="absolute top-3 left-3 sm:top-4 sm:left-4 z-20 w-52 sm:w-60 bg-[#1E293B]/85 backdrop-blur-md border border-slate-700/80 rounded-2xl p-3 shadow-2xl text-white">
           <div className="flex items-center justify-between pb-1.5 border-b border-slate-700">
             <span className="text-[10px] font-extrabold uppercase tracking-widest text-slate-400">
               Destination
@@ -368,7 +368,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
       </div>
 
       {/* BOTTOM SECTION: SHIPMENT FLOW BY AIR (6-Step Flow Bar) */}
-      <div className="p-4 md:p-5 bg-slate-900/95 border-t border-slate-700 backdrop-blur-md">
+      <div className="p-4 md:p-5 bg-[#1E293B]/95 border-t border-slate-700 backdrop-blur-md">
         <div className="text-center mb-3">
           <h3 className="text-xs font-black uppercase tracking-widest text-slate-400">
             SHIPMENT FLOW BY AIR

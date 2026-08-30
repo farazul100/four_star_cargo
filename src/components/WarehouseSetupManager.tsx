@@ -609,7 +609,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
       {/* 6. MODAL 1: CREATE NEW WAREHOUSE */}
       {/* ========================================================================= */}
       {showAddWhModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1E293B]/50 backdrop-blur-xs">
           <div className={`w-full max-w-lg rounded-none border p-6 space-y-5 shadow-2xl ${
             isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
@@ -786,7 +786,7 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
       {/* 7. MODAL 2: ASSIGN WAREHOUSE INCHARGE STAFF ACCOUNT */}
       {/* ========================================================================= */}
       {targetWhForIncharge && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1E293B]/50 backdrop-blur-xs">
           <div className={`w-full max-w-lg rounded-none border p-6 space-y-4 shadow-2xl ${
             isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>

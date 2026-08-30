@@ -226,7 +226,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-700">
         <div>
           <div className="flex items-center space-x-2.5">
-            <div className="p-2 rounded-none bg-blue-50 dark:bg-slate-900 text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
+            <div className="p-2 rounded-none bg-blue-50 dark:bg-[#1E293B] text-blue-600 dark:text-blue-400 border border-blue-200 dark:border-blue-800">
               <Plane className="w-5 h-5" />
             </div>
             <h2 className="text-xl font-light tracking-tight text-slate-900 dark:text-white flex items-center space-x-2">
@@ -246,7 +246,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
         {/* Action Controls & Layout Toggle */}
         <div className="flex items-center space-x-2">
           {/* Layout View Mode Toggle */}
-          <div className="flex items-center border border-slate-300 dark:border-slate-700 rounded-none bg-white dark:bg-slate-900 p-0.5">
+          <div className="flex items-center border border-slate-300 dark:border-slate-700 rounded-none bg-white dark:bg-[#1E293B] p-0.5">
             <button
               onClick={() => setViewMode('cards')}
               className={`p-1.5 rounded-none text-xs flex items-center space-x-1 transition-all ${
@@ -379,7 +379,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
               value={dateFilter}
               onChange={(e) => setDateFilter(e.target.value)}
               className={`border rounded-none px-2.5 py-1.5 text-xs outline-none font-light transition-all focus:border-blue-500 ${
-                isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
               }`}
             />
           </div>
@@ -394,7 +394,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
               value={originFilter}
               onChange={(e) => setOriginFilter(e.target.value)}
               className={`border rounded-none px-2.5 py-1.5 text-xs outline-none font-light cursor-pointer transition-all focus:border-blue-500 ${
-                isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
               }`}
             >
               <option value="all">{isBn ? 'সকল অরিজিন হাব' : 'All Origin Hubs'}</option>
@@ -418,7 +418,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
               value={flightNoFilter}
               onChange={(e) => setFlightNoFilter(e.target.value)}
               className={`border rounded-none px-2.5 py-1.5 text-xs outline-none font-light cursor-pointer transition-all focus:border-blue-500 ${
-                isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
               }`}
             >
               <option value="all">{isBn ? 'সকল ফ্লাইট নম্বর' : 'All Flight Numbers'}</option>
@@ -440,7 +440,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
               value={destinationFilter}
               onChange={(e) => setDestinationFilter(e.target.value)}
               className={`border rounded-none px-2.5 py-1.5 text-xs outline-none font-light cursor-pointer transition-all focus:border-blue-500 ${
-                isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
               }`}
             >
               <option value="all">{isBn ? 'সকল ডেস্টিনেশন' : 'All Destinations'}</option>
@@ -461,7 +461,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className={`w-full border rounded-none py-1.5 pl-8 pr-3 text-xs outline-none font-light transition-all focus:border-blue-500 ${
-                  isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                  isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                 }`}
               />
               <Search className="w-3 h-3 absolute left-2.5 top-2.5 text-slate-400" />
@@ -535,28 +535,28 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
 
                 {/* Grid Specifications Body */}
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 text-xs font-light">
-                  <div className={`p-2.5 rounded-none border ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className={`p-2.5 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                     <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase font-light">{isBn ? 'অরিজিন হাব' : 'Origin Hub'}</span>
                     <span className="font-normal text-slate-900 dark:text-slate-200 block truncate" title={prop.warehouse_name}>
                       {prop.warehouse_name}
                     </span>
                   </div>
 
-                  <div className={`p-2.5 rounded-none border ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className={`p-2.5 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                     <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase font-light">{isBn ? 'ডেস্টিনেশন' : 'Destination'}</span>
                     <span className="font-normal text-emerald-600 dark:text-emerald-400 block truncate">
                       {prop.destination_warehouse_name || 'ঢাকা সেন্ট্রাল (BD)'}
                     </span>
                   </div>
 
-                  <div className={`p-2.5 rounded-none border ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className={`p-2.5 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                     <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase font-light">{isBn ? 'ফ্লাইট নম্বর' : 'Flight No'}</span>
                     <span className="font-mono text-blue-600 dark:text-blue-400 block font-normal">
                       {prop.flight_number || 'N/A'}
                     </span>
                   </div>
 
-                  <div className={`p-2.5 rounded-none border ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className={`p-2.5 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                     <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase font-light">{isBn ? 'এয়ারওয়ে বিল (AWB)' : 'AWB Number'}</span>
                     <div className="flex items-center justify-between">
                       <span className="font-mono text-slate-800 dark:text-slate-200 block font-normal truncate">
@@ -572,14 +572,14 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
                     </div>
                   </div>
 
-                  <div className={`p-2.5 rounded-none border ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className={`p-2.5 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                     <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase font-light">{isBn ? 'মোট ওজন (KG)' : 'Total Weight'}</span>
                     <span className="font-mono text-emerald-600 dark:text-emerald-400 block font-normal">
                       {prop.total_weight} kg
                     </span>
                   </div>
 
-                  <div className={`p-2.5 rounded-none border ${isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                  <div className={`p-2.5 rounded-none border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
                     <span className="text-[10px] text-slate-500 dark:text-slate-400 block uppercase font-light">{isBn ? 'মোট ভলিউম' : 'Total Volume'}</span>
                     <span className="font-mono text-purple-600 dark:text-purple-400 block font-normal">
                       {prop.total_cbm?.toFixed(2)} CBM
@@ -639,7 +639,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
           <div className="overflow-x-auto border border-slate-200 dark:border-slate-700 rounded-none">
             <table className="w-full text-left text-xs font-light">
               <thead className={`uppercase text-[10px] tracking-wider border-b sticky top-0 ${
-                isDark ? 'bg-slate-900 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-600 border-slate-200'
+                isDark ? 'bg-[#1E293B] text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-600 border-slate-200'
               }`}>
                 <tr>
                   <th className="p-3 font-normal">SL</th>
@@ -660,7 +660,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
                   const isDispatched = prop.status === 'dispatched' || prop.status === 'in_transit';
 
                   return (
-                    <tr key={prop.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/50 transition-colors">
+                    <tr key={prop.id} className="hover:bg-slate-50/50 dark:hover:bg-[#1E293B]/50 transition-colors">
                       <td className="p-3 font-mono text-slate-400">{idx + 1}</td>
                       <td className="p-3 font-mono whitespace-nowrap">{prop.date}</td>
                       <td className="p-3 font-normal font-mono text-slate-900 dark:text-white max-w-[180px] truncate">
@@ -719,7 +719,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
 
       {/* 5. FINISH & LAUNCH SUCCESS NOTIFICATION MODAL */}
       {finishSuccessProposal && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-xs z-50 flex items-center justify-center p-4 font-sans animate-backdrop-blur-fade">
+        <div className="fixed inset-0 bg-[#1E293B]/80 backdrop-blur-xs z-50 flex items-center justify-center p-4 font-sans animate-backdrop-blur-fade">
           <div className="bg-white dark:bg-[#1E293B] text-slate-900 dark:text-white rounded-none max-w-lg w-full p-6 space-y-5 border border-emerald-500/50 shadow-2xl">
             <div className="flex items-center space-x-3">
               <div className="w-10 h-10 rounded-none bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center border border-emerald-500/30">
@@ -735,7 +735,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
               </div>
             </div>
 
-            <div className="p-4 rounded-none bg-slate-50 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 space-y-2 text-xs font-light text-slate-700 dark:text-slate-300">
+            <div className="p-4 rounded-none bg-slate-50 dark:bg-[#1E293B]/60 border border-slate-200 dark:border-slate-700 space-y-2 text-xs font-light text-slate-700 dark:text-slate-300">
               <div className="flex items-center space-x-2 text-emerald-600 dark:text-emerald-400 font-normal">
                 <Sparkles className="w-4 h-4" />
                 <span>{isBn ? 'সকল সিস্টেম সিঙ্ক আপডেট কার্যকর হয়েছে:' : 'System-wide Sync Updates Applied:'}</span>
@@ -761,7 +761,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
 
       {/* 6. SUB-MODAL: CARTONS INSPECTOR FOR FLYING BATCH */}
       {selectedProposalForModal && (
-        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4 font-sans">
+        <div className="fixed inset-0 bg-[#1E293B]/60 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4 font-sans">
           <div
             className={`w-full max-w-6xl max-h-[92vh] rounded-none p-5 overflow-hidden flex flex-col border shadow-2xl ${
               isDark ? 'bg-[#1E293B] text-white border-slate-700' : 'bg-white text-slate-900 border-slate-300'
@@ -813,7 +813,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
                 </div>
 
                 <table className="w-full text-left text-xs whitespace-nowrap border-collapse border border-slate-200 dark:border-slate-700 font-light">
-                  <thead className={`uppercase text-[10px] tracking-wider ${isDark ? 'bg-slate-900 text-slate-400' : 'bg-slate-100 text-slate-700 font-normal'}`}>
+                  <thead className={`uppercase text-[10px] tracking-wider ${isDark ? 'bg-[#1E293B] text-slate-400' : 'bg-slate-100 text-slate-700 font-normal'}`}>
                     <tr>
                       <th className="p-2.5 border border-slate-200 dark:border-slate-700">SL</th>
                       <th className="p-2.5 border border-slate-200 dark:border-slate-700">ENTRY DATE</th>
@@ -838,11 +838,11 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
                       </tr>
                     ) : (
                       modalProposalCartons.map((c, idx) => (
-                        <tr key={c.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-900/40 transition-colors">
+                        <tr key={c.id} className="hover:bg-slate-50/50 dark:hover:bg-[#1E293B] transition-colors">
                           <td className="p-2.5 font-mono text-slate-400 border border-slate-200 dark:border-slate-700 text-center">{idx + 1}</td>
                           <td className="p-2.5 font-mono text-slate-500 border border-slate-200 dark:border-slate-700">{c.created_at ? c.created_at.split('T')[0] : '2026-08-15'}</td>
                           <td className="p-2.5 font-mono text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700">
-                            <span className="px-2 py-0.5 rounded-none bg-white dark:bg-slate-900 border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200">
+                            <span className="px-2 py-0.5 rounded-none bg-white dark:bg-[#1E293B] border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200">
                               {c.ctn_no}
                             </span>
                           </td>
@@ -897,7 +897,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
 
       {/* 7. PRINT MANIFEST PREVIEW MODAL */}
       {printManifestProposal && (
-        <div className="fixed inset-0 bg-slate-900/70 backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4 font-sans">
+        <div className="fixed inset-0 bg-[#1E293B] backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4 font-sans">
           <div className="bg-white text-slate-900 rounded-none w-full max-w-4xl max-h-[92vh] overflow-y-auto p-6 sm:p-8 space-y-6 border border-slate-300 shadow-2xl">
             {/* Print Controls Header (Hidden during browser print) */}
             <div className="flex items-center justify-between border-b pb-4 border-slate-200 print:hidden">
@@ -1014,8 +1014,8 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
 
       {/* 8. PROOF PHOTO MODAL */}
       {previewPhotoUrl && (
-        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-4 font-sans">
-          <div className="bg-white dark:bg-slate-900 rounded-none max-w-xl w-full p-5 space-y-4 border border-slate-300 dark:border-slate-700 shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-[#1E293B]/80 backdrop-blur-xs flex items-center justify-center p-4 font-sans">
+          <div className="bg-white dark:bg-[#1E293B] rounded-none max-w-xl w-full p-5 space-y-4 border border-slate-300 dark:border-slate-700 shadow-2xl">
             <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
               <h3 className="text-xs font-normal text-slate-900 dark:text-white flex items-center space-x-2">
                 <span>📸 প্যাকেজিং স্লিপ ও প্রোডাক্ট প্রমাণ ছবি</span>
@@ -1028,7 +1028,7 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
               </button>
             </div>
 
-            <div className="max-h-[60vh] overflow-y-auto flex items-center justify-center bg-slate-900 rounded-none p-2 border border-slate-700">
+            <div className="max-h-[60vh] overflow-y-auto flex items-center justify-center bg-[#1E293B] rounded-none p-2 border border-slate-700">
               <img
                 src={previewPhotoUrl}
                 alt="Parcel Proof Slip"

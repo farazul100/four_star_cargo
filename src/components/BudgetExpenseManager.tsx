@@ -875,7 +875,7 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
           </div>
 
           <div className="text-right border-l pl-4 border-slate-300">
-            <span className="inline-block px-2.5 py-1 bg-slate-900 text-white text-[10px] font-bold tracking-widest uppercase rounded-none">
+            <span className="inline-block px-2.5 py-1 bg-[#1E293B] text-white text-[10px] font-bold tracking-widest uppercase rounded-none">
               Official Document
             </span>
             <p className="text-xs font-mono font-bold text-slate-900 mt-2">Ref: FSC-FIN-2026-0815</p>

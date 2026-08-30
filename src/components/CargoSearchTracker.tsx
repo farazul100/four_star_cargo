@@ -210,7 +210,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
         <form
           onSubmit={handleSearchSubmit}
           className={`border rounded-xl p-3 shadow-lg flex flex-col sm:flex-row items-center gap-3 ${
-            isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-300 shadow-sm'
+            isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-300 shadow-sm'
           }`}
         >
           <div className="relative flex-1 w-full">
@@ -223,7 +223,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
               placeholder={isBn ? 'উদাহরণ: TRK98421039 বা FSC-2026-0891 বা SM-DHAKA-88...' : 'e.g. TRK98421039 or FSC-2026-0891...'}
               className={`w-full border rounded-xl py-3 pl-12 pr-4 text-sm outline-none transition-all font-mono font-medium ${
                 isDark
-                  ? 'bg-slate-900 border-slate-600 focus:border-teal-400 text-white placeholder:text-slate-300'
+                  ? 'bg-[#1E293B] border-slate-600 focus:border-teal-400 text-white placeholder:text-slate-300'
                   : 'bg-white border-slate-300 focus:border-teal-600 text-slate-900 placeholder-slate-400'
               }`}
             />
@@ -270,7 +270,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                 >
                   {/* Master Tracking Header Card */}
                   <div className={`p-4 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-                    isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-200'
+                    isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'
                   }`}>
                     <div className="space-y-1">
                       <div className="flex items-center space-x-2 flex-wrap gap-y-1">
@@ -305,7 +305,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                       <button
                         type="button"
                         onClick={() => setPrintPassShipment(shipment)}
-                        className="px-3.5 py-2 rounded-none bg-slate-800 hover:bg-slate-900 text-white text-xs font-medium transition-all flex items-center space-x-1.5 shadow-xs cursor-pointer border-0"
+                        className="px-3.5 py-2 rounded-none bg-slate-800 hover:bg-[#1E293B] text-white text-xs font-medium transition-all flex items-center space-x-1.5 shadow-xs cursor-pointer border-0"
                       >
                         <Printer className="w-4 h-4 text-slate-300" />
                         <span>{isBn ? 'ট্র্যাকিং পাস প্রিন্ট' : 'Print Pass'}</span>
@@ -336,7 +336,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                         } ${
                           chinaStockCartons.length > 0
                             ? isDark ? 'bg-amber-500/15 border-amber-500/40 text-amber-300' : 'bg-amber-50 border-amber-300 text-amber-900'
-                            : isDark ? 'bg-slate-900 border-slate-700 text-slate-400 opacity-75' : 'bg-slate-50 border-slate-200 text-slate-400'
+                            : isDark ? 'bg-[#1E293B] border-slate-700 text-slate-400 opacity-75' : 'bg-slate-50 border-slate-200 text-slate-400'
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -359,7 +359,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                         } ${
                           inTransitCartons.length > 0
                             ? isDark ? 'bg-blue-500/15 border-blue-500/40 text-blue-300' : 'bg-blue-50 border-blue-300 text-blue-900'
-                            : isDark ? 'bg-slate-900 border-slate-700 text-slate-400 opacity-75' : 'bg-slate-50 border-slate-200 text-slate-400'
+                            : isDark ? 'bg-[#1E293B] border-slate-700 text-slate-400 opacity-75' : 'bg-slate-50 border-slate-200 text-slate-400'
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -382,7 +382,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                         } ${
                           bdHubCartons.length > 0
                             ? isDark ? 'bg-teal-500/15 border-teal-500/40 text-teal-300' : 'bg-teal-50 border-teal-300 text-teal-900'
-                            : isDark ? 'bg-slate-900 border-slate-700 text-slate-400 opacity-75' : 'bg-slate-50 border-slate-200 text-slate-400'
+                            : isDark ? 'bg-[#1E293B] border-slate-700 text-slate-400 opacity-75' : 'bg-slate-50 border-slate-200 text-slate-400'
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -405,7 +405,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                         } ${
                           deliveredCartons.length > 0
                             ? isDark ? 'bg-emerald-500/15 border-emerald-500/40 text-emerald-300' : 'bg-emerald-50 border-emerald-300 text-emerald-900'
-                            : isDark ? 'bg-slate-900 border-slate-700 text-slate-400 opacity-75' : 'bg-slate-50 border-slate-200 text-slate-400'
+                            : isDark ? 'bg-[#1E293B] border-slate-700 text-slate-400 opacity-75' : 'bg-slate-50 border-slate-200 text-slate-400'
                         }`}
                       >
                         <div className="flex items-center justify-between">
@@ -488,7 +488,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                     <div className="overflow-x-auto border border-slate-200 dark:border-slate-700">
                       <table className="w-full text-left text-xs font-mono">
                         <thead className={`border-b text-[11px] ${
-                          isDark ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
+                          isDark ? 'bg-[#1E293B] border-slate-700 text-slate-300' : 'bg-slate-100 border-slate-200 text-slate-700'
                         }`}>
                           <tr>
                             <th className="p-2.5">#</th>

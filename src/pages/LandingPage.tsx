@@ -57,7 +57,7 @@ export const LandingPage: React.FC = () => {
   return (
     <div
       className={`min-h-screen flex flex-col justify-between p-6 md:p-12 relative overflow-hidden font-sans transition-colors duration-300 ${
-        isDark ? 'bg-[#141414] text-[#E0E0E0]' : 'bg-[#F8FAFC] text-[#0F2D52]'
+        isDark ? 'bg-[#1E293B] text-[#E0E0E0]' : 'bg-[#F8FAFC] text-[#0F2D52]'
       }`}
     >
       {/* 
@@ -122,7 +122,7 @@ export const LandingPage: React.FC = () => {
                 onClick={() => navigate(card.loginRoute)}
                 className={`rounded-2xl p-7 flex flex-col justify-between cursor-pointer group transition-all duration-300 ${
                   isDark
-                    ? 'bg-[#1C1C1E] border border-[#2C2C2E] hover:border-[#3A3A3C] hover:bg-[#222224]'
+                    ? 'bg-[#1E293B] border border-[#2C2C2E] hover:border-[#3A3A3C] hover:bg-[#222224]'
                     : 'bg-white border border-slate-200/80 hover:border-slate-300 shadow-sm hover:shadow-md'
                 }`}
               >

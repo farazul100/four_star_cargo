@@ -435,9 +435,14 @@ iframe.skiptranslate {
    LIGHT & DARK MODE DROPDOWN SELECT & OPTION STYLING FIX
    ========================================================= */
 html.dark select,
-.dark select {
+.dark select,
+html.dark input,
+.dark input,
+html.dark textarea,
+.dark textarea {
   color-scheme: dark !important;
-  background-color: #0F172A !important;
+  background-color: #1E293B !important;
+  border-color: #334155 !important;
   color: #FFFFFF !important;
 }
 
@@ -447,6 +452,23 @@ html.dark select option,
   background-color: #1E293B !important;
   color: #FFFFFF !important;
   padding: 8px 12px;
+}
+
+/* Global Dark Theme Pitch-Black Elimination Override */
+html.dark .bg-slate-950,
+.dark .bg-slate-950,
+html.dark .bg-slate-900,
+.dark .bg-slate-900,
+html.dark .bg-\[\#0F172A\],
+.dark .bg-\[\#0F172A\],
+html.dark .bg-\[\#121214\],
+.dark .bg-\[\#121214\],
+html.dark .bg-\[\#1C1C1E\],
+.dark .bg-\[\#1C1C1E\],
+html.dark .bg-\[\#141414\],
+.dark .bg-\[\#141414\] {
+  background-color: #1E293B !important;
+  border-color: #334155 !important;
 }
 
 html:not(.dark) select,

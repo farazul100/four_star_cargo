@@ -71,7 +71,7 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
   const destWh = cartons[0]?.destination_warehouse_name || 'Dhaka Central Hub (BD)';
 
   return (
-    <div className="fixed inset-0 z-[2500] bg-slate-900/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in">
+    <div className="fixed inset-0 z-[2500] bg-[#1E293B]/85 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto animate-in fade-in">
       {/* Printable CSS Media Rules */}
       <style>{`
         @media print {
@@ -100,7 +100,7 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
         }
       `}</style>
 
-      <div className="w-full max-w-5xl bg-slate-900 border-2 border-[#00897B] rounded-none shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
+      <div className="w-full max-w-5xl bg-[#1E293B] border-2 border-[#00897B] rounded-none shadow-2xl overflow-hidden flex flex-col max-h-[92vh]">
         {/* Top Modal Control Bar (Screen Only) */}
         <div className="no-print p-4 bg-[#1E293B] border-b border-slate-700 flex items-center justify-between shrink-0">
           <div className="flex items-center space-x-3">
@@ -139,7 +139,7 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
         </div>
 
         {/* Scrollable Printable Container */}
-        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 bg-slate-900" id="printable-invoices-area">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6 bg-[#1E293B]" id="printable-invoices-area">
           {cartons.map((ctn, index) => {
             const ctnNoStr = ctn.ctn_no || `CTN-${index + 1}`;
             const pkgNoStr = ctn.packaging_number || `BOX-${101 + index}`;

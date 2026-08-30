@@ -841,7 +841,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
       {/* 5. MODAL: CREATE NEW USER ACCOUNT */}
       {/* ========================================================================= */}
       {showAddUserModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-backdrop-blur-fade">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1E293B]/50 backdrop-blur-xs animate-backdrop-blur-fade">
           <div className={`w-full max-w-lg rounded-2xl border p-6 space-y-5 shadow-2xl animate-modal-pop-bounce ${
             isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
@@ -1019,7 +1019,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
       {/* 6. MODAL: PERMANENT USER ACCOUNT DELETE CONFIRMATION */}
       {/* ========================================================================= */}
       {userToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-xs animate-backdrop-blur-fade">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1E293B]/50 backdrop-blur-xs animate-backdrop-blur-fade">
           <div className={`w-full max-w-md rounded-2xl border p-6 space-y-4 shadow-2xl animate-modal-pop-bounce ${
             isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>

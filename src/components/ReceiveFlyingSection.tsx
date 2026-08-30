@@ -493,14 +493,14 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={isBn ? 'ফ্লাইং নাম, ফ্লাইট নং, AWB বা উৎস হাব দিয়ে খুঁজুন...' : 'Search by Flying Name, Flight No, AWB or Origin...'}
             className={`w-full pl-10 pr-4 py-2 rounded-none text-xs font-normal border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
-              isDark ? 'bg-slate-900 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
+              isDark ? 'bg-[#1E293B] border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
             }`}
           />
         </div>
 
         {/* Status Filter Pills */}
         <div className={`flex items-center p-1 rounded-none border text-xs font-normal ${
-          isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-100 border-slate-300/80'
+          isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-100 border-slate-300/80'
         }`}>
           <button
             type="button"
@@ -564,7 +564,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
           <table className="w-full text-left text-xs font-normal border-collapse">
             <thead
               className={`uppercase text-[10px] tracking-wider border-b font-medium ${
-                isDark ? 'bg-slate-900/60 text-slate-400 border-slate-700' : 'bg-slate-50 text-slate-600 border-slate-200'
+                isDark ? 'bg-[#1E293B]/60 text-slate-400 border-slate-700' : 'bg-slate-50 text-slate-600 border-slate-200'
               }`}
             >
               <tr>
@@ -720,10 +720,10 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
       {/* BD Weight Calibration Modal */}
       {selectedProposalForWeightCalib && (
-        <div className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-xs flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 bg-[#1E293B] backdrop-blur-xs flex items-center justify-center p-4">
           <div
             className={`max-w-md w-full rounded-none p-6 shadow-2xl border space-y-5 animate-in fade-in zoom-in-95 duration-200 ${
-              isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
+              isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
             }`}
           >
             <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
@@ -766,7 +766,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                   value={calibratedWeightInput}
                   onChange={(e) => setCalibratedWeightInput(Number(e.target.value))}
                   className={`w-full px-4 py-2.5 rounded-none text-sm font-mono border focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
-                    isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                    isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                   }`}
                 />
               </div>
@@ -794,10 +794,10 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
       {/* Flight Carton Scan & Receive Modal */}
       {selectedFlightForCartonReceive && (
-        <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-4 font-sans">
+        <div className="fixed inset-0 z-50 bg-[#1E293B]/80 backdrop-blur-xs flex items-center justify-center p-4 font-sans">
           <div
             className={`max-w-5xl w-full rounded-none p-6 shadow-none border space-y-4 max-h-[90vh] flex flex-col ${
-              isDark ? 'bg-slate-900 border-slate-700 text-slate-200' : 'bg-white border-slate-300 text-slate-800'
+              isDark ? 'bg-[#1E293B] border-slate-700 text-slate-200' : 'bg-white border-slate-300 text-slate-800'
             }`}
           >
             {/* Header */}
@@ -880,7 +880,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                   {/* Cartons List Table */}
                   <div className="overflow-y-auto max-h-[52vh] border border-slate-200 dark:border-slate-700 rounded-none">
                     <table className="w-full text-left text-xs font-light">
-                      <thead className="bg-slate-100 dark:bg-slate-900 text-slate-500 uppercase text-[10px] tracking-wider sticky top-0 border-b border-slate-200 dark:border-slate-700 font-normal">
+                      <thead className="bg-slate-100 dark:bg-[#1E293B] text-slate-500 uppercase text-[10px] tracking-wider sticky top-0 border-b border-slate-200 dark:border-slate-700 font-normal">
                         <tr>
                           <th className="p-2.5 font-normal">#</th>
                           <th className="p-2.5 font-normal">CTN No</th>

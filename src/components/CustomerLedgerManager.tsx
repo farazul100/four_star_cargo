@@ -948,7 +948,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
       {/* 5. MODAL: REGISTER NEW CUSTOMER */}
       {/* ========================================================================= */}
       {showAddCustomerModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-backdrop-blur-fade">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1E293B] backdrop-blur-xs animate-backdrop-blur-fade">
           <div className={`w-full max-w-lg rounded-none-none border p-6 space-y-5 shadow-2xl animate-modal-pop-bounce ${
             isDark ? 'bg-[#1E293B] border-slate-700/80 text-white' : 'bg-white border-slate-200/80 text-slate-900'
           }`}>
@@ -1102,7 +1102,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
       {/* 6. MODAL: RECORD PAYMENT RECEIVED (টাকা জমা নিন) */}
       {/* ========================================================================= */}
       {customerForPayment && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-xs animate-backdrop-blur-fade">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1E293B] backdrop-blur-xs animate-backdrop-blur-fade">
           <div className={`w-full max-w-md rounded-none-none border p-6 space-y-5 shadow-2xl animate-modal-pop-bounce ${
             isDark ? 'bg-[#1E293B] border-slate-700/80 text-white' : 'bg-white border-slate-200/80 text-slate-900'
           }`}>

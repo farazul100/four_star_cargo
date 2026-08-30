@@ -99,7 +99,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
             onClick={toggleTheme}
             className={`p-2 rounded-full border transition-all cursor-pointer ${
               isDark
-                ? 'bg-slate-900 border-slate-700 text-amber-400 hover:border-amber-400'
+                ? 'bg-[#1E293B] border-slate-700 text-amber-400 hover:border-amber-400'
                 : 'bg-slate-100 border-slate-300 text-slate-700 hover:border-[#00897B]'
             }`}
             title="Toggle Theme"
@@ -191,7 +191,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                   return (
                     <div className={`w-full rounded-3xl p-5 sm:p-6 border-2 shadow-xl backdrop-blur-md transition-all ${
                       isDark
-                        ? 'bg-slate-900/90 border-[#00897B]/40 text-white'
+                        ? 'bg-[#1E293B]/90 border-[#00897B]/40 text-white'
                         : 'bg-white border-[#00897B]/30 text-slate-900 shadow-teal-500/5'
                     }`}>
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-700/30 pb-3 mb-4 gap-2">

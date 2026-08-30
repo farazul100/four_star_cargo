@@ -410,7 +410,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     placeholder="e.g. FSC-1082 / CID-501"
                     className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-medium outline-none transition-all ${
                       isDark
-                        ? 'bg-slate-900 border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
+                        ? 'bg-[#1E293B] border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
                         : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                     }`}
                   />
@@ -450,7 +450,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     placeholder="e.g. Masuka Begum"
                     className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
                       isDark
-                        ? 'bg-slate-900 border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
+                        ? 'bg-[#1E293B] border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
                         : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                     }`}
                   />
@@ -469,7 +469,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     placeholder="01828661711"
                     className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-mono font-medium outline-none transition-all ${
                       isDark
-                        ? 'bg-slate-900 border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
+                        ? 'bg-[#1E293B] border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
                         : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                     }`}
                   />
@@ -487,7 +487,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     placeholder="e.g. Four Star Fashion Ltd"
                     className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
                       isDark
-                        ? 'bg-slate-900 border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
+                        ? 'bg-[#1E293B] border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
                         : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                     }`}
                   />
@@ -505,7 +505,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     placeholder="client@gmail.com"
                     className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
                       isDark
-                        ? 'bg-slate-900 border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
+                        ? 'bg-[#1E293B] border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
                         : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                     }`}
                   />
@@ -523,7 +523,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     placeholder="e.g. House 14, Road 5, Uttara Sector 7, Dhaka"
                     className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
                       isDark
-                        ? 'bg-slate-900 border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
+                        ? 'bg-[#1E293B] border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
                         : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                     }`}
                   />
@@ -559,7 +559,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     placeholder="e.g. Garments Fabrics / Electronics"
                     className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
                       isDark
-                        ? 'bg-slate-900 border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
+                        ? 'bg-[#1E293B] border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
                         : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                     }`}
                   />
@@ -577,7 +577,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     placeholder="e.g. 150 kg / 2 CBM"
                     className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
                       isDark
-                        ? 'bg-slate-900 border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
+                        ? 'bg-[#1E293B] border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
                         : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                     }`}
                   />
@@ -595,7 +595,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     placeholder="fb.com/page or wxid_..."
                     className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
                       isDark
-                        ? 'bg-slate-900 border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
+                        ? 'bg-[#1E293B] border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
                         : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                     }`}
                   />
@@ -628,15 +628,15 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     value={countryCategory}
                     onChange={(e) => setCountryCategory(e.target.value as any)}
                     className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none cursor-pointer ${
-                      isDark ? 'bg-slate-900 border-slate-600 text-white focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30' : 'bg-slate-50 border-slate-300 text-black focus:border-[#00897B] focus:bg-white'
+                      isDark ? 'bg-[#1E293B] border-slate-600 text-white focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30' : 'bg-slate-50 border-slate-300 text-black focus:border-[#00897B] focus:bg-white'
                     }`}
                   >
-                    <option value="CN_New" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>CN New</option>
-                    <option value="CN_Old" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>CHINA Old</option>
-                    <option value="KR_New" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>KR New</option>
-                    <option value="KR_Old" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>Korea Old</option>
-                    <option value="JP_New" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>JP New</option>
-                    <option value="Other" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>Other</option>
+                    <option value="CN_New" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-black'}>CN New</option>
+                    <option value="CN_Old" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-black'}>CHINA Old</option>
+                    <option value="KR_New" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-black'}>KR New</option>
+                    <option value="KR_Old" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-black'}>Korea Old</option>
+                    <option value="JP_New" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-black'}>JP New</option>
+                    <option value="Other" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-black'}>Other</option>
                   </select>
                 </div>
 
@@ -649,12 +649,12 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                     value={initialCategory}
                     onChange={(e) => setInitialCategory(e.target.value as any)}
                     className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none cursor-pointer ${
-                      isDark ? 'bg-slate-900 border-slate-600 text-white focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30' : 'bg-slate-50 border-slate-300 text-black focus:border-[#00897B] focus:bg-white'
+                      isDark ? 'bg-[#1E293B] border-slate-600 text-white focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30' : 'bg-slate-50 border-slate-300 text-black focus:border-[#00897B] focus:bg-white'
                     }`}
                   >
-                    <option value="followup" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>🔴 ফলো আপ কাস্টমার (Follow Up Table)</option>
-                    <option value="order_complete" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>🔵 নতুন কাস্টমার (New Customer Table)</option>
-                    <option value="important_regular" className={isDark ? 'bg-slate-900 text-white' : 'bg-white text-black'}>⚫ রেগুলার কাস্টমার (Regular Customer Table)</option>
+                    <option value="followup" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-black'}>🔴 ফলো আপ কাস্টমার (Follow Up Table)</option>
+                    <option value="order_complete" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-black'}>🔵 নতুন কাস্টমার (New Customer Table)</option>
+                    <option value="important_regular" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-black'}>⚫ রেগুলার কাস্টমার (Regular Customer Table)</option>
                   </select>
                 </div>
               </div>
@@ -682,7 +682,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                 placeholder="e.g. Guangzhou air freight quote given $8.5/kg. Flight expected next Monday..."
                 className={`w-full border rounded-xl py-2.5 px-3.5 text-xs font-medium outline-none transition-all ${
                   isDark
-                    ? 'bg-slate-900 border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
+                    ? 'bg-[#1E293B] border-slate-600 text-white placeholder:text-slate-300 focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30'
                     : 'bg-slate-50 border-slate-300 text-black placeholder:text-slate-500 focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20 focus:bg-white'
                 }`}
               />
@@ -806,7 +806,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={isBn ? 'নাম, ফোন বা কোম্পানি...' : 'Search name/phone/company...'}
                   className={`pl-8 pr-3 py-1.5 border rounded-lg text-xs font-medium outline-none transition-all ${
-                    isDark ? 'bg-slate-900 border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-600 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                    isDark ? 'bg-[#1E293B] border-slate-700 text-white placeholder:text-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]' : 'bg-white border-slate-400 text-black placeholder:text-slate-600 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
                   }`}
                 />
               </div>
@@ -830,7 +830,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-xs text-left border-collapse font-normal">
-                  <thead className={`border-b ${isDark ? 'bg-slate-900/90 border-slate-700 text-slate-200 font-semibold' : 'bg-slate-100 border-slate-400 text-black font-semibold'}`}>
+                  <thead className={`border-b ${isDark ? 'bg-[#1E293B]/90 border-slate-700 text-slate-200 font-semibold' : 'bg-slate-100 border-slate-400 text-black font-semibold'}`}>
                     <tr>
                       <th className="py-2.5 px-3.5 font-semibold">#</th>
                       <th className="py-2.5 px-3.5 font-semibold">{isBn ? 'কাস্টমার নাম ও যোগাযোগ' : 'Customer & Contact'}</th>
@@ -842,7 +842,7 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                   </thead>
                   <tbody className={`divide-y ${isDark ? 'divide-slate-800 border-slate-700' : 'divide-slate-200 border-slate-300'}`}>
                     {filteredCustomers.map((cust, idx) => (
-                      <tr key={cust.id} className={isDark ? 'hover:bg-slate-900/50 transition-colors' : 'hover:bg-slate-50 transition-colors'}>
+                      <tr key={cust.id} className={isDark ? 'hover:bg-[#1E293B]/50 transition-colors' : 'hover:bg-slate-50 transition-colors'}>
                         <td className={`py-3 px-3.5 font-mono font-medium ${isDark ? 'text-slate-400' : 'text-black'}`}>
                           {idx + 1}
                         </td>

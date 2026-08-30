@@ -440,7 +440,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={isBn ? 'কার্টুন নং, ট্র্যাকিং নং, শিপিং মার্ক বা কাস্টমার দিয়ে খুঁজুন...' : 'Search by Carton No, Tracking No, Shipping Mark...'}
             className={`w-full pl-10 pr-4 py-2 rounded-none text-xs font-normal border transition-all focus:outline-none focus:ring-2 focus:ring-emerald-500/20 ${
-              isDark ? 'bg-slate-900 border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
+              isDark ? 'bg-[#1E293B] border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
             }`}
           />
         </div>
@@ -452,7 +452,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
             value={originFilter}
             onChange={(e) => setOriginFilter(e.target.value)}
             className={`px-3 py-2 rounded-none text-xs font-normal border focus:outline-none cursor-pointer ${
-              isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+              isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
             }`}
           >
             <option value="all">{isBn ? 'সকল উৎস হাব (All Origins)' : 'All Origins'}</option>
@@ -483,7 +483,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
           <table className="w-full text-left text-xs font-normal border-collapse">
             <thead
               className={`uppercase text-[10px] tracking-wider border-b font-medium ${
-                isDark ? 'bg-slate-900/60 text-slate-400 border-slate-700' : 'bg-slate-50 text-slate-600 border-slate-200'
+                isDark ? 'bg-[#1E293B]/60 text-slate-400 border-slate-700' : 'bg-slate-50 text-slate-600 border-slate-200'
               }`}
             >
               <tr>
@@ -628,7 +628,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
 
       {/* PATHAO 1-CLICK BOOKING MODAL */}
       {selectedPathaoCarton && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1E293B]/60 backdrop-blur-xs animate-fade-in">
           <div className={`w-full max-w-lg rounded-none border p-6 shadow-2xl space-y-5 ${
             isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
@@ -665,7 +665,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
                   value={recipientName}
                   onChange={(e) => setRecipientName(e.target.value)}
                   className={`w-full px-3 py-2 border rounded-none text-xs outline-none font-medium ${
-                    isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                    isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                   }`}
                 />
               </div>
@@ -682,7 +682,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
                     value={recipientPhone}
                     onChange={(e) => setRecipientPhone(e.target.value)}
                     className={`w-full px-3 py-2 border rounded-none text-xs outline-none font-mono ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                      isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                     }`}
                   />
                 </div>
@@ -697,14 +697,14 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
                     value={recipientAddress}
                     onChange={(e) => setRecipientAddress(e.target.value)}
                     className={`w-full px-3 py-2 border rounded-none text-xs outline-none font-medium ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                      isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                     }`}
                   />
                 </div>
               </div>
 
               {/* Payment Status (Paid / Unpaid) */}
-              <div className="space-y-1.5 bg-slate-50 dark:bg-slate-900 p-3 border border-slate-200 dark:border-slate-700">
+              <div className="space-y-1.5 bg-slate-50 dark:bg-[#1E293B] p-3 border border-slate-200 dark:border-slate-700">
                 <label className="font-bold text-slate-800 dark:text-white block">
                   {isBn ? 'পেমেন্ট স্ট্যাটাস (Payment Status)' : 'Payment Status'}
                 </label>
@@ -778,7 +778,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
 
       {/* MANUAL DELIVERY MODAL */}
       {selectedManualCarton && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1E293B]/60 backdrop-blur-xs animate-fade-in">
           <div className={`w-full max-w-md rounded-none border p-6 shadow-2xl space-y-5 ${
             isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
@@ -805,7 +805,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
 
             <form onSubmit={handleConfirmManualDelivery} className="space-y-4 text-xs">
               {/* Payment Status (Paid / Unpaid) */}
-              <div className="space-y-1.5 bg-slate-50 dark:bg-slate-900 p-3 border border-slate-200 dark:border-slate-700">
+              <div className="space-y-1.5 bg-slate-50 dark:bg-[#1E293B] p-3 border border-slate-200 dark:border-slate-700">
                 <label className="font-bold text-slate-800 dark:text-white block">
                   {isBn ? 'পেমেন্ট স্ট্যাটাস (Payment Status)' : 'Payment Status'}
                 </label>

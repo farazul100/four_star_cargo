@@ -594,7 +594,7 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
             <table className="w-full text-left text-xs">
               <thead
                 className={`uppercase text-[10px] tracking-wider border-b ${
-                  isDark ? 'bg-slate-900 text-slate-300 border-slate-700' : 'bg-slate-50 text-slate-500 border-slate-200'
+                  isDark ? 'bg-[#1E293B] text-slate-300 border-slate-700' : 'bg-slate-50 text-slate-500 border-slate-200'
                 }`}
               >
                 <tr>

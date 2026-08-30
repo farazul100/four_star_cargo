@@ -193,7 +193,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
   return (
     <div
       className={`min-h-screen flex flex-col justify-between p-6 md:p-12 relative overflow-hidden font-sans transition-colors duration-300 ${
-        isDark ? 'bg-[#141414] text-[#E0E0E0]' : 'bg-[#F7FAFB] text-[#0F2D52]'
+        isDark ? 'bg-[#1E293B] text-[#E0E0E0]' : 'bg-[#F7FAFB] text-[#0F2D52]'
       }`}
     >
       {/* 
@@ -258,7 +258,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
           <div
             className={`w-full max-w-md rounded-2xl p-8 md:p-10 shadow-2xl transition-all duration-300 ${
               isDark
-                ? 'bg-[#1C1C1E]/90 border border-[#2C2C2E]/90 text-white'
+                ? 'bg-[#1E293B]/90 border border-[#2C2C2E]/90 text-white'
                 : 'bg-white/95 border border-[#E4E9EC] text-[#0F2D52] shadow-slate-200/60'
             }`}
           >
@@ -298,7 +298,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
                   required
                   className={`w-full rounded-xl py-3 px-4 text-xs outline-none transition-all ${
                     isDark
-                      ? 'bg-[#121214] border border-[#2C2C2E] focus:border-[#0099FF] text-white placeholder-[#666666]'
+                      ? 'bg-[#1E293B] border border-[#2C2C2E] focus:border-[#0099FF] text-white placeholder-[#666666]'
                       : 'bg-slate-50 border border-[#E4E9EC] focus:border-[#0099FF] text-[#0F2D52] placeholder-[#94A3B8]'
                   }`}
                   placeholder="Enter your email"
@@ -319,7 +319,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
                     required
                     className={`w-full rounded-xl py-3 pl-4 pr-10 text-xs outline-none transition-all ${
                       isDark
-                        ? 'bg-[#121214] border border-[#2C2C2E] focus:border-[#0099FF] text-white placeholder-[#666666]'
+                        ? 'bg-[#1E293B] border border-[#2C2C2E] focus:border-[#0099FF] text-white placeholder-[#666666]'
                         : 'bg-slate-50 border border-[#E4E9EC] focus:border-[#0099FF] text-[#0F2D52] placeholder-[#94A3B8]'
                     }`}
                     placeholder="Enter your password"

@@ -90,7 +90,7 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
     <div className="space-y-6 font-sans">
       {/* Top Banner */}
       <div className={`p-6 rounded-none border ${
-        isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
+        isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
       } shadow-none flex flex-wrap items-center justify-between gap-4`}>
         <div className="flex items-center space-x-4">
           <div className="p-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-none">
@@ -116,7 +116,7 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Total Booked */}
         <div className={`p-4 rounded-none border ${
-          isDark ? 'bg-slate-900/90 border-slate-700' : 'bg-white border-slate-200'
+          isDark ? 'bg-[#1E293B]/90 border-slate-700' : 'bg-white border-slate-200'
         }`}>
           <div className="flex items-center justify-between">
             <span className="text-xs font-light text-slate-500">📝 China Booked</span>
@@ -132,7 +132,7 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
 
         {/* Flying In Transit */}
         <div className={`p-4 rounded-none border ${
-          isDark ? 'bg-slate-900/90 border-slate-700' : 'bg-white border-slate-200'
+          isDark ? 'bg-[#1E293B]/90 border-slate-700' : 'bg-white border-slate-200'
         }`}>
           <div className="flex items-center justify-between">
             <span className="text-xs font-light text-slate-500">✈️ Air Flight (In Transit)</span>
@@ -148,7 +148,7 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
 
         {/* BD Warehouse Received */}
         <div className={`p-4 rounded-none border ${
-          isDark ? 'bg-slate-900/90 border-slate-700' : 'bg-white border-slate-200'
+          isDark ? 'bg-[#1E293B]/90 border-slate-700' : 'bg-white border-slate-200'
         }`}>
           <div className="flex items-center justify-between">
             <span className="text-xs font-light text-slate-500">📥 BD Hub Received</span>
@@ -164,7 +164,7 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
 
         {/* Delivered */}
         <div className={`p-4 rounded-none border ${
-          isDark ? 'bg-slate-900/90 border-slate-700' : 'bg-white border-slate-200'
+          isDark ? 'bg-[#1E293B]/90 border-slate-700' : 'bg-white border-slate-200'
         }`}>
           <div className="flex items-center justify-between">
             <span className="text-xs font-light text-slate-500">🚚 Customer Delivered</span>
@@ -181,7 +181,7 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
 
       {/* Filter Tabs & Search Bar */}
       <div className={`p-4 rounded-none border space-y-3 ${
-        isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'
+        isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200'
       }`}>
         <div className="flex flex-wrap items-center justify-between gap-3">
           {/* Stage Filter Buttons */}
@@ -191,7 +191,7 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
               onClick={() => setActiveFilter('all')}
               className={`px-3 py-1.5 text-xs font-light rounded-none border cursor-pointer transition-all ${
                 activeFilter === 'all'
-                  ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white'
+                  ? 'bg-[#1E293B] dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white'
                   : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200'
               }`}
             >
@@ -261,7 +261,7 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
       <div className="space-y-4">
         {filteredCartons.length === 0 ? (
           <div className={`p-12 text-center rounded-none border ${
-            isDark ? 'bg-slate-900 border-slate-700 text-slate-400' : 'bg-white border-slate-200 text-slate-500'
+            isDark ? 'bg-[#1E293B] border-slate-700 text-slate-400' : 'bg-white border-slate-200 text-slate-500'
           }`}>
             <Package className="w-10 h-10 mx-auto opacity-40 mb-2 font-light" />
             <p className="text-sm font-light">No cargo activity data found</p>
@@ -277,7 +277,7 @@ export const CargoLiveLifecycleMonitor: React.FC<CargoLiveLifecycleMonitorProps>
               <div
                 key={carton.id}
                 className={`p-5 rounded-none border space-y-4 transition-colors ${
-                  isDark ? 'bg-slate-900 border-slate-700 hover:border-slate-700' : 'bg-white border-slate-200 hover:border-slate-300'
+                  isDark ? 'bg-[#1E293B] border-slate-700 hover:border-slate-700' : 'bg-white border-slate-200 hover:border-slate-300'
                 }`}
               >
                 {/* Header info */}

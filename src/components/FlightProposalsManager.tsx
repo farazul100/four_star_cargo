@@ -1125,7 +1125,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
       {/* 5. INTERACTIVE CARTON AUDIT & MODIFICATION INSPECTOR MODAL */}
       {/* ========================================================================= */}
       {activeModalProposal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-xs animate-backdrop-blur-fade">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1E293B]/80 backdrop-blur-xs animate-backdrop-blur-fade">
           <div className={`w-full max-w-4xl max-h-[90vh] overflow-y-auto rounded-none border p-6 space-y-5 shadow-2xl animate-modal-pop-bounce ${
             isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}>
@@ -1198,7 +1198,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
             <div className="overflow-x-auto border rounded-none">
               <table className={`w-full text-left text-xs ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 <thead className={`uppercase text-[10px] tracking-wider border-b ${
-                  isDark ? 'bg-slate-900 text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-700 border-slate-200 font-medium'
+                  isDark ? 'bg-[#1E293B] text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-700 border-slate-200 font-medium'
                 }`}>
                   <tr>
                     <th className="p-2.5 w-8 text-center font-normal">SL</th>
@@ -1222,11 +1222,11 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                     </tr>
                   ) : (
                     getProposalCartons(activeModalProposal).map((ctn, idx) => (
-                      <tr key={ctn.id} className={isDark ? 'hover:bg-slate-900/60' : 'hover:bg-slate-50'}>
+                      <tr key={ctn.id} className={isDark ? 'hover:bg-[#1E293B]/60' : 'hover:bg-slate-50'}>
                         <td className="p-2.5 text-center font-mono text-slate-500 text-[11px]">{idx + 1}</td>
                         <td className="p-2.5 font-mono whitespace-nowrap">
                           <span className={`px-2 py-0.5 rounded-none font-mono text-[11px] font-medium border ${
-                            isDark ? 'bg-slate-900 text-teal-400 border-slate-700' : 'bg-slate-50 text-[#00897B] border-slate-300'
+                            isDark ? 'bg-[#1E293B] text-teal-400 border-slate-700' : 'bg-slate-50 text-[#00897B] border-slate-300'
                           }`}>
                             {ctn.ctn_no}
                           </span>
@@ -1388,7 +1388,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
         });
 
         return (
-          <div className="fixed inset-0 z-50 bg-slate-900/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 font-sans animate-backdrop-blur-fade">
+          <div className="fixed inset-0 z-50 bg-[#1E293B]/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 font-sans animate-backdrop-blur-fade">
             <div className={`w-full max-w-7xl max-h-[92vh] flex flex-col rounded-none border shadow-2xl overflow-hidden font-sans ${
               isDark ? 'bg-[#1E293B] border-slate-700 text-slate-100' : 'bg-white border-slate-300 text-slate-900'
             }`}>
@@ -1452,7 +1452,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                       value={addCartonSearch}
                       onChange={(e) => setAddCartonSearch(e.target.value)}
                       className={`w-full pl-8 pr-3 py-1.5 rounded-none border text-xs outline-none transition-all font-normal focus:ring-1 focus:ring-blue-500 ${
-                        isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
+                        isDark ? 'bg-[#1E293B] border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
                       }`}
                     />
                   </div>
@@ -1502,7 +1502,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                                     setSelectedUnassignedCartonIds([...selectedUnassignedCartonIds, c.id]);
                                   }
                                 }}
-                                className={`hover:bg-blue-50/40 dark:hover:bg-slate-900/60 cursor-pointer transition-colors ${
+                                className={`hover:bg-blue-50/40 dark:hover:bg-[#1E293B]/60 cursor-pointer transition-colors ${
                                   isChecked ? (isDark ? 'bg-blue-950/30' : 'bg-blue-50/70') : ''
                                 }`}
                               >
@@ -1584,7 +1584,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                       value={attachedCartonSearch}
                       onChange={(e) => setAttachedCartonSearch(e.target.value)}
                       className={`w-full pl-8 pr-3 py-1.5 rounded-none border text-xs outline-none transition-all font-normal focus:ring-1 focus:ring-blue-500 ${
-                        isDark ? 'bg-slate-900 border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
+                        isDark ? 'bg-[#1E293B] border-slate-700 text-white focus:border-blue-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:border-blue-500'
                       }`}
                     />
                   </div>
@@ -1622,7 +1622,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                             return (
                               <tr
                                 key={ctn.id}
-                                className={`hover:bg-slate-100/50 dark:hover:bg-slate-900/60 transition-colors ${
+                                className={`hover:bg-slate-100/50 dark:hover:bg-[#1E293B]/60 transition-colors ${
                                   isNewlySelected ? 'bg-blue-50/60 dark:bg-blue-950/30' : ''
                                 }`}
                               >
@@ -1694,7 +1694,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                 isDark ? 'bg-[#1E293B] border-slate-700 text-slate-100' : 'bg-white border-slate-200 text-slate-900'
               }`}>
                 <div className="flex flex-wrap items-center gap-3 text-xs font-mono text-slate-600 dark:text-slate-400 font-light">
-                  <span className="px-2.5 py-1 rounded-none bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-normal border border-slate-300 dark:border-slate-700">
+                  <span className="px-2.5 py-1 rounded-none bg-white dark:bg-[#1E293B] text-slate-800 dark:text-slate-200 font-normal border border-slate-300 dark:border-slate-700">
                     📦 {previewTotalCount} {isBn ? 'টি কার্টুন' : 'Cartons Total'}
                   </span>
                   <span>
@@ -1743,7 +1743,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
       {/* 7. PRINTABLE FLIGHT MANIFEST REPORT MODAL */}
       {/* ========================================================================= */}
       {printManifestProposal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-xs">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1E293B]/80 backdrop-blur-xs">
           <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-none bg-white border border-slate-300 p-8 text-slate-900 shadow-2xl space-y-6">
             <div className="flex items-center justify-between border-b pb-4">
               <div className="flex items-center space-x-3">

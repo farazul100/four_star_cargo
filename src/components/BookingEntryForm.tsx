@@ -600,7 +600,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
           <div className="flex flex-wrap items-center gap-3">
             <div className={`flex items-center space-x-1.5 px-3 py-1.5 rounded-xl border text-xs font-mono ${
               isDark
-                ? 'bg-slate-900 border-slate-700 text-slate-300'
+                ? 'bg-[#1E293B] border-slate-700 text-slate-300'
                 : 'bg-blue-50/80 border-blue-200 text-slate-800'
             }`}>
               <Building2 className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
@@ -698,7 +698,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     onFocus={() => setShowSuggestions(true)}
                     placeholder={isBn ? 'কাস্টমার নাম বা ফোন নাম্বার টাইপ করুন...' : 'Type Name or Phone...'}
                     className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-normal focus:ring-2 focus:ring-blue-500 ${
-                      isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                      isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                     }`}
                   />
                   <Search className="w-4 h-4 text-slate-400 absolute right-3 top-3" />
@@ -706,7 +706,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
                 {showSuggestions && matchingCustomers.length > 0 && (
                   <div className={`absolute z-30 top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto border rounded-xl shadow-xl divide-y ${
-                    isDark ? 'bg-slate-900 border-slate-700 divide-slate-800' : 'bg-white border-slate-200 divide-slate-100'
+                    isDark ? 'bg-[#1E293B] border-slate-700 divide-slate-800' : 'bg-white border-slate-200 divide-slate-100'
                   }`}>
                     {matchingCustomers.map((c) => (
                       <div
@@ -754,7 +754,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 placeholder="e.g. SM-DHAKA-"
                 title={isBn ? 'নাম্বারের আগের লেখাটুকু (Prefix string)' : 'Prefix before number'}
                 className={`w-2/3 px-3 py-2.5 rounded-xl border text-xs font-mono font-medium text-blue-600 dark:text-blue-400 ${
-                  isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-300'
+                  isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-300'
                 }`}
               />
               <input
@@ -764,7 +764,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 placeholder="e.g. 88"
                 title={isBn ? 'কোড নম্বর (Code number)' : 'Code number'}
                 className={`w-1/3 px-3 py-2.5 rounded-xl border text-xs font-mono font-medium text-center text-blue-600 dark:text-blue-400 ${
-                  isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-300'
+                  isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-300'
                 }`}
               />
             </div>
@@ -784,7 +784,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
               onChange={(e) => setMasterTrackingNumber(e.target.value)}
               placeholder="e.g. EXP-994801"
               className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-mono font-medium text-blue-600 dark:text-blue-400 focus:ring-2 focus:ring-blue-500 ${
-                isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-300'
+                isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-300'
               }`}
             />
           </div>
@@ -808,7 +808,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 onChange={(e) => setBatchProdNameEn(e.target.value)}
                 placeholder="e.g. Men's Cotton T-Shirts"
                 className={`w-full px-3.5 py-2 rounded-xl border text-xs font-normal ${
-                  isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                  isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                 }`}
               />
             </div>
@@ -824,7 +824,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 onChange={(e) => setBatchProdNameCn(e.target.value)}
                 placeholder="e.g. 男士棉质T恤"
                 className={`w-full px-3.5 py-2 rounded-xl border text-xs font-normal ${
-                  isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                  isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                 }`}
               />
             </div>
@@ -842,7 +842,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 onChange={(e) => setBatchCartonCount(e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                 placeholder="e.g. 10"
                 className={`w-full px-3.5 py-2 rounded-xl border text-xs font-mono font-medium text-center ${
-                  isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                  isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                 }`}
               />
             </div>
@@ -860,7 +860,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   placeholder="CTN-"
                   title={isBn ? 'কার্টুন নামের আগের প্রেফিক্স' : 'Carton prefix before number'}
                   className={`w-2/3 px-3 py-2 rounded-xl border text-xs font-mono font-medium ${
-                    isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                    isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                   }`}
                 />
                 <input
@@ -871,7 +871,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   placeholder="1"
                   title={isBn ? 'কার্টুন শুরু নম্বর' : 'Start number'}
                   className={`w-1/3 px-2 py-2 rounded-xl border text-xs font-mono font-medium text-center ${
-                    isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                    isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                   }`}
                 />
               </div>
@@ -891,7 +891,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 onChange={(e) => setBatchQtyPerCarton(e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                 placeholder="e.g. 50"
                 className={`w-full px-3 py-2 rounded-xl border text-xs font-mono text-center ${
-                  isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                  isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                 }`}
               />
             </div>
@@ -909,7 +909,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 onChange={(e) => setBatchNetWeight(e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
                 placeholder="e.g. 11.2"
                 className={`w-full px-3 py-2 rounded-xl border text-xs font-mono text-center ${
-                  isDark ? 'bg-slate-900 border-slate-700 text-slate-300' : 'bg-slate-50 border-slate-300 text-slate-700'
+                  isDark ? 'bg-[#1E293B] border-slate-700 text-slate-300' : 'bg-slate-50 border-slate-300 text-slate-700'
                 }`}
               />
             </div>
@@ -927,7 +927,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 onChange={(e) => setBatchGrossWeight(e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
                 placeholder="e.g. 12.5"
                 className={`w-full px-3 py-2 rounded-xl border text-xs font-mono text-center font-medium ${
-                  isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                  isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                 }`}
               />
             </div>
@@ -945,7 +945,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 onChange={(e) => setBatchCbm(e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
                 placeholder="e.g. 0.15"
                 className={`w-full px-3 py-2 rounded-xl border text-xs font-mono text-center text-purple-600 dark:text-purple-400 ${
-                  isDark ? 'bg-slate-900 border-slate-700' : 'bg-slate-50 border-slate-300'
+                  isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-300'
                 }`}
               />
             </div>
@@ -957,7 +957,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         {/* ------------------------------------------------------------- */}
         <div
           className={`p-4 rounded-xl border space-y-3 ${
-            isDark ? 'bg-slate-900/80 border-slate-700' : 'bg-blue-50/50 border-blue-100'
+            isDark ? 'bg-[#1E293B]/80 border-slate-700' : 'bg-blue-50/50 border-blue-100'
           }`}
         >
           <div className="flex items-center justify-between">
@@ -975,7 +975,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
             {/* Net Weight Sequence Paste */}
             <div className={`p-3 rounded-lg border space-y-2 ${
-              isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'
+              isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200'
             }`}>
               <div>
                 <label className="block text-[11px] font-medium text-slate-700 dark:text-slate-300">
@@ -993,7 +993,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   onChange={(e) => setNetWeightsListInput(e.target.value)}
                   placeholder="11.2, 11.5, 10.8..."
                   className={`w-full px-2.5 py-1.5 rounded border text-xs font-mono ${
-                    isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                    isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                   }`}
                 />
                 <button
@@ -1009,7 +1009,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
             {/* Gross Weight Sequence Paste */}
             <div className={`p-3 rounded-lg border space-y-2 ${
-              isDark ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'
+              isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200'
             }`}>
               <div>
                 <label className="block text-[11px] font-medium text-slate-700 dark:text-slate-300">
@@ -1027,7 +1027,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   onChange={(e) => setGrossWeightsListInput(e.target.value)}
                   placeholder="12.5, 12.8, 11.9..."
                   className={`w-full px-2.5 py-1.5 rounded border text-xs font-mono ${
-                    isDark ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                    isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                   }`}
                 />
                 <button
@@ -1046,7 +1046,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         {/* Section D: Shared Photo Attachment & Generate Preview Button */}
         <div className={`p-4 rounded-xl border flex flex-col md:flex-row items-start md:items-center justify-between gap-4 ${
           isDark
-            ? 'bg-slate-900/60 border-slate-700 text-white'
+            ? 'bg-[#1E293B]/60 border-slate-700 text-white'
             : 'bg-slate-50 border-slate-200 text-slate-900'
         }`}>
           <div>
@@ -1153,7 +1153,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 <col style={{ width: '55px' }} />
               </colgroup>
               <thead className={`uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-slate-700 font-medium ${
-                isDark ? 'bg-slate-900 text-slate-300' : 'bg-slate-100 text-slate-700'
+                isDark ? 'bg-[#1E293B] text-slate-300' : 'bg-slate-100 text-slate-700'
               }`}>
                 <tr>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">SL</th>
@@ -1172,7 +1172,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                 {previewRows.map((r, idx) => (
-                  <tr key={r.id} className="hover:bg-slate-50/60 dark:hover:bg-slate-900/40 transition-colors">
+                  <tr key={r.id} className="hover:bg-slate-50/60 dark:hover:bg-[#1E293B] transition-colors">
                     <td className="p-2 text-center font-mono text-slate-400 border border-slate-200 dark:border-slate-700">
                       {idx + 1}
                     </td>
@@ -1351,7 +1351,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
           {/* Footer Actions */}
           <div className={`p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-4 ${
-            isDark ? 'bg-slate-900/60 border-slate-700' : 'bg-slate-50/90 border-slate-200/90'
+            isDark ? 'bg-[#1E293B]/60 border-slate-700' : 'bg-slate-50/90 border-slate-200/90'
           }`}>
             <button
               type="button"
@@ -1425,7 +1425,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       {previewPhotoModalUrl && (
         <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
           <div className={`rounded-2xl max-w-2xl w-full p-6 space-y-4 border shadow-2xl ${
-            isDark ? 'bg-slate-900 text-white border-slate-700' : 'bg-white text-slate-900 border-slate-200'
+            isDark ? 'bg-[#1E293B] text-white border-slate-700' : 'bg-white text-slate-900 border-slate-200'
           }`}>
             <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
               <h3 className={`text-sm font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -1439,7 +1439,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
               </button>
             </div>
 
-            <div className="max-h-[60vh] overflow-y-auto flex items-center justify-center bg-slate-900 rounded-xl p-2">
+            <div className="max-h-[60vh] overflow-y-auto flex items-center justify-center bg-[#1E293B] rounded-xl p-2">
               <img
                 src={previewPhotoModalUrl}
                 alt="Proof Slip"

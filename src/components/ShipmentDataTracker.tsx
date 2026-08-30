@@ -747,7 +747,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
                           <span
                             key={c.id}
                             className={`px-2 py-0.5 rounded-none text-[10px] font-mono border ${
-                              isDark ? 'bg-slate-900 text-teal-400 border-slate-700' : 'bg-slate-100 text-teal-700 border-slate-200'
+                              isDark ? 'bg-[#1E293B] text-teal-400 border-slate-700' : 'bg-slate-100 text-teal-700 border-slate-200'
                             }`}
                           >
                             {c.ctn_no} ({c.gross_weight}kg)
@@ -762,7 +762,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
                         <button
                           type="button"
                           onClick={() => setPrintManifestProposal(prop)}
-                          className="px-3.5 py-1.5 rounded-none bg-slate-800 hover:bg-slate-900 active:bg-slate-900 text-white text-xs font-medium transition-all cursor-pointer flex items-center space-x-1.5 shadow-xs border-0 outline-none"
+                          className="px-3.5 py-1.5 rounded-none bg-slate-800 hover:bg-[#1E293B] active:bg-[#1E293B] text-white text-xs font-medium transition-all cursor-pointer flex items-center space-x-1.5 shadow-xs border-0 outline-none"
                         >
                           <Printer className="w-3.5 h-3.5 text-slate-300" />
                           <span>{isBn ? 'ম্যানিফেস্ট প্রিন্ট' : 'Print Manifest'}</span>
@@ -1112,7 +1112,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
               </button>
               <button
                 onClick={() => setPrintManifestProposal(null)}
-                className="px-4 py-1.5 bg-slate-800 hover:bg-slate-900 text-white font-sans text-xs cursor-pointer"
+                className="px-4 py-1.5 bg-slate-800 hover:bg-[#1E293B] text-white font-sans text-xs cursor-pointer"
               >
                 Close Report
               </button>
