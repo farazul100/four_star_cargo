@@ -869,7 +869,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 {isBn ? 'মার্জ টুলবার (Merge Toolbar):' : 'Merge Toolbar:'}
               </span>
               {selectedHubCartonIds.length > 0 && (
-                <span className="px-2.5 py-0.5 bg-blue-600 text-white rounded-full text-[10px] font-extrabold shadow-2xs">
+                <span className="px-2.5 py-0.5 bg-[#00897B] text-white rounded-full text-[10px] font-extrabold shadow-2xs border border-[#00796B]">
                   {selectedHubCartonIds.length} Selected
                 </span>
               )}
@@ -964,8 +964,8 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       className={`transition-colors duration-150 ${
                         isSelected
                           ? isDark
-                            ? 'bg-blue-900/70 text-white'
-                            : 'bg-blue-100/80 text-slate-900'
+                            ? 'bg-[#00897B]/70 text-white font-extrabold border-l-4 border-l-[#26A69A]'
+                            : 'bg-[#00897B]/20 text-slate-900 font-extrabold border-l-4 border-l-[#00897B]'
                           : spanInfo.isMerged
                           ? isDark
                             ? 'bg-[#1E1B4B]/80 hover:bg-[#2E2A72] text-white'
@@ -1261,7 +1261,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                   {isBn ? 'এক্সেল মার্জ টুলবার:' : 'Excel Merge Toolbar:'}
                 </span>
                 {selectedHubCartonIds.length > 0 && (
-                  <span className="px-2.5 py-0.5 bg-blue-600 text-white rounded-full text-[10px] font-extrabold shadow-2xs">
+                  <span className="px-2.5 py-0.5 bg-[#00897B] text-white rounded-full text-[10px] font-extrabold shadow-2xs border border-[#00796B]">
                     {selectedHubCartonIds.length} Selected
                   </span>
                 )}
@@ -1339,8 +1339,8 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                         className={`transition-colors duration-150 ${
                           isSelected
                             ? isDark
-                              ? 'bg-blue-900/70 text-white'
-                              : 'bg-blue-100/80 text-slate-900'
+                              ? 'bg-[#00897B]/70 text-white font-extrabold border-l-4 border-l-[#26A69A]'
+                              : 'bg-[#00897B]/20 text-slate-900 font-extrabold border-l-4 border-l-[#00897B]'
                             : spanInfo.isMerged
                             ? isDark
                               ? 'bg-[#1E1B4B]/80 hover:bg-[#2E2A72] text-white'
