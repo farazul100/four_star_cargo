@@ -530,27 +530,34 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
           </div>
 
           {/* VIEW TOGGLE & GROUP BY BUTTONS */}
-          <div className="flex flex-wrap items-center gap-2">
-            {/* GROUP BY TOGGLE */}
-            {/* GROUP BY BADGE (Tracking ID Only) */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* GROUP BY BADGE */}
             {viewMode === 'cards' && (
-              <div className="flex items-center space-x-1.5 bg-slate-100 dark:bg-[#1E293B] px-3 py-1.5 rounded-none-none border border-slate-200 dark:border-slate-700 text-xs">
-                <span className="text-[10px] text-slate-500 font-mono">{isBn ? 'গ্রুপ:' : 'Group:'}</span>
-                <span className="px-2.5 py-0.5 rounded-none-none text-[11px] font-semibold bg-emerald-600 text-white shadow-2xs">
+              <div className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-lg border text-xs font-mono transition-colors shadow-2xs ${
+                isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-white border-slate-300 text-slate-900'
+              }`}>
+                <span className={`font-extrabold text-xs uppercase tracking-wide ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>
+                  {isBn ? 'গ্রুপ:' : 'Group:'}
+                </span>
+                <span className="px-3 py-1 rounded-md text-xs font-extrabold bg-emerald-600 text-white shadow-xs border border-emerald-500">
                   {isBn ? '📦 ট্র্যাকিং ID' : 'Tracking ID'}
                 </span>
               </div>
             )}
 
             {/* VIEW MODE TOGGLE */}
-            <div className="flex items-center space-x-1 bg-slate-200 dark:bg-slate-800/80 p-1 rounded-lg border border-slate-300 dark:border-slate-700">
+            <div className={`flex items-center space-x-1.5 p-1.5 rounded-lg border transition-colors shadow-2xs ${
+              isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-white border-slate-300'
+            }`}>
               <button
                 type="button"
                 onClick={() => setViewMode('cards')}
-                className={`px-3 py-1.5 rounded-md text-xs font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-md text-xs font-extrabold flex items-center space-x-1.5 transition-all cursor-pointer ${
                   viewMode === 'cards'
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : isDark ? 'text-slate-300 hover:text-white hover:bg-slate-700/60' : 'text-slate-700 hover:text-slate-900 hover:bg-slate-300/60'
+                    ? 'bg-blue-600 text-white shadow-md border border-blue-500'
+                    : isDark
+                    ? 'bg-slate-800 text-slate-100 hover:bg-slate-700 hover:text-white border border-slate-700'
+                    : 'bg-slate-100 text-slate-800 hover:bg-slate-200 hover:text-slate-900 border border-slate-300'
                 }`}
               >
                 <LayoutGrid className="w-3.5 h-3.5" />
@@ -560,10 +567,12 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               <button
                 type="button"
                 onClick={() => setViewMode('list')}
-                className={`px-3 py-1.5 rounded-md text-xs font-bold flex items-center space-x-1.5 transition-all cursor-pointer ${
+                className={`px-3.5 py-1.5 rounded-md text-xs font-extrabold flex items-center space-x-1.5 transition-all cursor-pointer ${
                   viewMode === 'list'
-                    ? 'bg-blue-600 text-white shadow-xs'
-                    : isDark ? 'text-slate-300 hover:text-white hover:bg-slate-700/60' : 'text-slate-700 hover:text-slate-900 hover:bg-slate-300/60'
+                    ? 'bg-blue-600 text-white shadow-md border border-blue-500'
+                    : isDark
+                    ? 'bg-slate-800 text-slate-100 hover:bg-slate-700 hover:text-white border border-slate-700'
+                    : 'bg-slate-100 text-slate-800 hover:bg-slate-200 hover:text-slate-900 border border-slate-300'
                 }`}
               >
                 <ListFilter className="w-3.5 h-3.5" />
