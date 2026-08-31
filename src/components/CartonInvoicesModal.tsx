@@ -51,7 +51,7 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[2500] bg-[#1E293B]/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in">
-      {/* Printable CSS Media Rules - Forces EXACTLY 2 Invoices per A4 Sheet with strict Page Breaks */}
+      {/* Printable CSS Media Rules - Forces EXACTLY 2 Invoices per A4 Sheet with strict 140mm height and page breaks */}
       <style>{`
         @media print {
           @page {
@@ -63,11 +63,10 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
             print-color-adjust: exact !important;
             color-adjust: exact !important;
           }
-          html, body, #root, div {
+          html, body, #root {
             max-height: none !important;
             height: auto !important;
             overflow: visible !important;
-            display: block !important;
           }
           body * {
             visibility: hidden !important;
@@ -91,24 +90,29 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
             break-after: page !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
-            height: 282mm !important;
-            max-height: 282mm !important;
+            height: 288mm !important;
+            min-height: 288mm !important;
+            max-height: 288mm !important;
             overflow: hidden !important;
             box-sizing: border-box !important;
             margin: 0 0 0 0 !important;
             padding: 0 !important;
+            clear: both !important;
           }
           .carton-page-break {
-            display: block !important;
+            display: flex !important;
+            flex-direction: column !important;
+            justify-content: space-between !important;
             box-shadow: none !important;
             border: 2px solid #00897B !important;
             box-sizing: border-box !important;
             overflow: hidden !important;
             background-color: #ffffff !important;
-            height: 136mm !important;
-            max-height: 136mm !important;
-            margin-bottom: 4mm !important;
-            padding: 8px 12px !important;
+            height: 140mm !important;
+            min-height: 140mm !important;
+            max-height: 140mm !important;
+            margin-bottom: 6mm !important;
+            padding: 10px 14px !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
           }
@@ -122,18 +126,19 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
               page-break-after: auto !important;
               break-after: auto !important;
               height: auto !important;
+              min-height: 0 !important;
               max-height: none !important;
             }
             .carton-page-break {
               display: none !important;
             }
             #carton-inv-${printingSingleId} {
-              display: block !important;
+              display: flex !important;
               visibility: visible !important;
               page-break-after: avoid !important;
               break-after: avoid !important;
-              height: 275mm !important;
-              max-height: 275mm !important;
+              height: 278mm !important;
+              max-height: 278mm !important;
             }
           `
               : ''
