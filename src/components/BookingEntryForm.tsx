@@ -17,6 +17,7 @@ import {
   AlertTriangle,
   Printer,
   Layers,
+  ShieldCheck,
 } from 'lucide-react';
 import { Carton, Warehouse, User, Language, Customer, LedgerEntry } from '../types';
 import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction, publishSystemNotification } from '../lib/db';
@@ -442,6 +443,23 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
     let targetCustomer: Customer;
     let isNew = false;
+
+    if (!selectedCust && !rawNameOrMarkInput.trim()) {
+      const cleanMark = `${markPrefix.trim()}${markCode.trim()}` || 'SM-UNASSIGNED';
+      return {
+        id: 'unassigned',
+        customer_code: 'UNASSIGNED',
+        shipping_mark: cleanMark,
+        name: 'Unassigned (Mapped by Operations)',
+        phone: 'N/A',
+        address: 'Dhaka, Bangladesh',
+        total_billed: 0,
+        total_paid: 0,
+        total_due: 0,
+        status: 'active',
+        created_at: new Date().toISOString(),
+      };
+    }
 
     if (selectedCust) {
       targetCustomer = selectedCust;
@@ -952,90 +970,26 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
         {/* Section A: Customer & Shipping Mark Config */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Customer Selection Typeahead */}
+          {/* Anonymized Cargo Privacy Badge */}
           <div className="relative">
-            <label className={`block text-xs mb-1 font-normal ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-              {isBn ? 'কাস্টমার নাম নির্বাচন / টাইপ করুন *' : 'Customer Name Select / Type *'}
+            <label className={`block text-xs mb-1 font-extrabold ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
+              {isBn ? 'গোপনীয় কার্গো বুকিং মোড (অ্যানোনিমাস)' : 'Anonymized Cargo Booking Mode *'}
             </label>
-
-            {selectedCustomer ? (
-              <div className={`p-2.5 rounded-xl border flex items-center justify-between ${
-                isDark ? 'bg-blue-950/40 border-blue-800' : 'bg-blue-50/80 border-blue-200'
-              }`}>
-                <div>
-                  <div className={`text-xs font-medium flex items-center space-x-1.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                    <UserCheck className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
-                    <span>{selectedCustomer.name}</span>
-                  </div>
-                  <div className="text-[10px] font-mono text-blue-600 dark:text-blue-400 mt-0.5">
-                    Mark: {selectedCustomer.shipping_mark || 'N/A'} • Code: {selectedCustomer.customer_code}
-                  </div>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedCustomer(null);
-                    setCustomerSearchInput('');
-                  }}
-                  className="p-1 text-slate-400 hover:text-red-500"
-                >
-                  <X className="w-4 h-4" />
-                </button>
+            <div className={`p-2.5 rounded-xl border flex items-center space-x-2.5 ${
+              isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+            }`}>
+              <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
+                <ShieldCheck className="w-4.5 h-4.5 text-emerald-400" />
               </div>
-            ) : (
               <div>
-                <div className="relative">
-                  <input
-                    type="text"
-                    value={customerSearchInput}
-                    onChange={(e) => {
-                      setCustomerSearchInput(e.target.value);
-                      setShowSuggestions(true);
-                    }}
-                    onFocus={() => setShowSuggestions(true)}
-                    placeholder={isBn ? 'কাস্টমার নাম বা ফোন নাম্বার টাইপ করুন...' : 'Type Name or Phone...'}
-                    className={`w-full px-3.5 py-2.5 rounded-xl border text-xs font-normal focus:ring-2 focus:ring-blue-500 ${
-                      isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
-                    }`}
-                  />
-                  <Search className="w-4 h-4 text-slate-400 absolute right-3 top-3" />
+                <div className={`text-xs font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  {isBn ? 'কাস্টমার ইনপুট নিষ্ক্রিয় (প্রাইভেসি সুরক্ষিত)' : 'Customer Info Hidden'}
                 </div>
-
-                {showSuggestions && matchingCustomers.length > 0 && (
-                  <div className={`absolute z-30 top-full left-0 right-0 mt-1 max-h-48 overflow-y-auto border rounded-xl shadow-xl divide-y ${
-                    isDark ? 'bg-[#1E293B] border-slate-700 divide-slate-800' : 'bg-white border-slate-200 divide-slate-100'
-                  }`}>
-                    {matchingCustomers.map((c) => (
-                      <div
-                        key={c.id}
-                        onClick={() => {
-                          setSelectedCustomer(c);
-                          setCustomerSearchInput(c.name);
-                          if (c.shipping_mark) {
-                            setShippingMark(c.shipping_mark);
-                            const parts = c.shipping_mark.split('-');
-                            if (parts.length >= 2) {
-                              setMarkPrefix(parts.slice(0, -1).join('-') + '-');
-                              setMarkCode(parts[parts.length - 1]);
-                            }
-                          }
-                          setShowSuggestions(false);
-                        }}
-                        className={`p-2.5 cursor-pointer transition-colors ${
-                          isDark ? 'hover:bg-slate-800' : 'hover:bg-blue-50'
-                        }`}
-                      >
-                        <div className={`text-xs font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.name}</div>
-                        <div className="text-[10px] font-mono text-blue-600 dark:text-blue-400 flex justify-between mt-0.5">
-                          <span>Mark: {c.shipping_mark || 'N/A'}</span>
-                          <span>Phone: {c.phone}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <div className={`text-[10px] font-semibold ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>
+                  {isBn ? 'শিপিং মার্ক দিয়ে বুকিং হবে। কাস্টমার ট্যাগিং ঢাকা অপারেশন টিম করবে।' : 'Only Shipping Mark used. Customer mapped by Ops.'}
+                </div>
               </div>
-            )}
+            </div>
           </div>
 
           {/* CUSTOMIZABLE SHIPPING MARK PREFIX & CODE */}
