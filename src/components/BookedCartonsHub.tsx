@@ -1176,10 +1176,12 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             {/* Header */}
             <div className="flex items-center justify-between border-b pb-3 border-slate-300 dark:border-slate-700">
               <div>
-                <div className="text-xs font-mono text-blue-600 dark:text-blue-400 font-bold uppercase flex items-center space-x-2">
+                <div className={`text-xs font-mono font-extrabold uppercase flex items-center space-x-2 ${isDark ? 'text-sky-300' : 'text-blue-700'}`}>
                   <span>Tracking ID: {activeCustomerCartons[0]?.tracking_number || activeCustomerModalMark}</span>
                   {activeCustomerCartons[0]?.shipping_mark && (
-                    <span className="px-2 py-0.5 rounded text-[10px] bg-blue-500/10 text-blue-500 border border-blue-500/20 font-normal">
+                    <span className={`px-2 py-0.5 rounded text-[10px] font-mono font-extrabold border ${
+                      isDark ? 'bg-blue-950 text-sky-300 border-blue-700' : 'bg-blue-50 text-blue-700 border-blue-200'
+                    }`}>
                       Mark: {activeCustomerCartons[0]?.shipping_mark}
                     </span>
                   )}
@@ -1213,29 +1215,29 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             {/* Excel Formula Summary Bar */}
             <div className="grid grid-cols-4 gap-3 text-xs font-mono">
               <div className={`p-2.5 rounded border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-300'}`}>
-                <div className="text-[10px] text-slate-500 uppercase">{isBn ? 'মাস্টার কার্টুন' : 'Master Cartons'}</div>
-                <div className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                <div className={`text-[10px] uppercase font-bold ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>{isBn ? 'মাস্টার কার্টুন' : 'Master Cartons'}</div>
+                <div className={`text-sm font-extrabold ${isDark ? 'text-sky-300' : 'text-blue-700'}`}>
                   {new Set(activeCustomerCartons.map((c) => c.master_group_id || c.ctn_no)).size} Cartons
                 </div>
               </div>
 
               <div className={`p-2.5 rounded border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-300'}`}>
-                <div className="text-[10px] text-slate-500 uppercase">{isBn ? 'মোট সাব-আইটেম' : 'Sub-Items Rows'}</div>
-                <div className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                <div className={`text-[10px] uppercase font-bold ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>{isBn ? 'মোট সাব-আইটেম' : 'Sub-Items Rows'}</div>
+                <div className={`text-sm font-extrabold ${isDark ? 'text-indigo-300' : 'text-indigo-700'}`}>
                   {activeCustomerCartons.length} Rows
                 </div>
               </div>
 
               <div className={`p-2.5 rounded border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-300'}`}>
-                <div className="text-[10px] text-slate-500 uppercase">{isBn ? 'মোট গ্রস ওজন' : 'Total Gross Weight'}</div>
-                <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
+                <div className={`text-[10px] uppercase font-bold ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>{isBn ? 'মোট গ্রস ওজন' : 'Total Gross Weight'}</div>
+                <div className={`text-sm font-extrabold ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
                   {activeCustomerCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0).toFixed(1)} KG
                 </div>
               </div>
 
               <div className={`p-2.5 rounded border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-300'}`}>
-                <div className="text-[10px] text-slate-500 uppercase">{isBn ? 'মোট ভলিউম CBM' : 'Total CBM Volume'}</div>
-                <div className="text-sm font-bold text-purple-600 dark:text-purple-400">
+                <div className={`text-[10px] uppercase font-bold ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>{isBn ? 'মোট ভলিউম CBM' : 'Total CBM Volume'}</div>
+                <div className={`text-sm font-extrabold ${isDark ? 'text-fuchsia-300' : 'text-purple-700'}`}>
                   {activeCustomerCartons.reduce((sum, c) => sum + (c.cbm || 0), 0).toFixed(2)} CBM
                 </div>
               </div>
@@ -1413,19 +1415,21 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           {c.tracking_number}
                         </td>
                         <td className="p-2.5 font-sans truncate max-w-[160px] border-r border-slate-200/60 dark:border-slate-700/50">
-                          <div className="font-bold text-slate-900 dark:text-white text-xs leading-snug truncate">{c.product_name_en}</div>
-                          {c.product_name_cn && <div className="text-[10px] text-slate-500 dark:text-slate-300 font-normal truncate mt-0.5">{c.product_name_cn}</div>}
+                          <div className={`font-extrabold text-xs leading-snug truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.product_name_en}</div>
+                          {c.product_name_cn && <div className={`text-[10px] font-medium truncate mt-0.5 ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>{c.product_name_cn}</div>}
                         </td>
-                        <td className="p-2.5 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50 text-xs font-bold text-slate-900 dark:text-slate-100">
+                        <td className={`p-2.5 text-center font-mono border-r text-xs font-extrabold ${
+                          isDark ? 'text-white border-slate-700' : 'text-slate-900 border-slate-200'
+                        }`}>
                           {c.quantity} pcs | {c.net_weight} kg
                         </td>
                         <td className="p-2.5 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50">
-                          <span className="font-mono text-xs font-extrabold text-emerald-600 dark:text-emerald-400">
+                          <span className={`font-mono text-xs font-extrabold ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
                             {c.gross_weight} kg
                           </span>
                         </td>
                         <td className="p-2.5 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50">
-                          <span className="font-mono text-xs font-extrabold text-purple-600 dark:text-purple-300">
+                          <span className={`font-mono text-xs font-extrabold ${isDark ? 'text-fuchsia-300' : 'text-purple-700'}`}>
                             {c.cbm} CBM
                           </span>
                         </td>
@@ -1434,12 +1438,14 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             <button
                               type="button"
                               onClick={() => setPreviewPhotoUrl(c.photo_url!)}
-                              className="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold text-blue-600 dark:text-blue-300 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 dark:hover:bg-blue-900/80 border border-blue-200/80 dark:border-blue-800/80 transition-colors cursor-pointer"
+                              className={`px-2.5 py-1 rounded-md text-[10px] font-mono font-extrabold border transition-colors cursor-pointer ${
+                                isDark ? 'text-sky-300 bg-sky-950/70 hover:bg-sky-900 border-sky-700' : 'text-blue-700 bg-blue-50 hover:bg-blue-100 border-blue-200'
+                              }`}
                             >
                               View Photo
                             </button>
                           ) : (
-                            <span className="text-[10px] text-slate-400">No Photo</span>
+                            <span className={`text-[10px] font-semibold ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>No Photo</span>
                           )}
                         </td>
                         <td className="p-2.5 text-center">
@@ -1447,7 +1453,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             <button
                               type="button"
                               onClick={() => handleAddSubItemToCarton(c)}
-                              className="p-1.5 rounded-lg text-indigo-600 hover:text-indigo-500 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors cursor-pointer"
+                              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                                isDark ? 'text-indigo-300 bg-indigo-950/70 hover:bg-indigo-900 border-indigo-700' : 'text-indigo-700 bg-indigo-50 hover:bg-indigo-100 border-indigo-200'
+                              }`}
                               title={isBn ? 'এই কার্টুনে নতুন সাব-মার্ক যোগ/মার্জ করুন' : 'Add Sub-Mark / Merge Carton'}
                             >
                               <GitFork className="w-3.5 h-3.5" />
@@ -1455,7 +1463,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             <button
                               type="button"
                               onClick={() => handleDeleteSingleCarton(c.id)}
-                              className="p-1.5 rounded-lg text-red-500 hover:text-red-600 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors cursor-pointer"
+                              className={`p-1.5 rounded-lg border transition-colors cursor-pointer ${
+                                isDark ? 'text-red-400 bg-red-950/70 hover:bg-red-900 border-red-800' : 'text-red-700 bg-red-50 hover:bg-red-100 border-red-200'
+                              }`}
                               title={isBn ? 'কার্টুন ডিলেট করুন' : 'Delete Carton'}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
