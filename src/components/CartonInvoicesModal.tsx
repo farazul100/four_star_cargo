@@ -51,7 +51,7 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[2500] bg-[#1E293B]/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in">
-      {/* Printable CSS Media Rules - Forces EXACTLY 2 Invoices per A4 Sheet with strict 140mm height and page breaks */}
+      {/* Printable CSS Media Rules - Removes Modal Viewport Clipping to render ALL Pages in Chrome Print */}
       <style>{`
         @media print {
           @page {
@@ -63,10 +63,14 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
             print-color-adjust: exact !important;
             color-adjust: exact !important;
           }
-          html, body, #root {
+          html, body, #root, #root > div, div {
+            position: static !important;
+            float: none !important;
             max-height: none !important;
             height: auto !important;
+            min-height: 0 !important;
             overflow: visible !important;
+            inset: auto !important;
           }
           body * {
             visibility: hidden !important;
@@ -81,6 +85,7 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
             width: 100% !important;
             height: auto !important;
             display: block !important;
+            overflow: visible !important;
             padding: 0 !important;
             margin: 0 !important;
           }
@@ -90,9 +95,9 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
             break-after: page !important;
             page-break-inside: avoid !important;
             break-inside: avoid !important;
-            height: 288mm !important;
-            min-height: 288mm !important;
-            max-height: 288mm !important;
+            height: 284mm !important;
+            min-height: 284mm !important;
+            max-height: 284mm !important;
             overflow: hidden !important;
             box-sizing: border-box !important;
             margin: 0 0 0 0 !important;
@@ -108,9 +113,9 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
             box-sizing: border-box !important;
             overflow: hidden !important;
             background-color: #ffffff !important;
-            height: 140mm !important;
-            min-height: 140mm !important;
-            max-height: 140mm !important;
+            height: 138mm !important;
+            min-height: 138mm !important;
+            max-height: 138mm !important;
             margin-bottom: 6mm !important;
             padding: 10px 14px !important;
             page-break-inside: avoid !important;
