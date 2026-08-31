@@ -132,28 +132,28 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
       >
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex items-start space-x-4">
-            <div className="p-3.5 rounded-xl bg-blue-600/10 text-blue-600 dark:text-blue-400 shrink-0 border border-blue-500/20">
+            <div className="p-3.5 rounded-xl bg-blue-600/20 text-blue-400 shrink-0 border border-blue-500/30">
               <Building2 className="w-7 h-7" />
             </div>
             <div>
               <div className="flex items-center space-x-2.5">
-                <h2 className="text-xl font-medium text-slate-900 dark:text-white">
+                <h2 className={`text-xl font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   {formatWarehouseNameEn(myWh.name)}
                 </h2>
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-medium bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center space-x-1">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 flex items-center space-x-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
                   <span>{isBn ? 'সক্রিয় ওয়্যারহাউজ হাব' : 'OPERATIONAL HUB'}</span>
                 </span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-normal">
+              <p className={`text-xs mt-1 font-semibold ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>
                 {isBn
                   ? 'ওয়্যারহাউজ ইনভেন্টরি, কার্গো ইনটেক, ফ্লাইং ডিসপ্যাচ ও মোশন এনালাইটিক্স পোর্টাল'
                   : 'Real-time warehouse inventory, cargo intake, flying dispatch & motion analytics'}
               </p>
-              <div className="flex items-center space-x-4 mt-2.5 text-[11px] font-mono text-slate-500 dark:text-slate-400">
-                <span>Incharge: <strong className="font-normal text-slate-700 dark:text-slate-200">{currentUser.name}</strong></span>
+              <div className={`flex items-center space-x-4 mt-2.5 text-[11px] font-mono font-bold ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                <span>Incharge: <strong className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{currentUser.name}</strong></span>
                 <span>•</span>
-                <span>Code: <strong className="font-normal text-slate-700 dark:text-slate-200">{myWh.code || 'HUB-BD'}</strong></span>
+                <span>Code: <strong className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{myWh.code || 'HUB-BD'}</strong></span>
               </div>
             </div>
           </div>
@@ -163,7 +163,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
             <button
               type="button"
               onClick={() => onNavigateTab('booking_entry')}
-              className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-medium text-xs transition-all shadow-2xs flex items-center space-x-1.5 cursor-pointer hover:scale-105 active:scale-95"
+              className="px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-extrabold text-xs transition-all shadow-md flex items-center space-x-1.5 cursor-pointer hover:scale-105 active:scale-95"
             >
               <PlusCircle className="w-4 h-4" />
               <span>{isBn ? '+ নতুন এন্ট্রি' : '+ New Booking'}</span>
@@ -172,26 +172,26 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
               <button
                 type="button"
                 onClick={() => onNavigateTab('proposal_create')}
-                className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all border flex items-center space-x-1.5 cursor-pointer select-none ${
+                className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all border flex items-center space-x-1.5 cursor-pointer select-none ${
                   isDark
-                    ? 'bg-blue-500/15 hover:bg-blue-500/25 text-blue-300 border-blue-500/30'
-                    : 'bg-blue-50 hover:bg-blue-100 text-blue-700 border-blue-200'
+                    ? 'bg-blue-600/30 hover:bg-blue-600/50 text-sky-200 border-blue-500/50'
+                    : 'bg-blue-50 hover:bg-blue-100 text-blue-800 border-blue-200'
                 }`}
               >
-                <Plane className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <Plane className="w-4 h-4 text-sky-300" />
                 <span>{isBn ? 'ফ্লাইং প্রোপোজাল' : 'Create Flying'}</span>
               </button>
             )}
             <button
               type="button"
               onClick={() => onNavigateTab('history')}
-              className={`px-3.5 py-2 rounded-xl text-xs font-medium transition-all border flex items-center space-x-1.5 cursor-pointer select-none ${
+              className={`px-3.5 py-2 rounded-xl text-xs font-extrabold transition-all border flex items-center space-x-1.5 cursor-pointer select-none ${
                 isDark
-                  ? 'bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border-emerald-500/30'
-                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border-emerald-200'
+                  ? 'bg-emerald-600/30 hover:bg-emerald-600/50 text-emerald-200 border-emerald-500/50'
+                  : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border-emerald-200'
               }`}
             >
-              <Truck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <Truck className="w-4 h-4 text-emerald-300" />
               <span>{isBn ? 'রিসিভ ফ্লাইং' : 'Receive Flying'}</span>
             </button>
           </div>
@@ -207,22 +207,22 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">
+            <span className={`text-xs font-extrabold uppercase tracking-wide ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>
               {isBn ? 'গচ্ছিত মোট কার্টুন' : 'Total Stock Cartons'}
             </span>
-            <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
+            <div className="p-2 rounded-xl bg-blue-500/20 text-sky-300 border border-blue-500/30">
               <Package className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl font-medium font-mono text-slate-900 dark:text-white">
+            <span className={`text-2xl font-extrabold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
               {totalStockCartons}
             </span>
-            <span className={`text-[11px] font-normal flex items-center ${totalStockCartons > 0 ? 'text-emerald-500' : 'text-slate-400'}`}>
+            <span className={`text-[11px] font-extrabold flex items-center ${totalStockCartons > 0 ? 'text-emerald-300' : 'text-slate-400'}`}>
               {totalStockCartons > 0 ? '+12.4%' : '0%'}
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1 font-normal">
+          <p className={`text-[11px] mt-1 font-semibold ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>
             {isBn ? 'ওয়্যারহাউজ স্টকে সংরক্ষিত আছে' : 'Active items stored in hub'}
           </p>
         </div>
@@ -234,22 +234,22 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">
+            <span className={`text-xs font-extrabold uppercase tracking-wide ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>
               {isBn ? 'মোট কার্গো ওজন' : 'Total Gross Weight'}
             </span>
-            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+            <div className="p-2 rounded-xl bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
               <Layers className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl font-medium font-mono text-slate-900 dark:text-white">
-              {totalGrossWeight.toLocaleString()} <span className="text-xs font-normal text-slate-500">kg</span>
+            <span className={`text-2xl font-extrabold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              {totalGrossWeight.toLocaleString()} <span className={`text-xs font-bold ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>kg</span>
             </span>
-            <span className={`text-[11px] font-normal flex items-center ${totalGrossWeight > 0 ? 'text-emerald-500' : 'text-slate-400'}`}>
+            <span className={`text-[11px] font-extrabold flex items-center ${totalGrossWeight > 0 ? 'text-emerald-300' : 'text-slate-400'}`}>
               {totalGrossWeight > 0 ? '88.5% Payload' : '0% Payload'}
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1 font-normal">
+          <p className={`text-[11px] mt-1 font-semibold ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>
             {isBn ? 'এয়ার কার্গো শিপমেন্ট প্রস্তুত' : 'Ready for flight dispatch'}
           </p>
         </div>
@@ -261,23 +261,23 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">
+            <span className={`text-xs font-extrabold uppercase tracking-wide ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>
               {isBn ? 'উড্ডয়নরত ফ্লাইং ব্যাচ' : 'Flying Flight Batches'}
             </span>
-            <div className="p-2 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400">
+            <div className="p-2 rounded-xl bg-sky-500/20 text-sky-300 border border-sky-500/30">
               <Plane className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl font-medium font-mono text-slate-900 dark:text-white">
-              {activeFlyingCount} <span className="text-xs font-normal text-slate-500">Batches</span>
+            <span className={`text-2xl font-extrabold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              {activeFlyingCount} <span className={`text-xs font-bold ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>Batches</span>
             </span>
-            <span className={`text-[11px] font-normal flex items-center ${activeFlyingCount > 0 ? 'text-blue-500' : 'text-slate-400'}`}>
+            <span className={`text-[11px] font-extrabold flex items-center ${activeFlyingCount > 0 ? 'text-sky-300' : 'text-slate-400'}`}>
               <Clock className="w-3.5 h-3.5 mr-0.5" />
               {activeFlyingCount > 0 ? '2.4 Days SLA' : '0 Days SLA'}
             </span>
           </div>
-          <p className="text-[11px] text-slate-400 mt-1 font-normal">
+          <p className={`text-[11px] mt-1 font-semibold ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>
             {isBn ? 'মিড-এয়ার আন্তর্জাতিক রুট' : 'In-transit mid-air flight route'}
           </p>
         </div>
@@ -289,24 +289,24 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs text-slate-500 dark:text-slate-400 font-normal">
+            <span className={`text-xs font-extrabold uppercase tracking-wide ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>
               {isBn ? 'ওয়্যারহাউজ ক্যাপাসিটি' : 'Warehouse Storage Capacity'}
             </span>
-            <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 dark:text-indigo-400">
+            <div className="p-2 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
               <Box className="w-4 h-4" />
             </div>
           </div>
           <div className="mt-3 flex items-baseline justify-between">
-            <span className="text-2xl font-medium font-mono text-slate-900 dark:text-white">
-              {totalCbm.toFixed(1)} <span className="text-xs font-normal text-slate-500">/ {maxCapacityCbm} CBM</span>
+            <span className={`text-2xl font-extrabold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              {totalCbm.toFixed(1)} <span className={`text-xs font-bold ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>/ {maxCapacityCbm} CBM</span>
             </span>
-            <span className="text-[11px] font-normal text-indigo-600 dark:text-indigo-400">
+            <span className={`text-[11px] font-extrabold ${isDark ? 'text-indigo-300' : 'text-indigo-700'}`}>
               {occupiedPercent.toFixed(1)}% Occupied
             </span>
           </div>
           {/* Capacity Progress Bar */}
           <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 mt-2.5 overflow-hidden">
-            <div className="h-full rounded-full bg-indigo-600 dark:bg-indigo-500 transition-all duration-500" style={{ width: `${Math.min(100, occupiedPercent)}%` }} />
+            <div className="h-full rounded-full bg-indigo-600 dark:bg-indigo-400 transition-all duration-500" style={{ width: `${Math.min(100, occupiedPercent)}%` }} />
           </div>
         </div>
       </div>
@@ -321,20 +321,20 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
         >
           <div className="flex items-center justify-between border-b pb-4 border-slate-200 dark:border-slate-700">
             <div>
-              <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">
+              <h3 className={`text-sm font-extrabold flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 <BarChart3 className="w-4 h-4 text-blue-500" />
                 <span>{isBn ? 'দৈনিক কার্গো প্রসেসিং ও ফ্লাইং ট্রেন্ড' : 'Daily Cargo Intake & Air Dispatch Trend'}</span>
               </h3>
-              <p className="text-[11px] text-slate-400 mt-0.5 font-normal">
+              <p className={`text-[11px] mt-0.5 font-semibold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>
                 {isBn ? 'বুকিং কার্টুন সংখ্যা বনাম প্লেনে উড্ডয়নকৃত কার্গোর গতিপথ' : 'Booked cargo volume vs dispatched air payload over time'}
               </p>
             </div>
-            <div className="flex items-center space-x-3 text-xs font-normal">
-              <span className="flex items-center space-x-1.5 text-slate-600 dark:text-slate-300">
+            <div className="flex items-center space-x-3 text-xs font-bold">
+              <span className={`flex items-center space-x-1.5 ${isDark ? 'text-white' : 'text-slate-800'}`}>
                 <span className="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
                 <span>{isBn ? 'বুকিং কার্টুন' : 'Booked Intake'}</span>
               </span>
-              <span className="flex items-center space-x-1.5 text-slate-600 dark:text-slate-300">
+              <span className={`flex items-center space-x-1.5 ${isDark ? 'text-white' : 'text-slate-800'}`}>
                 <span className="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
                 <span>{isBn ? 'ফ্লাইং ডিসপ্যাচ' : 'Flying Dispatch'}</span>
               </span>
@@ -383,7 +383,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
                         }`}
                       />
                     </div>
-                    <span className="text-[10px] font-mono text-slate-400 mt-2">{d.day}</span>
+                    <span className={`text-[10px] font-mono mt-2 font-extrabold ${isDark ? 'text-slate-100' : 'text-slate-600'}`}>{d.day}</span>
                   </div>
                 );
               })}
@@ -394,24 +394,24 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
               <div className={`p-3 rounded-xl border flex items-center space-x-3 transition-colors ${
                 isDark ? 'bg-[#1E293B]/60 border-slate-700' : 'bg-slate-50/90 border-slate-200/90 hover:bg-slate-100/60'
               }`}>
-                <div className="p-2 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0">
+                <div className="p-2 rounded-lg bg-blue-500/20 text-sky-300 shrink-0 border border-blue-500/30">
                   <Package className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">{isBn ? 'চলতি মাসের মোট ইনটেক' : 'Total Monthly Intake'}</div>
-                  <div className="font-mono text-slate-900 dark:text-white font-medium mt-0.5">{totalStockCartons} Cartons</div>
+                  <div className={`text-[11px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>{isBn ? 'চলতি মাসের মোট ইনটেক' : 'Total Monthly Intake'}</div>
+                  <div className={`font-mono font-extrabold mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>{totalStockCartons} Cartons</div>
                 </div>
               </div>
 
               <div className={`p-3 rounded-xl border flex items-center space-x-3 transition-colors ${
                 isDark ? 'bg-[#1E293B]/60 border-slate-700' : 'bg-slate-50/90 border-slate-200/90 hover:bg-slate-100/60'
               }`}>
-                <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 shrink-0">
+                <div className="p-2 rounded-lg bg-emerald-500/20 text-emerald-300 shrink-0 border border-emerald-500/30">
                   <Plane className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">{isBn ? 'ফ্লাইটে রিলিজড পেলোড' : 'Dispatched Payload'}</div>
-                  <div className="font-mono text-slate-900 dark:text-white font-medium mt-0.5">
+                  <div className={`text-[11px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>{isBn ? 'ফ্লাইটে রিলিজড পেলোড' : 'Dispatched Payload'}</div>
+                  <div className={`font-mono font-extrabold mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {deliveredCount} Cartons ({totalStockCartons > 0 ? Math.round((deliveredCount / totalStockCartons) * 100) : 0}%)
                   </div>
                 </div>
@@ -420,12 +420,12 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
               <div className={`p-3 rounded-xl border flex items-center space-x-3 transition-colors ${
                 isDark ? 'bg-[#1E293B]/60 border-slate-700' : 'bg-slate-50/90 border-slate-200/90 hover:bg-slate-100/60'
               }`}>
-                <div className="p-2 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 shrink-0">
+                <div className="p-2 rounded-lg bg-indigo-500/20 text-indigo-300 shrink-0 border border-indigo-500/30">
                   <TrendingUp className="w-4 h-4" />
                 </div>
                 <div>
-                  <div className="text-[11px] text-slate-500 dark:text-slate-400">{isBn ? 'পিক প্রসেসিং ডে' : 'Peak Processing Day'}</div>
-                  <div className="font-mono text-slate-900 dark:text-white font-medium mt-0.5">
+                  <div className={`text-[11px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>{isBn ? 'পিক প্রসেসিং ডে' : 'Peak Processing Day'}</div>
+                  <div className={`font-mono font-extrabold mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {totalStockCartons > 0 ? `Today (${totalStockCartons} Cartons)` : 'N/A (0 Cartons)'}
                   </div>
                 </div>
@@ -443,11 +443,11 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
             }`}
           >
             <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
-              <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">
+              <h3 className={`text-sm font-extrabold flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                 <Box className="w-4 h-4 text-indigo-500" />
                 <span>{isBn ? 'ওয়্যারহাউজ ক্যাপাসিটি মিটার' : 'Storage Capacity Gauge'}</span>
               </h3>
-              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+              <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
                 Safe Zone
               </span>
             </div>
@@ -464,7 +464,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
                     d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
                   />
                   <path
-                    className="text-blue-600 dark:text-blue-500 transition-all duration-1000 ease-out"
+                    className="text-blue-600 dark:text-blue-400 transition-all duration-1000 ease-out"
                     strokeDasharray={`${Math.round(occupiedPercent)}, 100`}
                     strokeWidth="3.5"
                     strokeLinecap="round"
@@ -474,21 +474,21 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
                   />
                 </svg>
                 <div className="absolute flex flex-col items-center justify-center text-center">
-                  <span className="text-xl font-medium font-mono text-slate-900 dark:text-white">
+                  <span className={`text-xl font-extrabold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {occupiedPercent.toFixed(1)}%
                   </span>
-                  <span className="text-[10px] text-slate-400 font-normal">Capacity Used</span>
+                  <span className={`text-[10px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>Capacity Used</span>
                 </div>
               </div>
 
               <div className="mt-4 w-full grid grid-cols-2 gap-2 text-center text-xs font-normal border-t pt-3 border-slate-200 dark:border-slate-700">
                 <div>
-                  <div className="text-slate-400 text-[10px]">{isBn ? 'ব্যবহৃত ভলিউম' : 'Used Volume'}</div>
-                  <div className="font-mono text-slate-900 dark:text-white font-medium mt-0.5">{totalCbm.toFixed(1)} CBM</div>
+                  <div className={`text-[10px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>{isBn ? 'ব্যবহৃত ভলিউম' : 'Used Volume'}</div>
+                  <div className={`font-mono font-extrabold mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>{totalCbm.toFixed(1)} CBM</div>
                 </div>
                 <div>
-                  <div className="text-slate-400 text-[10px]">{isBn ? 'অবশিষ্ট খালি জায়গা' : 'Available Space'}</div>
-                  <div className="font-mono text-emerald-600 dark:text-emerald-400 font-medium mt-0.5">{remainingCbm.toFixed(1)} CBM</div>
+                  <div className={`text-[10px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>{isBn ? 'অবশিষ্ট খালি জায়গা' : 'Available Space'}</div>
+                  <div className={`font-mono font-extrabold mt-0.5 ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>{remainingCbm.toFixed(1)} CBM</div>
                 </div>
               </div>
             </div>
@@ -500,7 +500,7 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
               isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90'
             }`}
           >
-            <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2 border-b pb-3 border-slate-200 dark:border-slate-700">
+            <h3 className={`text-sm font-extrabold flex items-center space-x-2 border-b pb-3 border-slate-200 dark:border-slate-700 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               <Layers className="w-4 h-4 text-emerald-500" />
               <span>{isBn ? 'পণ্য ক্যাটাগরি ডিস্ট্রিবিউশন' : 'Product Category Share'}</span>
             </h3>
@@ -508,9 +508,9 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
             <div className="mt-4 space-y-3 text-xs font-normal">
               {/* Category 1 */}
               <div>
-                <div className="flex justify-between text-slate-700 dark:text-slate-300 mb-1">
+                <div className={`flex justify-between font-extrabold mb-1 ${isDark ? 'text-white' : 'text-slate-800'}`}>
                   <span>📱 Electronics & Gadgets</span>
-                  <span className="font-mono font-medium">{totalStockCartons > 0 ? '42%' : '0%'} ({Math.round(totalStockCartons * 0.42)} CTN)</span>
+                  <span className="font-mono font-extrabold">{totalStockCartons > 0 ? '42%' : '0%'} ({Math.round(totalStockCartons * 0.42)} CTN)</span>
                 </div>
                 <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
                   <div className="h-full bg-blue-500 rounded-full" style={{ width: `${totalStockCartons > 0 ? 42 : 0}%` }} />
@@ -519,9 +519,9 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
 
               {/* Category 2 */}
               <div>
-                <div className="flex justify-between text-slate-700 dark:text-slate-300 mb-1">
+                <div className={`flex justify-between font-extrabold mb-1 ${isDark ? 'text-white' : 'text-slate-800'}`}>
                   <span>👕 Garments & Apparel Fabric</span>
-                  <span className="font-mono font-medium">{totalStockCartons > 0 ? '32%' : '0%'} ({Math.round(totalStockCartons * 0.32)} CTN)</span>
+                  <span className="font-mono font-extrabold">{totalStockCartons > 0 ? '32%' : '0%'} ({Math.round(totalStockCartons * 0.32)} CTN)</span>
                 </div>
                 <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
                   <div className="h-full bg-emerald-500 rounded-full" style={{ width: `${totalStockCartons > 0 ? 32 : 0}%` }} />
@@ -530,9 +530,9 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
 
               {/* Category 3 */}
               <div>
-                <div className="flex justify-between text-slate-700 dark:text-slate-300 mb-1">
+                <div className={`flex justify-between font-extrabold mb-1 ${isDark ? 'text-white' : 'text-slate-800'}`}>
                   <span>⚙️ Machinery & Tools</span>
-                  <span className="font-mono font-medium">{totalStockCartons > 0 ? '16%' : '0%'} ({Math.round(totalStockCartons * 0.16)} CTN)</span>
+                  <span className="font-mono font-extrabold">{totalStockCartons > 0 ? '16%' : '0%'} ({Math.round(totalStockCartons * 0.16)} CTN)</span>
                 </div>
                 <div className="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-800 overflow-hidden">
                   <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${totalStockCartons > 0 ? 16 : 0}%` }} />
@@ -552,11 +552,11 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
           }`}
         >
           <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
-            <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">
+            <h3 className={`text-sm font-extrabold flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               <Send className="w-4 h-4 text-blue-500" />
               <span>{isBn ? 'গন্তব্য অনুযায়ী কার্গো ডিসপ্যাচ শেয়ার' : 'Destination Freight Share'}</span>
             </h3>
-            <span className="text-[10px] font-mono text-slate-400">Dhaka Central Focus</span>
+            <span className={`text-[10px] font-mono font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>Dhaka Central Focus</span>
           </div>
 
           <div className="mt-4 space-y-4 text-xs font-normal">
@@ -566,13 +566,13 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
               <div className="flex items-center space-x-3">
                 <span className="text-xl">🇧🇩</span>
                 <div>
-                  <div className="font-medium text-slate-900 dark:text-white">Dhaka Central Hub (BD)</div>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400">Primary Delivery Station</div>
+                  <div className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>Dhaka Central Hub (BD)</div>
+                  <div className={`text-[10px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>Primary Delivery Station</div>
                 </div>
               </div>
               <div className="text-right font-mono">
-                <div className="font-medium text-blue-600 dark:text-blue-400 text-sm">{totalStockCartons > 0 ? '70%' : '0%'} Share</div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">{Math.round(totalStockCartons * 0.7)} Cartons</div>
+                <div className="font-extrabold text-blue-400 text-sm">{totalStockCartons > 0 ? '70%' : '0%'} Share</div>
+                <div className={`text-[10px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>{Math.round(totalStockCartons * 0.7)} Cartons</div>
               </div>
             </div>
 
@@ -582,13 +582,13 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
               <div className="flex items-center space-x-3">
                 <span className="text-xl">🚢</span>
                 <div>
-                  <div className="font-medium text-slate-900 dark:text-white">Chittagong Port Air Cargo</div>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400">Regional Express Hub</div>
+                  <div className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>Chittagong Port Air Cargo</div>
+                  <div className={`text-[10px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>Regional Express Hub</div>
                 </div>
               </div>
               <div className="text-right font-mono">
-                <div className="font-medium text-emerald-600 dark:text-emerald-400 text-sm">{totalStockCartons > 0 ? '18%' : '0%'} Share</div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">{Math.round(totalStockCartons * 0.18)} Cartons</div>
+                <div className="font-extrabold text-emerald-400 text-sm">{totalStockCartons > 0 ? '18%' : '0%'} Share</div>
+                <div className={`text-[10px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>{Math.round(totalStockCartons * 0.18)} Cartons</div>
               </div>
             </div>
 
@@ -598,13 +598,13 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
               <div className="flex items-center space-x-3">
                 <span className="text-xl">✈️</span>
                 <div>
-                  <div className="font-medium text-slate-900 dark:text-white">Sylhet Air Cargo Terminal</div>
-                  <div className="text-[10px] text-slate-500 dark:text-slate-400">North-East Cargo Route</div>
+                  <div className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>Sylhet Air Cargo Terminal</div>
+                  <div className={`text-[10px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>North-East Cargo Route</div>
                 </div>
               </div>
               <div className="text-right font-mono">
-                <div className="font-medium text-indigo-600 dark:text-indigo-400 text-sm">{totalStockCartons > 0 ? '12%' : '0%'} Share</div>
-                <div className="text-[10px] text-slate-500 dark:text-slate-400">{Math.round(totalStockCartons * 0.12)} Cartons</div>
+                <div className="font-extrabold text-indigo-400 text-sm">{totalStockCartons > 0 ? '12%' : '0%'} Share</div>
+                <div className={`text-[10px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>{Math.round(totalStockCartons * 0.12)} Cartons</div>
               </div>
             </div>
           </div>
@@ -617,33 +617,33 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
           }`}
         >
           <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
-            <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">
+            <h3 className={`text-sm font-extrabold flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               <Zap className="w-4 h-4 text-emerald-500 animate-pulse" />
               <span>{isBn ? 'সাম্প্রতিক কার্গো মোশন ও কার্যক্রম' : 'Live Motion Stream'}</span>
             </h3>
-            <span className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400">Real-time Feed</span>
+            <span className="text-[10px] font-mono text-emerald-400 font-bold">Real-time Feed</span>
           </div>
 
           <div className="mt-4 space-y-3.5 text-xs font-normal">
             {myCartons.length > 0 ? (
               myCartons.slice(0, 4).map((c) => (
                 <div key={c.id} className="flex items-start space-x-3 p-2.5 rounded-xl hover:bg-slate-50 dark:hover:bg-[#1E293B] transition-colors">
-                  <div className="p-2 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5">
+                  <div className="p-2 rounded-xl bg-blue-500/20 text-sky-300 shrink-0 mt-0.5 border border-blue-500/30">
                     <Package className="w-3.5 h-3.5" />
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium text-slate-900 dark:text-white">Carton #{c.ctn_no}</span>
-                      <span className="text-[10px] font-mono text-slate-400">{(c as any).booking_date || c.created_at?.split('T')[0] || 'Recent'}</span>
+                      <span className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>Carton #{c.ctn_no}</span>
+                      <span className={`text-[10px] font-mono font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>{(c as any).booking_date || c.created_at?.split('T')[0] || 'Recent'}</span>
                     </div>
-                    <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">
+                    <p className={`text-[11px] font-semibold mt-0.5 ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>
                       {c.product_name_en} • Gross Weight: {c.gross_weight} kg • Tracking: {c.tracking_number}
                     </p>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="p-6 text-center text-slate-400 text-xs">
+              <div className={`p-6 text-center text-xs font-bold ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>
                 No recent activity logged for this warehouse
               </div>
             )}
