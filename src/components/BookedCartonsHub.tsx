@@ -849,9 +849,52 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             </span>
           </div>
 
+          {/* Quick Bulk Merge Toolbar */}
+          <div className="flex items-center justify-between p-3 bg-slate-100/90 dark:bg-slate-800/80 border-b border-slate-200/80 dark:border-slate-700/80 text-xs font-mono">
+            <div className="flex items-center space-x-2">
+              <span className="font-bold text-slate-700 dark:text-slate-300">
+                {isBn ? 'মার্জ টুলবার (Merge Toolbar):' : 'Merge Toolbar:'}
+              </span>
+              {selectedHubCartonIds.length > 0 && (
+                <span className="px-2.5 py-0.5 bg-blue-600 text-white rounded-full text-[10px] font-bold shadow-2xs">
+                  {selectedHubCartonIds.length} Selected
+                </span>
+              )}
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <button
+                type="button"
+                onClick={() => handleBulkMergeInHub(sortedFilteredCartons)}
+                disabled={selectedHubCartonIds.length < 2}
+                className={`px-3 py-1 text-xs font-bold rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                  selectedHubCartonIds.length >= 2
+                    ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs'
+                    : 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
+                }`}
+                title={isBn ? 'সিলেক্টকৃত কার্টুন মার্জ করে ১টি মাস্টার কার্টুন বানান' : 'Merge selected rows into 1 master carton'}
+              >
+                <GitFork className="w-3.5 h-3.5" />
+                <span>{isBn ? '🔗 মার্জ করুন (Merge Selected)' : '🔗 Merge Selected'}</span>
+              </button>
+
+              {selectedHubCartonIds.length > 0 && (
+                <button
+                  type="button"
+                  onClick={() => handleBulkUnmergeInHub(sortedFilteredCartons)}
+                  className="px-3 py-1 bg-slate-600 hover:bg-slate-700 text-white text-xs font-bold rounded-lg flex items-center space-x-1 shadow-xs cursor-pointer"
+                  title={isBn ? 'সিলেক্টকৃত কার্টুন আলাদা/আনমার্জ করুন' : 'Unmerge selected cartons'}
+                >
+                  <span>{isBn ? '🔓 আলাদা করুন (Unmerge)' : '🔓 Unmerge'}</span>
+                </button>
+              )}
+            </div>
+          </div>
+
           <div className="overflow-x-auto w-full">
-            <table className="w-full text-left text-xs border-collapse table-fixed min-w-[1300px]">
+            <table className="w-full text-left text-xs border-collapse table-fixed min-w-[1350px]">
               <colgroup>
+                <col style={{ width: '40px' }} />  {/* Checkbox */}
                 <col style={{ width: '45px' }} />  {/* SL */}
                 <col style={{ width: '100px' }} /> {/* CTN NO */}
                 <col style={{ width: '140px' }} /> {/* SHIPMENT CTN NO. */}
@@ -870,6 +913,17 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 isDark ? 'bg-[#151D2A] text-slate-300 border-slate-700/80' : 'bg-slate-100/90 text-slate-700 border-slate-200'
               }`}>
                 <tr>
+                  <th className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50 w-10">
+                    <input
+                      type="checkbox"
+                      checked={
+                        sortedFilteredCartons.length > 0 &&
+                        sortedFilteredCartons.every((c) => selectedHubCartonIds.includes(c.id))
+                      }
+                      onChange={() => handleToggleSelectAllInModal(sortedFilteredCartons)}
+                      className="rounded border-slate-400 cursor-pointer accent-blue-600"
+                    />
+                  </th>
                   <th className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50 font-bold">SL</th>
                   <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 font-bold">CTN NO</th>
                   <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 font-bold text-emerald-600 dark:text-emerald-400">SHIPMENT CTN NO.</th>
@@ -889,12 +943,17 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 {sortedFilteredCartons.map((c, idx) => {
                   const spanInfo = getCartonRowSpanInfo(sortedFilteredCartons, idx);
                   const slNum = getSlNumberForCartonRow(sortedFilteredCartons, idx);
+                  const isSelected = selectedHubCartonIds.includes(c.id);
 
                   return (
                     <tr
                       key={c.id}
                       className={`transition-colors duration-150 ${
-                        spanInfo.isMerged
+                        isSelected
+                          ? isDark
+                            ? 'bg-blue-950/50'
+                            : 'bg-blue-100/70'
+                          : spanInfo.isMerged
                           ? isDark
                             ? 'bg-indigo-950/25 hover:bg-indigo-950/40'
                             : 'bg-indigo-50/50 hover:bg-indigo-50/80'
@@ -903,6 +962,16 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           : 'hover:bg-slate-50/90'
                       }`}
                     >
+                      {/* Checkbox Column */}
+                      <td className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => handleToggleSelectCarton(c.id)}
+                          className="rounded border-slate-400 cursor-pointer accent-blue-600"
+                        />
+                      </td>
+
                       {/* SL (RowSpanned if Merged) */}
                       {spanInfo.isFirst && (
                         <td
