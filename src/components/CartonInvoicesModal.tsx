@@ -45,12 +45,12 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[2500] bg-[#1E293B]/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in">
-      {/* Printable CSS Media Rules - Guarantees 100% Color, Border, Grid & Single A4 Page Fit */}
+      {/* Printable CSS Media Rules - Forces 2 Invoices per A4 Sheet in Print All Mode */}
       <style>{`
         @media print {
           @page {
             size: A4 portrait;
-            margin: 6mm 8mm;
+            margin: 5mm 8mm;
           }
           * {
             -webkit-print-color-adjust: exact !important;
@@ -79,18 +79,19 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
             margin: 0 !important;
           }
           .carton-page-break {
-            page-break-after: always !important;
-            break-after: page !important;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-            margin: 0 0 0 0 !important;
-            padding: 14px 16px !important;
             box-shadow: none !important;
             border: 2px solid #00897B !important;
-            max-height: 278mm !important;
             box-sizing: border-box !important;
             overflow: hidden !important;
             background-color: #ffffff !important;
+            max-height: 135mm !important;
+            margin-bottom: 4mm !important;
+            padding: 10px 14px !important;
+          }
+          .carton-page-break-pair {
+            page-break-after: always !important;
+            break-after: page !important;
+            margin-bottom: 0 !important;
           }
           ${
             printingSingleId
@@ -103,6 +104,7 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
               visibility: visible !important;
               page-break-after: avoid !important;
               break-after: avoid !important;
+              max-height: 278mm !important;
             }
           `
               : ''
@@ -137,7 +139,7 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
               className="px-3 py-1.5 sm:px-4 sm:py-2 bg-[#00897B] hover:bg-[#00796B] text-white font-bold text-xs rounded-none transition-all shadow-md flex items-center space-x-1.5 cursor-pointer ring-2 ring-[#00897B]/50"
             >
               <Printer className="w-4 h-4" />
-              <span>{isBn ? 'সকল কার্টুন ইনভয়েস প্রিন্ট করুন' : 'Print All Invoices'}</span>
+              <span>{isBn ? 'সকল কার্টুন ইনভয়েস প্রিন্ট করুন (২টি/পেজ)' : 'Print All Invoices (2/Page)'}</span>
             </button>
 
             <button
@@ -152,12 +154,13 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
         </div>
 
         {/* Scrollable Printable Container */}
-        <div className="flex-1 overflow-y-auto p-3 sm:p-5 space-y-5 bg-[#1E293B]" id="printable-invoices-area">
+        <div className="flex-1 overflow-y-auto p-3 sm:p-5 space-y-4 bg-[#1E293B]" id="printable-invoices-area">
           {cartons.map((ctn, index) => {
             const ctnNoStr = ctn.ctn_no || `CTN-${index + 1}`;
             const pkgNoStr = ctn.packaging_number || `BOX-${101 + index}`;
             const trkNum = ctn.tracking_number || ctn.master_tracking_number || masterTracking;
             const barcodeCode = `${ctn.master_tracking_number || masterTracking}-${ctnNoStr}`;
+            const isSecondInPair = index % 2 === 1 || index === cartons.length - 1;
 
             // Real-Time Dynamic QR Code URL linking to Public Cargo Tracking Portal with pre-filled tracking number
             const trackingPortalUrl = `${siteOrigin}/tracking?search=${encodeURIComponent(trkNum)}`;
@@ -167,7 +170,7 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
               <div
                 key={ctn.id}
                 id={`carton-inv-${ctn.id}`}
-                className="carton-page-break bg-white text-slate-900 border-2 border-[#00897B] p-4 sm:p-5 shadow-xl relative overflow-hidden font-sans space-y-3"
+                className={`carton-page-break ${isSecondInPair ? 'carton-page-break-pair' : ''} bg-white text-slate-900 border-2 border-[#00897B] p-3 sm:p-4 shadow-xl relative overflow-hidden font-sans space-y-2`}
                 style={{ backgroundColor: '#ffffff', borderColor: '#00897B' }}
               >
                 {/* Printable Action Ribbon (Screen Only) */}
@@ -182,54 +185,57 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
                   </button>
                 </div>
 
-                {/* Company & Document Header with Real-Time QR Code */}
-                <div className="border-b-2 border-[#00897B] pb-3 flex items-start justify-between" style={{ borderBottomColor: '#00897B' }}>
-                  <div className="flex items-center space-x-3">
-                    <div
-                      className="w-11 h-11 text-white font-extrabold text-lg flex items-center justify-center border-2 border-[#00695C] shadow-sm shrink-0"
-                      style={{ backgroundColor: '#00897B', color: '#ffffff', borderColor: '#00695C' }}
-                    >
-                      4★
-                    </div>
+                {/* Company & Document Header with Official Logo & Real-Time QR Code */}
+                <div className="border-b-2 border-[#00897B] pb-2 flex items-start justify-between" style={{ borderBottomColor: '#00897B' }}>
+                  <div className="flex items-center space-x-2.5">
+                    <img
+                      src="/logo.png"
+                      alt="Four Star Cargo Logo"
+                      className="w-10 h-10 sm:w-11 sm:h-11 object-contain shrink-0 filter drop-shadow-sm"
+                      onError={(e) => {
+                        // Fallback if logo image fails to load
+                        (e.target as HTMLElement).style.display = 'none';
+                      }}
+                    />
                     <div>
-                      <h1 className="text-base font-black tracking-wider text-slate-900 leading-tight">
+                      <h1 className="text-sm sm:text-base font-black tracking-wider text-slate-900 leading-tight">
                         FOUR STAR CARGO
                       </h1>
-                      <p className="text-[9px] text-slate-600 font-semibold uppercase tracking-wider">
+                      <p className="text-[8.5px] text-slate-600 font-semibold uppercase tracking-wider">
                         International Express Logistics & Cargo Management
                       </p>
-                      <p className="text-[9px] text-slate-500 font-mono">
+                      <p className="text-[8.5px] text-slate-500 font-mono">
                         Guangzhou China • Dhaka Bangladesh • Dubai UAE
                       </p>
                     </div>
                   </div>
 
                   {/* Real-time Scannable Tracking QR Code + Invoice Badge */}
-                  <div className="flex items-center space-x-3 text-right">
+                  <div className="flex items-center space-x-2.5 text-right">
                     <div className="flex flex-col items-center">
                       <img
                         src={qrCodeImgUrl}
                         alt={`QR Code for Tracking ${trkNum}`}
-                        className="w-16 h-16 sm:w-20 sm:h-20 border border-slate-300 p-1 bg-white shadow-2xs"
+                        className="w-13 h-13 sm:w-16 sm:h-16 border border-slate-300 p-0.5 bg-white shadow-2xs"
                         style={{ backgroundColor: '#ffffff', borderColor: '#CBD5E1' }}
                         title="Scan to track live cargo status"
                       />
-                      <span className="text-[8px] font-mono font-bold text-[#00897B] mt-0.5 tracking-tighter" style={{ color: '#00897B' }}>
+                      <span className="text-[7.5px] font-mono font-bold text-[#00897B] mt-0.5 tracking-tighter" style={{ color: '#00897B' }}>
                         SCAN TO TRACK LIVE
                       </span>
                     </div>
 
                     <div className="flex flex-col items-end justify-center space-y-0.5">
                       <span
-                        className="px-2 py-0.5 text-white text-[10px] font-bold uppercase tracking-wider block"
+                        className="px-2 py-0.5 text-white text-[9px] font-bold uppercase tracking-wider block"
                         style={{ backgroundColor: '#00897B', color: '#ffffff' }}
                       >
                         CARGO SHIPPING INVOICE
                       </span>
-                      <p className="text-[11px] font-mono font-bold text-slate-800">
+                      <p className="text-[10px] font-mono font-bold text-slate-800">
                         Invoice No: <span className="text-[#00897B]" style={{ color: '#00897B' }}>INV-{ctn.id.slice(-8).toUpperCase()}</span>
                       </p>
-                      <p className="text-[9px] text-slate-500 font-mono">
+                      <p className="text-[8.5px] text-slate-500 font-mono">
                         Date: {new Date(ctn.created_at || Date.now()).toLocaleDateString('en-GB')}
                       </p>
                     </div>
@@ -238,79 +244,79 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
 
                 {/* Barcode & Unique Tracking Banner */}
                 <div
-                  className="bg-slate-50 border-2 border-dashed border-[#00897B] p-2 text-center space-y-0.5"
+                  className="bg-slate-50 border border-dashed border-[#00897B] p-1.5 text-center space-y-0.5"
                   style={{ backgroundColor: '#F8FAFC', borderColor: '#00897B' }}
                 >
-                  <div className="text-[9px] font-bold text-slate-500 uppercase tracking-widest">
+                  <div className="text-[8.5px] font-bold text-slate-500 uppercase tracking-widest">
                     MASTER TRACKING ID & BARCODE SPECIFICATION
                   </div>
-                  <div className="font-mono text-lg sm:text-xl font-black tracking-widest text-[#00897B] leading-none" style={{ color: '#00897B' }}>
+                  <div className="font-mono text-base sm:text-lg font-black tracking-widest text-[#00897B] leading-none" style={{ color: '#00897B' }}>
                     ||| | ||||| ||| |||| || |||||| | |||
                   </div>
-                  <div className="font-mono text-xs font-bold text-slate-900 tracking-widest">
+                  <div className="font-mono text-[11px] font-bold text-slate-900 tracking-widest">
                     {barcodeCode}
                   </div>
                 </div>
 
                 {/* Main 4-Block Metadata Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
-                  <div className="bg-slate-100 p-2 border border-slate-300" style={{ backgroundColor: '#F1F5F9', borderColor: '#CBD5E1' }}>
-                    <span className="text-[9px] font-bold text-slate-500 block uppercase">CARTON NUMBER</span>
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-1.5 text-xs">
+                  <div className="bg-slate-100 p-1.5 border border-slate-300" style={{ backgroundColor: '#F1F5F9', borderColor: '#CBD5E1' }}>
+                    <span className="text-[8.5px] font-bold text-slate-500 block uppercase">CARTON NUMBER</span>
                     <span className="text-xs font-black text-[#00897B] font-mono" style={{ color: '#00897B' }}>{ctnNoStr}</span>
-                    <span className="text-[9px] text-slate-500 block mt-0.5 font-semibold">
+                    <span className="text-[8.5px] text-slate-500 block font-semibold">
                       Index: {index + 1} of {cartons.length}
                     </span>
                   </div>
 
-                  <div className="bg-slate-100 p-2 border border-slate-300" style={{ backgroundColor: '#F1F5F9', borderColor: '#CBD5E1' }}>
-                    <span className="text-[9px] font-bold text-slate-500 block uppercase">PACKAGING SLIP / BOX</span>
+                  <div className="bg-slate-100 p-1.5 border border-slate-300" style={{ backgroundColor: '#F1F5F9', borderColor: '#CBD5E1' }}>
+                    <span className="text-[8.5px] font-bold text-slate-500 block uppercase">PACKAGING SLIP / BOX</span>
                     <span className="text-xs font-black text-slate-900 font-mono">{pkgNoStr}</span>
-                    <span className="text-[9px] text-slate-500 block mt-0.5 font-semibold">Slip Code</span>
+                    <span className="text-[8.5px] text-slate-500 block font-semibold">Slip Code</span>
                   </div>
 
-                  <div className="bg-amber-50 p-2 border border-amber-300" style={{ backgroundColor: '#FEF3C7', borderColor: '#FCD34D' }}>
-                    <span className="text-[9px] font-bold text-amber-800 block uppercase" style={{ color: '#92400E' }}>SHIPPING MARK</span>
+                  <div className="bg-amber-50 p-1.5 border border-amber-300" style={{ backgroundColor: '#FEF3C7', borderColor: '#FCD34D' }}>
+                    <span className="text-[8.5px] font-bold text-amber-800 block uppercase" style={{ color: '#92400E' }}>SHIPPING MARK</span>
                     <span className="text-xs font-black text-amber-900 font-mono" style={{ color: '#78350F' }}>{ctn.shipping_mark}</span>
-                    <span className="text-[9px] text-amber-700 block mt-0.5 font-semibold" style={{ color: '#B45309' }}>Freight Identity</span>
+                    <span className="text-[8.5px] text-amber-700 block font-semibold" style={{ color: '#B45309' }}>Freight Identity</span>
                   </div>
 
-                  <div className="bg-emerald-50 p-2 border border-emerald-300" style={{ backgroundColor: '#ECFDF5', borderColor: '#6EE7B7' }}>
-                    <span className="text-[9px] font-bold text-emerald-800 block uppercase" style={{ color: '#065F46' }}>MASTER TRACKING</span>
-                    <span className="text-[11px] font-black text-emerald-900 font-mono truncate block" style={{ color: '#064E3B' }}>{trkNum}</span>
-                    <span className="text-[9px] text-emerald-700 block mt-0.5 font-semibold" style={{ color: '#047857' }}>Air Express</span>
+                  <div className="bg-emerald-50 p-1.5 border border-emerald-300" style={{ backgroundColor: '#ECFDF5', borderColor: '#6EE7B7' }}>
+                    <span className="text-[8.5px] font-bold text-emerald-800 block uppercase" style={{ color: '#065F46' }}>MASTER TRACKING</span>
+                    <span className="text-[10.5px] font-black text-emerald-900 font-mono truncate block" style={{ color: '#064E3B' }}>{trkNum}</span>
+                    <span className="text-[8.5px] text-emerald-700 block font-semibold" style={{ color: '#047857' }}>Air Express</span>
                   </div>
                 </div>
 
                 {/* Customer & Route Details */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
-                  <div className="p-2 bg-slate-50 border border-slate-200 space-y-0.5" style={{ backgroundColor: '#F8FAFC', borderColor: '#E2E8F0' }}>
-                    <span className="font-bold text-[10px] text-[#00897B] uppercase block border-b border-slate-200 pb-0.5 mb-0.5" style={{ color: '#00897B', borderBottomColor: '#E2E8F0' }}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5 text-xs">
+                  <div className="p-1.5 bg-slate-50 border border-slate-200 space-y-0.5" style={{ backgroundColor: '#F8FAFC', borderColor: '#E2E8F0' }}>
+                    <span className="font-bold text-[9.5px] text-[#00897B] uppercase block border-b border-slate-200 pb-0.5 mb-0.5" style={{ color: '#00897B', borderBottomColor: '#E2E8F0' }}>
                       CUSTOMER & RECIPIENT INFORMATION
                     </span>
-                    <p className="font-bold text-slate-900 text-[11px]">
+                    <p className="font-bold text-slate-900 text-[10.5px]">
                       Shipping Mark: <span className="text-[#00897B] font-mono" style={{ color: '#00897B' }}>{ctn.shipping_mark}</span>
                     </p>
-                    <p className="text-slate-700 text-[11px]">
+                    <p className="text-slate-700 text-[10.5px]">
                       Customer Code: <span className="font-mono font-semibold">{(ctn as any).customer_code || 'CUST-GENERAL'}</span>
                     </p>
-                    <p className="text-slate-600 text-[10px]">
+                    <p className="text-slate-600 text-[9.5px]">
                       Status: <span className="font-bold text-emerald-700 uppercase" style={{ color: '#047857' }}>Booked & Confirmed</span>
                     </p>
                   </div>
 
-                  <div className="p-2 bg-slate-50 border border-slate-200 space-y-0.5" style={{ backgroundColor: '#F8FAFC', borderColor: '#E2E8F0' }}>
-                    <span className="font-bold text-[10px] text-[#00897B] uppercase block border-b border-slate-200 pb-0.5 mb-0.5" style={{ color: '#00897B', borderBottomColor: '#E2E8F0' }}>
+                  <div className="p-1.5 bg-slate-50 border border-slate-200 space-y-0.5" style={{ backgroundColor: '#F8FAFC', borderColor: '#E2E8F0' }}>
+                    <span className="font-bold text-[9.5px] text-[#00897B] uppercase block border-b border-slate-200 pb-0.5 mb-0.5" style={{ color: '#00897B', borderBottomColor: '#E2E8F0' }}>
                       CARGO ROUTE & WAREHOUSE SPECIFICATION
                     </span>
-                    <p className="font-bold text-slate-900 text-[11px] flex items-center space-x-1">
+                    <p className="font-bold text-slate-900 text-[10.5px] flex items-center space-x-1">
                       <MapPin className="w-3 h-3 text-[#00897B] shrink-0" style={{ color: '#00897B' }} />
                       <span>Origin: {originWh}</span>
                     </p>
-                    <p className="font-bold text-slate-900 text-[11px] flex items-center space-x-1">
+                    <p className="font-bold text-slate-900 text-[10.5px] flex items-center space-x-1">
                       <MapPin className="w-3 h-3 text-emerald-600 shrink-0" style={{ color: '#059669' }} />
                       <span>Destination: {destWh}</span>
                     </p>
-                    <p className="text-slate-600 text-[10px]">
+                    <p className="text-slate-600 text-[9.5px]">
                       Booked By: <span className="font-semibold">{currentUser?.name || 'Warehouse Staff'}</span>
                     </p>
                   </div>
@@ -320,25 +326,25 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
                 <div>
                   <table className="w-full border-collapse border border-slate-300 text-xs" style={{ borderColor: '#CBD5E1' }}>
                     <thead>
-                      <tr className="bg-[#00897B] text-white font-bold text-[10px] uppercase" style={{ backgroundColor: '#00897B', color: '#ffffff' }}>
-                        <th className="border border-slate-400 p-1.5 text-left" style={{ borderColor: '#94A3B8' }}>Product Description</th>
-                        <th className="border border-slate-400 p-1.5 text-left" style={{ borderColor: '#94A3B8' }}>Chinese Name (中文)</th>
-                        <th className="border border-slate-400 p-1.5 text-center" style={{ borderColor: '#94A3B8' }}>Qty (PCS)</th>
-                        <th className="border border-slate-400 p-1.5 text-center" style={{ borderColor: '#94A3B8' }}>N. Weight (KG)</th>
-                        <th className="border border-slate-400 p-1.5 text-center" style={{ borderColor: '#94A3B8' }}>G. Weight (KG)</th>
-                        <th className="border border-slate-400 p-1.5 text-center" style={{ borderColor: '#94A3B8' }}>CBM</th>
+                      <tr className="bg-[#00897B] text-white font-bold text-[9.5px] uppercase" style={{ backgroundColor: '#00897B', color: '#ffffff' }}>
+                        <th className="border border-slate-400 p-1 text-left" style={{ borderColor: '#94A3B8' }}>Product Description</th>
+                        <th className="border border-slate-400 p-1 text-left" style={{ borderColor: '#94A3B8' }}>Chinese Name (中文)</th>
+                        <th className="border border-slate-400 p-1 text-center" style={{ borderColor: '#94A3B8' }}>Qty (PCS)</th>
+                        <th className="border border-slate-400 p-1 text-center" style={{ borderColor: '#94A3B8' }}>N. Weight (KG)</th>
+                        <th className="border border-slate-400 p-1 text-center" style={{ borderColor: '#94A3B8' }}>G. Weight (KG)</th>
+                        <th className="border border-slate-400 p-1 text-center" style={{ borderColor: '#94A3B8' }}>CBM</th>
                       </tr>
                     </thead>
                     <tbody>
-                      <tr className="bg-white text-slate-900 font-medium text-[11px]">
-                        <td className="border border-slate-300 p-1.5 font-bold" style={{ borderColor: '#CBD5E1' }}>{ctn.product_name_en}</td>
-                        <td className="border border-slate-300 p-1.5 font-mono" style={{ borderColor: '#CBD5E1' }}>{ctn.product_name_cn || '-'}</td>
-                        <td className="border border-slate-300 p-1.5 text-center font-mono font-bold" style={{ borderColor: '#CBD5E1' }}>{ctn.quantity}</td>
-                        <td className="border border-slate-300 p-1.5 text-center font-mono" style={{ borderColor: '#CBD5E1' }}>{ctn.net_weight} kg</td>
-                        <td className="border border-slate-300 p-1.5 text-center font-mono font-extrabold text-[#00897B]" style={{ borderColor: '#CBD5E1', color: '#00897B' }}>
+                      <tr className="bg-white text-slate-900 font-medium text-[10.5px]">
+                        <td className="border border-slate-300 p-1 font-bold" style={{ borderColor: '#CBD5E1' }}>{ctn.product_name_en}</td>
+                        <td className="border border-slate-300 p-1 font-mono" style={{ borderColor: '#CBD5E1' }}>{ctn.product_name_cn || '-'}</td>
+                        <td className="border border-slate-300 p-1 text-center font-mono font-bold" style={{ borderColor: '#CBD5E1' }}>{ctn.quantity}</td>
+                        <td className="border border-slate-300 p-1 text-center font-mono" style={{ borderColor: '#CBD5E1' }}>{ctn.net_weight} kg</td>
+                        <td className="border border-slate-300 p-1 text-center font-mono font-extrabold text-[#00897B]" style={{ borderColor: '#CBD5E1', color: '#00897B' }}>
                           {ctn.gross_weight} kg
                         </td>
-                        <td className="border border-slate-300 p-1.5 text-center font-mono" style={{ borderColor: '#CBD5E1' }}>{ctn.cbm} m³</td>
+                        <td className="border border-slate-300 p-1 text-center font-mono" style={{ borderColor: '#CBD5E1' }}>{ctn.cbm} m³</td>
                       </tr>
                     </tbody>
                   </table>
@@ -346,28 +352,28 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
 
                 {/* Attached Packaging Slip Image (If Present) */}
                 {ctn.photo_url && (
-                  <div className="p-2 bg-slate-50 border border-slate-200 space-y-1" style={{ backgroundColor: '#F8FAFC', borderColor: '#E2E8F0' }}>
-                    <span className="text-[9px] font-bold text-slate-600 uppercase block">
+                  <div className="p-1.5 bg-slate-50 border border-slate-200 space-y-0.5" style={{ backgroundColor: '#F8FAFC', borderColor: '#E2E8F0' }}>
+                    <span className="text-[8.5px] font-bold text-slate-600 uppercase block">
                       ATTACHED PACKAGING SLIP / PRODUCT IMAGE
                     </span>
                     <img
                       src={ctn.photo_url}
                       alt="Packaging Slip"
-                      className="max-h-24 max-w-xs object-contain border border-slate-300 shadow-sm"
+                      className="max-h-20 max-w-xs object-contain border border-slate-300 shadow-sm"
                       style={{ borderColor: '#CBD5E1' }}
                     />
                   </div>
                 )}
 
                 {/* Footer Stamp & Signature Verification Boxes */}
-                <div className="pt-3 border-t border-slate-300 flex items-center justify-between text-[10px] text-slate-600" style={{ borderTopColor: '#CBD5E1' }}>
-                  <div className="text-center w-1/3 border-t border-slate-400 pt-1 font-medium" style={{ borderTopColor: '#94A3B8' }}>
+                <div className="pt-2 border-t border-slate-300 flex items-center justify-between text-[9.5px] text-slate-600" style={{ borderTopColor: '#CBD5E1' }}>
+                  <div className="text-center w-1/3 border-t border-slate-400 pt-0.5 font-medium" style={{ borderTopColor: '#94A3B8' }}>
                     Prepared By (Warehouse Incharge)
                   </div>
-                  <div className="text-center w-1/3 border-t border-slate-400 pt-1 font-medium" style={{ borderTopColor: '#94A3B8' }}>
+                  <div className="text-center w-1/3 border-t border-slate-400 pt-0.5 font-medium" style={{ borderTopColor: '#94A3B8' }}>
                     Verified & Measured By (QC)
                   </div>
-                  <div className="text-center w-1/3 border-t border-slate-400 pt-1 font-medium" style={{ borderTopColor: '#94A3B8' }}>
+                  <div className="text-center w-1/3 border-t border-slate-400 pt-0.5 font-medium" style={{ borderTopColor: '#94A3B8' }}>
                     Carrier / Driver Signature
                   </div>
                 </div>
