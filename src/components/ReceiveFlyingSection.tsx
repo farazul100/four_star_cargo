@@ -568,14 +568,14 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
               }`}
             >
               <tr>
-                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>ফ্লাইট তারিখ (DATE)</th>
-                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>ফ্লাইং নাম / ব্যাচ টাইটেল</th>
-                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>ফ্লাইট নম্বর / AWB</th>
-                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>উৎস হাব (ORIGIN)</th>
-                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>কার্টুন সংখ্যা</th>
-                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>বাংলাদেশে মেপে পাওয়া ওজন</th>
-                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>বর্তমান অবস্থা (STATUS)</th>
-                <th className={`p-3.5 text-right font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>অ্যাকশন (BD RECEIVING & CALIBRATION)</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'ফ্লাইট তারিখ (DATE)' : 'Flight Date (DATE)'}</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'ফ্লাইং নাম / ব্যাচ টাইটেল' : 'Flying Name / Batch Title'}</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'ফ্লাইট নম্বর / AWB' : 'Flight No / AWB'}</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'উৎস হাব (ORIGIN)' : 'Origin Hub (ORIGIN)'}</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'কার্টুন সংখ্যা' : 'Cartons Count'}</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'বাংলাদেশে মেপে পাওয়া ওজন' : 'BD Calibrated Weight'}</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'বর্তমান অবস্থা (STATUS)' : 'Status (STATUS)'}</th>
+                <th className={`p-3.5 text-right font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'অ্যাকশন (BD RECEIVING & CALIBRATION)' : 'Action (BD Receiving & Calibration)'}</th>
               </tr>
             </thead>
             <tbody

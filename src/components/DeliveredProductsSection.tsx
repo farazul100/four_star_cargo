@@ -487,19 +487,19 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
               }`}
             >
               <tr>
-                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>কার্টুন নম্বর (CTN NO)</th>
-                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>শিপিং মার্ক / ট্র্যাকিং নং</th>
-                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>প্রোডাক্ট নাম & পিস</th>
-                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>উৎস ➔ গন্তব্য হাব</th>
-                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold text-center ${isDark ? 'text-white' : 'text-slate-900'}`}>ফ্লাইট নং</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'কার্টুন নম্বর (CTN NO)' : 'Carton No (CTN NO)'}</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'শিপিং মার্ক / ট্র্যাকিং নং' : 'Shipping Mark / Tracking No'}</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'প্রোডাক্ট নাম & পিস' : 'Product Name & Pcs'}</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'উৎস ➔ গন্তব্য হাব' : 'Origin ➔ Destination Hub'}</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold text-center ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'ফ্লাইট নং' : 'Flight No'}</th>
                 <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${
                   isDark ? 'bg-emerald-500/20 text-emerald-300' : 'bg-emerald-50 text-emerald-800'
                 }`}>
-                  ⚖️ মেপে পাওয়া চূড়ান্ত ওজন
+                  ⚖️ {isBn ? 'মেপে পাওয়া চূড়ান্ত ওজন' : 'Calibrated Final Weight'}
                 </th>
-                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold text-center ${isDark ? 'text-white' : 'text-slate-900'}`}>সিবিএম (CBM)</th>
-                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>অবস্থা (STATUS)</th>
-                <th className={`p-3.5 text-right font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>মেমো & অ্যাকশন</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold text-center ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'সিবিএম (CBM)' : 'Volume (CBM)'}</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'অবস্থা (STATUS)' : 'Status'}</th>
+                <th className={`p-3.5 text-right font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'মেমো & অ্যাকশন' : 'Memo & Action'}</th>
               </tr>
             </thead>
             <tbody
