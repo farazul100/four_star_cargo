@@ -343,6 +343,46 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
   }
 
   // --------------------------------------------------------------------------
+  // TAB: ALL BOOKED CARTONS HUB (অপারেশনস কাস্টমার ম্যাপিং & অল বুকিং লিস্ট)
+  // --------------------------------------------------------------------------
+  if (activeTab === 'cartons' || activeTab === 'inventory') {
+    return (
+      <BookedCartonsHub
+        cartons={cartons}
+        warehouses={warehouses}
+        currentUser={currentUser}
+        language={language}
+      />
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // TAB: FLIGHT PROPOSALS MANAGER
+  // --------------------------------------------------------------------------
+  if (activeTab === 'proposals' || activeTab === 'proposal_create') {
+    return (
+      <FlightProposalsManager
+        language={language}
+        theme={theme}
+      />
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // TAB: RECEIVE FLYING
+  // --------------------------------------------------------------------------
+  if (activeTab === 'history') {
+    return (
+      <ReceiveFlyingSection
+        cartons={cartons}
+        setCartons={setCartons}
+        currentUser={currentUser}
+        language={language}
+      />
+    );
+  }
+
+  // --------------------------------------------------------------------------
   // MAIN OVERVIEW: EXECUTIVE OPERATIONS DASHBOARD (activeTab === 'dashboard')
   // --------------------------------------------------------------------------
   if (activeTab === 'dashboard') {

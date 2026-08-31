@@ -22,6 +22,9 @@ import {
   LayoutGrid,
   Printer,
   GitFork,
+  UserCheck,
+  UserPlus,
+  Plus,
 } from 'lucide-react';
 import { Carton, Warehouse, User as UserType, Language, Customer } from '../types';
 import { useTheme } from '../context/ThemeContext';
@@ -149,6 +152,95 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
   // Live Real-Time Cartons Sync State
   const [liveRealtimeCartons, setLiveRealtimeCartons] = useState<Carton[]>(cartons);
+
+  // Customer Assignment / Mapping Modal States
+  const [mapCustomerModalMark, setMapCustomerModalMark] = useState<string | null>(null);
+  const [mapSelectedCustomerId, setMapSelectedCustomerId] = useState<string>('');
+  const [isNewCustMapping, setIsNewCustMapping] = useState(false);
+  const [newCustMappingName, setNewCustMappingName] = useState('');
+  const [newCustMappingPhone, setNewCustMappingPhone] = useState('');
+  const [allDbCustomersList, setAllDbCustomersList] = useState<Customer[]>(() => {
+    return getHostingerDbData().customers || [];
+  });
+
+  const handleOpenCustomerMapping = (shippingMark: string) => {
+    const dbCusts = getHostingerDbData().customers || [];
+    setAllDbCustomersList(dbCusts);
+    setMapCustomerModalMark(shippingMark);
+    setIsNewCustMapping(false);
+    setNewCustMappingName('');
+    setNewCustMappingPhone('');
+    const matchingCust = dbCusts.find(
+      (c) => c.shipping_mark && c.shipping_mark.toLowerCase() === shippingMark.toLowerCase()
+    );
+    if (matchingCust) {
+      setMapSelectedCustomerId(matchingCust.id);
+    } else if (dbCusts.length > 0) {
+      setMapSelectedCustomerId(dbCusts[0].id);
+    }
+  };
+
+  const handleSaveCustomerMapping = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!mapCustomerModalMark) return;
+
+    const dbData = getHostingerDbData();
+    let currentCusts = dbData.customers || [];
+    let targetCust: Customer | undefined;
+
+    if (isNewCustMapping) {
+      if (!newCustMappingName.trim()) return;
+      targetCust = {
+        id: `cust-${Date.now()}`,
+        customer_code: `CUST-${Math.floor(1000 + Math.random() * 9000)}`,
+        name: newCustMappingName.trim(),
+        phone: newCustMappingPhone.trim() || '01700000000',
+        shipping_mark: mapCustomerModalMark,
+        address: 'Dhaka, Bangladesh',
+        total_billed: 0,
+        total_paid: 0,
+        total_due: 0,
+        created_at: new Date().toISOString(),
+      };
+      currentCusts = [targetCust, ...currentCusts];
+    } else {
+      targetCust = currentCusts.find((c) => c.id === mapSelectedCustomerId);
+    }
+
+    if (!targetCust) return;
+
+    const updatedCusts = currentCusts.map((c) =>
+      c.id === targetCust!.id ? { ...c, shipping_mark: mapCustomerModalMark } : c
+    );
+    saveHostingerDbData('fsc_vps_customers', updatedCusts);
+
+    const currentCartons = dbData.cartons || [];
+    const updatedCartons = currentCartons.map((c) => {
+      if (c.shipping_mark && c.shipping_mark.toLowerCase() === mapCustomerModalMark.toLowerCase()) {
+        return {
+          ...c,
+          customer_id: targetCust!.id,
+          customer_code: targetCust!.customer_code,
+          customer_name: targetCust!.name,
+          updated_at: new Date().toISOString(),
+        };
+      }
+      return c;
+    });
+
+    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+    setLiveRealtimeCartons(updatedCartons);
+
+    logSystemAuditAction(
+      currentUser,
+      'MAP_CUSTOMER_TO_MARK',
+      'carton',
+      mapCustomerModalMark,
+      `অপারেশন টিম শিপিং মার্ক ${mapCustomerModalMark} এর সাথে কাস্টমার "${targetCust.name}" সফলভাবে ট্যাগ করেছেন`
+    );
+
+    setMapCustomerModalMark(null);
+  };
 
   React.useEffect(() => {
     setLiveRealtimeCartons(cartons);
@@ -786,6 +878,19 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                     {/* Card Action Footer */}
                     <div className="pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs gap-2">
                       <div className="flex items-center space-x-2">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleOpenCustomerMapping(mark);
+                          }}
+                          className="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold rounded flex items-center space-x-1 cursor-pointer transition-all shadow-xs"
+                          title={isBn ? 'এই শিপিং মার্কের সাথে কাস্টমার ট্যাগ করুন' : 'Map Customer to Shipping Mark'}
+                        >
+                          <UserCheck className="w-3.5 h-3.5" />
+                          <span>{isBn ? 'কাস্টমার ট্যাগ' : 'Map Customer'}</span>
+                        </button>
+
                         <button
                           type="button"
                           onClick={(e) => {
@@ -1593,6 +1698,120 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
           language={language}
           currentUser={currentUser}
         />
+      )}
+
+      {/* MAP CUSTOMER TO SHIPPING MARK MODAL */}
+      {mapCustomerModalMark && (
+        <div className="fixed inset-0 z-50 bg-[#1E293B]/80 backdrop-blur-xs flex items-center justify-center p-4">
+          <form
+            onSubmit={handleSaveCustomerMapping}
+            className={`p-6 max-w-md w-full space-y-5 rounded-2xl border ${
+              isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
+            } shadow-2xl animate-in zoom-in-95`}
+          >
+            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
+              <h3 className={`text-sm font-extrabold flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <UserCheck className="w-5 h-5 text-emerald-400" />
+                <span>{isBn ? `কাস্টমার ট্যাগিং (${mapCustomerModalMark})` : `Map Customer (${mapCustomerModalMark})`}</span>
+              </h3>
+              <button
+                type="button"
+                onClick={() => setMapCustomerModalMark(null)}
+                className="text-slate-400 hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className={`p-3 rounded-xl border text-xs space-y-1 font-semibold ${
+              isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-blue-50 border-blue-200 text-slate-800'
+            }`}>
+              <div>শিপিং মার্ক: <strong className="text-sky-300 font-mono font-extrabold">{mapCustomerModalMark}</strong></div>
+              <div>অপারেটর: <strong className="text-emerald-400 font-extrabold">{currentUser.name} ({currentUser.role})</strong></div>
+            </div>
+
+            <div className="space-y-3 text-xs">
+              <div className="flex items-center justify-between">
+                <label className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                  {isBn ? 'প্রকৃত কাস্টমার নির্বাচন করুন *' : 'Select Customer *'}
+                </label>
+                <button
+                  type="button"
+                  onClick={() => setIsNewCustMapping(!isNewCustMapping)}
+                  className="text-emerald-400 hover:underline text-xs flex items-center space-x-1 cursor-pointer font-extrabold"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{isNewCustMapping ? (isBn ? 'বিদ্যমান কাস্টমার সিলেক্ট' : 'Select Existing') : (isBn ? '+ নতুন কাস্টমার যোগ' : '+ Quick Add New')}</span>
+                </button>
+              </div>
+
+              {!isNewCustMapping ? (
+                <select
+                  value={mapSelectedCustomerId}
+                  onChange={(e) => setMapSelectedCustomerId(e.target.value)}
+                  className={`w-full border rounded-xl p-2.5 outline-none font-extrabold text-xs cursor-pointer ${
+                    isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'
+                  }`}
+                >
+                  {allDbCustomersList.map((cust) => (
+                    <option key={cust.id} value={cust.id}>
+                      {cust.name} ({cust.customer_code}) — {cust.phone}
+                    </option>
+                  ))}
+                </select>
+              ) : (
+                <div className={`grid grid-cols-1 gap-3 p-3 rounded-xl border ${
+                  isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-slate-100 border-slate-200'
+                }`}>
+                  <div>
+                    <label className={`block mb-1 font-extrabold ${isDark ? 'text-white' : 'text-slate-800'}`}>{isBn ? 'গ্রাহকের নাম *' : 'Customer Name *'}</label>
+                    <input
+                      type="text"
+                      required
+                      value={newCustMappingName}
+                      onChange={(e) => setNewCustMappingName(e.target.value)}
+                      placeholder="e.g. Rahim Traders"
+                      className={`w-full border rounded-xl p-2 outline-none font-semibold text-xs ${
+                        isDark ? 'bg-[#1E293B] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={`block mb-1 font-extrabold ${isDark ? 'text-white' : 'text-slate-800'}`}>{isBn ? 'মোবাইল নম্বর' : 'Phone Number'}</label>
+                    <input
+                      type="text"
+                      value={newCustMappingPhone}
+                      onChange={(e) => setNewCustMappingPhone(e.target.value)}
+                      placeholder="01700000000"
+                      className={`w-full border rounded-xl p-2 font-mono font-extrabold outline-none text-xs ${
+                        isDark ? 'bg-[#1E293B] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'
+                      }`}
+                    />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end space-x-2 pt-2">
+              <button
+                type="button"
+                onClick={() => setMapCustomerModalMark(null)}
+                className={`px-4 py-2 rounded-xl text-xs font-extrabold border cursor-pointer ${
+                  isDark ? 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700' : 'bg-slate-100 text-slate-700 border-slate-300'
+                }`}
+              >
+                {isBn ? 'বাতিল' : 'Cancel'}
+              </button>
+              <button
+                type="submit"
+                className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs transition-all border border-emerald-500 cursor-pointer shadow-md"
+              >
+                {isBn ? 'কাস্টমার ট্যাগিং কনফার্ম করুন' : 'Confirm Customer Mapping'}
+              </button>
+            </div>
+          </form>
+        </div>
       )}
     </div>
   );
