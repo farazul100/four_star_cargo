@@ -91,7 +91,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
   const [batchProdNameEn, setBatchProdNameEn] = useState('');
   const [batchProdNameCn, setBatchProdNameCn] = useState('');
   const [batchCartonCount, setBatchCartonCount] = useState<number | ''>('');
-  const [boxPrefix, setBoxPrefix] = useState('BOX-A');
+  const [boxPrefix, setBoxPrefix] = useState('BOX-');
+  const [boxStartNum, setBoxStartNum] = useState<number | ''>(101);
   const [batchQtyPerCarton, setBatchQtyPerCarton] = useState<number | ''>('');
   const [batchNetWeight, setBatchNetWeight] = useState<number | ''>('');
   const [batchGrossWeight, setBatchGrossWeight] = useState<number | ''>('');
@@ -186,7 +187,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
     );
 
     const activeMark = markStr.trim();
-    const boxCode = prefixStr.trim() || 'BOX-A';
+    const boxCode = prefixStr.trim() || 'BOX-';
+    const bStartNo = Math.max(1, typeof boxStartNum === 'number' ? boxStartNum : 101);
     const ctnPre = ctnPreStr.trim() || 'CTN-';
     const startNo = Math.max(1, startNoVal || 1);
 
@@ -197,6 +199,9 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
     for (let i = 0; i < actualCount; i++) {
       const currentNum = startNo + i;
       const padNum = currentNum < 10 ? `0${currentNum}` : `${currentNum}`;
+
+      const currentBoxNum = bStartNo + i;
+      const padBoxNum = currentBoxNum < 10 ? `0${currentBoxNum}` : `${currentBoxNum}`;
 
       // Calculate auto-incrementing Shipping Mark (e.g. AL-DHAKA-88, AL-DHAKA-89, AL-DHAKA-90...)
       let rowShippingMark = activeMark;
@@ -218,7 +223,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         id: `prev-row-${Date.now()}-${i}`,
         entry_date: todayStr,
         ctn_no: `${ctnPre}${padNum}`,
-        packaging_number: `${boxCode}${100 + currentNum}`,
+        packaging_number: `${boxCode}${padBoxNum}`,
         shipping_mark: rowShippingMark,
         product_name_en: prodEn,
         product_name_cn: prodCn.trim() || prodEn.trim(),
@@ -1088,7 +1093,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
             {isBn ? '📦 কার্টুন ও পণ্যের বিবরণ (Batch Specification Form)' : 'Batch Product & Carton Specification Form'}
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
             {/* Product Name EN */}
             <div>
               <label className={`block text-xs mb-1 font-normal ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
@@ -1099,7 +1104,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 value={batchProdNameEn}
                 onChange={(e) => setBatchProdNameEn(e.target.value)}
                 placeholder="e.g. Men's Cotton T-Shirts"
-                className={`w-full px-3.5 py-2 rounded-xl border text-xs font-normal ${
+                className={`w-full px-3 py-2 rounded-xl border text-xs font-normal ${
                   isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                 }`}
               />
@@ -1115,7 +1120,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 value={batchProdNameCn}
                 onChange={(e) => setBatchProdNameCn(e.target.value)}
                 placeholder="e.g. 男士棉质T恤"
-                className={`w-full px-3.5 py-2 rounded-xl border text-xs font-normal ${
+                className={`w-full px-3 py-2 rounded-xl border text-xs font-normal ${
                   isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                 }`}
               />
@@ -1124,7 +1129,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
             {/* Total Cartons Count */}
             <div>
               <label className={`block text-xs mb-1 font-normal ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                {isBn ? 'মোট কার্টুন সংখ্যা (1 - 100+) *' : 'Total Cartons Count *'}
+                {isBn ? 'মোট কার্টুন সংখ্যা (1-100+) *' : 'Total Cartons Count *'}
               </label>
               <input
                 type="number"
@@ -1133,7 +1138,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 value={batchCartonCount}
                 onChange={(e) => setBatchCartonCount(e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                 placeholder="e.g. 10"
-                className={`w-full px-3.5 py-2 rounded-xl border text-xs font-mono font-medium text-center ${
+                className={`w-full px-3 py-2 rounded-xl border text-xs font-mono font-medium text-center ${
                   isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                 }`}
               />
@@ -1142,16 +1147,16 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
             {/* CUSTOMIZABLE CARTON PREFIX & START NUMBER */}
             <div>
               <label className={`block text-xs mb-1 font-normal ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                {isBn ? 'কার্টুন কোড কাস্টমাইজেশন (প্রিফিক্স + শুরু নম্বর)' : 'Custom Carton Code (Prefix + Start No)'}
+                {isBn ? 'কার্টুন কোড (প্রিফিক্স + শুরু)' : 'Custom Carton Code (Prefix + Start)'}
               </label>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-1.5">
                 <input
                   type="text"
                   value={cartonPrefix}
                   onChange={(e) => setCartonPrefix(e.target.value)}
                   placeholder="CTN-"
                   title={isBn ? 'কার্টুন নামের আগের প্রেফিক্স' : 'Carton prefix before number'}
-                  className={`w-2/3 px-3 py-2 rounded-xl border text-xs font-mono font-medium ${
+                  className={`w-3/5 px-2.5 py-2 rounded-xl border text-xs font-mono font-medium ${
                     isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                   }`}
                 />
@@ -1162,8 +1167,38 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   onChange={(e) => setCartonStartNum(e.target.value === '' ? '' : parseInt(e.target.value) || 1)}
                   placeholder="1"
                   title={isBn ? 'কার্টুন শুরু নম্বর' : 'Start number'}
-                  className={`w-1/3 px-2 py-2 rounded-xl border text-xs font-mono font-medium text-center ${
+                  className={`w-2/5 px-2 py-2 rounded-xl border text-xs font-mono font-medium text-center ${
                     isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                  }`}
+                />
+              </div>
+            </div>
+
+            {/* CUSTOMIZABLE PACKAGING SLIP PREFIX & START NUMBER */}
+            <div>
+              <label className={`block text-xs mb-1 font-medium text-emerald-600 dark:text-emerald-400`}>
+                {isBn ? 'প্যাকেজিং স্লিপ (প্রিফিক্স + শুরু)' : 'Packaging Slip (Prefix + Start)'}
+              </label>
+              <div className="flex items-center space-x-1.5">
+                <input
+                  type="text"
+                  value={boxPrefix}
+                  onChange={(e) => setBoxPrefix(e.target.value)}
+                  placeholder="BOX-"
+                  title={isBn ? 'প্যাকেজিং স্লিপ প্রেফিক্স' : 'Packaging slip prefix'}
+                  className={`w-3/5 px-2.5 py-2 rounded-xl border text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 ${
+                    isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-300'
+                  }`}
+                />
+                <input
+                  type="number"
+                  min={1}
+                  value={boxStartNum}
+                  onChange={(e) => setBoxStartNum(e.target.value === '' ? '' : parseInt(e.target.value) || 101)}
+                  placeholder="101"
+                  title={isBn ? 'প্যাকেজিং স্লিপ শুরু নম্বর' : 'Start number'}
+                  className={`w-2/5 px-2 py-2 rounded-xl border text-xs font-mono font-bold text-center text-emerald-600 dark:text-emerald-400 ${
+                    isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-300'
                   }`}
                 />
               </div>
