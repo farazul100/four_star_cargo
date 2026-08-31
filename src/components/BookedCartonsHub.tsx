@@ -263,6 +263,102 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     );
   };
 
+  // Selected Cartons Checkbox State for Excel-style Bulk Merge/Unmerge
+  const [selectedHubCartonIds, setSelectedHubCartonIds] = useState<string[]>([]);
+
+  const handleToggleSelectCarton = (id: string) => {
+    setSelectedHubCartonIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleToggleSelectAllInModal = (modalCartons: Carton[]) => {
+    const modalIds = modalCartons.map((c) => c.id);
+    const allSelected = modalIds.length > 0 && modalIds.every((id) => selectedHubCartonIds.includes(id));
+
+    if (allSelected) {
+      setSelectedHubCartonIds((prev) => prev.filter((id) => !modalIds.includes(id)));
+    } else {
+      setSelectedHubCartonIds((prev) => Array.from(new Set([...prev, ...modalIds])));
+    }
+  };
+
+  // BULK MERGE SELECTED CARTONS IN HUB
+  const handleBulkMergeInHub = (targetCartonsList: Carton[]) => {
+    const selectedCartons = targetCartonsList.filter((c) => selectedHubCartonIds.includes(c.id));
+    if (selectedCartons.length < 2) {
+      alert(isBn ? 'মার্জ করার জন্য অন্তত ২টি কার্টুন সিলেক্ট করুন!' : 'Select at least 2 cartons to merge!');
+      return;
+    }
+
+    const masterCarton = selectedCartons[0];
+    const groupId = masterCarton.master_group_id || `grp-hub-${masterCarton.ctn_no}-${Date.now()}`;
+    const targetCtnNo = masterCarton.ctn_no;
+    const targetPkgNo = masterCarton.packaging_number;
+
+    const dbData = getHostingerDbData();
+    const updatedCartons = (dbData.cartons || []).map((c) => {
+      if (selectedHubCartonIds.includes(c.id)) {
+        return {
+          ...c,
+          ctn_no: targetCtnNo,
+          packaging_number: targetPkgNo,
+          master_group_id: groupId,
+          is_merged: true,
+          updated_at: new Date().toISOString(),
+        };
+      }
+      return c;
+    });
+
+    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+    setLiveRealtimeCartons(updatedCartons);
+    setSelectedHubCartonIds([]);
+
+    logSystemAuditAction(
+      currentUser,
+      'BULK_MERGE_CARTONS',
+      'carton',
+      targetCtnNo,
+      `${selectedCartons.length}টি কার্টুনকে ${targetCtnNo} তে মার্জ করা হয়েছে`
+    );
+  };
+
+  // BULK UNMERGE SELECTED CARTONS IN HUB
+  const handleBulkUnmergeInHub = (targetCartonsList: Carton[]) => {
+    const selectedCartons = targetCartonsList.filter((c) => selectedHubCartonIds.includes(c.id));
+    if (selectedCartons.length === 0) return;
+
+    const dbData = getHostingerDbData();
+    let unmergeCounter = 1;
+
+    const updatedCartons = (dbData.cartons || []).map((c) => {
+      if (selectedHubCartonIds.includes(c.id)) {
+        const newCtnNo = `CTN-${unmergeCounter < 10 ? '0' : ''}${unmergeCounter++}`;
+        return {
+          ...c,
+          ctn_no: newCtnNo,
+          master_group_id: undefined,
+          is_merged: false,
+          updated_at: new Date().toISOString(),
+        };
+      }
+      return c;
+    });
+
+    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+    setLiveRealtimeCartons(updatedCartons);
+    setSelectedHubCartonIds([]);
+
+    logSystemAuditAction(
+      currentUser,
+      'BULK_UNMERGE_CARTONS',
+      'carton',
+      'UNMERGE',
+      `${selectedCartons.length}টি কার্টুন আনমার্জ করা হয়েছে`
+    );
+  };
+
   // Check if current user is restricted to their assigned warehouse only (Warehouse Incharge)
   const isWarehouseIncharge =
     currentUser?.role === 'warehouse_incharge' ||
@@ -357,9 +453,26 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   // Active Customer in Modal (Sorted naturally by carton number: CTN-01, CTN-02...)
   const activeCustomerCartons = React.useMemo(() => {
     if (!activeCustomerModalMark) return [];
-    const list = customerGroupsMap[activeCustomerModalMark] || [];
+    let list = customerGroupsMap[activeCustomerModalMark] || [];
+
+    if (list.length === 0) {
+      list = accessibleCartons.filter(
+        (c) =>
+          c.tracking_number === activeCustomerModalMark ||
+          c.shipping_mark === activeCustomerModalMark ||
+          c.master_group_id === activeCustomerModalMark
+      );
+    } else {
+      const trkNo = list[0]?.tracking_number;
+      if (trkNo) {
+        list = accessibleCartons.filter(
+          (c) => c.tracking_number === trkNo || c.master_tracking_number === trkNo
+        );
+      }
+    }
+
     return [...list].sort(compareCartonsNaturally);
-  }, [activeCustomerModalMark, customerGroupsMap]);
+  }, [activeCustomerModalMark, customerGroupsMap, accessibleCartons]);
 
   // Filtered Cartons Sorted for List View
   const sortedFilteredCartons = React.useMemo(() => {
@@ -912,14 +1025,15 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       )}
 
       {/* ------------------------------------------------------------- */}
-      {/* EXPANDED CUSTOMER CARTONS MODAL VIEW */}
+      {/* EXPANDED CUSTOMER CARTONS MODAL VIEW (EXCEL SPREADSHEET UI) */}
       {/* ------------------------------------------------------------- */}
       {activeCustomerModalMark && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className={`rounded-xl max-w-4xl w-full p-6 space-y-5 border shadow-2xl ${
-            isDark ? 'bg-[#1E293B] text-white border-slate-700' : 'bg-white text-slate-900 border-slate-200'
+        <div className="fixed inset-0 z-50 bg-black/75 backdrop-blur-xs flex items-center justify-center p-3 md:p-6">
+          <div className={`rounded-xl max-w-5xl w-full p-5 space-y-4 border shadow-2xl ${
+            isDark ? 'bg-[#0F172A] text-white border-slate-700' : 'bg-white text-slate-900 border-slate-300'
           }`}>
-            <div className="flex items-center justify-between border-b pb-4 border-slate-200 dark:border-slate-700">
+            {/* Header */}
+            <div className="flex items-center justify-between border-b pb-3 border-slate-300 dark:border-slate-700">
               <div>
                 <div className="text-xs font-mono text-blue-600 dark:text-blue-400 font-bold uppercase flex items-center space-x-2">
                   <span>Tracking ID: {activeCustomerCartons[0]?.tracking_number || activeCustomerModalMark}</span>
@@ -929,8 +1043,8 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                     </span>
                   )}
                 </div>
-                <h3 className={`text-base font-semibold mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  {activeCustomerCartons[0]?.product_name_en || 'Customer Shipment Profile'}
+                <h3 className={`text-base font-bold mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  {activeCustomerCartons[0]?.product_name_en || 'Customer Shipment Profile'} (Excel Grid View)
                 </h3>
               </div>
 
@@ -955,75 +1069,152 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               </div>
             </div>
 
-            {/* Customer Batch Summary Badges */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className={`p-3 rounded border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
-                <div className="text-[10px] text-slate-500 font-mono">{isBn ? 'মোট কার্টুন সংখ্যা' : 'Total Cartons'}</div>
-                <div className="text-sm font-bold text-blue-600 dark:text-blue-400 font-mono">{activeCustomerCartons.length} {isBn ? 'টি' : 'Cartons'}</div>
+            {/* Excel Formula Summary Bar */}
+            <div className="grid grid-cols-4 gap-3 text-xs font-mono">
+              <div className={`p-2.5 rounded border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-300'}`}>
+                <div className="text-[10px] text-slate-500 uppercase">{isBn ? 'মাস্টার কার্টুন' : 'Master Cartons'}</div>
+                <div className="text-sm font-bold text-blue-600 dark:text-blue-400">
+                  {new Set(activeCustomerCartons.map((c) => c.master_group_id || c.ctn_no)).size} Cartons
+                </div>
               </div>
 
-              <div className={`p-3 rounded border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
-                <div className="text-[10px] text-slate-500 font-mono">{isBn ? 'মোট গ্রস ওজন' : 'Total Gross Weight'}</div>
-                <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+              <div className={`p-2.5 rounded border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-300'}`}>
+                <div className="text-[10px] text-slate-500 uppercase">{isBn ? 'মোট সাব-আইটেম' : 'Sub-Items Rows'}</div>
+                <div className="text-sm font-bold text-indigo-600 dark:text-indigo-400">
+                  {activeCustomerCartons.length} Rows
+                </div>
+              </div>
+
+              <div className={`p-2.5 rounded border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-300'}`}>
+                <div className="text-[10px] text-slate-500 uppercase">{isBn ? 'মোট গ্রস ওজন' : 'Total Gross Weight'}</div>
+                <div className="text-sm font-bold text-emerald-600 dark:text-emerald-400">
                   {activeCustomerCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0).toFixed(1)} KG
                 </div>
               </div>
 
-              <div className={`p-3 rounded border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
-                <div className="text-[10px] text-slate-500 font-mono">{isBn ? 'মোট ভলিউম CBM' : 'Total CBM Volume'}</div>
-                <div className="text-sm font-bold text-purple-600 dark:text-purple-400 font-mono">
+              <div className={`p-2.5 rounded border ${isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-300'}`}>
+                <div className="text-[10px] text-slate-500 uppercase">{isBn ? 'মোট ভলিউম CBM' : 'Total CBM Volume'}</div>
+                <div className="text-sm font-bold text-purple-600 dark:text-purple-400">
                   {activeCustomerCartons.reduce((sum, c) => sum + (c.cbm || 0), 0).toFixed(2)} CBM
                 </div>
               </div>
             </div>
 
-            {/* Customer Cartons Detailed Table */}
-            <div className="max-h-[50vh] overflow-y-auto border border-slate-200 dark:border-slate-700 rounded">
-              <table className="w-full text-left text-xs border-collapse min-w-[700px]">
-                <thead className={`uppercase text-[10px] tracking-wider border-b font-medium ${
-                  isDark ? 'bg-[#1E293B] text-slate-300 border-slate-700' : 'bg-slate-100 text-slate-700 border-slate-200'
+            {/* Excel Quick Bulk Actions Bar */}
+            <div className="flex items-center justify-between p-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-t-lg">
+              <div className="flex items-center space-x-2 text-xs font-mono">
+                <span className="font-bold text-slate-700 dark:text-slate-300">
+                  {isBn ? 'এক্সেল মার্জ টুলবার:' : 'Excel Merge Toolbar:'}
+                </span>
+                {selectedHubCartonIds.length > 0 && (
+                  <span className="px-2 py-0.5 bg-blue-600 text-white rounded text-[10px] font-bold">
+                    {selectedHubCartonIds.length} Selected
+                  </span>
+                )}
+              </div>
+
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={() => handleBulkMergeInHub(activeCustomerCartons)}
+                  disabled={selectedHubCartonIds.length < 2}
+                  className={`px-3 py-1 text-xs font-bold rounded flex items-center space-x-1 transition-all cursor-pointer ${
+                    selectedHubCartonIds.length >= 2
+                      ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs'
+                      : 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
+                  }`}
+                  title={isBn ? 'সিলেক্টকৃত রো মার্জ করে ১টি মাস্টার কার্টুন বানান' : 'Merge selected rows into 1 master carton'}
+                >
+                  <GitFork className="w-3.5 h-3.5" />
+                  <span>{isBn ? '🔗 মার্জ করুন (Merge Selected)' : '🔗 Merge Selected'}</span>
+                </button>
+
+                {selectedHubCartonIds.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => handleBulkUnmergeInHub(activeCustomerCartons)}
+                    className="px-3 py-1 bg-slate-600 hover:bg-slate-700 text-white text-xs font-bold rounded flex items-center space-x-1 shadow-xs cursor-pointer"
+                    title={isBn ? 'সিলেক্টকৃত কার্টুন আলাদা/আনমার্জ করুন' : 'Unmerge selected cartons'}
+                  >
+                    <span>{isBn ? '🔓 আলাদা করুন (Unmerge)' : '🔓 Unmerge'}</span>
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Excel Sheet Table Grid */}
+            <div className="max-h-[50vh] overflow-y-auto border-x border-b border-slate-300 dark:border-slate-700 rounded-b-lg">
+              <table className="w-full text-left text-xs border-collapse min-w-[800px]">
+                <thead className={`uppercase text-[10px] tracking-wider border-b font-mono font-bold ${
+                  isDark ? 'bg-[#1E293B] text-slate-200 border-slate-700' : 'bg-slate-200 text-slate-800 border-slate-300'
                 }`}>
                   <tr>
-                    <th className="p-3">SL</th>
-                    <th className="p-3">CTN NO</th>
-                    <th className="p-3">SHIPPING MARK</th>
-                    <th className="p-3">TRACKING NO</th>
-                    <th className="p-3 font-medium">PRODUCT</th>
-                    <th className="p-3 text-center">QTY / N.WT</th>
-                    <th className="p-3 text-center">G.WEIGHT</th>
-                    <th className="p-3 text-center">CBM</th>
-                    <th className="p-3 text-center">PROOF</th>
-                    <th className="p-3 text-center">ACTION</th>
+                    <th className="p-2.5 text-center border border-slate-300 dark:border-slate-700 w-10">
+                      <input
+                        type="checkbox"
+                        checked={
+                          activeCustomerCartons.length > 0 &&
+                          activeCustomerCartons.every((c) => selectedHubCartonIds.includes(c.id))
+                        }
+                        onChange={() => handleToggleSelectAllInModal(activeCustomerCartons)}
+                        className="rounded border-slate-400 cursor-pointer"
+                      />
+                    </th>
+                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-center w-12">SL</th>
+                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 w-32">CTN NO</th>
+                    <th className="p-2.5 border border-slate-300 dark:border-slate-700">SHIPPING MARK</th>
+                    <th className="p-2.5 border border-slate-300 dark:border-slate-700">TRACKING NO</th>
+                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 font-medium">PRODUCT</th>
+                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-center">QTY / N.WT</th>
+                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-center">G.WEIGHT</th>
+                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-center">CBM</th>
+                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-center">PROOF</th>
+                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-center">ACTION</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                <tbody className="divide-y divide-slate-300 dark:divide-slate-700">
                   {activeCustomerCartons.map((c, idx) => {
                     const spanInfo = getCartonRowSpanInfo(activeCustomerCartons, idx);
                     const slNum = getSlNumberForCartonRow(activeCustomerCartons, idx);
+                    const isSelected = selectedHubCartonIds.includes(c.id);
 
                     return (
                       <tr
                         key={c.id}
                         className={`transition-colors ${
-                          spanInfo.isMerged
+                          isSelected
+                            ? isDark
+                              ? 'bg-blue-950/50'
+                              : 'bg-blue-100/70'
+                            : spanInfo.isMerged
                             ? isDark
                               ? 'bg-indigo-950/20 hover:bg-indigo-950/30'
-                              : 'bg-indigo-50/40 hover:bg-indigo-50/70'
+                              : 'bg-indigo-50/50 hover:bg-indigo-50/80'
                             : isDark
                             ? 'hover:bg-slate-800/50'
                             : 'hover:bg-slate-50/80'
                         }`}
                       >
+                        {/* Checkbox Column */}
+                        <td className="p-2.5 text-center border border-slate-300 dark:border-slate-700">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleToggleSelectCarton(c.id)}
+                            className="rounded border-slate-400 cursor-pointer"
+                          />
+                        </td>
+
                         {/* SL (RowSpanned if Merged) */}
                         {spanInfo.isFirst && (
                           <td
                             rowSpan={spanInfo.rowSpan}
-                            className={`p-3 font-mono text-center align-middle font-bold border border-slate-200 dark:border-slate-700 ${
+                            className={`p-2.5 font-mono text-center align-middle font-bold border border-slate-300 dark:border-slate-700 ${
                               spanInfo.isMerged
                                 ? isDark
-                                  ? 'bg-indigo-950/40 text-indigo-400 border-r-2 border-r-indigo-500'
-                                  : 'bg-indigo-50/80 text-indigo-700 border-r-2 border-r-indigo-500'
-                                : 'text-slate-400'
+                                  ? 'bg-indigo-950/50 text-indigo-300 border-r-2 border-r-indigo-500'
+                                  : 'bg-indigo-100/80 text-indigo-900 border-r-2 border-r-indigo-500'
+                                : 'text-slate-500'
                             }`}
                           >
                             {slNum}
@@ -1034,35 +1225,35 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                         {spanInfo.isFirst && (
                           <td
                             rowSpan={spanInfo.rowSpan}
-                            className={`p-3 font-mono font-bold align-middle border border-slate-200 dark:border-slate-700 ${
+                            className={`p-2.5 font-mono font-bold align-middle border border-slate-300 dark:border-slate-700 ${
                               spanInfo.isMerged
                                 ? isDark
-                                  ? 'bg-indigo-950/40 text-indigo-300'
-                                  : 'bg-indigo-50/80 text-indigo-900'
+                                  ? 'bg-indigo-950/50 text-indigo-300'
+                                  : 'bg-indigo-100/80 text-indigo-950'
                                 : 'text-slate-900 dark:text-white'
                             }`}
                           >
-                            <div className="font-bold">{c.ctn_no}</div>
+                            <div className="font-bold text-sm">{c.ctn_no}</div>
                             {spanInfo.isMerged && (
-                              <span className="mt-1 inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/30">
-                                <span>🔗 MERGED ({spanInfo.rowSpan})</span>
+                              <span className="mt-1 inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-indigo-600 text-white shadow-2xs">
+                                <span>🔗 MERGED ({spanInfo.rowSpan} Sub-Items)</span>
                               </span>
                             )}
                           </td>
                         )}
 
-                        <td className="p-3 font-mono text-blue-600 dark:text-blue-400 font-bold border border-slate-200 dark:border-slate-700">
+                        <td className="p-2.5 font-mono text-blue-600 dark:text-blue-400 font-bold border border-slate-300 dark:border-slate-700">
                           {c.shipping_mark}
                         </td>
-                        <td className="p-3 font-mono text-slate-500 border border-slate-200 dark:border-slate-700">{c.tracking_number}</td>
-                        <td className="p-3 font-sans truncate max-w-[160px] border border-slate-200 dark:border-slate-700">
-                          <div>{c.product_name_en}</div>
+                        <td className="p-2.5 font-mono text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">{c.tracking_number}</td>
+                        <td className="p-2.5 font-sans truncate max-w-[160px] border border-slate-300 dark:border-slate-700">
+                          <div className="font-semibold">{c.product_name_en}</div>
                           {c.product_name_cn && <div className="text-[10px] text-slate-400">{c.product_name_cn}</div>}
                         </td>
-                        <td className="p-3 text-center font-mono border border-slate-200 dark:border-slate-700">{c.quantity} pcs | {c.net_weight} kg</td>
-                        <td className="p-3 text-center font-mono font-bold text-emerald-600 dark:text-emerald-400 border border-slate-200 dark:border-slate-700">{c.gross_weight} kg</td>
-                        <td className="p-3 text-center font-mono text-purple-600 dark:text-purple-400 border border-slate-200 dark:border-slate-700">{c.cbm} CBM</td>
-                        <td className="p-3 text-center border border-slate-200 dark:border-slate-700">
+                        <td className="p-2.5 text-center font-mono border border-slate-300 dark:border-slate-700">{c.quantity} pcs | {c.net_weight} kg</td>
+                        <td className="p-2.5 text-center font-mono font-bold text-emerald-600 dark:text-emerald-400 border border-slate-300 dark:border-slate-700">{c.gross_weight} kg</td>
+                        <td className="p-2.5 text-center font-mono text-purple-600 dark:text-purple-400 border border-slate-300 dark:border-slate-700">{c.cbm} CBM</td>
+                        <td className="p-2.5 text-center border border-slate-300 dark:border-slate-700">
                           {c.photo_url ? (
                             <button
                               type="button"
@@ -1075,7 +1266,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             <span className="text-[10px] text-slate-400">No Photo</span>
                           )}
                         </td>
-                        <td className="p-3 text-center border border-slate-200 dark:border-slate-700">
+                        <td className="p-2.5 text-center border border-slate-300 dark:border-slate-700">
                           <div className="flex items-center justify-center space-x-1">
                             <button
                               type="button"
@@ -1116,10 +1307,10 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 type="button"
                 onClick={() => setActiveCustomerModalMark(null)}
                 className={`px-4 py-2 rounded text-xs font-normal cursor-pointer ${
-                  isDark ? 'bg-slate-800 text-slate-200 hover:bg-slate-700' : 'bg-slate-100 text-slate-800 hover:bg-slate-200'
+                  isDark ? 'bg-slate-800 text-slate-300 hover:bg-slate-700' : 'bg-slate-200 text-slate-700 hover:bg-slate-300'
                 }`}
               >
-                {isBn ? 'বন্ধ করুন' : 'Close'}
+                {isBn ? 'বন্ধ করুন (Close)' : 'Close'}
               </button>
             </div>
           </div>
