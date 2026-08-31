@@ -831,23 +831,26 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       {/* ------------------------------------------------------------- */}
       {viewMode === 'list' && (
         <div
-          className={`rounded-2xl border transition-all shadow-xl overflow-hidden ${
+          className={`rounded-2xl border transition-all shadow-lg overflow-hidden ${
             isDark
-              ? 'bg-[#1E293B] border-slate-700 text-white'
-              : 'bg-white border-slate-200 text-slate-900'
+              ? 'bg-[#1E293B] border-slate-700/80 text-white'
+              : 'bg-white border-slate-200/90 text-slate-900'
           }`}
         >
-          <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-            <h3 className={`text-xs font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              {isBn ? 'সকল কার্টুনের বিবরণ (Central Cartons Inventory Table)' : 'Central Cartons Inventory List'}
-            </h3>
-            <span className="text-xs font-mono text-blue-600 dark:text-blue-400 font-bold">
+          <div className="p-4 border-b border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between bg-slate-50/60 dark:bg-slate-800/40 backdrop-blur-xs">
+            <div className="flex items-center space-x-2.5">
+              <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-xs" />
+              <h3 className={`text-xs font-bold uppercase tracking-wider ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                {isBn ? 'সকল কার্টুনের বিবরণ (Central Cartons Inventory Table)' : 'Central Cartons Inventory List'}
+              </h3>
+            </div>
+            <span className="px-3 py-1 rounded-full text-xs font-mono font-bold bg-blue-50 dark:bg-blue-950/60 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/60 shadow-2xs">
               {filteredCartons.length} Cartons Total
             </span>
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse border border-slate-200 dark:border-slate-700 table-fixed min-w-[1200px]">
+            <table className="w-full text-left text-xs border-collapse table-fixed min-w-[1200px]">
               <colgroup>
                 <col style={{ width: '45px' }} />
                 <col style={{ width: '110px' }} />
@@ -859,28 +862,28 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 <col style={{ width: '90px' }} />
                 <col style={{ width: '80px' }} />
                 <col style={{ width: '125px' }} />
+                <col style={{ width: '100px' }} />
                 <col style={{ width: '90px' }} />
-                <col style={{ width: '80px' }} />
               </colgroup>
-              <thead className={`uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-slate-700 font-medium ${
-                isDark ? 'bg-[#1E293B] text-slate-300' : 'bg-slate-100 text-slate-700'
+              <thead className={`uppercase text-[10px] tracking-wider border-b font-mono font-bold ${
+                isDark ? 'bg-[#151D2A] text-slate-300 border-slate-700/80' : 'bg-slate-100/90 text-slate-700 border-slate-200'
               }`}>
                 <tr>
-                  <th className="p-3 border border-slate-200 dark:border-slate-700 text-center font-medium">SL</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-700 font-medium">CTN NO</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-700 font-medium">MARK</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-700 font-medium">TRACKING NO</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-700 font-medium">PRODUCT (EN & CN)</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-700 text-center font-medium">QTY</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-700 text-center font-medium">N.WT</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-700 text-center font-medium">G.WT</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-700 text-center font-medium">CBM</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-700 font-medium">DESTINATION</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-700 text-center font-medium">STATUS</th>
-                  <th className="p-3 border border-slate-200 dark:border-slate-700 text-center font-medium">ACTION</th>
+                  <th className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50 font-bold">SL</th>
+                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 font-bold">CTN NO</th>
+                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 font-bold">MARK</th>
+                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 font-bold">TRACKING NO</th>
+                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 font-bold">PRODUCT (EN & CN)</th>
+                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 text-center font-bold">QTY</th>
+                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 text-center font-bold">N.WT</th>
+                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 text-center font-bold">G.WT</th>
+                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 text-center font-bold">CBM</th>
+                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 font-bold">DESTINATION</th>
+                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 text-center font-bold">STATUS</th>
+                  <th className="p-3 text-center font-bold">ACTION</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+              <tbody className="divide-y divide-slate-200/60 dark:divide-slate-800/60">
                 {sortedFilteredCartons.map((c, idx) => {
                   const spanInfo = getCartonRowSpanInfo(sortedFilteredCartons, idx);
                   const slNum = getSlNumberForCartonRow(sortedFilteredCartons, idx);
@@ -888,29 +891,31 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                   return (
                     <tr
                       key={c.id}
-                      className={`transition-colors ${
+                      className={`transition-colors duration-150 ${
                         spanInfo.isMerged
                           ? isDark
-                            ? 'bg-indigo-950/20 hover:bg-indigo-950/30'
-                            : 'bg-indigo-50/40 hover:bg-indigo-50/70'
+                            ? 'bg-indigo-950/25 hover:bg-indigo-950/40'
+                            : 'bg-indigo-50/50 hover:bg-indigo-50/80'
                           : isDark
-                          ? 'hover:bg-slate-800/50'
-                          : 'hover:bg-slate-50/80'
+                          ? 'hover:bg-slate-800/60'
+                          : 'hover:bg-slate-50/90'
                       }`}
                     >
                       {/* SL (RowSpanned if Merged) */}
                       {spanInfo.isFirst && (
                         <td
                           rowSpan={spanInfo.rowSpan}
-                          className={`p-3 text-center font-mono align-middle font-bold border border-slate-200 dark:border-slate-700 ${
+                          className={`p-3 text-center font-mono align-middle font-bold border-r border-slate-200/60 dark:border-slate-700/50 ${
                             spanInfo.isMerged
                               ? isDark
-                                ? 'bg-indigo-950/40 text-indigo-400 border-r-2 border-r-indigo-500'
+                                ? 'bg-indigo-950/40 text-indigo-300 border-r-2 border-r-indigo-500'
                                 : 'bg-indigo-50/80 text-indigo-700 border-r-2 border-r-indigo-500'
                               : 'text-slate-400'
                           }`}
                         >
-                          {slNum}
+                          <span className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-mono font-bold inline-flex items-center justify-center border border-slate-200/60 dark:border-slate-700/50">
+                            {slNum}
+                          </span>
                         </td>
                       )}
 
@@ -918,7 +923,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       {spanInfo.isFirst && (
                         <td
                           rowSpan={spanInfo.rowSpan}
-                          className={`p-3 font-mono font-bold align-middle border border-slate-200 dark:border-slate-700 ${
+                          className={`p-3 font-mono font-bold align-middle border-r border-slate-200/60 dark:border-slate-700/50 ${
                             spanInfo.isMerged
                               ? isDark
                                 ? 'bg-indigo-950/40 text-indigo-300'
@@ -926,75 +931,86 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                               : 'text-slate-900 dark:text-white'
                           }`}
                         >
-                          <div>{c.ctn_no}</div>
+                          <div className="font-mono font-bold text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-md inline-block border border-slate-200/60 dark:border-slate-700/60 shadow-2xs">
+                            {c.ctn_no}
+                          </div>
                           {spanInfo.isMerged && (
-                            <span className="mt-0.5 inline-block px-1.5 py-0.5 rounded text-[9px] font-mono font-semibold bg-indigo-500/15 text-indigo-600 dark:text-indigo-400 border border-indigo-500/30">
-                              🔗 MERGED ({spanInfo.rowSpan})
+                            <span className="mt-1.5 inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-indigo-600 text-white shadow-xs">
+                              <span>🔗 MERGED ({spanInfo.rowSpan})</span>
                             </span>
                           )}
                         </td>
                       )}
 
-                      <td className="p-3 font-mono text-blue-600 dark:text-blue-400 font-bold border border-slate-200 dark:border-slate-700">
+                      <td className="p-3 font-mono border-r border-slate-200/60 dark:border-slate-700/50">
                         <div className="flex items-center space-x-1">
                           {spanInfo.isMerged && !spanInfo.isFirst && (
                             <span className="text-[10px] font-mono text-indigo-500 font-bold">└</span>
                           )}
-                          <span>{c.shipping_mark}</span>
+                          <span className="font-mono font-bold text-xs px-2 py-1 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-md inline-block border border-blue-200/60 dark:border-blue-800/50 shadow-2xs">
+                            {c.shipping_mark}
+                          </span>
                         </div>
                       </td>
 
-                      <td className="p-3 font-mono text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 truncate">
+                      <td className="p-3 font-mono text-slate-600 dark:text-slate-300 border-r border-slate-200/60 dark:border-slate-700/50 truncate text-xs">
                         {c.tracking_number}
                       </td>
 
-                      <td className="p-3 border border-slate-200 dark:border-slate-700">
-                        <div className="font-normal text-slate-900 dark:text-white truncate">{c.product_name_en}</div>
+                      <td className="p-3 border-r border-slate-200/60 dark:border-slate-700/50">
+                        <div className="font-semibold text-slate-900 dark:text-slate-100 text-xs leading-snug truncate">{c.product_name_en}</div>
                         {c.product_name_cn && (
-                          <div className="text-[10px] text-slate-500 truncate">{c.product_name_cn}</div>
+                          <div className="text-[10px] text-slate-400 font-normal truncate mt-0.5">{c.product_name_cn}</div>
                         )}
                       </td>
 
-                      <td className="p-3 text-center font-mono border border-slate-200 dark:border-slate-700">
+                      <td className="p-3 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50 font-medium text-slate-700 dark:text-slate-300 text-xs">
                         {c.quantity} pcs
                       </td>
 
-                      <td className="p-3 text-center font-mono border border-slate-200 dark:border-slate-700 text-slate-500">
+                      <td className="p-3 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50 text-slate-500 text-xs">
                         {c.net_weight} kg
                       </td>
 
-                      <td className="p-3 text-center font-mono font-bold border border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white">
-                        {c.gross_weight} kg
+                      <td className="p-3 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50">
+                        <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200/60 dark:border-emerald-800/40">
+                          {c.gross_weight} kg
+                        </span>
                       </td>
 
-                      <td className="p-3 text-center font-mono border border-slate-200 dark:border-slate-700 text-purple-600 dark:text-purple-400">
-                        {c.cbm}
+                      <td className="p-3 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50">
+                        <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded border border-purple-200/60 dark:border-purple-800/40">
+                          {c.cbm}
+                        </span>
                       </td>
 
-                      <td className="p-3 border border-slate-200 dark:border-slate-700 truncate">
+                      <td className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 text-xs text-slate-700 dark:text-slate-300 truncate">
                         {c.destination_warehouse_name || warehouses.find((w) => w.id === c.destination_warehouse_id)?.name || 'Bangladesh Hub'}
                       </td>
 
-                      <td className="p-3 text-center border border-slate-200 dark:border-slate-700">
-                        <span className={`px-2 py-0.5 rounded-none text-[10px] font-bold uppercase font-mono ${
+                      <td className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono uppercase tracking-wider shadow-2xs ${
                           c.status === 'booked'
-                            ? 'bg-blue-500/10 text-blue-600 dark:text-blue-300 border border-blue-500/20'
+                            ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
                             : c.status === 'in_transit'
-                            ? 'bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/20'
+                            ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
                             : c.status === 'received'
-                            ? 'bg-teal-500/10 text-teal-600 dark:text-teal-300 border border-teal-500/20'
-                            : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300 border border-emerald-500/20'
+                            ? 'bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20'
+                            : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
                         }`}>
+                          <span className={`w-1.5 h-1.5 rounded-full ${
+                            c.status === 'booked' ? 'bg-blue-500 animate-pulse' : c.status === 'in_transit' ? 'bg-amber-500' : c.status === 'received' ? 'bg-teal-500' : 'bg-emerald-500'
+                          }`} />
                           {c.status}
                         </span>
                       </td>
 
-                      <td className="p-3 text-center border border-slate-200 dark:border-slate-700">
+                      <td className="p-3 text-center">
                         <div className="flex items-center justify-center space-x-1">
                           <button
                             type="button"
                             onClick={() => setSelectedCartonsForInvoiceModal([c])}
-                            className="p-1 text-[#00897B] hover:text-[#26A69A] cursor-pointer"
+                            className="p-1.5 rounded-lg text-teal-600 hover:text-teal-700 bg-teal-50 dark:bg-teal-950/40 hover:bg-teal-100 dark:hover:bg-teal-900/60 transition-colors cursor-pointer"
                             title={isBn ? 'কার্টুন ইনভয়েস প্রিন্ট করুন' : 'Print Carton Invoice'}
                           >
                             <Printer className="w-3.5 h-3.5" />
@@ -1003,7 +1019,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             <button
                               type="button"
                               onClick={() => setPreviewPhotoUrl(c.photo_url!)}
-                              className="p-1 text-blue-500 hover:text-blue-700 cursor-pointer"
+                              className="p-1.5 rounded-lg text-blue-600 hover:text-blue-700 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors cursor-pointer"
                               title="View Photo Proof"
                             >
                               <Eye className="w-3.5 h-3.5" />
@@ -1012,7 +1028,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           <button
                             type="button"
                             onClick={() => setEditingCarton(c)}
-                            className="p-1 text-slate-400 hover:text-blue-600 cursor-pointer"
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
                             title="Edit Carton"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
@@ -1020,7 +1036,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           <button
                             type="button"
                             onClick={() => handleAddSubItemToCarton(c)}
-                            className="p-1 text-indigo-500 hover:text-indigo-700 cursor-pointer"
+                            className="p-1.5 rounded-lg text-indigo-600 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors cursor-pointer"
                             title={isBn ? 'এই কার্টুনে নতুন সাব-মার্ক যোগ/মার্জ করুন' : 'Add Sub-Mark / Merge Carton'}
                           >
                             <GitFork className="w-3.5 h-3.5" />
@@ -1028,7 +1044,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           <button
                             type="button"
                             onClick={() => handleDeleteSingleCarton(c.id)}
-                            className="p-1 text-slate-400 hover:text-red-600 cursor-pointer"
+                            className="p-1.5 rounded-lg text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors cursor-pointer"
                             title={isBn ? 'কার্টুন ডিলেট করুন' : 'Delete Carton'}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -1163,13 +1179,13 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             </div>
 
             {/* Excel Sheet Table Grid */}
-            <div className="max-h-[50vh] overflow-y-auto border-x border-b border-slate-300 dark:border-slate-700 rounded-b-lg">
+            <div className="max-h-[50vh] overflow-y-auto border-x border-b border-slate-200/80 dark:border-slate-700/80 rounded-b-xl shadow-inner">
               <table className="w-full text-left text-xs border-collapse min-w-[800px]">
                 <thead className={`uppercase text-[10px] tracking-wider border-b font-mono font-bold ${
-                  isDark ? 'bg-[#1E293B] text-slate-200 border-slate-700' : 'bg-slate-200 text-slate-800 border-slate-300'
+                  isDark ? 'bg-[#151D2A] text-slate-300 border-slate-700/80' : 'bg-slate-100/90 text-slate-700 border-slate-200'
                 }`}>
                   <tr>
-                    <th className="p-2.5 text-center border border-slate-300 dark:border-slate-700 w-10">
+                    <th className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50 w-10">
                       <input
                         type="checkbox"
                         checked={
@@ -1180,20 +1196,20 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                         className="rounded border-slate-400 cursor-pointer"
                       />
                     </th>
-                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-center w-12">SL</th>
-                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 w-32">CTN NO</th>
-                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-emerald-600 dark:text-emerald-400">SHIPMENT CTN NO.</th>
-                    <th className="p-2.5 border border-slate-300 dark:border-slate-700">SHIPPING MARK</th>
-                    <th className="p-2.5 border border-slate-300 dark:border-slate-700">TRACKING NO</th>
-                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 font-medium">PRODUCT</th>
-                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-center">QTY / N.WT</th>
-                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-center">G.WEIGHT</th>
-                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-center">CBM</th>
-                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-center">PROOF</th>
-                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-center">ACTION</th>
+                    <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 text-center w-12 font-bold">SL</th>
+                    <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 w-32 font-bold">CTN NO</th>
+                    <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-bold text-emerald-600 dark:text-emerald-400">SHIPMENT CTN NO.</th>
+                    <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-bold">SHIPPING MARK</th>
+                    <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-bold">TRACKING NO</th>
+                    <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-bold">PRODUCT</th>
+                    <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 text-center font-bold">QTY / N.WT</th>
+                    <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 text-center font-bold">G.WEIGHT</th>
+                    <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 text-center font-bold">CBM</th>
+                    <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 text-center font-bold">PROOF</th>
+                    <th className="p-2.5 text-center font-bold">ACTION</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-300 dark:divide-slate-700">
+                <tbody className="divide-y divide-slate-200/60 dark:divide-slate-800/60">
                   {activeCustomerCartons.map((c, idx) => {
                     const spanInfo = getCartonRowSpanInfo(activeCustomerCartons, idx);
                     const slNum = getSlNumberForCartonRow(activeCustomerCartons, idx);
@@ -1202,22 +1218,22 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                     return (
                       <tr
                         key={c.id}
-                        className={`transition-colors ${
+                        className={`transition-colors duration-150 ${
                           isSelected
                             ? isDark
                               ? 'bg-blue-950/50'
                               : 'bg-blue-100/70'
                             : spanInfo.isMerged
                             ? isDark
-                              ? 'bg-indigo-950/20 hover:bg-indigo-950/30'
+                              ? 'bg-indigo-950/25 hover:bg-indigo-950/40'
                               : 'bg-indigo-50/50 hover:bg-indigo-50/80'
                             : isDark
-                            ? 'hover:bg-slate-800/50'
-                            : 'hover:bg-slate-50/80'
+                            ? 'hover:bg-slate-800/60'
+                            : 'hover:bg-slate-50/90'
                         }`}
                       >
                         {/* Checkbox Column */}
-                        <td className="p-2.5 text-center border border-slate-300 dark:border-slate-700">
+                        <td className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50">
                           <input
                             type="checkbox"
                             checked={isSelected}
@@ -1230,7 +1246,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                         {spanInfo.isFirst && (
                           <td
                             rowSpan={spanInfo.rowSpan}
-                            className={`p-2.5 font-mono text-center align-middle font-bold border border-slate-300 dark:border-slate-700 ${
+                            className={`p-2.5 font-mono text-center align-middle font-bold border-r border-slate-200/60 dark:border-slate-700/50 ${
                               spanInfo.isMerged
                                 ? isDark
                                   ? 'bg-indigo-950/50 text-indigo-300 border-r-2 border-r-indigo-500'
@@ -1238,7 +1254,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                                 : 'text-slate-500'
                             }`}
                           >
-                            {slNum}
+                            <span className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-mono font-bold inline-flex items-center justify-center border border-slate-200/60 dark:border-slate-700/50">
+                              {slNum}
+                            </span>
                           </td>
                         )}
 
@@ -1246,7 +1264,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                         {spanInfo.isFirst && (
                           <td
                             rowSpan={spanInfo.rowSpan}
-                            className={`p-2.5 font-mono font-bold align-middle border border-slate-300 dark:border-slate-700 ${
+                            className={`p-2.5 font-mono font-bold align-middle border-r border-slate-200/60 dark:border-slate-700/50 ${
                               spanInfo.isMerged
                                 ? isDark
                                   ? 'bg-indigo-950/50 text-indigo-300'
@@ -1254,7 +1272,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                                 : 'text-slate-900 dark:text-white'
                             }`}
                           >
-                            <div className="font-bold text-sm">{c.ctn_no}</div>
+                            <div className="font-mono font-bold text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-md inline-block border border-slate-200/60 dark:border-slate-700/60 shadow-2xs">
+                              {c.ctn_no}
+                            </div>
                             {spanInfo.isMerged && (
                               <span className="mt-1 inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-indigo-600 text-white shadow-2xs">
                                 <span>🔗 MERGED ({spanInfo.rowSpan} Sub-Items)</span>
@@ -1267,29 +1287,45 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                         {spanInfo.isFirst && (
                           <td
                             rowSpan={spanInfo.rowSpan}
-                            className="p-2.5 font-mono text-emerald-600 dark:text-emerald-400 font-bold align-middle border border-slate-300 dark:border-slate-700"
+                            className="p-2.5 font-mono text-emerald-600 dark:text-emerald-400 font-bold align-middle border-r border-slate-200/60 dark:border-slate-700/50"
                           >
-                            {c.packaging_number || '-'}
+                            <span className="bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200/50 dark:border-emerald-800/30">
+                              {c.packaging_number || '-'}
+                            </span>
                           </td>
                         )}
 
-                        <td className="p-2.5 font-mono text-blue-600 dark:text-blue-400 font-bold border border-slate-300 dark:border-slate-700">
-                          {c.shipping_mark}
+                        <td className="p-2.5 font-mono border-r border-slate-200/60 dark:border-slate-700/50">
+                          <span className="font-mono font-bold text-xs px-2 py-1 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-md inline-block border border-blue-200/60 dark:border-blue-800/50 shadow-2xs">
+                            {c.shipping_mark}
+                          </span>
                         </td>
-                        <td className="p-2.5 font-mono text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-700">{c.tracking_number}</td>
-                        <td className="p-2.5 font-sans truncate max-w-[160px] border border-slate-300 dark:border-slate-700">
-                          <div className="font-semibold">{c.product_name_en}</div>
-                          {c.product_name_cn && <div className="text-[10px] text-slate-400">{c.product_name_cn}</div>}
+                        <td className="p-2.5 font-mono text-slate-600 dark:text-slate-300 border-r border-slate-200/60 dark:border-slate-700/50 text-xs">
+                          {c.tracking_number}
                         </td>
-                        <td className="p-2.5 text-center font-mono border border-slate-300 dark:border-slate-700">{c.quantity} pcs | {c.net_weight} kg</td>
-                        <td className="p-2.5 text-center font-mono font-bold text-emerald-600 dark:text-emerald-400 border border-slate-300 dark:border-slate-700">{c.gross_weight} kg</td>
-                        <td className="p-2.5 text-center font-mono text-purple-600 dark:text-purple-400 border border-slate-300 dark:border-slate-700">{c.cbm} CBM</td>
-                        <td className="p-2.5 text-center border border-slate-300 dark:border-slate-700">
+                        <td className="p-2.5 font-sans truncate max-w-[160px] border-r border-slate-200/60 dark:border-slate-700/50">
+                          <div className="font-semibold text-slate-900 dark:text-slate-100 text-xs leading-snug truncate">{c.product_name_en}</div>
+                          {c.product_name_cn && <div className="text-[10px] text-slate-400 font-normal truncate mt-0.5">{c.product_name_cn}</div>}
+                        </td>
+                        <td className="p-2.5 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50 text-xs text-slate-700 dark:text-slate-300">
+                          {c.quantity} pcs | {c.net_weight} kg
+                        </td>
+                        <td className="p-2.5 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50">
+                          <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200/60 dark:border-emerald-800/40">
+                            {c.gross_weight} kg
+                          </span>
+                        </td>
+                        <td className="p-2.5 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50">
+                          <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded border border-purple-200/60 dark:border-purple-800/40">
+                            {c.cbm} CBM
+                          </span>
+                        </td>
+                        <td className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50">
                           {c.photo_url ? (
                             <button
                               type="button"
                               onClick={() => setPreviewPhotoUrl(c.photo_url!)}
-                              className="px-2 py-1 rounded text-[10px] font-mono bg-blue-500/10 text-blue-500 hover:underline cursor-pointer"
+                              className="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/40 hover:bg-blue-100 transition-colors cursor-pointer"
                             >
                               View Photo
                             </button>
@@ -1297,12 +1333,12 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             <span className="text-[10px] text-slate-400">No Photo</span>
                           )}
                         </td>
-                        <td className="p-2.5 text-center border border-slate-300 dark:border-slate-700">
-                          <div className="flex items-center justify-center space-x-1">
+                        <td className="p-2.5 text-center">
+                          <div className="flex items-center justify-center space-x-1.5">
                             <button
                               type="button"
                               onClick={() => handleAddSubItemToCarton(c)}
-                              className="p-1 text-indigo-500 hover:text-indigo-700 cursor-pointer"
+                              className="p-1.5 rounded-lg text-indigo-600 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors cursor-pointer"
                               title={isBn ? 'এই কার্টুনে নতুন সাব-মার্ক যোগ/মার্জ করুন' : 'Add Sub-Mark / Merge Carton'}
                             >
                               <GitFork className="w-3.5 h-3.5" />
