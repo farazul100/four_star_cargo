@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Printer, Package, MapPin } from 'lucide-react';
+import QRCode from 'qrcode';
 import { Carton, Language, User } from '../types';
 
 interface CartonInvoicesModalProps {
@@ -16,6 +17,7 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
   currentUser,
 }) => {
   const isBn = language === 'bn';
+  const [qrDataUrls, setQrDataUrls] = useState<Record<string, string>>({});
 
   if (!cartons || cartons.length === 0) return null;
 
@@ -25,13 +27,48 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
   const destWh = cartons[0]?.destination_warehouse_name || 'Dhaka Central Hub (BD)';
   const siteOrigin = typeof window !== 'undefined' ? window.location.origin : 'https://four.kee2mart.com';
 
+  // Pre-generate Base64 Data URLs for real-time tracking QR codes to guarantee 100% instant display in Print Previews & Paper Prints
+  useEffect(() => {
+    let isMounted = true;
+
+    const generateQrs = async () => {
+      const urls: Record<string, string> = {};
+      for (const ctn of cartons) {
+        const trkNum = ctn.tracking_number || ctn.master_tracking_number || masterTracking;
+        const trackingPortalUrl = `${siteOrigin}/tracking?search=${encodeURIComponent(trkNum)}`;
+        try {
+          const dataUrl = await QRCode.toDataURL(trackingPortalUrl, {
+            margin: 1,
+            width: 160,
+            color: {
+              dark: '#0f172a',
+              light: '#ffffff',
+            },
+          });
+          urls[ctn.id] = dataUrl;
+        } catch (err) {
+          console.error('Failed to generate QR Code:', err);
+        }
+      }
+      if (isMounted) {
+        setQrDataUrls(urls);
+      }
+    };
+
+    generateQrs();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [cartons, masterTracking, siteOrigin]);
+
   // Group cartons into pairs of 2 so every A4 page contains EXACTLY 2 cartons and breaks cleanly
   const cartonPairs: Carton[][] = [];
   for (let i = 0; i < cartons.length; i += 2) {
     cartonPairs.push(cartons.slice(i, i + 2));
   }
 
-  // Dedicated Print Function using an isolated iframe - Eliminates blank pages and main DOM clipping issues 100%
+  // Dedicated Print Function using an isolated iframe - Eliminates blank pages, network delays, and DOM clipping issues 100%
   const printCartonsList = (cartonsToPrint: Carton[], isSingle = false) => {
     const headStyles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
       .map((node) => node.outerHTML)
@@ -155,6 +192,10 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
             .carton-page-break:last-child {
               margin-bottom: 0 !important;
             }
+            img {
+              max-width: 100% !important;
+              display: inline-block !important;
+            }
           </style>
         </head>
         <body>
@@ -172,7 +213,7 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
           document.body.removeChild(iframe);
         }
       }, 1000);
-    }, 250);
+    }, 300);
   };
 
   const handlePrintAll = () => {
@@ -239,7 +280,7 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
 
                 // Real-Time Dynamic QR Code URL linking to Public Cargo Tracking Portal with pre-filled tracking number
                 const trackingPortalUrl = `${siteOrigin}/tracking?search=${encodeURIComponent(trkNum)}`;
-                const qrCodeImgUrl = `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(trackingPortalUrl)}`;
+                const qrCodeImgUrl = qrDataUrls[ctn.id] || `https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=${encodeURIComponent(trackingPortalUrl)}`;
 
                 return (
                   <div
@@ -401,7 +442,7 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
                     <div>
                       <table className="w-full border-collapse border border-slate-300 text-xs" style={{ borderColor: '#CBD5E1' }}>
                         <thead>
-                          <tr className="bg-[#00897B] text-white font-bold text-[9.5px] uppercase" style={{ backgroundColor: '#00897B', color: '#ffffff' }}>
+                          <tr className="bg-[#00897B] text-[#ffffff] font-bold text-[9.5px] uppercase" style={{ backgroundColor: '#00897B', color: '#ffffff' }}>
                             <th className="border border-slate-400 p-1 text-left" style={{ borderColor: '#94A3B8' }}>Product Description</th>
                             <th className="border border-slate-400 p-1 text-left" style={{ borderColor: '#94A3B8' }}>Chinese Name (中文)</th>
                             <th className="border border-slate-400 p-1 text-center" style={{ borderColor: '#94A3B8' }}>Qty (PCS)</th>
