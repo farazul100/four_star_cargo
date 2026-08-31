@@ -111,8 +111,8 @@ export const WarehouseDashboardPage: React.FC = () => {
       subtitle: lang === 'bn' ? 'শুধুমাত্র আপনার ওয়্যারহাউজের স্টক ও কার্টুন ডাটা' : 'Live inventory stock scoped strictly to your assigned warehouse',
     },
     booking_entry: {
-      title: lang === 'bn' ? 'নতুন কার্টুন বুকিং এন্ট্রি (Booking Entry)' : 'New Carton Booking Entry',
-      subtitle: lang === 'bn' ? 'সিঙ্গেল বা মাল্টি কার্টুন এডিটেবল গ্রিডে সরাসরি বুকিং এন্ট্রি করুন' : 'Direct in-system entry supporting both single & bulk multi-carton grid modes',
+      title: '',
+      subtitle: '',
     },
     receive_incoming: {
       title: lang === 'bn' ? 'ইনকামিং ট্রানজিট কার্গো গ্রহণ (Incoming Transit)' : 'Incoming Transit Receiving',
