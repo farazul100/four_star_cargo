@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { X, Printer, Package, MapPin } from 'lucide-react';
 import { Carton, Language, User } from '../types';
 
@@ -16,79 +16,25 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
   currentUser,
 }) => {
   const isBn = language === 'bn';
+  const [printingSingleId, setPrintingSingleId] = useState<string | null>(null);
 
   if (!cartons || cartons.length === 0) return null;
 
   const handlePrintAll = () => {
-    window.print();
+    setPrintingSingleId(null);
+    setTimeout(() => {
+      window.print();
+    }, 50);
   };
 
   const handlePrintSingle = (cartonId: string) => {
-    const printContent = document.getElementById(`carton-inv-${cartonId}`);
-    if (!printContent) return;
-
-    // Grab all active Tailwind and custom CSS stylesheets from the main window head
-    const headStylesHtml = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
-      .map((node) => node.outerHTML)
-      .join('\n');
-
-    const printWindow = window.open('', '_blank', 'width=850,height=950');
-    if (!printWindow) return;
-
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Carton Invoice Label - ${cartonId}</title>
-          ${headStylesHtml}
-          <style>
-            @page {
-              size: A4 portrait;
-              margin: 6mm 8mm;
-            }
-            * {
-              box-sizing: border-box !important;
-              -webkit-print-color-adjust: exact !important;
-              print-color-adjust: exact !important;
-              color-adjust: exact !important;
-            }
-            html, body {
-              margin: 0 !important;
-              padding: 0 !important;
-              background: #ffffff !important;
-              color: #0f172a !important;
-              font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
-            }
-            .invoice-box {
-              border: 2px solid #00897b !important;
-              padding: 16px !important;
-              max-width: 100% !important;
-              margin: 0 auto !important;
-              background-color: #ffffff !important;
-              page-break-after: avoid !important;
-              page-break-inside: avoid !important;
-              max-height: 278mm !important;
-              overflow: hidden !important;
-            }
-            .no-print {
-              display: none !important;
-            }
-          </style>
-        </head>
-        <body>
-          <div class="invoice-box">
-            ${printContent.innerHTML}
-          </div>
-        </body>
-      </html>
-    `);
-
-    printWindow.document.close();
-    printWindow.focus();
+    setPrintingSingleId(cartonId);
     setTimeout(() => {
-      printWindow.print();
-      printWindow.close();
-    }, 450);
+      window.print();
+      setTimeout(() => {
+        setPrintingSingleId(null);
+      }, 500);
+    }, 100);
   };
 
   const masterTracking = cartons[0]?.master_tracking_number || cartons[0]?.tracking_number || 'N/A';
@@ -99,7 +45,7 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[2500] bg-[#1E293B]/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in">
-      {/* Printable CSS Media Rules - Forces Full Color, Borders, Grid & Styling in Print Mode */}
+      {/* Printable CSS Media Rules - Guarantees 100% Color, Border, Grid & Single A4 Page Fit */}
       <style>{`
         @media print {
           @page {
@@ -112,7 +58,7 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
             color-adjust: exact !important;
           }
           html, body {
-            height: 100%;
+            height: 100% !important;
             margin: 0 !important;
             padding: 0 !important;
             background: #ffffff !important;
@@ -145,6 +91,21 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
             box-sizing: border-box !important;
             overflow: hidden !important;
             background-color: #ffffff !important;
+          }
+          ${
+            printingSingleId
+              ? `
+            .carton-page-break {
+              display: none !important;
+            }
+            #carton-inv-${printingSingleId} {
+              display: block !important;
+              visibility: visible !important;
+              page-break-after: avoid !important;
+              break-after: avoid !important;
+            }
+          `
+              : ''
           }
           .no-print {
             display: none !important;
