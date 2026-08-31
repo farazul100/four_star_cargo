@@ -183,16 +183,21 @@ export const getHostingerDbData = () => {
     cartons = window.__FSC_GLOBAL_CARTONS__;
   }
 
-  // Deduplicate cartons by unique ID
+  // Deduplicate cartons strictly by unique ID (never collapse sub-items sharing tracking_number or ctn_no)
   if (Array.isArray(cartons) && cartons.length > 0) {
     const cartonMap = new Map<string, Carton>();
     cartons.forEach((c) => {
       if (c) {
-        const compositeKey = c.tracking_number && c.ctn_no ? `${c.tracking_number.trim()}_${c.ctn_no.trim()}` : (c.id || c.ctn_no);
-        if (compositeKey) {
-          const existing = cartonMap.get(compositeKey);
+        const uniqueKey = c.id
+          ? String(c.id).trim()
+          : c.tracking_number && c.shipping_mark
+          ? `${c.tracking_number.trim()}_${c.shipping_mark.trim()}`
+          : `${c.tracking_number || 'TRK'}_${c.ctn_no || 'CTN'}_${c.product_name_en || ''}`;
+
+        if (uniqueKey) {
+          const existing = cartonMap.get(uniqueKey);
           if (!existing || c.status === 'received' || c.status === 'delivered' || c.current_warehouse_id === 'wh-bd') {
-            cartonMap.set(compositeKey, c);
+            cartonMap.set(uniqueKey, c);
           }
         }
       }

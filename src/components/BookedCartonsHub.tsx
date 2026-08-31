@@ -936,7 +936,12 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       )}
 
                       <td className="p-3 font-mono text-blue-600 dark:text-blue-400 font-bold border border-slate-200 dark:border-slate-700">
-                        {c.shipping_mark}
+                        <div className="flex items-center space-x-1">
+                          {spanInfo.isMerged && !spanInfo.isFirst && (
+                            <span className="text-[10px] font-mono text-indigo-500 font-bold">└</span>
+                          )}
+                          <span>{c.shipping_mark}</span>
+                        </div>
                       </td>
 
                       <td className="p-3 font-mono text-slate-600 dark:text-slate-400 border border-slate-200 dark:border-slate-700 truncate">
