@@ -833,11 +833,13 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         <div
           className={`rounded-2xl border transition-all shadow-lg overflow-hidden ${
             isDark
-              ? 'bg-[#1E293B] border-slate-700/80 text-white'
-              : 'bg-white border-slate-200/90 text-slate-900'
+              ? 'bg-[#1E293B] border-slate-700 text-white'
+              : 'bg-white border-slate-200 text-slate-900'
           }`}
         >
-          <div className="p-4 border-b border-slate-200/80 dark:border-slate-700/80 flex items-center justify-between bg-slate-50/60 dark:bg-slate-800/40 backdrop-blur-xs">
+          <div className={`p-4 border-b flex items-center justify-between transition-colors ${
+            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
+          }`}>
             <div className="flex items-center space-x-2.5">
               <div className="w-2.5 h-2.5 rounded-full bg-blue-500 shadow-xs" />
               <h3 className={`text-xs font-bold uppercase tracking-wider ${isDark ? 'text-white' : 'text-slate-900'}`}>
@@ -850,7 +852,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
           </div>
 
           {/* Quick Bulk Merge Toolbar */}
-          <div className="flex items-center justify-between p-3 bg-slate-100/90 dark:bg-slate-800/80 border-b border-slate-200/80 dark:border-slate-700/80 text-xs font-mono">
+          <div className={`flex items-center justify-between p-3 border-b text-xs font-mono transition-colors ${
+            isDark ? 'bg-[#1E293B]/80 border-slate-700 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'
+          }`}>
             <div className="flex items-center space-x-2">
               <span className="font-bold text-slate-700 dark:text-slate-300">
                 {isBn ? 'মার্জ টুলবার (Merge Toolbar):' : 'Merge Toolbar:'}
@@ -910,7 +914,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 <col style={{ width: '120px' }} /> {/* ACTION */}
               </colgroup>
               <thead className={`uppercase text-[10px] tracking-wider border-b font-mono font-bold ${
-                isDark ? 'bg-[#151D2A] text-slate-300 border-slate-700/80' : 'bg-slate-100/90 text-slate-700 border-slate-200'
+                isDark ? 'bg-[#0F172A] text-slate-300 border-slate-700' : 'bg-slate-100 text-slate-700 border-slate-200'
               }`}>
                 <tr>
                   <th className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50 w-10">
@@ -981,10 +985,10 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                               ? isDark
                                 ? 'bg-indigo-950/40 text-indigo-300 border-r-2 border-r-indigo-500'
                                 : 'bg-indigo-50/80 text-indigo-700 border-r-2 border-r-indigo-500'
-                              : 'text-slate-400'
+                              : 'text-slate-500 dark:text-slate-400'
                           }`}
                         >
-                          <span className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-mono font-bold inline-flex items-center justify-center border border-slate-200/60 dark:border-slate-700/50">
+                          <span className="font-mono text-xs font-semibold text-slate-500 dark:text-slate-400">
                             {slNum}
                           </span>
                         </td>
@@ -1002,11 +1006,11 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                               : 'text-slate-900 dark:text-white'
                           }`}
                         >
-                          <div className="font-mono font-bold text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-md inline-block border border-slate-200/60 dark:border-slate-700/60 shadow-2xs">
+                          <div className="font-mono font-bold text-xs text-slate-900 dark:text-white">
                             {c.ctn_no}
                           </div>
                           {spanInfo.isMerged && (
-                            <span className="mt-1.5 inline-flex items-center space-x-1 px-2 py-0.5 rounded text-[9px] font-mono font-bold bg-indigo-600 text-white shadow-xs">
+                            <span className="mt-1 flex items-center space-x-1 text-[10px] font-mono font-bold text-indigo-600 dark:text-indigo-400">
                               <span>🔗 MERGED ({spanInfo.rowSpan})</span>
                             </span>
                           )}
@@ -1019,7 +1023,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           rowSpan={spanInfo.rowSpan}
                           className="p-3 font-mono font-bold align-middle border-r border-slate-200/60 dark:border-slate-700/50"
                         >
-                          <span className="font-mono font-bold text-xs px-2 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-md inline-block border border-emerald-200/50 dark:border-emerald-800/30 shadow-2xs">
+                          <span className="font-mono font-bold text-xs text-emerald-600 dark:text-emerald-400">
                             {c.packaging_number || '-'}
                           </span>
                         </td>
@@ -1030,7 +1034,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           {spanInfo.isMerged && !spanInfo.isFirst && (
                             <span className="text-[10px] font-mono text-indigo-500 font-bold">└</span>
                           )}
-                          <span className="font-mono font-bold text-xs px-2 py-1 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-md inline-block border border-blue-200/60 dark:border-blue-800/50 shadow-2xs">
+                          <span className="font-mono font-bold text-xs text-blue-600 dark:text-blue-400">
                             {c.shipping_mark}
                           </span>
                         </div>
@@ -1051,18 +1055,18 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                         {c.quantity} pcs
                       </td>
 
-                      <td className="p-3 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50 text-slate-500 text-xs">
+                      <td className="p-3 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50 text-slate-500 dark:text-slate-400 text-xs">
                         {c.net_weight} kg
                       </td>
 
                       <td className="p-3 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50">
-                        <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200/60 dark:border-emerald-800/40">
+                        <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">
                           {c.gross_weight} kg
                         </span>
                       </td>
 
                       <td className="p-3 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50">
-                        <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded border border-purple-200/60 dark:border-purple-800/40">
+                        <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400">
                           {c.cbm}
                         </span>
                       </td>
@@ -1072,14 +1076,14 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       </td>
 
                       <td className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold font-mono uppercase tracking-wider shadow-2xs ${
+                        <span className={`inline-flex items-center gap-1.5 text-[11px] font-bold font-mono uppercase tracking-wider ${
                           c.status === 'booked'
-                            ? 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20'
+                            ? 'text-blue-600 dark:text-blue-400'
                             : c.status === 'in_transit'
-                            ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                            ? 'text-amber-600 dark:text-amber-400'
                             : c.status === 'received'
-                            ? 'bg-teal-500/10 text-teal-600 dark:text-teal-400 border border-teal-500/20'
-                            : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                            ? 'text-teal-600 dark:text-teal-400'
+                            : 'text-emerald-600 dark:text-emerald-400'
                         }`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${
                             c.status === 'booked' ? 'bg-blue-500 animate-pulse' : c.status === 'in_transit' ? 'bg-amber-500' : c.status === 'received' ? 'bg-teal-500' : 'bg-emerald-500'
@@ -1093,7 +1097,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           <button
                             type="button"
                             onClick={() => setSelectedCartonsForInvoiceModal([c])}
-                            className="p-1.5 rounded-lg text-teal-600 hover:text-teal-700 bg-teal-50 dark:bg-teal-950/40 hover:bg-teal-100 dark:hover:bg-teal-900/60 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-lg text-teal-600 hover:text-teal-500 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors cursor-pointer"
                             title={isBn ? 'কার্টুন ইনভয়েস প্রিন্ট করুন' : 'Print Carton Invoice'}
                           >
                             <Printer className="w-3.5 h-3.5" />
@@ -1102,7 +1106,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             <button
                               type="button"
                               onClick={() => setPreviewPhotoUrl(c.photo_url!)}
-                              className="p-1.5 rounded-lg text-blue-600 hover:text-blue-700 bg-blue-50 dark:bg-blue-950/40 hover:bg-blue-100 dark:hover:bg-blue-900/60 transition-colors cursor-pointer"
+                              className="p-1.5 rounded-lg text-blue-600 hover:text-blue-500 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors cursor-pointer"
                               title="View Photo Proof"
                             >
                               <Eye className="w-3.5 h-3.5" />
@@ -1111,7 +1115,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           <button
                             type="button"
                             onClick={() => setEditingCarton(c)}
-                            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-lg text-slate-500 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors cursor-pointer"
                             title="Edit Carton"
                           >
                             <Edit2 className="w-3.5 h-3.5" />
@@ -1119,7 +1123,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           <button
                             type="button"
                             onClick={() => handleAddSubItemToCarton(c)}
-                            className="p-1.5 rounded-lg text-indigo-600 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-lg text-indigo-600 hover:text-indigo-500 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors cursor-pointer"
                             title={isBn ? 'এই কার্টুনে নতুন সাব-মার্ক যোগ/মার্জ করুন' : 'Add Sub-Mark / Merge Carton'}
                           >
                             <GitFork className="w-3.5 h-3.5" />
@@ -1127,7 +1131,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           <button
                             type="button"
                             onClick={() => handleDeleteSingleCarton(c.id)}
-                            className="p-1.5 rounded-lg text-red-500 hover:text-red-700 bg-red-50 dark:bg-red-950/40 hover:bg-red-100 dark:hover:bg-red-900/60 transition-colors cursor-pointer"
+                            className="p-1.5 rounded-lg text-red-500 hover:text-red-600 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors cursor-pointer"
                             title={isBn ? 'কার্টুন ডিলেট করুন' : 'Delete Carton'}
                           >
                             <Trash2 className="w-3.5 h-3.5" />
@@ -1220,13 +1224,15 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             </div>
 
             {/* Excel Quick Bulk Actions Bar */}
-            <div className="flex items-center justify-between p-2.5 bg-slate-100 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-t-lg">
+            <div className={`flex items-center justify-between p-2.5 border text-xs font-mono transition-colors rounded-t-xl ${
+              isDark ? 'bg-[#1E293B] border-slate-700 text-slate-300' : 'bg-slate-50 border-slate-200 text-slate-700'
+            }`}>
               <div className="flex items-center space-x-2 text-xs font-mono">
                 <span className="font-bold text-slate-700 dark:text-slate-300">
                   {isBn ? 'এক্সেল মার্জ টুলবার:' : 'Excel Merge Toolbar:'}
                 </span>
                 {selectedHubCartonIds.length > 0 && (
-                  <span className="px-2 py-0.5 bg-blue-600 text-white rounded text-[10px] font-bold">
+                  <span className="px-2 py-0.5 bg-blue-600 text-white rounded-full text-[10px] font-bold">
                     {selectedHubCartonIds.length} Selected
                   </span>
                 )}
@@ -1237,7 +1243,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                   type="button"
                   onClick={() => handleBulkMergeInHub(activeCustomerCartons)}
                   disabled={selectedHubCartonIds.length < 2}
-                  className={`px-3 py-1 text-xs font-bold rounded flex items-center space-x-1 transition-all cursor-pointer ${
+                  className={`px-3 py-1 text-xs font-bold rounded-lg flex items-center space-x-1 transition-all cursor-pointer ${
                     selectedHubCartonIds.length >= 2
                       ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-xs'
                       : 'bg-slate-200 dark:bg-slate-700 text-slate-400 cursor-not-allowed'
@@ -1252,7 +1258,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                   <button
                     type="button"
                     onClick={() => handleBulkUnmergeInHub(activeCustomerCartons)}
-                    className="px-3 py-1 bg-slate-600 hover:bg-slate-700 text-white text-xs font-bold rounded flex items-center space-x-1 shadow-xs cursor-pointer"
+                    className="px-3 py-1 bg-slate-600 hover:bg-slate-700 text-white text-xs font-bold rounded-lg flex items-center space-x-1 shadow-xs cursor-pointer"
                     title={isBn ? 'সিলেক্টকৃত কার্টুন আলাদা/আনমার্জ করুন' : 'Unmerge selected cartons'}
                   >
                     <span>{isBn ? '🔓 আলাদা করুন (Unmerge)' : '🔓 Unmerge'}</span>
@@ -1265,7 +1271,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             <div className="max-h-[50vh] overflow-y-auto border-x border-b border-slate-200/80 dark:border-slate-700/80 rounded-b-xl shadow-inner">
               <table className="w-full text-left text-xs border-collapse min-w-[800px]">
                 <thead className={`uppercase text-[10px] tracking-wider border-b font-mono font-bold ${
-                  isDark ? 'bg-[#151D2A] text-slate-300 border-slate-700/80' : 'bg-slate-100/90 text-slate-700 border-slate-200'
+                  isDark ? 'bg-[#0F172A] text-slate-300 border-slate-700' : 'bg-slate-100 text-slate-700 border-slate-200'
                 }`}>
                   <tr>
                     <th className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50 w-10">
@@ -1276,7 +1282,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           activeCustomerCartons.every((c) => selectedHubCartonIds.includes(c.id))
                         }
                         onChange={() => handleToggleSelectAllInModal(activeCustomerCartons)}
-                        className="rounded border-slate-400 cursor-pointer"
+                        className="rounded border-slate-400 cursor-pointer accent-blue-600"
                       />
                     </th>
                     <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 text-center w-12 font-bold">SL</th>
@@ -1321,7 +1327,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => handleToggleSelectCarton(c.id)}
-                            className="rounded border-slate-400 cursor-pointer"
+                            className="rounded border-slate-400 cursor-pointer accent-blue-600"
                           />
                         </td>
 
@@ -1332,12 +1338,12 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             className={`p-2.5 font-mono text-center align-middle font-bold border-r border-slate-200/60 dark:border-slate-700/50 ${
                               spanInfo.isMerged
                                 ? isDark
-                                  ? 'bg-indigo-950/50 text-indigo-300 border-r-2 border-r-indigo-500'
-                                  : 'bg-indigo-100/80 text-indigo-900 border-r-2 border-r-indigo-500'
-                                : 'text-slate-500'
+                                  ? 'bg-indigo-950/40 text-indigo-300 border-r-2 border-r-indigo-500'
+                                  : 'bg-indigo-50/80 text-indigo-700 border-r-2 border-r-indigo-500'
+                                : 'text-slate-500 dark:text-slate-400'
                             }`}
                           >
-                            <span className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-mono font-bold inline-flex items-center justify-center border border-slate-200/60 dark:border-slate-700/50">
+                            <span className="font-mono text-xs font-semibold text-slate-500 dark:text-slate-400">
                               {slNum}
                             </span>
                           </td>
@@ -1350,16 +1356,16 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             className={`p-2.5 font-mono font-bold align-middle border-r border-slate-200/60 dark:border-slate-700/50 ${
                               spanInfo.isMerged
                                 ? isDark
-                                  ? 'bg-indigo-950/50 text-indigo-300'
-                                  : 'bg-indigo-100/80 text-indigo-950'
+                                  ? 'bg-indigo-950/40 text-indigo-300'
+                                  : 'bg-indigo-50/80 text-indigo-950'
                                 : 'text-slate-900 dark:text-white'
                             }`}
                           >
-                            <div className="font-mono font-bold text-xs px-2 py-1 bg-slate-100 dark:bg-slate-800 rounded-md inline-block border border-slate-200/60 dark:border-slate-700/60 shadow-2xs">
+                            <div className="font-mono font-bold text-xs text-slate-900 dark:text-white">
                               {c.ctn_no}
                             </div>
                             {spanInfo.isMerged && (
-                              <span className="mt-1 inline-flex items-center space-x-1 px-1.5 py-0.5 rounded text-[9px] font-mono font-bold bg-indigo-600 text-white shadow-2xs">
+                              <span className="mt-1 flex items-center space-x-1 text-[10px] font-mono font-bold text-indigo-600 dark:text-indigo-400">
                                 <span>🔗 MERGED ({spanInfo.rowSpan} Sub-Items)</span>
                               </span>
                             )}
@@ -1372,14 +1378,14 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             rowSpan={spanInfo.rowSpan}
                             className="p-2.5 font-mono text-emerald-600 dark:text-emerald-400 font-bold align-middle border-r border-slate-200/60 dark:border-slate-700/50"
                           >
-                            <span className="bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200/50 dark:border-emerald-800/30">
+                            <span className="font-mono font-bold text-xs text-emerald-600 dark:text-emerald-400">
                               {c.packaging_number || '-'}
                             </span>
                           </td>
                         )}
 
                         <td className="p-2.5 font-mono border-r border-slate-200/60 dark:border-slate-700/50">
-                          <span className="font-mono font-bold text-xs px-2 py-1 bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 rounded-md inline-block border border-blue-200/60 dark:border-blue-800/50 shadow-2xs">
+                          <span className="font-mono font-bold text-xs text-blue-600 dark:text-blue-400">
                             {c.shipping_mark}
                           </span>
                         </td>
@@ -1394,12 +1400,12 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           {c.quantity} pcs | {c.net_weight} kg
                         </td>
                         <td className="p-2.5 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50">
-                          <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded border border-emerald-200/60 dark:border-emerald-800/40">
+                          <span className="font-mono text-xs font-bold text-emerald-600 dark:text-emerald-400">
                             {c.gross_weight} kg
                           </span>
                         </td>
                         <td className="p-2.5 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50">
-                          <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400 bg-purple-50 dark:bg-purple-950/40 px-2 py-0.5 rounded border border-purple-200/60 dark:border-purple-800/40">
+                          <span className="font-mono text-xs font-bold text-purple-600 dark:text-purple-400">
                             {c.cbm} CBM
                           </span>
                         </td>
@@ -1408,7 +1414,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             <button
                               type="button"
                               onClick={() => setPreviewPhotoUrl(c.photo_url!)}
-                              className="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold bg-blue-50 dark:bg-blue-950/40 text-blue-600 dark:text-blue-400 border border-blue-200/60 dark:border-blue-800/40 hover:bg-blue-100 transition-colors cursor-pointer"
+                              className="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold text-blue-600 dark:text-blue-400 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors cursor-pointer"
                             >
                               View Photo
                             </button>
@@ -1421,7 +1427,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             <button
                               type="button"
                               onClick={() => handleAddSubItemToCarton(c)}
-                              className="p-1.5 rounded-lg text-indigo-600 hover:text-indigo-700 bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 transition-colors cursor-pointer"
+                              className="p-1.5 rounded-lg text-indigo-600 hover:text-indigo-500 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors cursor-pointer"
                               title={isBn ? 'এই কার্টুনে নতুন সাব-মার্ক যোগ/মার্জ করুন' : 'Add Sub-Mark / Merge Carton'}
                             >
                               <GitFork className="w-3.5 h-3.5" />
@@ -1429,7 +1435,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             <button
                               type="button"
                               onClick={() => handleDeleteSingleCarton(c.id)}
-                              className="p-1 text-slate-400 hover:text-red-600 cursor-pointer"
+                              className="p-1.5 rounded-lg text-red-500 hover:text-red-600 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors cursor-pointer"
                               title={isBn ? 'কার্টুন ডিলেট করুন' : 'Delete Carton'}
                             >
                               <Trash2 className="w-3.5 h-3.5" />
