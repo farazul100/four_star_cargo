@@ -453,21 +453,36 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   // Active Customer in Modal (Sorted naturally by carton number: CTN-01, CTN-02...)
   const activeCustomerCartons = React.useMemo(() => {
     if (!activeCustomerModalMark) return [];
+    const targetKey = activeCustomerModalMark.toLowerCase().trim();
+
+    // 1. Initial list from customerGroupsMap or direct match
     let list = customerGroupsMap[activeCustomerModalMark] || [];
 
     if (list.length === 0) {
-      list = accessibleCartons.filter(
-        (c) =>
-          c.tracking_number === activeCustomerModalMark ||
-          c.shipping_mark === activeCustomerModalMark ||
-          c.master_group_id === activeCustomerModalMark
-      );
-    } else {
-      const trkNo = list[0]?.tracking_number;
-      if (trkNo) {
-        list = accessibleCartons.filter(
-          (c) => c.tracking_number === trkNo || c.master_tracking_number === trkNo
-        );
+      list = accessibleCartons.filter((c) => {
+        const trk = (c.tracking_number || '').toLowerCase().trim();
+        const mark = (c.shipping_mark || '').toLowerCase().trim();
+        const masterTrk = (c.master_tracking_number || '').toLowerCase().trim();
+        const groupId = (c.master_group_id || '').toLowerCase().trim();
+
+        return trk === targetKey || masterTrk === targetKey || mark === targetKey || groupId === targetKey;
+      });
+    }
+
+    // 2. Expand list to include ALL cartons belonging to the same tracking batch or master group
+    if (list.length > 0) {
+      const firstTrk = (list[0].tracking_number || list[0].master_tracking_number || '').toLowerCase().trim();
+      const firstGroupId = (list[0].master_group_id || '').toLowerCase().trim();
+
+      if (firstTrk || firstGroupId) {
+        const expanded = accessibleCartons.filter((c) => {
+          const trk = (c.tracking_number || c.master_tracking_number || '').toLowerCase().trim();
+          const groupId = (c.master_group_id || '').toLowerCase().trim();
+          return (firstTrk && trk === firstTrk) || (firstGroupId && groupId === firstGroupId);
+        });
+        if (expanded.length > list.length) {
+          list = expanded;
+        }
       }
     }
 
