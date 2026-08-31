@@ -277,20 +277,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
                       setActiveTab(item.id);
                       if (onCloseMobile) onCloseMobile();
                     }}
-                    className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-[13.5px] font-normal transition-all duration-150 cursor-pointer ${
+                    className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-[13.5px] transition-all duration-150 cursor-pointer ${
                       isActive
-                        ? isDark
-                          ? 'bg-[#28282A] text-white font-semibold shadow-xs'
-                          : 'bg-slate-100 text-slate-900 font-semibold shadow-xs'
+                        ? 'bg-[#00897B] text-white font-bold shadow-md border border-[#00796B]'
                         : isDark
-                        ? 'text-[#A0A0A0] hover:text-white hover:bg-[#1E293B]'
+                        ? 'text-[#A0A0A0] hover:text-white hover:bg-slate-800/60'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                   >
                     <Icon
                       className={`w-4 h-4 shrink-0 transition-colors ${
                         isActive
-                          ? 'text-[#1FB6A8]'
+                          ? 'text-white'
                           : isDark
                           ? 'text-[#8E8E93]'
                           : 'text-gray-500'
