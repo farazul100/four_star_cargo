@@ -45,7 +45,7 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-[2500] bg-[#1E293B]/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in">
-      {/* Printable CSS Media Rules - Forces 2 Invoices per A4 Sheet in Print All Mode */}
+      {/* Printable CSS Media Rules - Forces 2 Invoices per A4 Sheet in Print All Mode across all pages */}
       <style>{`
         @media print {
           @page {
@@ -57,12 +57,10 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
             print-color-adjust: exact !important;
             color-adjust: exact !important;
           }
-          html, body {
-            height: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: #ffffff !important;
-            color: #0f172a !important;
+          html, body, #root, div {
+            max-height: none !important;
+            height: auto !important;
+            overflow: visible !important;
           }
           body * {
             visibility: hidden !important;
@@ -75,6 +73,8 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
             left: 0 !important;
             top: 0 !important;
             width: 100% !important;
+            height: auto !important;
+            overflow: visible !important;
             padding: 0 !important;
             margin: 0 !important;
           }
@@ -84,9 +84,12 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
             box-sizing: border-box !important;
             overflow: hidden !important;
             background-color: #ffffff !important;
+            height: 135mm !important;
             max-height: 135mm !important;
             margin-bottom: 4mm !important;
             padding: 10px 14px !important;
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
           }
           .carton-page-break-pair {
             page-break-after: always !important;
@@ -104,7 +107,8 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
               visibility: visible !important;
               page-break-after: avoid !important;
               break-after: avoid !important;
-              max-height: 278mm !important;
+              height: 275mm !important;
+              max-height: 275mm !important;
             }
           `
               : ''
