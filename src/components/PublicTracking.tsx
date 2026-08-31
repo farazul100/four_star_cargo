@@ -330,7 +330,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                             </div>
                             <p className="text-xs text-slate-400 font-mono">
                               Master Tracking: <strong className={isDark ? 'text-white' : 'text-slate-900'}>{carton.master_tracking_number || carton.tracking_number}</strong>
-                              {carton.packaging_number && <span className="ml-3">Slip: {carton.packaging_number}</span>}
+                              {carton.packaging_number && <span className="ml-3">Shipment Ctn NO.: {carton.packaging_number}</span>}
                             </p>
                           </div>
 

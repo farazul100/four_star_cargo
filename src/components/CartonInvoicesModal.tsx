@@ -385,9 +385,9 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
                       </div>
 
                       <div className="bg-slate-100 p-1.5 border border-slate-300" style={{ backgroundColor: '#F1F5F9', borderColor: '#CBD5E1' }}>
-                        <span className="text-[8.5px] font-bold text-slate-500 block uppercase">PACKAGING SLIP / BOX</span>
+                        <span className="text-[8.5px] font-bold text-slate-500 block uppercase">SHIPMENT CTN NO.</span>
                         <span className="text-xs font-black text-slate-900 font-mono">{pkgNoStr}</span>
-                        <span className="text-[8.5px] text-slate-500 block font-semibold">Slip Code</span>
+                        <span className="text-[8.5px] text-slate-500 block font-semibold">Shipment Ctn Code</span>
                       </div>
 
                       <div className="bg-amber-50 p-1.5 border border-amber-300" style={{ backgroundColor: '#FEF3C7', borderColor: '#FCD34D' }}>
@@ -470,11 +470,11 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
                     {ctn.photo_url && (
                       <div className="p-1.5 bg-slate-50 border border-slate-200 space-y-0.5" style={{ backgroundColor: '#F8FAFC', borderColor: '#E2E8F0' }}>
                         <span className="text-[8.5px] font-bold text-slate-600 uppercase block">
-                          ATTACHED PACKAGING SLIP / PRODUCT IMAGE
+                          ATTACHED SHIPMENT CTN / PRODUCT IMAGE
                         </span>
                         <img
                           src={ctn.photo_url}
-                          alt="Packaging Slip"
+                          alt="Shipment Ctn"
                           className="max-h-20 max-w-xs object-contain border border-slate-300 shadow-sm"
                           style={{ borderColor: '#CBD5E1' }}
                         />

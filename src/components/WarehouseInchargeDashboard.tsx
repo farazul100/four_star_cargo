@@ -497,7 +497,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                   <tr>
                     <th className="p-3 w-10 text-center font-normal">Select</th>
                     <th className="p-3 font-normal">CTN NO</th>
-                    <th className="p-3 font-normal text-emerald-500 font-bold">PACKAGING SLIP</th>
+                    <th className="p-3 font-normal text-emerald-500 font-bold">SHIPMENT CTN NO.</th>
                     <th className="p-3 font-normal">TRACKING ID</th>
                     <th className="p-3 font-normal">SHIPPING MARK</th>
                     <th className="p-3 font-normal">PRODUCT NAME</th>

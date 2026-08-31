@@ -1174,10 +1174,10 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
               </div>
             </div>
 
-            {/* CUSTOMIZABLE PACKAGING SLIP PREFIX & START NUMBER */}
+            {/* CUSTOMIZABLE SHIPMENT CTN NO. PREFIX & START NUMBER */}
             <div>
               <label className={`block text-xs mb-1 font-medium text-emerald-600 dark:text-emerald-400`}>
-                {isBn ? 'প্যাকেজিং স্লিপ (প্রিফিক্স + শুরু)' : 'Packaging Slip (Prefix + Start)'}
+                {isBn ? 'শিপমেন্ট কার্টুন নম্বর (প্রিফিক্স + শুরু)' : 'Shipment Ctn NO. (Prefix + Start)'}
               </label>
               <div className="flex items-center space-x-1.5">
                 <input
@@ -1185,7 +1185,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   value={boxPrefix}
                   onChange={(e) => setBoxPrefix(e.target.value)}
                   placeholder="BOX-"
-                  title={isBn ? 'প্যাকেজিং স্লিপ প্রেফিক্স' : 'Packaging slip prefix'}
+                  title={isBn ? 'শিপমেন্ট কার্টুন প্রেফিক্স' : 'Shipment Ctn NO. prefix'}
                   className={`w-3/5 px-2.5 py-2 rounded-xl border text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 ${
                     isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-300'
                   }`}
@@ -1196,7 +1196,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   value={boxStartNum}
                   onChange={(e) => setBoxStartNum(e.target.value === '' ? '' : parseInt(e.target.value) || 101)}
                   placeholder="101"
-                  title={isBn ? 'প্যাকেজিং স্লিপ শুরু নম্বর' : 'Start number'}
+                  title={isBn ? 'শিপমেন্ট কার্টুন শুরু নম্বর' : 'Start number'}
                   className={`w-2/5 px-2 py-2 rounded-xl border text-xs font-mono font-bold text-center text-emerald-600 dark:text-emerald-400 ${
                     isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-50 border-slate-300'
                   }`}
@@ -1507,7 +1507,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   </th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">ENTRY DATE</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">CTN NO. & CODE</th>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium text-emerald-600 dark:text-emerald-400">PACKAGING SLIP</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium text-emerald-600 dark:text-emerald-400">SHIPMENT CTN NO.</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium text-blue-600 dark:text-blue-400">SHIPPING MARK</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">PRODUCT NAME (EN & CN)</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">QTY (PCS)</th>

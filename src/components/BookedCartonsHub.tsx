@@ -1182,7 +1182,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                     </th>
                     <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-center w-12">SL</th>
                     <th className="p-2.5 border border-slate-300 dark:border-slate-700 w-32">CTN NO</th>
-                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-emerald-600 dark:text-emerald-400">PACKAGING SLIP</th>
+                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-emerald-600 dark:text-emerald-400">SHIPMENT CTN NO.</th>
                     <th className="p-2.5 border border-slate-300 dark:border-slate-700">SHIPPING MARK</th>
                     <th className="p-2.5 border border-slate-300 dark:border-slate-700">TRACKING NO</th>
                     <th className="p-2.5 border border-slate-300 dark:border-slate-700 font-medium">PRODUCT</th>
