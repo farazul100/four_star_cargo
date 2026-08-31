@@ -1182,6 +1182,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                     </th>
                     <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-center w-12">SL</th>
                     <th className="p-2.5 border border-slate-300 dark:border-slate-700 w-32">CTN NO</th>
+                    <th className="p-2.5 border border-slate-300 dark:border-slate-700 text-emerald-600 dark:text-emerald-400">PACKAGING SLIP</th>
                     <th className="p-2.5 border border-slate-300 dark:border-slate-700">SHIPPING MARK</th>
                     <th className="p-2.5 border border-slate-300 dark:border-slate-700">TRACKING NO</th>
                     <th className="p-2.5 border border-slate-300 dark:border-slate-700 font-medium">PRODUCT</th>
@@ -1259,6 +1260,16 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                                 <span>🔗 MERGED ({spanInfo.rowSpan} Sub-Items)</span>
                               </span>
                             )}
+                          </td>
+                        )}
+
+                        {/* Packaging Slip Code (RowSpanned if Merged) */}
+                        {spanInfo.isFirst && (
+                          <td
+                            rowSpan={spanInfo.rowSpan}
+                            className="p-2.5 font-mono text-emerald-600 dark:text-emerald-400 font-bold align-middle border border-slate-300 dark:border-slate-700"
+                          >
+                            {c.packaging_number || '-'}
                           </td>
                         )}
 

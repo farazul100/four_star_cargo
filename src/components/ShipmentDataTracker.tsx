@@ -807,6 +807,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
                 <th className="p-3 text-center border-r border-gray-200 dark:border-[#2C2C2E]/60 w-12">SL/NO</th>
                 <th className="p-3 border-r border-gray-200 dark:border-[#2C2C2E]/60 whitespace-nowrap">ENTRY DATE</th>
                 <th className="p-3 border-r border-gray-200 dark:border-[#2C2C2E]/60 whitespace-nowrap text-[#00897B]">CTN NO</th>
+                <th className="p-3 border-r border-gray-200 dark:border-[#2C2C2E]/60 whitespace-nowrap text-emerald-500 font-bold">PACKAGING SLIP</th>
                 <th className="p-3 border-r border-gray-200 dark:border-[#2C2C2E]/60 whitespace-nowrap text-amber-500">SHIPPING MARK</th>
                 <th className="p-3 border-r border-gray-200 dark:border-[#2C2C2E]/60">PRODUCT NAME (EN / CN)</th>
                 <th className="p-3 border-r border-gray-200 dark:border-[#2C2C2E]/60 text-center whitespace-nowrap">QTY/CTN</th>
@@ -822,7 +823,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
             <tbody className={`divide-y ${isDark ? 'divide-[#2C2C2E]/70 text-gray-200' : 'divide-gray-100 text-gray-800'}`}>
               {filteredCartons.length === 0 ? (
                 <tr>
-                  <td colSpan={13} className="p-12 text-center text-xs opacity-60 font-medium">
+                  <td colSpan={14} className="p-12 text-center text-xs opacity-60 font-medium">
                     {isBn ? 'কোনো শিপমেন্ট ডাটা পাওয়া যায়নি — সব ডাটা প্রসেসিংয়ে আছে' : 'No shipment data found in this pipeline stage'}
                   </td>
                 </tr>
@@ -855,6 +856,11 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
                       {/* 3. CTN NO */}
                       <td className="p-3 border-r border-gray-200 dark:border-[#2C2C2E]/60 whitespace-nowrap font-bold text-sm text-[#00897B]">
                         {c.ctn_no || '2440'}
+                      </td>
+
+                      {/* 3.5. Packaging Slip Code */}
+                      <td className="p-3 border-r border-gray-200 dark:border-[#2C2C2E]/60 whitespace-nowrap font-bold text-xs text-emerald-500">
+                        {c.packaging_number || '-'}
                       </td>
 
                       {/* 4. Shipping Mark */}

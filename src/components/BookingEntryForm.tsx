@@ -1472,6 +1472,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   </th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">ENTRY DATE</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">CTN NO. & CODE</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium text-emerald-600 dark:text-emerald-400">PACKAGING SLIP</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium text-blue-600 dark:text-blue-400">SHIPPING MARK</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">PRODUCT NAME (EN & CN)</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">QTY (PCS)</th>
@@ -1560,11 +1561,22 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                               isDark ? 'text-white' : 'text-slate-900'
                             }`}
                           />
-                          {r.packaging_number && (
-                            <div className="text-[10px] font-mono text-slate-400 px-1 truncate">
-                              {r.packaging_number}
-                            </div>
-                          )}
+                        </td>
+                      )}
+
+                      {/* Packaging Slip Code (RowSpanned if Merged) */}
+                      {spanInfo.isFirst && (
+                        <td
+                          rowSpan={spanInfo.rowSpan}
+                          className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden align-middle"
+                        >
+                          <input
+                            type="text"
+                            value={r.packaging_number || ''}
+                            onChange={(e) => handleRowUpdate(r.id, 'packaging_number', e.target.value)}
+                            placeholder="e.g. BOX-A101"
+                            className="w-full bg-transparent border-0 outline-none text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold px-1 py-1 rounded focus:bg-emerald-500/10 truncate"
+                          />
                         </td>
                       )}
 

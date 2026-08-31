@@ -497,6 +497,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                   <tr>
                     <th className="p-3 w-10 text-center font-normal">Select</th>
                     <th className="p-3 font-normal">CTN NO</th>
+                    <th className="p-3 font-normal text-emerald-500 font-bold">PACKAGING SLIP</th>
                     <th className="p-3 font-normal">TRACKING ID</th>
                     <th className="p-3 font-normal">SHIPPING MARK</th>
                     <th className="p-3 font-normal">PRODUCT NAME</th>
@@ -525,6 +526,9 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                         </td>
                         <td className="p-3 font-mono font-medium text-slate-900 dark:text-white">
                           {c.ctn_no}
+                        </td>
+                        <td className="p-3 font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                          {c.packaging_number || '-'}
                         </td>
                         <td className="p-3 font-mono text-slate-500 dark:text-slate-400">
                           {c.tracking_number}
