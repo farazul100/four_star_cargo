@@ -204,18 +204,18 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
       {/* Header Banner */}
-      <div className={`p-6 rounded-none border ${
-        isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
+      <div className={`p-6 rounded-2xl border ${
+        isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
       } flex flex-col sm:flex-row sm:items-center justify-between gap-4`}>
         <div className="flex items-center space-x-3">
-          <div className="p-3 bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 rounded-none">
-            <Truck className="w-6 h-6 font-light" />
+          <div className="p-3 bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 rounded-xl">
+            <Truck className="w-6 h-6 font-bold" />
           </div>
           <div>
-            <h2 className="text-lg font-normal tracking-wide flex items-center space-x-2">
+            <h2 className={`text-lg font-extrabold tracking-wide flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               <span>{isBn ? 'বাংলাদেশ ওয়্যারহাউজ ডেলিভারি ও ক্যাশ কালেকশন' : 'Customer Delivery & Payment Processing'}</span>
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-light mt-1">
+            <p className={`text-xs mt-1 font-semibold ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>
               {isBn
                 ? 'গন্তব্য ওয়্যারহাউজে রিসিভড হওয়া কার্টুনগুলো With Pay (টাকা বাকি) ও Without Pay (পরিশোধিত) হিসেবে শ্রেণীবদ্ধ করে ডেলিভারি দিন'
                 : 'Hand over arrived cartons to customers and divide by With Pay (Due) vs Without Pay (Paid)'}
@@ -227,7 +227,7 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
           <button
             type="button"
             onClick={() => handleOpenDeliveryModal()}
-            className="flex items-center justify-center space-x-2 py-2 px-5 rounded-none bg-emerald-600 hover:bg-emerald-700 text-white font-light text-xs transition-all border border-emerald-700 cursor-pointer"
+            className="flex items-center justify-center space-x-2 py-2 px-5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs transition-all border border-emerald-500 cursor-pointer shadow-md"
           >
             <CheckCircle2 className="w-4 h-4" />
             <span>
@@ -240,19 +240,21 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
       </div>
 
       {/* Payment Classification Filter Bar */}
-      <div className={`p-4 rounded-none border ${
-        isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200'
+      <div className={`p-4 rounded-xl border ${
+        isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90 shadow-2xs'
       } flex flex-wrap items-center justify-between gap-3`}>
         <div className="flex items-center space-x-2">
-          <span className="text-xs text-slate-500 dark:text-slate-400 font-light">{isBn ? 'পেমেন্ট ধরন ফিল্টার:' : 'Filter Payment:'}</span>
+          <span className={`text-xs font-extrabold ${isDark ? 'text-white' : 'text-slate-700'}`}>{isBn ? 'পেমেন্ট ধরন ফিল্টার:' : 'Filter Payment:'}</span>
           <div className="flex items-center space-x-1.5">
             <button
               type="button"
               onClick={() => setPaymentFilter('all')}
-              className={`px-3 py-1.5 rounded-none text-xs font-light border cursor-pointer transition-all ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold border cursor-pointer transition-all ${
                 paymentFilter === 'all'
-                  ? 'bg-[#1E293B] dark:bg-white text-white dark:text-slate-900 border-slate-900 dark:border-white'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200'
+                  ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
+                  : isDark
+                  ? 'bg-slate-800 text-white border-slate-600 hover:bg-slate-700'
+                  : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
               }`}
             >
               📦 {isBn ? `সকল রিসিভড পণ্য (${readyCartons.length})` : `All Ready (${readyCartons.length})`}
@@ -260,10 +262,12 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
             <button
               type="button"
               onClick={() => setPaymentFilter('with_pay')}
-              className={`px-3 py-1.5 rounded-none text-xs font-light border cursor-pointer transition-all ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold border cursor-pointer transition-all ${
                 paymentFilter === 'with_pay'
-                  ? 'bg-amber-600 text-white border-amber-600'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200'
+                  ? 'bg-amber-600 text-white border-amber-500 shadow-sm'
+                  : isDark
+                  ? 'bg-slate-800 text-white border-slate-600 hover:bg-slate-700'
+                  : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
               }`}
             >
               💰 {isBn ? 'With Pay (টাকা বাকি)' : 'With Pay (Due)'}
@@ -271,55 +275,59 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
             <button
               type="button"
               onClick={() => setPaymentFilter('without_pay')}
-              className={`px-3 py-1.5 rounded-none text-xs font-light border cursor-pointer transition-all ${
+              className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold border cursor-pointer transition-all ${
                 paymentFilter === 'without_pay'
-                  ? 'bg-emerald-600 text-white border-emerald-600'
-                  : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-300 dark:border-slate-700 hover:bg-slate-200'
+                  ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm'
+                  : isDark
+                  ? 'bg-slate-800 text-white border-slate-600 hover:bg-slate-700'
+                  : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
               }`}
             >
               ✅ {isBn ? 'Without Pay (পরিশোধিত)' : 'Without Pay (Paid)'}
             </button>
           </div>
         </div>
-        <div className="text-xs text-slate-500 dark:text-slate-400 font-mono font-light">
+        <div className={`text-xs font-mono font-extrabold ${isDark ? 'text-sky-300' : 'text-slate-600'}`}>
           {filteredReadyCartons.length} {isBn ? 'টি কার্টুন প্রদর্শিত' : 'Cartons Displayed'}
         </div>
       </div>
 
       {/* Ready Cartons Table */}
-      <div className={`rounded-none border overflow-hidden ${
-        isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200'
+      <div className={`rounded-2xl border overflow-hidden shadow-xl ${
+        isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
       }`}>
         <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-          <h3 className="text-sm font-normal text-slate-900 dark:text-white flex items-center space-x-2">
-            <Package className="w-4 h-4 text-emerald-500" />
+          <h3 className={`text-sm font-extrabold flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            <Package className="w-4 h-4 text-emerald-400" />
             <span>{isBn ? 'ডেলিভারির জন্য প্রস্তুত কার্টুনসমূহ (Received Stock)' : 'Ready for Customer Delivery'}</span>
           </h3>
-          <span className="text-xs text-emerald-600 dark:text-emerald-400 font-mono font-light">{filteredReadyCartons.length} Ready</span>
+          <span className={`text-xs font-mono font-extrabold ${isDark ? 'text-emerald-300' : 'text-emerald-600'}`}>{filteredReadyCartons.length} Ready</span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs font-light">
-            <thead className="bg-slate-100 dark:bg-slate-800/60 text-slate-600 dark:text-slate-400 uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-slate-700">
+          <table className="w-full text-left text-xs font-normal border-collapse">
+            <thead className={`uppercase text-[10px] tracking-wider border-b font-extrabold ${
+              isDark ? 'bg-[#1E293B] text-white border-slate-700' : 'bg-slate-100 text-slate-900 border-slate-200'
+            }`}>
               <tr>
                 <th className="p-3">
                   <input
                     type="checkbox"
                     checked={filteredReadyCartons.length > 0 && selectedCartonIds.length === filteredReadyCartons.length}
                     onChange={toggleSelectAll}
-                    className="w-4 h-4 accent-emerald-600 rounded-none cursor-pointer"
+                    className="w-4 h-4 accent-[#00897B] rounded-md cursor-pointer"
                   />
                 </th>
-                <th className="p-3 font-normal">CTN No</th>
-                <th className="p-3 font-normal">Shipping Mark</th>
-                <th className="p-3 font-normal">Tracking No</th>
-                <th className="p-3 font-normal">Product Name</th>
-                <th className="p-3 font-normal">Gross Weight</th>
-                <th className="p-3 font-normal">Payment Type</th>
-                <th className="p-3 text-right font-normal">Action</th>
+                <th className={`p-3 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>CTN NO</th>
+                <th className={`p-3 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>SHIPPING MARK</th>
+                <th className={`p-3 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>TRACKING NO</th>
+                <th className={`p-3 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>PRODUCT NAME</th>
+                <th className={`p-3 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>GROSS WEIGHT</th>
+                <th className={`p-3 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>PAYMENT TYPE</th>
+                <th className={`p-3 text-right font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>ACTION</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+            <tbody className={`divide-y ${isDark ? 'divide-slate-800 text-white' : 'divide-slate-200 text-slate-800'}`}>
               {filteredReadyCartons.map((c) => {
                 const isSelected = selectedCartonIds.includes(c.id);
                 const matchedCust = customersList.find(
@@ -338,29 +346,29 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
                         type="checkbox"
                         checked={isSelected}
                         onChange={() => toggleSelectCarton(c.id)}
-                        className="w-4 h-4 accent-emerald-600 rounded-none cursor-pointer"
+                        className="w-4 h-4 accent-[#00897B] rounded-md cursor-pointer"
                       />
                     </td>
-                    <td className="p-3 font-mono font-normal text-slate-900 dark:text-white">{c.ctn_no}</td>
-                    <td className="p-3 text-blue-600 dark:text-blue-400 font-normal">{c.shipping_mark}</td>
-                    <td className="p-3 text-slate-500 dark:text-slate-400 font-mono">{c.tracking_number}</td>
+                    <td className={`p-3 font-mono font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.ctn_no}</td>
+                    <td className="p-3 text-sky-300 font-extrabold">{c.shipping_mark}</td>
+                    <td className={`p-3 font-mono font-semibold ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>{c.tracking_number}</td>
                     <td className="p-3">
-                      <div className="font-normal text-slate-800 dark:text-slate-200">{c.product_name_en}</div>
+                      <div className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.product_name_en}</div>
                       {c.product_name_cn && (
-                        <div className="text-[10px] text-slate-400 font-light">{c.product_name_cn}</div>
+                        <div className={`text-[10px] font-medium ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>{c.product_name_cn}</div>
                       )}
                     </td>
-                    <td className="p-3 text-slate-900 dark:text-white font-normal">{c.gross_weight} kg</td>
+                    <td className={`p-3 font-mono font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.gross_weight} kg</td>
                     <td className="p-3">
                       {hasDue ? (
-                        <span className="px-2 py-0.5 rounded-none bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-light border border-amber-500/20 inline-flex items-center space-x-1">
+                        <span className="px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 text-[10px] font-extrabold border border-amber-500/30 inline-flex items-center space-x-1">
                           <span>💰 With Pay</span>
-                          <span className="text-[9px] opacity-80">(৳{matchedCust?.total_due.toLocaleString()} বাকি)</span>
+                          <span className="text-[9px] opacity-90">(৳{matchedCust?.total_due.toLocaleString()} বাকি)</span>
                         </span>
                       ) : (
-                        <span className="px-2 py-0.5 rounded-none bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-light border border-emerald-500/20 inline-flex items-center space-x-1">
+                        <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold border border-emerald-500/30 inline-flex items-center space-x-1">
                           <span>✅ Without Pay</span>
-                          <span className="text-[9px] opacity-80">(পরিশোধিত)</span>
+                          <span className="text-[9px] opacity-90">(পরিশোধিত)</span>
                         </span>
                       )}
                     </td>
@@ -368,7 +376,7 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
                       <button
                         type="button"
                         onClick={() => handleOpenDeliveryModal(c.id)}
-                        className="px-3 py-1 rounded-none bg-emerald-600 hover:bg-emerald-700 text-white font-light text-xs transition-all border border-emerald-700 cursor-pointer"
+                        className="px-3 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs transition-all border border-emerald-500 cursor-pointer shadow-md"
                       >
                         {isBn ? 'ডেলিভারি ও ক্যাশ' : 'Deliver & Cash'}
                       </button>
@@ -381,7 +389,9 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
         </div>
 
         {readyCartons.length === 0 && (
-          <div className="p-12 text-center text-xs text-slate-400 font-light">
+          <div className={`p-12 text-center text-xs font-extrabold border-t border-slate-200 dark:border-slate-700 ${
+            isDark ? 'text-white' : 'text-slate-800'
+          }`}>
             {isBn ? 'বর্তমানে ডেলিভারি দেওয়ার মতো রিসিভড কার্টুন নেই!' : 'No received cartons awaiting delivery!'}
           </div>
         )}
@@ -389,40 +399,42 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
 
       {/* Delivery & Cash Collection Modal */}
       {showDeliveryModal && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 bg-[#1E293B]/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
           <form
             onSubmit={handleConfirmDelivery}
-            className={`p-6 max-w-lg w-full space-y-5 rounded-none border ${
+            className={`p-6 max-w-lg w-full space-y-5 rounded-2xl border ${
               isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
             } shadow-2xl animate-in zoom-in-95`}
           >
             <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
-              <h3 className="text-base font-normal tracking-wide flex items-center space-x-2">
-                <Truck className="w-5 h-5 text-emerald-500" />
+              <h3 className={`text-base font-extrabold tracking-wide flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <Truck className="w-5 h-5 text-emerald-400" />
                 <span>{isBn ? 'ডেলিভারি ও ক্যাশ কালেকশন ফরম' : 'Delivery & Cash Collection Form'}</span>
               </h3>
               <button
                 type="button"
                 onClick={() => setShowDeliveryModal(false)}
-                className="text-slate-400 hover:text-slate-600 dark:hover:text-white"
+                className="text-slate-400 hover:text-white cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="p-3 rounded-none bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-600 dark:text-slate-300 space-y-1 font-light">
-              <div>মোট সিলেক্টেড কার্টুন: <strong className="text-slate-900 dark:text-white font-normal">{selectedCartonIds.length} Pcs</strong></div>
-              <div>ওয়্যারহাউজ: <strong className="text-emerald-600 dark:text-emerald-400 font-normal">M/S Four Star Cargo (Dhaka Hub)</strong></div>
+            <div className={`p-3 rounded-xl border text-xs space-y-1 font-semibold ${
+              isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-slate-100 border-slate-200 text-slate-800'
+            }`}>
+              <div>মোট সিলেক্টেড কার্টুন: <strong className="text-emerald-400 font-extrabold">{selectedCartonIds.length} Pcs</strong></div>
+              <div>ওয়্যারহাউজ: <strong className="text-emerald-300 font-extrabold">M/S Four Star Cargo (Dhaka Hub)</strong></div>
             </div>
 
             {/* Customer Selection / Inline Quick-Add */}
-            <div className="space-y-3 text-xs font-light">
+            <div className="space-y-3 text-xs font-normal">
               <div className="flex items-center justify-between">
-                <label className="text-slate-600 dark:text-slate-300 font-normal">{isBn ? 'কাস্টমার নির্বাচন করুন *' : 'Select Customer *'}</label>
+                <label className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-800'}`}>{isBn ? 'কাস্টমার নির্বাচন করুন *' : 'Select Customer *'}</label>
                 <button
                   type="button"
                   onClick={() => setIsNewCustomer(!isNewCustomer)}
-                  className="text-emerald-600 dark:text-emerald-400 hover:underline text-xs flex items-center space-x-1 cursor-pointer"
+                  className="text-emerald-400 hover:underline text-xs flex items-center space-x-1 cursor-pointer font-extrabold"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>{isNewCustomer ? (isBn ? 'বিদ্যমান কাস্টমার সিলেক্ট' : 'Select Existing') : (isBn ? '+ নতুন কাস্টমার যোগ' : '+ Quick Add New')}</span>
@@ -433,7 +445,9 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
                 <select
                   value={selectedCustomerId}
                   onChange={(e) => setSelectedCustomerId(e.target.value)}
-                  className="w-full bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-none p-2.5 text-slate-800 dark:text-white outline-none focus:border-emerald-500 font-light"
+                  className={`w-full border rounded-xl p-2.5 outline-none font-extrabold text-xs cursor-pointer ${
+                    isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'
+                  }`}
                 >
                   {customersList.map((cust) => (
                     <option key={cust.id} value={cust.id}>
@@ -442,27 +456,33 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
                   ))}
                 </select>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-none bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700">
+                <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl border ${
+                  isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-slate-100 border-slate-200'
+                }`}>
                   <div>
-                    <label className="text-slate-600 dark:text-slate-400 block mb-1">{isBn ? 'গ্রাহকের নাম *' : 'Customer Name *'}</label>
+                    <label className={`block mb-1 font-extrabold ${isDark ? 'text-white' : 'text-slate-800'}`}>{isBn ? 'গ্রাহকের নাম *' : 'Customer Name *'}</label>
                     <input
                       type="text"
                       required
                       value={newCustName}
                       onChange={(e) => setNewCustName(e.target.value)}
                       placeholder="e.g. বিসমিল্লাহ ট্রেডার্স"
-                      className="w-full bg-white dark:bg-[#1E293B] border border-slate-300 dark:border-slate-700 rounded-none p-2 text-slate-800 dark:text-white outline-none font-light"
+                      className={`w-full border rounded-xl p-2 outline-none font-semibold text-xs ${
+                        isDark ? 'bg-[#1E293B] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'
+                      }`}
                     />
                   </div>
 
                   <div>
-                    <label className="text-slate-600 dark:text-slate-400 block mb-1">{isBn ? 'মোবাইল নম্বর' : 'Phone Number'}</label>
+                    <label className={`block mb-1 font-extrabold ${isDark ? 'text-white' : 'text-slate-800'}`}>{isBn ? 'মোবাইল নম্বর' : 'Phone Number'}</label>
                     <input
                       type="text"
                       value={newCustPhone}
                       onChange={(e) => setNewCustPhone(e.target.value)}
                       placeholder="01700000000"
-                      className="w-full bg-white dark:bg-[#1E293B] border border-slate-300 dark:border-slate-700 rounded-none p-2 text-slate-800 dark:text-white font-mono outline-none font-light"
+                      className={`w-full border rounded-xl p-2 font-mono font-extrabold outline-none text-xs ${
+                        isDark ? 'bg-[#1E293B] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'
+                      }`}
                     />
                   </div>
                 </div>
@@ -470,24 +490,26 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
             </div>
 
             {/* Optional Cash Collection Toggle */}
-            <div className="p-4 rounded-none bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 space-y-3 text-xs font-light">
+            <div className={`p-4 rounded-xl border space-y-3 text-xs ${
+              isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-slate-100 border-slate-200'
+            }`}>
               <div className="flex items-center justify-between">
                 <div className="flex items-center space-x-2">
-                  <DollarSign className="w-4 h-4 text-emerald-500" />
-                  <span className="font-normal text-slate-900 dark:text-white">{isBn ? 'নগদ অর্থ সংগ্রহ করবেন? (Collect Cash)' : 'Collect Cash Now?'}</span>
+                  <DollarSign className="w-4 h-4 text-emerald-400" />
+                  <span className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'নগদ অর্থ সংগ্রহ করবেন? (Collect Cash)' : 'Collect Cash Now?'}</span>
                 </div>
                 <input
                   type="checkbox"
                   checked={collectCash}
                   onChange={(e) => setCollectCash(e.target.checked)}
-                  className="w-4 h-4 accent-emerald-600 rounded-none cursor-pointer"
+                  className="w-4 h-4 accent-[#00897B] rounded-md cursor-pointer"
                 />
               </div>
 
               {collectCash && (
                 <div className="space-y-3 pt-2 border-t border-slate-200 dark:border-slate-700">
                   <div>
-                    <label className="text-slate-600 dark:text-slate-400 block mb-1 font-normal">
+                    <label className={`block mb-1 font-extrabold ${isDark ? 'text-white' : 'text-slate-800'}`}>
                       {isBn ? 'সংগৃহীত নগদ টাকার পরিমাণ (BDT ৳)' : 'Collected Cash Amount (BDT ৳)'}
                     </label>
                     <input
@@ -495,18 +517,22 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
                       min="0"
                       value={cashAmount}
                       onChange={(e) => setCashAmount(Number(e.target.value))}
-                      className="w-full bg-white dark:bg-[#1E293B] border border-slate-300 dark:border-slate-700 rounded-none p-2.5 text-emerald-600 dark:text-emerald-400 font-normal font-mono outline-none text-base"
+                      className={`w-full border rounded-xl p-2.5 font-extrabold font-mono outline-none text-base ${
+                        isDark ? 'bg-[#1E293B] border-emerald-500 text-emerald-300' : 'bg-white border-slate-300 text-emerald-600'
+                      }`}
                     />
                   </div>
 
                   <div>
-                    <label className="text-slate-600 dark:text-slate-400 block mb-1">{isBn ? 'নোট / রসিদ নম্বর (Note)' : 'Receipt Note'}</label>
+                    <label className={`block mb-1 font-extrabold ${isDark ? 'text-white' : 'text-slate-800'}`}>{isBn ? 'নোট / রসিদ নম্বর (Note)' : 'Receipt Note'}</label>
                     <input
                       type="text"
                       value={deliveryNote}
                       onChange={(e) => setDeliveryNote(e.target.value)}
                       placeholder="e.g. ক্যাশ মেমো নং #8894"
-                      className="w-full bg-white dark:bg-[#1E293B] border border-slate-300 dark:border-slate-700 rounded-none p-2 text-slate-800 dark:text-white outline-none font-light"
+                      className={`w-full border rounded-xl p-2 outline-none font-semibold text-xs ${
+                        isDark ? 'bg-[#1E293B] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'
+                      }`}
                     />
                   </div>
                 </div>
@@ -517,13 +543,15 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
               <button
                 type="button"
                 onClick={() => setShowDeliveryModal(false)}
-                className="px-4 py-2 rounded-none bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 text-xs font-light hover:bg-slate-200 border border-slate-300 dark:border-slate-700 cursor-pointer"
+                className={`px-4 py-2 rounded-xl text-xs font-extrabold border cursor-pointer ${
+                  isDark ? 'bg-slate-800 text-white border-slate-700 hover:bg-slate-700' : 'bg-slate-100 text-slate-700 border-slate-300'
+                }`}
               >
                 {isBn ? 'বাতিল' : 'Cancel'}
               </button>
               <button
                 type="submit"
-                className="px-5 py-2 rounded-none bg-emerald-600 hover:bg-emerald-700 text-white font-light text-xs transition-all border border-emerald-700 cursor-pointer"
+                className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs transition-all border border-emerald-500 cursor-pointer shadow-md"
               >
                 {isBn ? 'ডেলিভারি ও ক্যাশ কনফার্ম করুন' : 'Confirm Delivery & Cash'}
               </button>
