@@ -149,6 +149,7 @@ export const WarehouseDashboardPage: React.FC = () => {
         currentUser={user}
         setLedgerEntries={setLedgerEntries}
         language={lang}
+        onNavigateTab={handleTabChange}
       />
     </DashboardLayout>
   );

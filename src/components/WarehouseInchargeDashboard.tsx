@@ -46,6 +46,7 @@ interface WarehouseInchargeDashboardProps {
   currentUser: User;
   setLedgerEntries: React.Dispatch<React.SetStateAction<LedgerEntry[]>>;
   language: Language;
+  onNavigateTab?: (tabId: string) => void;
 }
 
 export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProps> = ({
@@ -56,6 +57,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
   currentUser,
   setLedgerEntries,
   language,
+  onNavigateTab,
 }) => {
   const isBn = language === 'bn';
   const { theme } = useTheme();
@@ -366,7 +368,9 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
           currentUser={currentUser}
           language={language}
           onNavigateTab={(tabId) => {
-            // Callback passed to dashboard buttons
+            if (onNavigateTab) {
+              onNavigateTab(tabId);
+            }
           }}
         />
       </div>
