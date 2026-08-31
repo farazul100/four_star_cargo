@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { X, Printer, Package, MapPin } from 'lucide-react';
 import { Carton, Language, User } from '../types';
 
@@ -16,26 +16,8 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
   currentUser,
 }) => {
   const isBn = language === 'bn';
-  const [printingSingleId, setPrintingSingleId] = useState<string | null>(null);
 
   if (!cartons || cartons.length === 0) return null;
-
-  const handlePrintAll = () => {
-    setPrintingSingleId(null);
-    setTimeout(() => {
-      window.print();
-    }, 50);
-  };
-
-  const handlePrintSingle = (cartonId: string) => {
-    setPrintingSingleId(cartonId);
-    setTimeout(() => {
-      window.print();
-      setTimeout(() => {
-        setPrintingSingleId(null);
-      }, 500);
-    }, 100);
-  };
 
   const masterTracking = cartons[0]?.master_tracking_number || cartons[0]?.tracking_number || 'N/A';
   const shippingMark = cartons[0]?.shipping_mark || 'N/A';
@@ -49,111 +31,163 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
     cartonPairs.push(cartons.slice(i, i + 2));
   }
 
-  return (
-    <div className="fixed inset-0 z-[2500] bg-[#1E293B]/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in">
-      {/* Printable CSS Media Rules - Removes Modal Viewport Clipping to render ALL Pages in Chrome Print */}
-      <style>{`
-        @media print {
-          @page {
-            size: A4 portrait;
-            margin: 4mm 6mm;
-          }
-          * {
-            -webkit-print-color-adjust: exact !important;
-            print-color-adjust: exact !important;
-            color-adjust: exact !important;
-          }
-          html, body, #root, #root > div, div {
-            position: static !important;
-            float: none !important;
-            max-height: none !important;
-            height: auto !important;
-            min-height: 0 !important;
-            overflow: visible !important;
-            inset: auto !important;
-          }
-          body * {
-            visibility: hidden !important;
-          }
-          #printable-invoices-area, #printable-invoices-area * {
-            visibility: visible !important;
-          }
-          #printable-invoices-area {
-            position: absolute !important;
-            left: 0 !important;
-            top: 0 !important;
-            width: 100% !important;
-            height: auto !important;
-            display: block !important;
-            overflow: visible !important;
-            padding: 0 !important;
-            margin: 0 !important;
-          }
-          .a4-page-pair {
-            display: block !important;
-            page-break-after: always !important;
-            break-after: page !important;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-            height: 284mm !important;
-            min-height: 284mm !important;
-            max-height: 284mm !important;
-            overflow: hidden !important;
-            box-sizing: border-box !important;
-            margin: 0 0 0 0 !important;
-            padding: 0 !important;
-            clear: both !important;
-          }
-          .carton-page-break {
-            display: flex !important;
-            flex-direction: column !important;
-            justify-content: space-between !important;
-            box-shadow: none !important;
-            border: 2px solid #00897B !important;
-            box-sizing: border-box !important;
-            overflow: hidden !important;
-            background-color: #ffffff !important;
-            height: 138mm !important;
-            min-height: 138mm !important;
-            max-height: 138mm !important;
-            margin-bottom: 6mm !important;
-            padding: 10px 14px !important;
-            page-break-inside: avoid !important;
-            break-inside: avoid !important;
-          }
-          .carton-page-break:last-child {
-            margin-bottom: 0 !important;
-          }
-          ${
-            printingSingleId
-              ? `
-            .a4-page-pair {
-              page-break-after: auto !important;
-              break-after: auto !important;
-              height: auto !important;
-              min-height: 0 !important;
-              max-height: none !important;
+  // Dedicated Print Function using an isolated iframe - Eliminates blank pages and main DOM clipping issues 100%
+  const printCartonsList = (cartonsToPrint: Carton[], isSingle = false) => {
+    const headStyles = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
+      .map((node) => node.outerHTML)
+      .join('\n');
+
+    let bodyHtml = '';
+
+    if (isSingle && cartonsToPrint.length === 1) {
+      const singleCarton = cartonsToPrint[0];
+      const elem = document.getElementById(`carton-inv-${singleCarton.id}`);
+      bodyHtml = `
+        <div class="a4-page-single">
+          ${elem ? elem.outerHTML : ''}
+        </div>
+      `;
+    } else {
+      const pairs: Carton[][] = [];
+      for (let i = 0; i < cartonsToPrint.length; i += 2) {
+        pairs.push(cartonsToPrint.slice(i, i + 2));
+      }
+
+      bodyHtml = pairs
+        .map(
+          (pair) => `
+        <div class="a4-page-pair">
+          ${pair
+            .map((ctn) => {
+              const elem = document.getElementById(`carton-inv-${ctn.id}`);
+              return elem ? elem.outerHTML : '';
+            })
+            .join('')}
+        </div>
+      `
+        )
+        .join('');
+    }
+
+    const iframe = document.createElement('iframe');
+    iframe.style.position = 'fixed';
+    iframe.style.right = '0';
+    iframe.style.bottom = '0';
+    iframe.style.width = '0';
+    iframe.style.height = '0';
+    iframe.style.border = '0';
+    document.body.appendChild(iframe);
+
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) return;
+
+    doc.open();
+    doc.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Four Star Cargo Carton Invoices</title>
+          ${headStyles}
+          <style>
+            @page {
+              size: A4 portrait;
+              margin: 4mm 6mm;
             }
-            .carton-page-break {
+            * {
+              box-sizing: border-box !important;
+              -webkit-print-color-adjust: exact !important;
+              print-color-adjust: exact !important;
+              color-adjust: exact !important;
+            }
+            html, body {
+              margin: 0 !important;
+              padding: 0 !important;
+              background: #ffffff !important;
+              color: #0f172a !important;
+              font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+            }
+            .no-print {
               display: none !important;
             }
-            #carton-inv-${printingSingleId} {
-              display: flex !important;
-              visibility: visible !important;
+            .a4-page-pair {
+              display: block !important;
+              page-break-after: always !important;
+              break-after: page !important;
+              page-break-inside: avoid !important;
+              break-inside: avoid !important;
+              height: 284mm !important;
+              max-height: 284mm !important;
+              overflow: hidden !important;
+              box-sizing: border-box !important;
+              margin: 0 0 0 0 !important;
+              padding: 0 !important;
+            }
+            .a4-page-pair:last-child {
+              page-break-after: auto !important;
+              break-after: auto !important;
+            }
+            .a4-page-single {
+              display: block !important;
               page-break-after: avoid !important;
               break-after: avoid !important;
               height: 278mm !important;
               max-height: 278mm !important;
+              overflow: hidden !important;
             }
-          `
-              : ''
-          }
-          .no-print {
-            display: none !important;
-          }
-        }
-      `}</style>
+            .carton-page-break {
+              display: flex !important;
+              flex-direction: column !important;
+              justify-content: space-between !important;
+              border: 2px solid #00897B !important;
+              box-sizing: border-box !important;
+              overflow: hidden !important;
+              background-color: #ffffff !important;
+              height: 138mm !important;
+              max-height: 138mm !important;
+              margin-bottom: 6mm !important;
+              padding: 10px 14px !important;
+            }
+            .a4-page-single .carton-page-break {
+              height: 278mm !important;
+              max-height: 278mm !important;
+              margin-bottom: 0 !important;
+            }
+            .carton-page-break:last-child {
+              margin-bottom: 0 !important;
+            }
+          </style>
+        </head>
+        <body>
+          ${bodyHtml}
+        </body>
+      </html>
+    `);
+    doc.close();
 
+    setTimeout(() => {
+      iframe.contentWindow?.focus();
+      iframe.contentWindow?.print();
+      setTimeout(() => {
+        if (document.body.contains(iframe)) {
+          document.body.removeChild(iframe);
+        }
+      }, 1000);
+    }, 250);
+  };
+
+  const handlePrintAll = () => {
+    printCartonsList(cartons, false);
+  };
+
+  const handlePrintSingle = (cartonId: string) => {
+    const targetCarton = cartons.find((c) => c.id === cartonId);
+    if (targetCarton) {
+      printCartonsList([targetCarton], true);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-[2500] bg-[#1E293B]/85 backdrop-blur-md flex items-center justify-center p-2 sm:p-4 overflow-y-auto animate-in fade-in">
       <div className="w-full max-w-4xl bg-[#1E293B] border-2 border-[#00897B] rounded-none shadow-2xl overflow-hidden flex flex-col max-h-[95vh]">
         {/* Top Modal Control Bar (Screen Only) */}
         <div className="no-print p-3 sm:p-4 bg-[#1E293B] border-b border-slate-700 flex items-center justify-between shrink-0">
