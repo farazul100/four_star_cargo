@@ -849,21 +849,22 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             </span>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs border-collapse table-fixed min-w-[1200px]">
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-left text-xs border-collapse table-fixed min-w-[1300px]">
               <colgroup>
-                <col style={{ width: '45px' }} />
-                <col style={{ width: '110px' }} />
-                <col style={{ width: '120px' }} />
-                <col style={{ width: '130px' }} />
-                <col style={{ width: '260px' }} />
-                <col style={{ width: '80px' }} />
-                <col style={{ width: '90px' }} />
-                <col style={{ width: '90px' }} />
-                <col style={{ width: '80px' }} />
-                <col style={{ width: '125px' }} />
-                <col style={{ width: '100px' }} />
-                <col style={{ width: '90px' }} />
+                <col style={{ width: '45px' }} />  {/* SL */}
+                <col style={{ width: '100px' }} /> {/* CTN NO */}
+                <col style={{ width: '140px' }} /> {/* SHIPMENT CTN NO. */}
+                <col style={{ width: '95px' }} />  {/* MARK */}
+                <col style={{ width: '120px' }} /> {/* TRACKING NO */}
+                <col style={{ width: '170px' }} /> {/* PRODUCT (EN & CN) */}
+                <col style={{ width: '70px' }} />  {/* QTY */}
+                <col style={{ width: '70px' }} />  {/* N.WT */}
+                <col style={{ width: '75px' }} />  {/* G.WT */}
+                <col style={{ width: '65px' }} />  {/* CBM */}
+                <col style={{ width: '135px' }} /> {/* DESTINATION */}
+                <col style={{ width: '95px' }} />  {/* STATUS */}
+                <col style={{ width: '120px' }} /> {/* ACTION */}
               </colgroup>
               <thead className={`uppercase text-[10px] tracking-wider border-b font-mono font-bold ${
                 isDark ? 'bg-[#151D2A] text-slate-300 border-slate-700/80' : 'bg-slate-100/90 text-slate-700 border-slate-200'
@@ -871,6 +872,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 <tr>
                   <th className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50 font-bold">SL</th>
                   <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 font-bold">CTN NO</th>
+                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 font-bold text-emerald-600 dark:text-emerald-400">SHIPMENT CTN NO.</th>
                   <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 font-bold">MARK</th>
                   <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 font-bold">TRACKING NO</th>
                   <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50 font-bold">PRODUCT (EN & CN)</th>
@@ -939,6 +941,18 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                               <span>🔗 MERGED ({spanInfo.rowSpan})</span>
                             </span>
                           )}
+                        </td>
+                      )}
+
+                      {/* SHIPMENT CTN NO. (RowSpanned if Merged) */}
+                      {spanInfo.isFirst && (
+                        <td
+                          rowSpan={spanInfo.rowSpan}
+                          className="p-3 font-mono font-bold align-middle border-r border-slate-200/60 dark:border-slate-700/50"
+                        >
+                          <span className="font-mono font-bold text-xs px-2 py-1 bg-emerald-50 dark:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 rounded-md inline-block border border-emerald-200/50 dark:border-emerald-800/30 shadow-2xs">
+                            {c.packaging_number || '-'}
+                          </span>
                         </td>
                       )}
 
