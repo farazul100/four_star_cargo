@@ -466,13 +466,13 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       {/* Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-700">
         <div>
-          <h2 className="text-xl font-medium text-slate-900 dark:text-white flex items-center space-x-2.5">
-            <div className="p-2 rounded-none bg-blue-600/10 text-blue-600 dark:text-blue-400">
+          <h2 className={`text-xl font-extrabold flex items-center space-x-2.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+            <div className="p-2 rounded-xl bg-blue-600/20 text-sky-300 border border-blue-500/30">
               <Truck className="w-5 h-5" />
             </div>
             <span>{isBn ? 'রিসিভ ফ্লাইং (ইনকামিং কার্গো বিমান তালিকা)' : 'Receive Flying (Inbound Flight Dispatches)'}</span>
           </h2>
-          <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-normal">
+          <p className={`text-xs mt-1 font-semibold ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>
             {isBn
               ? 'উৎস হাব (চীন, হংকং, দুবাই) থেকে রিলিজ হওয়া সকল ফ্লাইটের তথ্য। এখান থেকে ওজন এডিট ও "বাংলাদেশ এয়ারপোর্টে প্রাপ্ত" মার্ক করলে পণ্য বাংলাদেশ ওয়্যারহাউজে যুক্ত হবে।'
               : 'Inbound flight dispatches from origin hubs (China, Hong Kong, Dubai). Calibrate BD weight & mark "Received at BD Airport" to transfer cargo to BD stock.'}
@@ -481,7 +481,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       </div>
 
       {/* Filter & Search Toolbar */}
-      <div className={`p-4 rounded-none border flex flex-col md:flex-row md:items-center justify-between gap-3 ${
+      <div className={`p-4 rounded-xl border flex flex-col md:flex-row md:items-center justify-between gap-3 ${
         isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90 shadow-2xs'
       }`}>
         {/* Search */}
@@ -492,25 +492,25 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={isBn ? 'ফ্লাইং নাম, ফ্লাইট নং, AWB বা উৎস হাব দিয়ে খুঁজুন...' : 'Search by Flying Name, Flight No, AWB or Origin...'}
-            className={`w-full pl-10 pr-4 py-2 rounded-none text-xs font-normal border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
-              isDark ? 'bg-[#1E293B] border-slate-700 text-white placeholder-slate-500' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400'
+            className={`w-full pl-10 pr-4 py-2 rounded-xl text-xs font-semibold border transition-all focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
+              isDark ? 'bg-[#0F172A] border-slate-600 text-white placeholder-slate-300' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-500'
             }`}
           />
         </div>
 
         {/* Status Filter Pills */}
-        <div className={`flex items-center p-1 rounded-none border text-xs font-normal ${
-          isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-slate-100 border-slate-300/80'
+        <div className={`flex items-center p-1 rounded-xl border text-xs font-bold ${
+          isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-slate-100 border-slate-300/80'
         }`}>
           <button
             type="button"
             onClick={() => setStatusFilter('all')}
-            className={`px-3 py-1.5 rounded-none transition-all font-medium text-xs whitespace-nowrap cursor-pointer select-none ${
+            className={`px-3.5 py-1.5 rounded-lg transition-all font-extrabold text-xs whitespace-nowrap cursor-pointer select-none ${
               statusFilter === 'all'
-                ? 'bg-blue-600 text-white shadow-2xs'
+                ? 'bg-blue-600 text-white shadow-sm'
                 : isDark
-                ? 'text-slate-300 hover:text-white'
-                : 'text-slate-700 hover:text-slate-900'
+                ? 'text-white hover:text-white bg-slate-800/80 hover:bg-slate-700'
+                : 'text-slate-800 hover:text-slate-900'
             }`}
           >
             {isBn ? 'সকল ফ্লাইট' : 'All Flights'} ({proposals.length})
@@ -518,12 +518,12 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
           <button
             type="button"
             onClick={() => setStatusFilter('in_transit')}
-            className={`px-3 py-1.5 rounded-none transition-all font-medium text-xs whitespace-nowrap cursor-pointer select-none ${
+            className={`px-3.5 py-1.5 rounded-lg transition-all font-extrabold text-xs whitespace-nowrap cursor-pointer select-none ${
               statusFilter === 'in_transit'
-                ? 'bg-blue-600 text-white shadow-2xs'
+                ? 'bg-blue-600 text-white shadow-sm'
                 : isDark
-                ? 'text-slate-300 hover:text-white'
-                : 'text-slate-700 hover:text-slate-900'
+                ? 'text-white hover:text-white bg-slate-800/80 hover:bg-slate-700'
+                : 'text-slate-800 hover:text-slate-900'
             }`}
           >
             ✈️ {isBn ? 'মিড-এিয়ার ফ্লাইটে চলমান' : 'Cruising Mid-Air'}
@@ -531,12 +531,12 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
           <button
             type="button"
             onClick={() => setStatusFilter('received')}
-            className={`px-3 py-1.5 rounded-none transition-all font-medium text-xs whitespace-nowrap cursor-pointer select-none ${
+            className={`px-3.5 py-1.5 rounded-lg transition-all font-extrabold text-xs whitespace-nowrap cursor-pointer select-none ${
               statusFilter === 'received'
-                ? 'bg-emerald-600 text-white shadow-2xs'
+                ? 'bg-emerald-600 text-white shadow-sm'
                 : isDark
-                ? 'text-slate-300 hover:text-white'
-                : 'text-slate-700 hover:text-slate-900'
+                ? 'text-white hover:text-white bg-slate-800/80 hover:bg-slate-700'
+                : 'text-slate-800 hover:text-slate-900'
             }`}
           >
             🛬 {isBn ? 'বাংলাদেশ এয়ারপোর্টে প্রাপ্ত' : 'Received at BD'}
@@ -546,16 +546,16 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
       {/* Main Flights Table */}
       <div
-        className={`border rounded-none overflow-hidden shadow-2xs ${
+        className={`border rounded-2xl overflow-hidden shadow-xl ${
           isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
         }`}
       >
         <div className="p-4 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between">
-          <h3 className="text-sm font-medium text-slate-900 dark:text-white flex items-center space-x-2">
+          <h3 className={`text-sm font-extrabold flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
             <Plane className="w-4 h-4 text-blue-500" />
             <span>{isBn ? 'ইনকামিং ফ্লাইং ও ডিসপ্যাচ তালিকা' : 'Inbound Flights List'}</span>
           </h3>
-          <span className="text-xs text-blue-600 dark:text-blue-400 font-mono font-normal">
+          <span className={`text-xs font-mono font-extrabold ${isDark ? 'text-sky-300' : 'text-blue-600'}`}>
             {groupedFlightList.length} {isBn ? 'টি ফ্লাইট ব্যাচ' : 'Batches Found'}
           </span>
         </div>
@@ -563,29 +563,29 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs font-normal border-collapse">
             <thead
-              className={`uppercase text-[10px] tracking-wider border-b font-medium ${
-                isDark ? 'bg-[#1E293B]/60 text-slate-400 border-slate-700' : 'bg-slate-50 text-slate-600 border-slate-200'
+              className={`uppercase text-[10px] tracking-wider border-b font-extrabold ${
+                isDark ? 'bg-[#1E293B] text-white border-slate-700' : 'bg-slate-100 text-slate-900 border-slate-200'
               }`}
             >
               <tr>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">ফ্লাইট তারিখ (DATE)</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">ফ্লাইং নাম / ব্যাচ টাইটেল</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">ফ্লাইট নম্বর / AWB</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">উৎস হাব (ORIGIN)</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">কার্টুন সংখ্যা</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">বাংলাদেশে মেপে পাওয়া ওজন</th>
-                <th className="p-3.5 border-r border-slate-200 dark:border-slate-700 font-medium">বর্তমান অবস্থা (STATUS)</th>
-                <th className="p-3.5 text-right font-medium">অ্যাকশন (BD RECEIVING & CALIBRATION)</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>ফ্লাইট তারিখ (DATE)</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>ফ্লাইং নাম / ব্যাচ টাইটেল</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>ফ্লাইট নম্বর / AWB</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>উৎস হাব (ORIGIN)</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>কার্টুন সংখ্যা</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>বাংলাদেশে মেপে পাওয়া ওজন</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>বর্তমান অবস্থা (STATUS)</th>
+                <th className={`p-3.5 text-right font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>অ্যাকশন (BD RECEIVING & CALIBRATION)</th>
               </tr>
             </thead>
             <tbody
               className={`divide-y ${
-                isDark ? 'divide-slate-800 text-slate-200' : 'divide-slate-200 text-slate-800'
+                isDark ? 'divide-slate-800 text-white' : 'divide-slate-200 text-slate-800'
               }`}
             >
               {groupedFlightList.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="p-8 text-center text-slate-400 text-xs font-normal border-b border-slate-200 dark:border-slate-700">
+                  <td colSpan={8} className={`p-8 text-center text-xs font-extrabold border-b border-slate-200 dark:border-slate-700 ${isDark ? 'text-white' : 'text-slate-800'}`}>
                     {isBn ? 'কোনো ফ্লাইং ডাটা পাওয়া যায়নি' : 'No flying flight batches found'}
                   </td>
                 </tr>
@@ -596,33 +596,33 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
                   return (
                     <tr key={gf.groupKey} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="p-3.5 font-mono text-blue-600 dark:text-blue-400 font-normal border-r border-b border-slate-200 dark:border-slate-700">
+                      <td className="p-3.5 font-mono text-sky-300 font-extrabold border-r border-b border-slate-200 dark:border-slate-700">
                         {gf.date || '2026-08-16'}
                       </td>
                       <td className="p-3.5 font-normal text-slate-900 dark:text-white border-r border-b border-slate-200 dark:border-slate-700">
-                        <div className="font-semibold text-slate-900 dark:text-white text-sm">{gf.flying_name}</div>
-                        <div className="text-[10px] text-slate-400 font-mono mt-0.5">Flight Group: {gf.flight_number}</div>
+                        <div className={`font-extrabold text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>{gf.flying_name}</div>
+                        <div className={`text-[10px] font-mono mt-0.5 font-semibold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>Flight Group: {gf.flight_number}</div>
                       </td>
                       <td className="p-3.5 font-mono text-slate-700 dark:text-slate-300 border-r border-b border-slate-200 dark:border-slate-700">
-                        <div className="font-semibold text-blue-600 dark:text-blue-400">{gf.flight_number}</div>
-                        <div className="text-[10px] text-slate-400 mt-0.5">AWB: {gf.awb_number}</div>
+                        <div className="font-extrabold text-sky-300">{gf.flight_number}</div>
+                        <div className={`text-[10px] mt-0.5 font-semibold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>AWB: {gf.awb_number}</div>
                       </td>
                       <td className="p-3.5 font-normal border-r border-b border-slate-200 dark:border-slate-700">
                         <span className="inline-flex items-center space-x-1.5">
-                          <span>{gf.warehouse_name}</span>
-                          <span className="text-slate-400 text-[10px]">➔ 🇧🇩 DAC</span>
+                          <span className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{gf.warehouse_name}</span>
+                          <span className={`text-[10px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>➔ 🇧🇩 DAC</span>
                         </span>
                       </td>
-                      <td className="p-3.5 text-blue-600 dark:text-blue-400 font-normal border-r border-b border-slate-200 dark:border-slate-700">
-                        <span className="font-bold text-sm">{gf.total_cartons}</span> Cartons
+                      <td className="p-3.5 text-sky-300 font-extrabold border-r border-b border-slate-200 dark:border-slate-700">
+                        <span className="font-extrabold text-sm text-white">{gf.total_cartons}</span> Cartons
                       </td>
-                      <td className="p-3.5 font-mono text-slate-900 dark:text-white font-normal border-r border-b border-slate-200 dark:border-slate-700">
+                      <td className="p-3.5 font-mono font-extrabold text-white border-r border-b border-slate-200 dark:border-slate-700">
                         <div className="flex items-center space-x-1.5">
-                          <span className="font-bold text-sm">{gf.total_weight} kg</span>
+                          <span className="font-extrabold text-sm text-white">{gf.total_weight} kg</span>
                           <button
                             type="button"
                             onClick={() => handleOpenWeightCalibModal(gf.sampleProposal)}
-                            className="p-1 px-1.5 rounded-none bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 cursor-pointer transition-colors text-[10px] font-normal border border-blue-500/20"
+                            className="p-1 px-1.5 rounded-lg bg-blue-500/20 text-sky-300 hover:bg-blue-500/30 cursor-pointer transition-colors text-[10px] font-extrabold border border-blue-500/30"
                             title={isBn ? 'বাংলাদেশে মেপে পাওয়া ওজন টিউন/এডিট করুন' : 'Calibrate Official BD Weight'}
                           >
                             ⚖️ এডিট
@@ -631,12 +631,12 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                       </td>
                       <td className="p-3.5 border-r border-b border-slate-200 dark:border-slate-700">
                         {isArrivedBd ? (
-                          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-none bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] font-medium border border-emerald-500/20">
+                          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold border border-emerald-500/30">
                             <span>🛬 বাংলাদেশ এয়ারপোর্টে প্রাপ্ত</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-none bg-blue-500/10 text-blue-700 dark:text-blue-400 text-[10px] font-medium border border-blue-500/20">
-                            <span className="w-1.5 h-1.5 rounded-none bg-blue-500 animate-ping"></span>
+                          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-blue-500/20 text-sky-300 text-[10px] font-extrabold border border-blue-500/30">
+                            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping"></span>
                             <span>✈️ মিড-এিয়ার ফ্লাইটে চলমান</span>
                           </span>
                         )}
@@ -722,20 +722,20 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       {selectedProposalForWeightCalib && (
         <div className="fixed inset-0 z-50 bg-[#1E293B] backdrop-blur-xs flex items-center justify-center p-4">
           <div
-            className={`max-w-md w-full rounded-none p-6 shadow-2xl border space-y-5 animate-in fade-in zoom-in-95 duration-200 ${
+            className={`max-w-md w-full rounded-xl p-6 shadow-2xl border space-y-5 animate-in fade-in zoom-in-95 duration-200 ${
               isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
             }`}
           >
             <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
               <div className="flex items-center space-x-2">
-                <div className="p-2 rounded-none bg-blue-500/10 text-blue-500">
+                <div className="p-2 rounded-xl bg-blue-500/20 text-sky-300 border border-blue-500/30">
                   <Truck className="w-5 h-5" />
                 </div>
                 <div>
-                  <h3 className="text-base font-medium text-slate-900 dark:text-white">
+                  <h3 className={`text-base font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {isBn ? '⚖️ বাংলাদেশে মেপে পাওয়া সঠিক ওজন পুনর্নির্ধারণ' : 'Official BD Weight Calibration'}
                   </h3>
-                  <p className="text-[11px] text-slate-400 font-mono">
+                  <p className={`text-[11px] font-mono font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>
                     {selectedProposalForWeightCalib.flight_number} • {selectedProposalForWeightCalib.flying_name || selectedProposalForWeightCalib.warehouse_name}
                   </p>
                 </div>
@@ -743,21 +743,21 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedProposalForWeightCalib(null)}
-                className="p-1 rounded-none text-slate-400 hover:text-slate-600 dark:hover:text-white transition-colors"
+                className="p-1 rounded-lg text-slate-400 hover:text-white transition-colors"
               >
                 ✕
               </button>
             </div>
 
             <div className="space-y-4 text-xs font-normal">
-              <div className="p-3 rounded-none bg-blue-500/10 border border-blue-500/20 text-blue-700 dark:text-blue-300 leading-relaxed">
+              <div className="p-3 rounded-xl bg-blue-500/20 border border-blue-500/30 text-sky-200 font-semibold leading-relaxed">
                 💡 {isBn
                   ? 'নোট: বাংলাদেশে আসার পর প্রোডাক্টের যে ওজন পরিমাপ করা হবে, সেটিই চূড়ান্ত সত্য ওজন হিসেবে গণ্য হবে এবং গ্রাহকের বিলে হিসাব হবে।'
                   : 'Note: Official gross weight measured upon arrival in Bangladesh is the final billable weight.'}
               </div>
 
               <div>
-                <label className="block text-slate-700 dark:text-slate-300 font-medium mb-1.5">
+                <label className={`block font-extrabold mb-1.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                   {isBn ? 'বাংলাদেশে মেপে পাওয়া সঠিক মোট গ্রস ওজন (KG):' : 'Official BD Calibrated Gross Weight (KG):'}
                 </label>
                 <input
@@ -765,8 +765,8 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                   step="0.1"
                   value={calibratedWeightInput}
                   onChange={(e) => setCalibratedWeightInput(Number(e.target.value))}
-                  className={`w-full px-4 py-2.5 rounded-none text-sm font-mono border focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
-                    isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                  className={`w-full px-4 py-2.5 rounded-xl text-sm font-mono font-extrabold border focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${
+                    isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
                   }`}
                 />
               </div>
@@ -776,14 +776,16 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedProposalForWeightCalib(null)}
-                className="px-4 py-2 rounded-none text-xs font-medium border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
+                className={`px-4 py-2 rounded-xl text-xs font-extrabold border transition-all cursor-pointer ${
+                  isDark ? 'border-slate-700 text-white hover:bg-slate-800' : 'border-slate-300 text-slate-700 hover:bg-slate-100'
+                }`}
               >
                 {isBn ? 'বাতিল' : 'Cancel'}
               </button>
               <button
                 type="button"
                 onClick={handleSaveBdWeightCalibration}
-                className="px-4 py-2 rounded-none text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-xs transition-all cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs font-extrabold bg-blue-600 hover:bg-blue-500 text-white shadow-md transition-all cursor-pointer"
               >
                 {isBn ? 'সেভ করুন ও ওজন আপডেট করুন' : 'Save BD Weight'}
               </button>
@@ -794,23 +796,23 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
       {/* Flight Carton Scan & Receive Modal */}
       {selectedFlightForCartonReceive && (
-        <div className="fixed inset-0 z-50 bg-[#1E293B]/80 backdrop-blur-xs flex items-center justify-center p-4 font-sans">
+        <div className="fixed inset-0 z-50 bg-[#1E293B]/90 backdrop-blur-xs flex items-center justify-center p-4 font-sans">
           <div
-            className={`max-w-5xl w-full rounded-none p-6 shadow-none border space-y-4 max-h-[90vh] flex flex-col ${
-              isDark ? 'bg-[#1E293B] border-slate-700 text-slate-200' : 'bg-white border-slate-300 text-slate-800'
+            className={`max-w-5xl w-full rounded-2xl p-6 shadow-2xl border space-y-4 max-h-[90vh] flex flex-col ${
+              isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-300 text-slate-800'
             }`}
           >
             {/* Header */}
             <div className="flex items-center justify-between border-b pb-3.5 border-slate-200 dark:border-slate-700">
               <div className="flex items-center space-x-3">
-                <div className="p-2.5 rounded-none bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-300 dark:border-slate-700">
-                  <Package className="w-5 h-5 font-light" />
+                <div className="p-2.5 rounded-xl bg-blue-500/20 text-sky-300 border border-blue-500/30">
+                  <Package className="w-5 h-5 font-bold" />
                 </div>
                 <div>
-                  <h3 className="text-base font-normal text-slate-900 dark:text-white flex items-center space-x-2">
+                  <h3 className={`text-base font-extrabold flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     <span>ফ্লাইট {selectedFlightForCartonReceive.flying_name || selectedFlightForCartonReceive.flight_number} কার্টুন তালিকা ও স্টক রিসিভিং</span>
                   </h3>
-                  <p className="text-xs text-slate-500 font-light">
+                  <p className={`text-xs font-semibold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>
                     AWB: {selectedFlightForCartonReceive.awb_number || 'N/A'} • উৎস: {selectedFlightForCartonReceive.warehouse_name} ➔ ঢাকা সেন্ট্রাল Hub
                   </p>
                 </div>
@@ -818,7 +820,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
               <button
                 type="button"
                 onClick={() => setSelectedFlightForCartonReceive(null)}
-                className="p-1.5 rounded-none text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-colors cursor-pointer text-sm font-light"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer text-sm font-bold"
               >
                 ✕
               </button>
@@ -844,10 +846,12 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
               return (
                 <>
-                  <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-none border border-slate-200 dark:border-slate-700 font-light">
+                  <div className={`flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl border ${
+                    isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-slate-50 border-slate-200'
+                  }`}>
                     <div className="flex items-center space-x-3">
-                      <span className="text-xs font-light text-slate-600 dark:text-slate-300">
-                        রিসিভিং প্রোগ্রেস: <span className="text-emerald-600 dark:text-emerald-400 font-normal">{receivedCartonsCount} / {flightCartons.length}</span> কার্টুন রিসিভড
+                      <span className={`text-xs font-bold ${isDark ? 'text-white' : 'text-slate-700'}`}>
+                        রিসিভিং প্রোগ্রেস: <span className="text-emerald-400 font-extrabold">{receivedCartonsCount} / {flightCartons.length}</span> কার্টুন রিসিভড
                       </span>
                     </div>
 
@@ -855,7 +859,9 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                       <button
                         type="button"
                         onClick={toggleSelectAllInModal}
-                        className="px-3 py-1.5 rounded-none bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-light cursor-pointer hover:bg-slate-300 dark:hover:bg-slate-600 transition-all border border-slate-300 dark:border-slate-600"
+                        className={`px-3 py-1.5 rounded-lg text-xs font-extrabold cursor-pointer transition-all border ${
+                          isDark ? 'bg-slate-800 text-white border-slate-600 hover:bg-slate-700' : 'bg-slate-200 text-slate-800 border-slate-300'
+                        }`}
                       >
                         {selectedCartonIdsInModal.length === pendingCartons.length ? 'আন-সিলেক্ট' : 'সব সিলেক্ট'}
                       </button>
@@ -869,7 +875,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                             selectedFlightForCartonReceive.proposal_ids
                           )
                         }
-                        className="px-4 py-1.5 rounded-none bg-emerald-600 hover:bg-emerald-700 text-white font-light text-xs transition-all flex items-center space-x-1.5 cursor-pointer border border-emerald-700"
+                        className="px-4 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs transition-all flex items-center space-x-1.5 cursor-pointer border border-emerald-500 shadow-md"
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>একত্রে সব রিসিভ করুন ({selectedCartonIdsInModal.length || pendingCartons.length} Cartons)</span>
@@ -878,19 +884,21 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                   </div>
 
                   {/* Cartons List Table */}
-                  <div className="overflow-y-auto max-h-[52vh] border border-slate-200 dark:border-slate-700 rounded-none">
-                    <table className="w-full text-left text-xs font-light">
-                      <thead className="bg-slate-100 dark:bg-[#1E293B] text-slate-500 uppercase text-[10px] tracking-wider sticky top-0 border-b border-slate-200 dark:border-slate-700 font-normal">
+                  <div className="overflow-y-auto max-h-[52vh] border border-slate-200 dark:border-slate-700 rounded-xl">
+                    <table className="w-full text-left text-xs font-normal">
+                      <thead className={`uppercase text-[10px] tracking-wider sticky top-0 border-b border-slate-200 dark:border-slate-700 font-extrabold ${
+                        isDark ? 'bg-[#1E293B] text-white' : 'bg-slate-100 text-slate-900'
+                      }`}>
                         <tr>
-                          <th className="p-2.5 font-normal">#</th>
-                          <th className="p-2.5 font-normal">CTN No</th>
-                          <th className="p-2.5 font-normal">Shipping Mark</th>
-                          <th className="p-2.5 font-normal">Tracking No</th>
-                          <th className="p-2.5 font-normal">Product Name</th>
-                          <th className="p-2.5 font-normal">Qty / CBM</th>
-                          <th className="p-2.5 font-normal">BD Calibrated Weight (কেজি)</th>
-                          <th className="p-2.5 font-normal">Status</th>
-                          <th className="p-2.5 text-right font-normal">Action</th>
+                          <th className="p-2.5 font-extrabold">#</th>
+                          <th className="p-2.5 font-extrabold">CTN No</th>
+                          <th className="p-2.5 font-extrabold">Shipping Mark</th>
+                          <th className="p-2.5 font-extrabold">Tracking No</th>
+                          <th className="p-2.5 font-extrabold">Product Name</th>
+                          <th className="p-2.5 font-extrabold">Qty / CBM</th>
+                          <th className="p-2.5 font-extrabold">BD Calibrated Weight (কেজি)</th>
+                          <th className="p-2.5 font-extrabold">Status</th>
+                          <th className="p-2.5 text-right font-extrabold">Action</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
@@ -902,7 +910,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                             <tr
                               key={c.id}
                               className={`hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors ${
-                                isCartonReceived ? 'bg-emerald-500/5' : ''
+                                isCartonReceived ? 'bg-emerald-500/10' : ''
                               }`}
                             >
                               <td className="p-2.5">
@@ -915,22 +923,22 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                                         prev.includes(c.id) ? prev.filter((id) => id !== c.id) : [...prev, c.id]
                                       )
                                     }
-                                    className="w-3.5 h-3.5 accent-emerald-600 rounded-none cursor-pointer"
+                                    className="w-3.5 h-3.5 accent-[#00897B] rounded-md cursor-pointer"
                                   />
                                 )}
                               </td>
-                              <td className="p-2.5 font-normal font-mono text-slate-800 dark:text-slate-200">{c.ctn_no}</td>
-                              <td className="p-2.5 text-blue-600 dark:text-blue-400 font-normal">{c.shipping_mark}</td>
-                              <td className="p-2.5 font-mono text-slate-500 font-light">{c.tracking_number}</td>
-                              <td className="p-2.5 font-light">
-                                <div className="font-normal text-slate-800 dark:text-slate-200">{c.product_name_en}</div>
+                              <td className={`p-2.5 font-extrabold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.ctn_no}</td>
+                              <td className="p-2.5 text-sky-300 font-extrabold">{c.shipping_mark}</td>
+                              <td className={`p-2.5 font-mono font-semibold ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>{c.tracking_number}</td>
+                              <td className="p-2.5 font-normal">
+                                <div className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.product_name_en}</div>
                                 {c.product_name_cn && (
-                                  <div className="text-[10px] text-slate-400 font-light">{c.product_name_cn}</div>
+                                  <div className={`text-[10px] font-medium ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>{c.product_name_cn}</div>
                                 )}
                               </td>
-                              <td className="p-2.5 font-mono text-slate-600 dark:text-slate-400 font-light">
+                              <td className="p-2.5 font-mono text-purple-300 font-extrabold">
                                 <div>{c.quantity || 1} Pcs</div>
-                                <div className="text-[10px] text-slate-400">{c.cbm || 0.15} CBM</div>
+                                <div className="text-[10px] text-fuchsia-300">{c.cbm || 0.15} CBM</div>
                               </td>
                               <td className="p-2.5">
                                 <div className="flex items-center space-x-1">
@@ -954,30 +962,30 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                                         handleUpdateCartonWeight(c.id, parsed);
                                       }
                                     }}
-                                    className={`w-20 px-2 py-1 text-xs font-bold text-center rounded-none border transition-all ${
+                                    className={`w-20 px-2 py-1 text-xs font-extrabold text-center rounded-lg border transition-all ${
                                       isCartonReceived
-                                        ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-700 dark:text-emerald-300 focus:ring-2 focus:ring-emerald-500'
-                                        : 'bg-white dark:bg-slate-800 border-blue-400 dark:border-blue-700 text-blue-900 dark:text-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                                        ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300 focus:ring-2 focus:ring-emerald-500'
+                                        : 'bg-[#0F172A] border-blue-500 text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
                                     }`}
                                     title="বাংলাদেশে মেপে পাওয়া ওজন টিউন/এডিট করুন"
                                   />
-                                  <span className="text-[10px] font-light text-slate-400">KG</span>
+                                  <span className={`text-[10px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>KG</span>
                                 </div>
                               </td>
                               <td className="p-2.5">
                                 {isCartonReceived ? (
-                                  <span className="px-2 py-0.5 rounded-none bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-light border border-emerald-500/20">
+                                  <span className="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold border border-emerald-500/30">
                                     BD রিসিভড
                                   </span>
                                 ) : (
-                                  <span className="px-2 py-0.5 rounded-none bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-light border border-amber-500/20">
+                                  <span className="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 text-[10px] font-extrabold border border-amber-500/30">
                                     ইন-ট্রানজিট
                                   </span>
                                 )}
                               </td>
                               <td className="p-2.5 text-right">
                                 {isCartonReceived ? (
-                                  <span className="text-[10px] text-emerald-600 dark:text-emerald-400 font-light px-2 py-0.5 rounded-none bg-emerald-500/10 border border-emerald-500/20">
+                                  <span className="text-[10px] text-emerald-300 font-extrabold px-2 py-0.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30">
                                     ইনভেন্টরিতে যুক্ত
                                   </span>
                                 ) : isBdWarehouseStaff ? (
@@ -985,13 +993,13 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                                     type="button"
                                     onMouseDown={(e) => e.preventDefault()}
                                     onClick={() => handleReceiveSingleCarton(c)}
-                                    className="px-2.5 py-1 rounded-none bg-emerald-600 hover:bg-emerald-700 text-white font-light text-xs transition-all inline-flex items-center space-x-1 cursor-pointer border border-emerald-700 shadow-xs"
+                                    className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs transition-all inline-flex items-center space-x-1 cursor-pointer border border-emerald-500 shadow-md"
                                   >
                                     <CheckCircle2 className="w-3 h-3" />
                                     <span>বুঝে পেয়েছি (রিসিভড)</span>
                                   </button>
                                 ) : (
-                                  <span className="text-[10px] text-blue-600 dark:text-blue-400 font-light px-2 py-0.5 rounded-none bg-blue-500/10 border border-blue-500/20">
+                                  <span className="text-[10px] text-sky-300 font-extrabold px-2 py-0.5 rounded-lg bg-blue-500/20 border border-blue-500/30">
                                     অপারেশনস ফ্লাইট রিসিভিং
                                   </span>
                                 )}
