@@ -352,15 +352,47 @@ export const Header: React.FC<HeaderProps> = ({
             >
               {/* Solid Colored Circle Badge or Uploaded Photo */}
               {currentUser.avatar_url || currentUser.photo_url ? (
-                <img
-                  src={currentUser.avatar_url || currentUser.photo_url}
-                  alt={userBadge.name}
-                  className="w-8 h-8 rounded-full object-cover border border-[#00897B] shadow-xs select-none"
-                />
+                <div
+                  style={{
+                    width: '34px',
+                    height: '34px',
+                    borderRadius: '50%',
+                    overflow: 'hidden',
+                    border: '2px solid #00897B',
+                    clipPath: 'circle(50% at 50% 50%)',
+                    WebkitClipPath: 'circle(50% at 50% 50%)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                  }}
+                >
+                  <img
+                    src={currentUser.avatar_url || currentUser.photo_url}
+                    alt={userBadge.name}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      borderRadius: '50%',
+                      objectFit: 'cover',
+                      clipPath: 'circle(50% at 50% 50%)',
+                      WebkitClipPath: 'circle(50% at 50% 50%)',
+                    }}
+                  />
+                </div>
               ) : (
                 <div
                   translate="no"
-                  className={`notranslate w-8 h-8 rounded-full bg-[#00897B] text-white flex items-center justify-center font-bold text-xs shadow-xs select-none`}
+                  className={`notranslate text-white flex items-center justify-center font-bold text-xs shadow-xs select-none`}
+                  style={{
+                    width: '34px',
+                    height: '34px',
+                    borderRadius: '50%',
+                    backgroundColor: '#00897B',
+                    clipPath: 'circle(50% at 50% 50%)',
+                    WebkitClipPath: 'circle(50% at 50% 50%)',
+                    flexShrink: 0,
+                  }}
                 >
                   {userBadge.initials}
                 </div>
