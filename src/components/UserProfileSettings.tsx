@@ -45,7 +45,7 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
     setTimeout(() => setToastMsg(null), 3500);
   };
 
-  // Auto Image Compressor Handler with Physical Circle Clipping
+  // Auto Image Compressor Handler for Any Photo Shape
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -61,28 +61,31 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
       img.src = event.target?.result as string;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_SIZE = 250;
+        const MAX_DIM = 400;
         let width = img.width;
         let height = img.height;
 
-        const minDim = Math.min(width, height);
-        const cropX = (width - minDim) / 2;
-        const cropY = (height - minDim) / 2;
-
-        canvas.width = MAX_SIZE;
-        canvas.height = MAX_SIZE;
-        const ctx = canvas.getContext('2d');
-        if (ctx) {
-          // Physical 100% Circle Clipping Mask on Canvas
-          ctx.beginPath();
-          ctx.arc(MAX_SIZE / 2, MAX_SIZE / 2, MAX_SIZE / 2, 0, Math.PI * 2, true);
-          ctx.closePath();
-          ctx.clip();
-          ctx.drawImage(img, cropX, cropY, minDim, minDim, 0, 0, MAX_SIZE, MAX_SIZE);
+        if (width > height) {
+          if (width > MAX_DIM) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          }
+        } else {
+          if (height > MAX_DIM) {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
         }
 
-        // Export as PNG so transparent round outer padding stays completely transparent
-        const compressedBase64 = canvas.toDataURL('image/png');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, width, height);
+        }
+
+        // Compress JPEG image to 0.82 quality (~20-35KB size)
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.82);
         setPhotoUrl(compressedBase64);
 
         // Save to Hostinger Database
@@ -123,10 +126,10 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
           'UPDATE_PROFILE_PHOTO',
           'user',
           currentUser.id,
-          `গোল প্রোফাইল ছবি অটো-কমপ্রেস করে সফলভাবে সেভ করা হয়েছে`
+          `প্রোফাইল ছবি অটো-কমপ্রেস করে সফলভাবে সেভ করা হয়েছে`
         );
 
-        showToast(isBn ? 'গোল প্রোফাইল ছবি সফলভাবে সেভ করা হয়েছে!' : 'Circle profile photo saved successfully!');
+        showToast(isBn ? 'প্রোফাইল ছবি সফলভাবে সেভ করা হয়েছে!' : 'Profile photo saved successfully!');
       };
     };
     reader.readAsDataURL(file);
