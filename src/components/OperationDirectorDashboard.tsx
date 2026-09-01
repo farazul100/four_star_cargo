@@ -40,6 +40,7 @@ import { BookedCartonsHub } from './BookedCartonsHub';
 import { PublicTracking } from './PublicTracking';
 import { CargoSearchTracker } from './CargoSearchTracker';
 import { CrmManagementSystem } from './CrmManagementSystem';
+import { CreateFlyingProposalSection } from './CreateFlyingProposalSection';
 
 interface OperationDirectorDashboardProps {
   activeTab: string;
@@ -360,9 +361,27 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
   }
 
   // --------------------------------------------------------------------------
-  // TAB: FLIGHT PROPOSALS MANAGER
+  // TAB: CREATE FLYING PROPOSAL BATCH BUILDER
   // --------------------------------------------------------------------------
-  if (activeTab === 'proposals' || activeTab === 'proposal_create') {
+  if (activeTab === 'proposal_create') {
+    return (
+      <CreateFlyingProposalSection
+        currentUser={currentUser}
+        warehouses={warehouses}
+        language={language}
+        onProposalCreated={() => {
+          if (setActiveTab) {
+            setActiveTab('proposals');
+          }
+        }}
+      />
+    );
+  }
+
+  // --------------------------------------------------------------------------
+  // TAB: FLIGHT PROPOSALS MANAGER (PENDING FLYING LISTS)
+  // --------------------------------------------------------------------------
+  if (activeTab === 'proposals') {
     return (
       <FlightProposalsManager
         language={language}

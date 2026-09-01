@@ -1,0 +1,509 @@
+import React, { useState, useEffect, useMemo } from 'react';
+import {
+  Plane,
+  Building2,
+  Calendar,
+  Search,
+  CheckCircle2,
+  Package,
+  PlusCircle,
+  XCircle,
+  Filter,
+  Check,
+  Send,
+  Sparkles,
+  Layers,
+  Scale,
+  Box,
+  AlertCircle,
+  Clock,
+  ArrowRight,
+} from 'lucide-react';
+import { Carton, Warehouse, User, Language, FlyingProposal } from '../types';
+import { getHostingerDbData, saveHostingerDbMultiData, logSystemAuditAction, publishSystemNotification, subscribeToDbUpdates } from '../lib/db';
+import { useTheme } from '../context/ThemeContext';
+import { ToastContainer, ToastMessage } from './Toast';
+
+interface CreateFlyingProposalSectionProps {
+  currentUser: User;
+  warehouses: Warehouse[];
+  language: Language;
+  onProposalCreated?: () => void;
+}
+
+export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionProps> = ({
+  currentUser,
+  warehouses,
+  language,
+  onProposalCreated,
+}) => {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const isBn = language === 'bn';
+
+  // Live state from DB
+  const [cartons, setCartons] = useState<Carton[]>([]);
+  const [proposals, setProposals] = useState<FlyingProposal[]>([]);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+
+  // Toast Helper
+  const addToast = (type: 'success' | 'error' | 'info', title: string, message?: string) => {
+    setToasts((prev) => [...prev, { id: `toast-${Date.now()}`, type, title, message }]);
+  };
+  const dismissToast = (id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // Form States
+  const originWarehouses = useMemo(() => warehouses.filter((w) => !w.is_final_destination), [warehouses]);
+  const destWarehouses = useMemo(() => warehouses.filter((w) => w.is_final_destination), [warehouses]);
+
+  const [selectedOriginWhId, setSelectedOriginWhId] = useState<string>(
+    currentUser?.warehouse_id || originWarehouses[0]?.id || 'wh-china'
+  );
+  const [selectedDestWhId, setSelectedDestWhId] = useState<string>('wh-bd');
+  const [flyingDate, setFlyingDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [flightNumber, setFlightNumber] = useState<string>('BS-206');
+  const [flyingName, setFlyingName] = useState<string>('Guangzhou Flight Batch #1');
+  const [airline, setAirline] = useState<string>('US-Bangla Airlines / Biman Cargo');
+
+  // Carton Selection States
+  const [selectedCartonIds, setSelectedCartonIds] = useState<string[]>([]);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+
+  // Real-time DB subscription
+  useEffect(() => {
+    const syncDb = () => {
+      const dbData = getHostingerDbData();
+      setCartons(dbData.cartons || []);
+      setProposals(dbData.proposals || []);
+    };
+    syncDb();
+    const unsubscribe = subscribeToDbUpdates(syncDb);
+    return () => unsubscribe();
+  }, []);
+
+  // Filter available stock cartons in selected origin warehouse
+  const availableStockCartons = useMemo(() => {
+    return cartons.filter(
+      (c) =>
+        (c.current_warehouse_id === selectedOriginWhId ||
+          (c.current_warehouse_name || '').toLowerCase().includes('guangzhou') ||
+          selectedOriginWhId === 'wh-china') &&
+        (c.status === 'booked' || c.status === 'received')
+    );
+  }, [cartons, selectedOriginWhId]);
+
+  const filteredCartons = useMemo(() => {
+    if (!searchQuery.trim()) return availableStockCartons;
+    const q = searchQuery.toLowerCase().trim();
+    return availableStockCartons.filter(
+      (c) =>
+        c.ctn_no.toLowerCase().includes(q) ||
+        (c.shipping_mark || '').toLowerCase().includes(q) ||
+        (c.tracking_number || '').toLowerCase().includes(q) ||
+        (c.product_name_en || '').toLowerCase().includes(q) ||
+        (c.customer_name || '').toLowerCase().includes(q)
+    );
+  }, [availableStockCartons, searchQuery]);
+
+  // Payload totals for selected cartons
+  const selectedCartons = useMemo(
+    () => cartons.filter((c) => selectedCartonIds.includes(c.id)),
+    [cartons, selectedCartonIds]
+  );
+  const totalSelectedWeight = useMemo(
+    () => selectedCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0),
+    [selectedCartons]
+  );
+  const totalSelectedCbm = useMemo(
+    () => selectedCartons.reduce((sum, c) => sum + (c.cbm || 0), 0),
+    [selectedCartons]
+  );
+
+  // Toggle single carton selection
+  const handleToggleSelect = (id: string) => {
+    setSelectedCartonIds((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  // Toggle select all cartons
+  const handleToggleSelectAll = () => {
+    if (selectedCartonIds.length === filteredCartons.length) {
+      setSelectedCartonIds([]);
+    } else {
+      setSelectedCartonIds(filteredCartons.map((c) => c.id));
+    }
+  };
+
+  // Submit new Flying Proposal Batch
+  const handleSubmitProposal = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (selectedCartonIds.length === 0) {
+      addToast(
+        'error',
+        isBn ? 'কোনো কার্টুন নির্বাচন করা হয়নি!' : 'No Cartons Selected!',
+        isBn ? 'প্রস্তাবিত ফ্লাইটে অন্তত ১টি কার্টুন টিক দিয়ে নির্বাচন করুন।' : 'Please check at least 1 carton to include in flight proposal.'
+      );
+      return;
+    }
+
+    const originWhObj = warehouses.find((w) => w.id === selectedOriginWhId);
+    const destWhObj = warehouses.find((w) => w.id === selectedDestWhId);
+
+    const newProposal: FlyingProposal = {
+      id: `prop-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      flying_name: flyingName.trim() || `Flight Batch ${flightNumber}`,
+      warehouse_id: selectedOriginWhId,
+      warehouse_name: originWhObj?.name || 'Guangzhou Air Hub',
+      destination_warehouse_id: selectedDestWhId,
+      destination_warehouse_name: destWhObj?.name || 'Dhaka Central Freight Hub',
+      proposed_by: currentUser.id,
+      proposed_by_name: currentUser.name,
+      date: flyingDate,
+      status: 'pending',
+      flight_number: flightNumber.trim() || 'BS-206',
+      airline: airline.trim() || 'US-Bangla Airlines',
+      carton_ids: selectedCartonIds,
+      items_count: selectedCartonIds.length,
+      total_weight: Math.round(totalSelectedWeight * 10) / 10,
+      total_cbm: Math.round(totalSelectedCbm * 100) / 100,
+    };
+
+    // Update status of selected cartons to proposed
+    const updatedCartons = cartons.map((c) =>
+      selectedCartonIds.includes(c.id)
+        ? {
+            ...c,
+            status: 'proposed' as const,
+            flight_number: flightNumber.trim(),
+            updated_at: new Date().toISOString(),
+          }
+        : c
+    );
+
+    const updatedProposals = [newProposal, ...proposals];
+
+    saveHostingerDbMultiData({
+      fsc_vps_proposals: updatedProposals,
+      fsc_vps_cartons: updatedCartons,
+    });
+
+    logSystemAuditAction(
+      currentUser,
+      'CREATE_FLYING_PROPOSAL',
+      'flying_proposal',
+      newProposal.id,
+      `নতুন ফ্লাইং প্রোপোজাল ব্যাচ জেনারেট সম্পন্ন! Flight: ${flightNumber}, Date: ${flyingDate}, Cartons: ${selectedCartonIds.length}`
+    );
+
+    publishSystemNotification({
+      title: 'নতুন ফ্লাইং প্রোপোজাল সাবমিট হয়েছে',
+      message: `অপারেশনস ডিরেক্টর নতুন ফ্লাইট ব্যাচ "${flyingName}" (${selectedCartonIds.length}টি কার্টুন, ${totalSelectedWeight.toFixed(1)} kg) তৈরি করেছেন।`,
+      type: 'info',
+      target_role: 'operation_director',
+    });
+
+    addToast(
+      'success',
+      isBn ? 'ফ্লাইং প্রোপোজাল ব্যাচ সফলভাবে জেনারেট হয়েছে!' : 'Flight Proposal Batch Created!',
+      isBn
+        ? `ফ্লাইট: ${flightNumber} (${flyingDate}) — ${selectedCartonIds.length}টি কার্টুন সফলভাবে যুক্ত হয়েছে।`
+        : `Flight: ${flightNumber} (${flyingDate}) — ${selectedCartonIds.length} cartons attached.`
+    );
+
+    // Reset Form
+    setSelectedCartonIds([]);
+    if (onProposalCreated) {
+      onProposalCreated();
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <ToastContainer toasts={toasts} onDismiss={dismissToast} />
+
+      {/* HEADER TITLE CARD */}
+      <div
+        className={`p-6 rounded-2xl border transition-all shadow-xl space-y-3 ${
+          isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+        }`}
+      >
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-700">
+          <div>
+            <h2 className="text-base font-semibold flex items-center space-x-2.5">
+              <Plane className="w-5 h-5 text-blue-500" />
+              <span>{isBn ? 'নতুন ফ্লাইং প্রোপোজাল ও ফ্লাইট ব্যাচ জেনারেটর' : 'Create Flying Proposal & Flight Batch Builder'}</span>
+            </h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              {isBn
+                ? 'ওয়্যারহাউজের বুকিংকৃত কার্টুনসমূহ থেকে পছন্দমতো কার্টুন নির্বাচন করে নতুন ফ্লাইটের জন্য ব্যাচ জেনারেট করুন।'
+                : 'Select booked cartons from origin inventory and dispatch new flight payload batches.'}
+            </p>
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <span className="px-3.5 py-1.5 rounded-xl text-xs font-mono font-extrabold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+              {availableStockCartons.length} Cartons Available
+            </span>
+          </div>
+        </div>
+
+        {/* PAYLOAD METRICS SUMMARY BAR */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+          <div className={`p-3.5 rounded-xl border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-blue-50/70 border-blue-200'}`}>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">{isBn ? 'সিলেক্টকৃত কার্টুন' : 'Selected Cartons'}</span>
+            <div className="text-base font-extrabold text-blue-600 dark:text-sky-300 font-mono mt-0.5">
+              {selectedCartonIds.length} / {availableStockCartons.length} {isBn ? 'টি' : 'Pcs'}
+            </div>
+          </div>
+
+          <div className={`p-3.5 rounded-xl border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-emerald-50/70 border-emerald-200'}`}>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">{isBn ? 'মোট গ্রস ওজন (KG)' : 'Total Gross Weight'}</span>
+            <div className="text-base font-extrabold text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">
+              {totalSelectedWeight.toFixed(1)} KG
+            </div>
+          </div>
+
+          <div className={`p-3.5 rounded-xl border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-purple-50/70 border-purple-200'}`}>
+            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">{isBn ? 'মোট সিবিএম (CBM)' : 'Total CBM Volume'}</span>
+            <div className="text-base font-extrabold text-purple-600 dark:text-purple-300 font-mono mt-0.5">
+              {totalSelectedCbm.toFixed(2)} CBM
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* FLIGHT BUILDER FORM */}
+      <form onSubmit={handleSubmitProposal} className="space-y-6">
+        <div
+          className={`p-6 rounded-2xl border transition-all shadow-xl space-y-4 ${
+            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          }`}
+        >
+          <h3 className="text-xs font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center space-x-2 border-b pb-3 border-slate-200 dark:border-slate-700">
+            <Layers className="w-4 h-4 text-blue-500" />
+            <span>{isBn ? '১. ফ্লাইট বিস্তারিত তথ্য (Flight Configuration)' : '1. Flight Batch Details'}</span>
+          </h3>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+            {/* Origin Warehouse */}
+            <div>
+              <label className="block text-slate-500 dark:text-slate-400 font-bold mb-1.5">{isBn ? 'অরিজিন ওয়্যারহাউজ *' : 'Origin Hub *'}</label>
+              <select
+                value={selectedOriginWhId}
+                onChange={(e) => {
+                  setSelectedOriginWhId(e.target.value);
+                  setSelectedCartonIds([]);
+                }}
+                className={`w-full px-3 py-2 rounded-xl border text-xs font-bold focus:ring-2 focus:ring-blue-500 cursor-pointer ${
+                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                }`}
+              >
+                {originWarehouses.map((w) => (
+                  <option key={w.id} value={w.id}>
+                    {w.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Flying Date */}
+            <div>
+              <label className="block text-slate-500 dark:text-slate-400 font-bold mb-1.5">{isBn ? 'ফ্লাইটের তারিখ *' : 'Flight Date *'}</label>
+              <input
+                type="date"
+                required
+                value={flyingDate}
+                onChange={(e) => setFlyingDate(e.target.value)}
+                className={`w-full px-3 py-2 rounded-xl border text-xs font-mono font-bold focus:ring-2 focus:ring-blue-500 ${
+                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                }`}
+              />
+            </div>
+
+            {/* Flight Number */}
+            <div>
+              <label className="block text-slate-500 dark:text-slate-400 font-bold mb-1.5">{isBn ? 'ফ্লাইট নম্বর / কোড *' : 'Flight Number *'}</label>
+              <input
+                type="text"
+                required
+                value={flightNumber}
+                onChange={(e) => setFlightNumber(e.target.value)}
+                placeholder="e.g. BS-206"
+                className={`w-full px-3 py-2 rounded-xl border text-xs font-mono font-bold focus:ring-2 focus:ring-blue-500 ${
+                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                }`}
+              />
+            </div>
+
+            {/* Flight Batch Name */}
+            <div>
+              <label className="block text-slate-500 dark:text-slate-400 font-bold mb-1.5">{isBn ? 'ফ্লাইট ব্যাচের নাম' : 'Flight Batch Name'}</label>
+              <input
+                type="text"
+                value={flyingName}
+                onChange={(e) => setFlyingName(e.target.value)}
+                placeholder="Guangzhou Batch #1"
+                className={`w-full px-3 py-2 rounded-xl border text-xs font-bold focus:ring-2 focus:ring-blue-500 ${
+                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                }`}
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* CARTONS PAYLOAD SELECTOR */}
+        <div
+          className={`rounded-2xl border transition-all shadow-xl overflow-hidden ${
+            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          }`}
+        >
+          <div className="p-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-slate-200 dark:border-slate-700">
+            <div className="flex items-center space-x-2">
+              <Package className="w-4 h-4 text-emerald-500" />
+              <h3 className="text-xs font-extrabold uppercase tracking-wider">
+                {isBn ? '২. প্রোপোজালে কার্টুন যুক্তকরণ (Cartons Inventory Payload)' : '2. Select Cartons Payload'}
+              </h3>
+            </div>
+
+            {/* Search Filter */}
+            <div className="relative max-w-xs w-full">
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={isBn ? 'খুঁজুন: মার্ক, কাস্টমার, CTN, পণ্য...' : 'Filter mark, customer, ctn...'}
+                className={`w-full pl-9 pr-3 py-1.5 rounded-xl border text-xs font-semibold focus:ring-2 focus:ring-blue-500 ${
+                  isDark ? 'bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-400' : 'bg-slate-50 border-slate-300 text-slate-900'
+                }`}
+              />
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+            </div>
+          </div>
+
+          {/* Cartons Table List */}
+          <div className="overflow-x-auto max-h-[500px]">
+            <table className="w-full text-left text-xs border-collapse min-w-[750px]">
+              <thead
+                className={`uppercase text-[11px] font-mono font-extrabold border-b ${
+                  isDark ? 'bg-[#0F172A] text-white border-slate-700' : 'bg-slate-100 text-slate-900 border-slate-300'
+                }`}
+              >
+                <tr>
+                  <th className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50 w-10">
+                    <input
+                      type="checkbox"
+                      checked={
+                        filteredCartons.length > 0 && selectedCartonIds.length === filteredCartons.length
+                      }
+                      onChange={handleToggleSelectAll}
+                      className="rounded border-slate-400 cursor-pointer accent-blue-600"
+                    />
+                  </th>
+                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50">CTN NO</th>
+                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50">MARK & CUSTOMER</th>
+                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50">TRACKING NO</th>
+                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50">PRODUCT NAME</th>
+                  <th className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50">GROSS WT (KG)</th>
+                  <th className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50">CBM</th>
+                  <th className="p-3 text-center">STATUS</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200/60 dark:divide-slate-800/60">
+                {filteredCartons.length > 0 ? (
+                  filteredCartons.map((c) => {
+                    const isSelected = selectedCartonIds.includes(c.id);
+                    return (
+                      <tr
+                        key={c.id}
+                        onClick={() => handleToggleSelect(c.id)}
+                        className={`transition-colors duration-150 cursor-pointer ${
+                          isSelected
+                            ? isDark
+                              ? 'bg-blue-950/70 text-white font-bold border-l-4 border-l-blue-500'
+                              : 'bg-blue-50 text-slate-900 font-bold border-l-4 border-l-blue-600'
+                            : isDark
+                            ? 'bg-[#1E293B] hover:bg-slate-800 text-white'
+                            : 'bg-white hover:bg-slate-50 text-slate-900'
+                        }`}
+                      >
+                        <td className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50">
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleToggleSelect(c.id)}
+                            className="rounded border-slate-400 cursor-pointer accent-blue-600"
+                          />
+                        </td>
+                        <td className="p-3 font-mono font-extrabold border-r border-slate-200/60 dark:border-slate-700/50">
+                          {c.ctn_no}
+                        </td>
+                        <td className="p-3 border-r border-slate-200/60 dark:border-slate-700/50">
+                          <div className="font-mono font-extrabold text-blue-600 dark:text-sky-300">
+                            {c.shipping_mark}
+                          </div>
+                          {c.customer_name && !c.customer_name.includes('Unassigned') && (
+                            <div className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                              👤 {c.customer_name}
+                            </div>
+                          )}
+                        </td>
+                        <td className="p-3 font-mono text-xs border-r border-slate-200/60 dark:border-slate-700/50">
+                          {c.tracking_number}
+                        </td>
+                        <td className="p-3 border-r border-slate-200/60 dark:border-slate-700/50">
+                          <div className="font-bold text-xs truncate max-w-[200px]">{c.product_name_en}</div>
+                        </td>
+                        <td className="p-3 text-center font-mono font-bold text-emerald-600 dark:text-emerald-400 border-r border-slate-200/60 dark:border-slate-700/50">
+                          {c.gross_weight} kg
+                        </td>
+                        <td className="p-3 text-center font-mono font-bold text-purple-600 dark:text-purple-300 border-r border-slate-200/60 dark:border-slate-700/50">
+                          {c.cbm} CBM
+                        </td>
+                        <td className="p-3 text-center">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                            {c.status}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
+                ) : (
+                  <tr>
+                    <td colSpan={8} className="p-8 text-center text-slate-400">
+                      <Package className="w-8 h-8 mx-auto opacity-40 mb-2" />
+                      <div>{isBn ? 'ওয়্যারহাউজে কোনো স্টক কার্টুন পাওয়া যায়নি' : 'No available stock cartons found in this warehouse.'}</div>
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* SUBMIT BUTTON BAR */}
+          <div className="p-4 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
+            <div className="text-xs font-mono font-bold">
+              <span>{selectedCartonIds.length} Cartons Selected</span>
+            </div>
+
+            <button
+              type="submit"
+              disabled={selectedCartonIds.length === 0}
+              className={`px-6 py-2.5 rounded-xl font-extrabold text-xs flex items-center space-x-2 transition-all cursor-pointer shadow-md ${
+                selectedCartonIds.length > 0
+                  ? 'bg-blue-600 hover:bg-blue-500 text-white border border-blue-500'
+                  : 'bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-400/30'
+              }`}
+            >
+              <Send className="w-4 h-4" />
+              <span>{isBn ? 'ফ্লাইং প্রোপোজাল সাবমিট করুন' : 'Submit Flying Proposal Batch'}</span>
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  );
+};
