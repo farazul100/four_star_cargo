@@ -333,26 +333,31 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
           <div className="flex flex-col items-center space-y-3 shrink-0">
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="relative group cursor-pointer w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-[#00897B] shadow-xl overflow-hidden flex items-center justify-center bg-teal-50 dark:bg-slate-800 transition-all hover:scale-105 hover:border-amber-500"
+              className="relative group cursor-pointer w-28 h-28 sm:w-36 sm:h-36 border-4 border-[#00897B] shadow-2xl flex items-center justify-center bg-slate-900 transition-all hover:scale-105 hover:border-amber-500"
+              style={{ borderRadius: '9999px', overflow: 'hidden' }}
               title={isBn ? 'গ্যালারি থেকে ছবি পরিবর্তন করতে ক্লিক করুন' : 'Click to change profile photo'}
             >
               {photoUrl ? (
                 <img
                   src={photoUrl}
                   alt={currentUser.name}
-                  className="w-full h-full object-cover rounded-full"
+                  className="w-full h-full object-cover"
+                  style={{ borderRadius: '9999px' }}
                 />
               ) : (
-                <span className="font-black text-2xl sm:text-3xl text-[#00897B] dark:text-teal-400 select-none">
+                <span className="font-black text-2xl sm:text-4xl text-amber-400 select-none">
                   {getInitials(currentUser.name)}
                 </span>
               )}
 
               {/* Hover Overlay with Camera Icon */}
-              <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-all backdrop-blur-[2px]">
-                <Camera className="w-7 h-7 text-amber-400 animate-bounce mb-1" />
-                <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
-                  {isBn ? 'ছবি আপলোড' : 'Change Photo'}
+              <div
+                className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-all backdrop-blur-[2px]"
+                style={{ borderRadius: '9999px' }}
+              >
+                <Camera className="w-8 h-8 text-amber-400 animate-bounce mb-1" />
+                <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">
+                  {isBn ? 'ছবি পরিবর্তন' : 'Change Photo'}
                 </span>
               </div>
             </div>
@@ -363,7 +368,7 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
               className="text-xs font-semibold text-[#00897B] hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 bg-transparent border-0 outline-none cursor-pointer flex items-center gap-1.5 transition-colors"
             >
               <Camera className="w-3.5 h-3.5" />
-              <span>{isBn ? 'ছবি আপলোড করতে ক্লিক করুন (অটো-সাইজ কমবে)' : 'Click to Upload Photo (Auto-compressed)'}</span>
+              <span>{isBn ? 'ছবি আপলোড করতে ক্লিক করুন (রাউন্ড ফ্রেম)' : 'Click to Upload Photo (Round Frame)'}</span>
             </button>
           </div>
 
