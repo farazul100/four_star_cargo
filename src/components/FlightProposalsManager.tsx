@@ -27,6 +27,7 @@ import { FlyingProposal, Carton, Language, Theme, AuditLog } from '../types';
 import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSystemAuditAction } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
+import { FlightManifestExportModal, exportProposalToExcel, exportProposalToCSV } from './FlightManifestExportModal';
 
 interface FlightProposalsManagerProps {
   language: Language;
@@ -656,8 +657,37 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                         </span>
 
                         <button
+                          type="button"
+                          onClick={() => setPrintManifestProposal(prop)}
+                          className="px-2.5 py-1.5 rounded text-xs font-medium bg-slate-800 hover:bg-slate-700 text-white transition-all cursor-pointer flex items-center space-x-1 shadow-xs"
+                          title={isBn ? 'প্রিন্ট ও এক্সপোর্ট ম্যানিফেস্ট' : 'Print & Export Manifest'}
+                        >
+                          <Printer className="w-3.5 h-3.5" />
+                          <span>{isBn ? 'প্রিন্ট' : 'Print'}</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => exportProposalToExcel(prop, cartons)}
+                          className="px-2.5 py-1.5 rounded text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer flex items-center space-x-1 shadow-xs"
+                          title={isBn ? 'ডাউনলোড এক্সেল ফাইল (.xlsx)' : 'Download Excel (.xlsx)'}
+                        >
+                          <FileText className="w-3.5 h-3.5" />
+                          <span>Excel</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => exportProposalToCSV(prop, cartons)}
+                          className="px-2.5 py-1.5 rounded text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white transition-all cursor-pointer flex items-center space-x-1 shadow-xs"
+                          title={isBn ? 'ডাউনলোড গুগল শিট (.csv)' : 'Download Google Sheet (.csv)'}
+                        >
+                          <span>Sheet</span>
+                        </button>
+
+                        <button
                           onClick={() => setActiveModalProposal(prop)}
-                          className="px-3.5 py-1.5 rounded-none text-xs font-normal bg-[#00897B] hover:bg-[#00796B] text-white transition-all cursor-pointer flex items-center space-x-1.5 shadow-xs"
+                          className="px-3.5 py-1.5 rounded text-xs font-medium bg-[#00897B] hover:bg-[#00796B] text-white transition-all cursor-pointer flex items-center space-x-1.5 shadow-xs"
                         >
                           <Eye className="w-3.5 h-3.5" />
                           <span>{isBn ? 'কার্টুন অডিট ও সংশোধন' : 'Audit & Modify'}</span>
@@ -1740,106 +1770,15 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
       })()}
 
       {/* ========================================================================= */}
-      {/* 7. PRINTABLE FLIGHT MANIFEST REPORT MODAL */}
+      {/* 7. PRINTABLE & EXPORTABLE FLIGHT MANIFEST REPORT MODAL */}
       {/* ========================================================================= */}
       {printManifestProposal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-[#1E293B]/80 backdrop-blur-xs">
-          <div className="w-full max-w-3xl max-h-[90vh] overflow-y-auto rounded-none bg-white border border-slate-300 p-8 text-slate-900 shadow-2xl space-y-6">
-            <div className="flex items-center justify-between border-b pb-4">
-              <div className="flex items-center space-x-3">
-                <div className="w-12 h-12 rounded-none bg-teal-800 text-white flex items-center justify-center">
-                  <Plane className="w-6 h-6" />
-                </div>
-                <div>
-                  <h2 className="text-lg font-medium text-slate-900">M/S FOUR STAR CARGO SYSTEM</h2>
-                  <p className="text-xs text-slate-500 font-mono">OFFICIAL AIR FREIGHT MANIFEST REPORT</p>
-                </div>
-              </div>
-
-              <div className="text-right">
-                <span className="px-3 py-1 rounded-none text-xs font-mono font-medium bg-teal-100 text-teal-900 border border-teal-300">
-                  MANIFEST #{printManifestProposal.id.toUpperCase()}
-                </span>
-                <p className="text-xs font-mono text-slate-500 mt-1">Date: {printManifestProposal.date}</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 p-4 rounded-none bg-slate-50 border border-slate-200 text-xs">
-              <div>
-                <span className="text-[11px] text-slate-500 block uppercase font-normal">Flight No / Airline</span>
-                <span className="font-mono font-medium text-slate-900">{printManifestProposal.flight_number || 'N/A'} ({printManifestProposal.airline || 'Air Freight'})</span>
-              </div>
-              <div>
-                <span className="text-[11px] text-slate-500 block uppercase font-normal">Origin Hub</span>
-                <span className="font-medium text-slate-900">{printManifestProposal.warehouse_name}</span>
-              </div>
-              <div>
-                <span className="text-[11px] text-slate-500 block uppercase font-normal">Total Payload</span>
-                <span className="font-mono font-medium text-teal-800">{printManifestProposal.total_weight.toFixed(1)} kg / {printManifestProposal.total_cbm.toFixed(2)} CBM</span>
-              </div>
-              <div>
-                <span className="text-[11px] text-slate-500 block uppercase font-normal">Final Status</span>
-                <span className="font-mono font-medium text-emerald-800 uppercase">{printManifestProposal.status}</span>
-              </div>
-            </div>
-
-            <div className="border rounded-none overflow-hidden text-xs">
-              <table className="w-full text-left">
-                <thead className="bg-slate-100 text-slate-700 font-normal uppercase text-[10px]">
-                  <tr>
-                    <th className="p-3"># Carton No</th>
-                    <th className="p-3">Tracking Code</th>
-                    <th className="p-3">Product Description</th>
-                    <th className="p-3">Weight (KG)</th>
-                    <th className="p-3">CBM</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-200">
-                  {getProposalCartons(printManifestProposal).map((c, i) => (
-                    <tr key={c.id}>
-                      <td className="p-3 font-mono font-medium text-teal-800">{c.ctn_no}</td>
-                      <td className="p-3 font-mono text-slate-800">{c.tracking_number}</td>
-                      <td className="p-3 font-normal">{c.product_name_en}</td>
-                      <td className="p-3 font-mono font-medium">{c.gross_weight} kg</td>
-                      <td className="p-3 font-mono">{c.cbm} CBM</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <div className="pt-8 border-t border-slate-200 grid grid-cols-2 gap-8 text-xs text-center">
-              <div>
-                <div className="h-10 border-b border-dashed border-slate-400 mb-1" />
-                <p className="font-normal text-slate-700">Prepared by Warehouse Incharge</p>
-                <p className="text-[10px] text-slate-400 font-mono">{printManifestProposal.proposed_by_name}</p>
-              </div>
-
-              <div>
-                <div className="h-10 border-b border-dashed border-slate-400 mb-1" />
-                <p className="font-normal text-slate-700">Approved by Operations Director / Super Admin</p>
-                <p className="text-[10px] text-slate-400 font-mono">{printManifestProposal.finalized_by || 'Tanvir Ahmed (Super Admin)'}</p>
-              </div>
-            </div>
-
-            <div className="pt-4 border-t border-slate-200 flex items-center justify-between no-print">
-              <button
-                onClick={() => setPrintManifestProposal(null)}
-                className="px-4 py-2 rounded-none text-xs font-normal bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 cursor-pointer"
-              >
-                Close Report
-              </button>
-
-              <button
-                onClick={() => window.print()}
-                className="px-5 py-2 rounded-none text-xs font-normal bg-[#00897B] hover:bg-[#00796B] text-white shadow-sm flex items-center space-x-2 cursor-pointer"
-              >
-                <Printer className="w-4 h-4" />
-                <span>Print Official Manifest</span>
-              </button>
-            </div>
-          </div>
-        </div>
+        <FlightManifestExportModal
+          proposal={printManifestProposal}
+          cartons={cartons}
+          language={language}
+          onClose={() => setPrintManifestProposal(null)}
+        />
       )}
     </div>
   );

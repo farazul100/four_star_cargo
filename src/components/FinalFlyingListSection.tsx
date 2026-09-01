@@ -24,6 +24,7 @@ import {
 import { FlyingProposal, Carton, Language, Theme } from '../types';
 import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
+import { FlightManifestExportModal, exportProposalToExcel, exportProposalToCSV } from './FlightManifestExportModal';
 
 interface FinalFlyingListSectionProps {
   language: Language;
@@ -897,119 +898,12 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
 
       {/* 7. PRINT MANIFEST PREVIEW MODAL */}
       {printManifestProposal && (
-        <div className="fixed inset-0 bg-[#1E293B] backdrop-blur-xs z-50 flex items-center justify-center p-2 sm:p-4 font-sans">
-          <div className="bg-white text-slate-900 rounded-none w-full max-w-4xl max-h-[92vh] overflow-y-auto p-6 sm:p-8 space-y-6 border border-slate-300 shadow-2xl">
-            {/* Print Controls Header (Hidden during browser print) */}
-            <div className="flex items-center justify-between border-b pb-4 border-slate-200 print:hidden">
-              <div className="flex items-center space-x-2">
-                <Printer className="w-5 h-5 text-blue-600" />
-                <h3 className="text-sm font-normal text-slate-900">
-                  {isBn ? 'ফ্লাইট ম্যানিফেস্ট প্রিন্ট প্রিভিউ' : 'Flight Manifest Print Preview'}
-                </h3>
-              </div>
-              <div className="flex items-center space-x-2">
-                <button
-                  onClick={() => window.print()}
-                  className="px-4 py-2 rounded-none bg-blue-600 hover:bg-blue-700 text-white text-xs font-normal transition-colors flex items-center space-x-2 cursor-pointer border border-blue-600"
-                >
-                  <Printer className="w-4 h-4" />
-                  <span>{isBn ? 'প্রিন্ট করুন (Print)' : 'Print Manifest'}</span>
-                </button>
-                <button
-                  onClick={() => setPrintManifestProposal(null)}
-                  className="px-4 py-2 rounded-none border border-slate-300 hover:bg-slate-100 text-slate-600 text-xs font-light transition-colors cursor-pointer"
-                >
-                  {isBn ? 'বন্ধ করুন' : 'Close'}
-                </button>
-              </div>
-            </div>
-
-            {/* PRINTABLE MANIFEST DOCUMENT */}
-            <div className="space-y-6">
-              {/* Header Letterhead */}
-              <div className="text-center border-b pb-4 border-slate-300 space-y-1">
-                <h1 className="text-xl font-bold tracking-tight text-slate-900 uppercase">
-                  M/S FOUR STAR CARGO & LOGISTICS
-                </h1>
-                <p className="text-xs font-mono text-slate-600">
-                  INTERNATIONAL AIR CARGO DISPATCH MANIFEST
-                </p>
-                <p className="text-[11px] text-slate-500 font-light">
-                  Origin Hub: {printManifestProposal.warehouse_name} | Destination: {printManifestProposal.destination_warehouse_name || 'Dhaka Central Hub'}
-                </p>
-              </div>
-
-              {/* Manifest Info Table */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono border border-slate-300 p-3 bg-slate-50">
-                <div>
-                  <span className="text-slate-500 text-[10px] block">FLIGHT NO:</span>
-                  <span className="font-bold text-blue-700">{printManifestProposal.flight_number || 'BS-206'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 text-[10px] block">MASTER AWB:</span>
-                  <span className="font-bold text-slate-900">{printManifestProposal.awb_number || '157-889120'}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 text-[10px] block">DISPATCH DATE:</span>
-                  <span className="font-bold text-slate-900">{printManifestProposal.date}</span>
-                </div>
-                <div>
-                  <span className="text-slate-500 text-[10px] block">DISPATCHED BY:</span>
-                  <span className="font-bold text-slate-900">{printManifestProposal.proposed_by_name}</span>
-                </div>
-              </div>
-
-              {/* Summary Stats */}
-              <div className="flex items-center justify-between border-y border-slate-300 py-2 text-xs font-mono font-normal">
-                <span>TOTAL CARTONS: <strong>{printManifestProposal.items_count} CTNs</strong></span>
-                <span>TOTAL GROSS WEIGHT: <strong>{printManifestProposal.total_weight} KG</strong></span>
-                <span>TOTAL CBM: <strong>{printManifestProposal.total_cbm?.toFixed(2)} CBM</strong></span>
-              </div>
-
-              {/* Cartons Breakdown Table */}
-              <table className="w-full text-left text-xs border-collapse border border-slate-300 font-light">
-                <thead className="bg-slate-100 text-slate-800 uppercase text-[10px] font-normal border-b border-slate-300">
-                  <tr>
-                    <th className="p-2 border border-slate-300">SL</th>
-                    <th className="p-2 border border-slate-300">CTN NO</th>
-                    <th className="p-2 border border-slate-300">SHIPPING MARK</th>
-                    <th className="p-2 border border-slate-300">TRACKING NO</th>
-                    <th className="p-2 border border-slate-300">PRODUCT NAME</th>
-                    <th className="p-2 text-center border border-slate-300">QTY</th>
-                    <th className="p-2 text-center border border-slate-300">G.WEIGHT</th>
-                    <th className="p-2 text-center border border-slate-300">CBM</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-300">
-                  {printProposalCartons.map((c, idx) => (
-                    <tr key={c.id}>
-                      <td className="p-2 border border-slate-300 font-mono text-center">{idx + 1}</td>
-                      <td className="p-2 border border-slate-300 font-mono font-normal">{c.ctn_no}</td>
-                      <td className="p-2 border border-slate-300 font-mono">{c.shipping_mark || 'N/A'}</td>
-                      <td className="p-2 border border-slate-300 font-mono">{c.tracking_number}</td>
-                      <td className="p-2 border border-slate-300">{c.product_name_en}</td>
-                      <td className="p-2 border border-slate-300 font-mono text-center">{c.quantity || 1} pcs</td>
-                      <td className="p-2 border border-slate-300 font-mono text-center font-normal">{c.gross_weight} kg</td>
-                      <td className="p-2 border border-slate-300 font-mono text-center font-normal">{c.cbm} CBM</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-
-              {/* Footer Signatures */}
-              <div className="grid grid-cols-2 gap-8 pt-12 text-xs font-light text-slate-600">
-                <div className="border-t border-slate-400 pt-2 text-center">
-                  <p>Prepared By: {printManifestProposal.proposed_by_name}</p>
-                  <p className="text-[10px] text-slate-400">Warehouse Incharge Signature</p>
-                </div>
-                <div className="border-t border-slate-400 pt-2 text-center">
-                  <p>Approved By: Operations Director</p>
-                  <p className="text-[10px] text-slate-400">Air Cargo Authorization Stamp</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <FlightManifestExportModal
+          proposal={printManifestProposal}
+          cartons={cartons}
+          language={language}
+          onClose={() => setPrintManifestProposal(null)}
+        />
       )}
 
       {/* 8. PROOF PHOTO MODAL */}
