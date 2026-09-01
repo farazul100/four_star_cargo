@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { Plane, RefreshCw, Layers, MapPin, CheckCircle2, PackageCheck, ArrowRight, AlertCircle } from 'lucide-react';
 import { Carton, FlyingProposal, Language, Theme } from '../types';
 import { useTheme } from '../context/ThemeContext';
+import { getProposalDisplayCode } from '../lib/db';
 import { CARGO_PLANE_BASE64 } from './cargoPlaneData';
 
 interface LiveCargoTrackingMapProps {
@@ -133,7 +134,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
 
   const totalWeight = currentProposal?.total_weight || 0;
   const cartonsCount = currentProposal?.items_count || (currentProposal?.carton_ids || []).length || 0;
-  const flightName = currentProposal?.flying_name || currentProposal?.flight_number || 'BS-206';
+  const lotDisplayCode = getProposalDisplayCode(currentProposal) || 'LOT-BS-206';
   const awb = currentProposal?.awb_number || '157-889120';
 
   return (
@@ -165,7 +166,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
               </option>
               {activeProposals.map((p, idx) => (
                 <option key={p.id || idx} value={p.id}>
-                  {p.flying_name || p.flight_number || `Flight #${idx + 1}`} ({p.total_weight || 0}kg)
+                  ✈️ {getProposalDisplayCode(p)} ({p.total_weight || 0}kg)
                 </option>
               ))}
             </select>
@@ -261,7 +262,7 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
             <div className="absolute -top-11 left-1/2 -translate-x-1/2 whitespace-nowrap bg-[#1E293B]/90 text-white border border-amber-500/80 px-3 py-1 rounded-xl shadow-2xl backdrop-blur-md flex items-center gap-2 animate-bounce z-40">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
               <span className="text-[11px] font-black text-amber-400 uppercase tracking-widest">
-                ✈️ #{flightName}
+                ✈️ {lotDisplayCode}
               </span>
               <span className="text-[10px] font-bold text-slate-300">
                 ({cartonsCount} CTNs)
@@ -320,8 +321,8 @@ export const LiveCargoTrackingMap: React.FC<LiveCargoTrackingMapProps> = ({
 
           <div className="mt-2 pt-1.5 border-t border-slate-700/80 flex items-center justify-between text-[10px] text-slate-300">
             <div>
-              <span className="text-slate-400 block text-[9px]">Flight No:</span>
-              <span className="font-bold text-white">{currentProposal ? `#${flightName}` : 'N/A'}</span>
+              <span className="text-slate-400 block text-[9px]">Flight No / Lot:</span>
+              <span className="font-bold text-white">{currentProposal ? lotDisplayCode : 'N/A'}</span>
             </div>
             <div className="text-right">
               <span className="text-slate-400 block text-[9px]">Total Cargo:</span>
