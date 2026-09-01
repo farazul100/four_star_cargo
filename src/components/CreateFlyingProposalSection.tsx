@@ -370,9 +370,9 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
             </div>
           </div>
 
-          {/* Cartons Table List */}
-          <div className="overflow-x-auto max-h-[480px]">
-            <table className="w-full text-left text-xs border-collapse min-w-[750px]">
+          {/* Cartons Table List with ALL Columns & SEPARATE Customer Name Column (No Icons!) */}
+          <div className="overflow-x-auto max-h-[500px]">
+            <table className="w-full text-left text-xs border-collapse min-w-[900px]">
               <thead
                 className={`text-xs font-semibold border-b transition-colors ${
                   isDark ? 'bg-[#0F172A] text-slate-300 border-slate-700' : 'bg-slate-50 text-slate-700 border-slate-200'
@@ -389,19 +389,26 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                       className="rounded border-slate-300 cursor-pointer accent-blue-600"
                     />
                   </th>
-                  <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold">CTN NO</th>
-                  <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold">MARK & CUSTOMER</th>
-                  <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold">TRACKING NO</th>
-                  <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold">PRODUCT NAME</th>
-                  <th className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50 font-semibold">GROSS WT (KG)</th>
-                  <th className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50 font-semibold">CBM</th>
-                  <th className="p-2.5 text-center font-semibold">STATUS</th>
+                  <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">CTN NO</th>
+                  <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">SHIPPING MARK</th>
+                  <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">CUSTOMER NAME</th>
+                  <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">TRACKING NO</th>
+                  <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">PRODUCT NAME</th>
+                  <th className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">QTY / CTNS</th>
+                  <th className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">GROSS WT (KG)</th>
+                  <th className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">CHARGEABLE WT (KG)</th>
+                  <th className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">CBM</th>
+                  <th className="p-2.5 text-center font-semibold whitespace-nowrap">STATUS</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200/60 dark:divide-slate-800/60 text-xs font-normal">
                 {filteredCartons.length > 0 ? (
                   filteredCartons.map((c) => {
                     const isSelected = selectedCartonIds.includes(c.id);
+                    const custNameClean = c.customer_name && !c.customer_name.includes('Unassigned')
+                      ? c.customer_name
+                      : 'Unassigned';
+
                     return (
                       <tr
                         key={c.id}
@@ -424,32 +431,42 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                             className="rounded border-slate-300 cursor-pointer accent-blue-600"
                           />
                         </td>
-                        <td className="p-2.5 font-medium border-r border-slate-200/60 dark:border-slate-700/50 text-slate-800 dark:text-slate-200">
+                        <td className="p-2.5 font-medium border-r border-slate-200/60 dark:border-slate-700/50 text-slate-800 dark:text-slate-200 whitespace-nowrap">
                           {c.ctn_no}
                         </td>
-                        <td className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50">
-                          <div className="font-semibold text-blue-700 dark:text-sky-300">
-                            {c.shipping_mark}
-                          </div>
-                          {c.customer_name && !c.customer_name.includes('Unassigned') && (
-                            <div className="text-[11px] font-normal text-emerald-700 dark:text-emerald-400 mt-0.5 flex items-center space-x-1">
-                              <span>👤 {c.customer_name}</span>
-                            </div>
+                        <td className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-medium text-blue-700 dark:text-sky-300 whitespace-nowrap">
+                          {c.shipping_mark}
+                        </td>
+                        <td className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 text-slate-800 dark:text-slate-200 whitespace-nowrap">
+                          {custNameClean !== 'Unassigned' ? (
+                            <span className="text-emerald-700 dark:text-emerald-400 font-medium">
+                              {custNameClean}
+                            </span>
+                          ) : (
+                            <span className="text-slate-400 dark:text-slate-500 italic">
+                              Unassigned
+                            </span>
                           )}
                         </td>
-                        <td className="p-2.5 font-mono text-slate-600 dark:text-slate-300 border-r border-slate-200/60 dark:border-slate-700/50">
+                        <td className="p-2.5 font-mono text-slate-600 dark:text-slate-300 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap">
                           {c.tracking_number}
                         </td>
-                        <td className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50">
-                          <div className="font-normal text-slate-800 dark:text-slate-200 truncate max-w-[200px]">{c.product_name_en}</div>
+                        <td className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 max-w-[200px] truncate">
+                          {c.product_name_en}
                         </td>
-                        <td className="p-2.5 text-center font-medium text-slate-800 dark:text-slate-200 border-r border-slate-200/60 dark:border-slate-700/50">
+                        <td className="p-2.5 text-center font-medium text-slate-800 dark:text-slate-200 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap">
+                          {c.quantity || 1}
+                        </td>
+                        <td className="p-2.5 text-center font-medium text-slate-800 dark:text-slate-200 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap">
                           {c.gross_weight} kg
                         </td>
-                        <td className="p-2.5 text-center font-medium text-slate-800 dark:text-slate-200 border-r border-slate-200/60 dark:border-slate-700/50">
+                        <td className="p-2.5 text-center font-medium text-slate-800 dark:text-slate-200 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap">
+                          {c.chargeable_weight || c.gross_weight} kg
+                        </td>
+                        <td className="p-2.5 text-center font-medium text-slate-800 dark:text-slate-200 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap">
                           {c.cbm} CBM
                         </td>
-                        <td className="p-2.5 text-center">
+                        <td className="p-2.5 text-center whitespace-nowrap">
                           <span className="px-2 py-0.5 rounded text-[10px] font-medium uppercase bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
                             {c.status}
                           </span>
@@ -459,7 +476,7 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                   })
                 ) : (
                   <tr>
-                    <td colSpan={8} className="p-8 text-center text-slate-400">
+                    <td colSpan={11} className="p-8 text-center text-slate-400">
                       <Package className="w-7 h-7 mx-auto opacity-40 mb-2" />
                       <div className="font-normal">{isBn ? 'ওয়্যারহাউজে কোনো স্টক কার্টুন পাওয়া যায়নি' : 'No available stock cartons found in this warehouse.'}</div>
                     </td>

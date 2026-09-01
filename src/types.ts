@@ -88,6 +88,7 @@ export interface Carton {
   gross_weight: number; // kg
   origin_weight?: number; // Original booked weight at China/Origin hub (kg)
   bd_calibrated_weight?: number; // Official calibrated weight at BD Warehouse (kg)
+  chargeable_weight?: number; // Chargeable weight (kg)
   cbm: number;
   photo_url?: string; // Proof / Package Slip Photo
   photo_proofs?: string[]; // Multiple photos / proof attachments
