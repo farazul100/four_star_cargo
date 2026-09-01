@@ -866,6 +866,71 @@ export const fetchServerDbAndSync = async () => {
                   localStorage.setItem('fsc_vps_warehouses', cleanStr);
                   hasChanges = true;
                 }
+              } else if (key === DB_KEYS.CARTONS || key === 'fsc_vps_cartons') {
+                const localCartons: Carton[] = localRaw ? JSON.parse(localRaw) : [];
+                const serverCartons: Carton[] = Array.isArray(serverData) ? serverData : [];
+                const cartonMap = new Map<string, Carton>();
+
+                serverCartons.forEach((sc) => {
+                  if (sc && sc.id) {
+                    cartonMap.set(sc.id, sc);
+                  }
+                });
+
+                localCartons.forEach((lc) => {
+                  if (lc && lc.id) {
+                    const existing = cartonMap.get(lc.id);
+                    if (!existing) {
+                      cartonMap.set(lc.id, lc);
+                    } else {
+                      cartonMap.set(lc.id, {
+                        ...existing,
+                        ...lc,
+                        customer_id: lc.customer_id || existing.customer_id,
+                        customer_code: lc.customer_code || existing.customer_code,
+                        customer_name: lc.customer_name || existing.customer_name,
+                      });
+                    }
+                  }
+                });
+
+                const mergedCartons = Array.from(cartonMap.values());
+                const mergedStr = JSON.stringify(mergedCartons);
+                if (localRaw !== mergedStr) {
+                  localStorage.setItem(DB_KEYS.CARTONS, mergedStr);
+                  localStorage.setItem('fsc_vps_cartons', mergedStr);
+                  if (typeof window !== 'undefined') {
+                    window.__FSC_GLOBAL_CARTONS__ = mergedCartons;
+                  }
+                  hasChanges = true;
+                }
+              } else if (key === DB_KEYS.CUSTOMERS || key === 'fsc_vps_customers') {
+                const localCusts: Customer[] = localRaw ? JSON.parse(localRaw) : [];
+                const serverCusts: Customer[] = Array.isArray(serverData) ? serverData : [];
+                const custMap = new Map<string, Customer>();
+
+                serverCusts.forEach((sc) => {
+                  if (sc && sc.id) custMap.set(sc.id, sc);
+                });
+
+                localCusts.forEach((lc) => {
+                  if (lc && lc.id) {
+                    const existing = custMap.get(lc.id);
+                    if (!existing) {
+                      custMap.set(lc.id, lc);
+                    } else {
+                      custMap.set(lc.id, { ...existing, ...lc });
+                    }
+                  }
+                });
+
+                const mergedCusts = Array.from(custMap.values());
+                const mergedStr = JSON.stringify(mergedCusts);
+                if (localRaw !== mergedStr) {
+                  localStorage.setItem(DB_KEYS.CUSTOMERS, mergedStr);
+                  localStorage.setItem('fsc_vps_customers', mergedStr);
+                  hasChanges = true;
+                }
               } else {
                 const serverStr = JSON.stringify(serverData);
                 if (localRaw !== serverStr) {
