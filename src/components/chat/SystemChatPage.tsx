@@ -601,12 +601,19 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                           />
                         ) : (
                           <div
-                            className={`w-8 h-8 rounded-full font-bold text-xs flex items-center justify-center border ${
+                            className={`w-8 h-8 rounded-full font-bold text-xs flex items-center justify-center border shrink-0 ${
                               isDark 
                                 ? 'bg-[#00897B]/20 text-[#26A69A] border-[#00897B]/40' 
                                 : 'bg-[#00897B]/15 text-[#00897B] border-[#00897B]/30'
                             }`}
-                            style={{ borderRadius: '50%' }}
+                            style={{
+                              width: '32px',
+                              height: '32px',
+                              borderRadius: '50%',
+                              clipPath: 'circle(50% at 50% 50%)',
+                              WebkitClipPath: 'circle(50% at 50% 50%)',
+                              overflow: 'hidden',
+                            }}
                           >
                             {initials}
                           </div>
@@ -907,8 +914,14 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                         />
                       ) : (
                         <div
-                          className="w-5 h-5 rounded-full bg-[#00897B] text-white flex items-center justify-center font-bold text-[9px] shrink-0"
-                          style={{ borderRadius: '50%' }}
+                          className="w-5 h-5 rounded-full bg-[#00897B] text-white flex items-center justify-center font-bold text-[9px] shrink-0 overflow-hidden"
+                          style={{
+                            width: '20px',
+                            height: '20px',
+                            borderRadius: '50%',
+                            clipPath: 'circle(50% at 50% 50%)',
+                            WebkitClipPath: 'circle(50% at 50% 50%)',
+                          }}
                         >
                           {msg.sender_name[0]?.toUpperCase() || 'U'}
                         </div>
