@@ -907,9 +907,13 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
                       {/* Customer Card Details Grid */}
                       <div className="grid grid-cols-2 gap-3 pt-3 text-xs">
-                        <div className="col-span-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-between">
-                          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">{isBn ? 'কাস্টমার অ্যাকাউন্ট:' : 'Customer Account:'}</span>
-                          <strong className="text-xs font-extrabold text-blue-600 dark:text-sky-300 font-sans flex items-center space-x-1">
+                        <div className={`col-span-2 p-2.5 rounded-xl border flex items-center justify-between transition-colors ${
+                          isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-blue-50/70 border-blue-200/90 text-slate-900'
+                        }`}>
+                          <span className={`text-[11px] font-bold ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{isBn ? 'কাস্টমার অ্যাকাউন্ট:' : 'Customer Account:'}</span>
+                          <strong className={`text-xs font-extrabold font-sans flex items-center space-x-1.5 ${
+                            isDark ? 'text-sky-300' : 'text-blue-700'
+                          }`}>
                             <User className="w-3.5 h-3.5 text-blue-500" />
                             <span>{firstCarton?.customer_name || (isBn ? 'ম্যাপ করা হয়নি' : 'Unassigned')}</span>
                           </strong>
