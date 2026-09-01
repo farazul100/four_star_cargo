@@ -163,15 +163,34 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     return getHostingerDbData().customers || [];
   });
 
-  const handleOpenCustomerMapping = (shippingMark: string) => {
+  const handleOpenCustomerMapping = (shippingMarkOrTracking: string) => {
     const dbCusts = getHostingerDbData().customers || [];
     setAllDbCustomersList(dbCusts);
-    setMapCustomerModalMark(shippingMark);
+    setMapCustomerModalMark(shippingMarkOrTracking);
     setIsNewCustMapping(false);
     setNewCustMappingName('');
     setNewCustMappingPhone('');
+
+    const targetKey = shippingMarkOrTracking.toLowerCase().trim();
+    const dbCartons = getHostingerDbData().cartons || [];
+    const targetCarton = dbCartons.find((c) => {
+      const matchMark = (c.shipping_mark || '').toLowerCase().trim();
+      const matchTrk = (c.tracking_number || '').toLowerCase().trim();
+      const matchMasterTrk = (c.master_tracking_number || '').toLowerCase().trim();
+      const matchGroup = (c.master_group_id || '').toLowerCase().trim();
+      return matchMark === targetKey || matchTrk === targetKey || matchMasterTrk === targetKey || matchGroup === targetKey;
+    });
+
+    if (targetCarton && targetCarton.customer_id) {
+      const existingCust = dbCusts.find((c) => c.id === targetCarton.customer_id);
+      if (existingCust) {
+        setMapSelectedCustomerId(existingCust.id);
+        return;
+      }
+    }
+
     const matchingCust = dbCusts.find(
-      (c) => c.shipping_mark && c.shipping_mark.toLowerCase() === shippingMark.toLowerCase()
+      (c) => c.shipping_mark && (c.shipping_mark.toLowerCase().trim() === targetKey || targetCarton?.shipping_mark?.toLowerCase().trim() === c.shipping_mark.toLowerCase().trim())
     );
     if (matchingCust) {
       setMapSelectedCustomerId(matchingCust.id);
@@ -214,9 +233,20 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     );
     saveHostingerDbData('fsc_vps_customers', updatedCusts);
 
+    const targetKey = mapCustomerModalMark.toLowerCase().trim();
     const currentCartons = dbData.cartons || [];
     const updatedCartons = currentCartons.map((c) => {
-      if (c.shipping_mark && c.shipping_mark.toLowerCase() === mapCustomerModalMark.toLowerCase()) {
+      const matchMark = (c.shipping_mark || '').toLowerCase().trim();
+      const matchTrk = (c.tracking_number || '').toLowerCase().trim();
+      const matchMasterTrk = (c.master_tracking_number || '').toLowerCase().trim();
+      const matchGroup = (c.master_group_id || '').toLowerCase().trim();
+
+      if (
+        matchMark === targetKey ||
+        matchTrk === targetKey ||
+        matchMasterTrk === targetKey ||
+        matchGroup === targetKey
+      ) {
         return {
           ...c,
           customer_id: targetCust!.id,
@@ -231,12 +261,24 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     saveHostingerDbData('fsc_vps_cartons', updatedCartons);
     setLiveRealtimeCartons(updatedCartons);
 
+    if (onUpdateCarton) {
+      updatedCartons.forEach((c) => {
+        const matchMark = (c.shipping_mark || '').toLowerCase().trim();
+        const matchTrk = (c.tracking_number || '').toLowerCase().trim();
+        const matchMasterTrk = (c.master_tracking_number || '').toLowerCase().trim();
+        const matchGroup = (c.master_group_id || '').toLowerCase().trim();
+        if (matchMark === targetKey || matchTrk === targetKey || matchMasterTrk === targetKey || matchGroup === targetKey) {
+          onUpdateCarton(c);
+        }
+      });
+    }
+
     logSystemAuditAction(
       currentUser,
       'MAP_CUSTOMER_TO_MARK',
       'carton',
       mapCustomerModalMark,
-      `অপারেশন টিম শিপিং মার্ক ${mapCustomerModalMark} এর সাথে কাস্টমার "${targetCust.name}" সফলভাবে ট্যাগ করেছেন`
+      `অপারেশন টিম শিপিং মার্ক / ট্র্যাকিং ${mapCustomerModalMark} এর সাথে কাস্টমার "${targetCust.name}" সফলভাবে ট্যাগ করেছেন`
     );
 
     setMapCustomerModalMark(null);

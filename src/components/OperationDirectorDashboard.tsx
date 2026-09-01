@@ -352,6 +352,9 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
         warehouses={warehouses}
         currentUser={currentUser}
         language={language}
+        onUpdateCarton={(updatedCarton) => {
+          setCartons((prev) => prev.map((c) => (c.id === updatedCarton.id ? updatedCarton : c)));
+        }}
       />
     );
   }
