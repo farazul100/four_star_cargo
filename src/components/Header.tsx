@@ -150,17 +150,22 @@ export const Header: React.FC<HeaderProps> = ({
     navigate(targetUrl);
   };
 
-  const getRoleBadge = (role?: string) => {
-    switch (role) {
-      case 'super_admin': return { text: 'SA', bg: 'bg-[#00897B]', label: 'Super Admin' };
-      case 'operation_director': return { text: 'OD', bg: 'bg-[#1E88E5]', label: 'Operation Director' };
-      case 'warehouse_incharge': return { text: 'WI', bg: 'bg-[#8E24AA]', label: 'Warehouse Incharge' };
-      case 'accountant': return { text: 'AC', bg: 'bg-[#F57C00]', label: 'Accountant' };
-      default: return { text: 'U', bg: 'bg-gray-600', label: 'User' };
+  const getUserBadge = (user: User | null) => {
+    if (!user) return { initials: 'U', name: 'User' };
+    const fullName = user.name || user.username || 'User';
+    const parts = fullName.trim().split(/\s+/);
+    let initials = 'U';
+    if (parts.length >= 2) {
+      initials = (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    } else if (parts[0].length >= 2) {
+      initials = parts[0].slice(0, 2).toUpperCase();
+    } else {
+      initials = parts[0].toUpperCase();
     }
+    return { initials, name: fullName };
   };
 
-  const badgeConfig = getRoleBadge(currentUser?.role);
+  const userBadge = getUserBadge(currentUser);
 
   const renderNotifIcon = (type: NotificationItem['type']) => {
     switch (type) {
@@ -350,15 +355,15 @@ export const Header: React.FC<HeaderProps> = ({
                 translate="no"
                 className={`notranslate w-8 h-8 rounded-full bg-[#00897B] text-white flex items-center justify-center font-bold text-xs shadow-xs select-none`}
               >
-                {badgeConfig.text}
+                {userBadge.initials}
               </div>
 
-              {/* User Role / Name Label */}
+              {/* User Created Name Label */}
               <span
                 translate="no"
                 className={`notranslate hidden sm:block text-xs font-medium ${isDark ? 'text-white' : 'text-gray-900'}`}
               >
-                {badgeConfig.label}
+                {userBadge.name}
               </span>
             </button>
 
@@ -372,7 +377,7 @@ export const Header: React.FC<HeaderProps> = ({
                 {/* Header Info */}
                 <div className={`p-3.5 border-b ${isDark ? 'border-slate-700' : 'border-slate-100'}`}>
                   <p className="font-semibold text-xs text-slate-900 dark:text-white truncate">
-                    {badgeConfig.label}
+                    {userBadge.name}
                   </p>
                   <p className="text-[11px] text-slate-400 capitalize mt-0.5 font-normal">
                     {currentUser.role?.replace('_', ' ') || 'owner'}
