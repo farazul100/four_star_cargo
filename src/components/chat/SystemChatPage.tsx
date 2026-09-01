@@ -592,13 +592,25 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                     >
                       {/* Avatar Circle with Real-Time Online Badge */}
                       <div className="relative shrink-0">
-                        <div className={`w-8 h-8 rounded-none font-bold text-xs flex items-center justify-center border ${
-                          isDark 
-                            ? 'bg-[#00897B]/20 text-[#26A69A] border-[#00897B]/40' 
-                            : 'bg-[#00897B]/15 text-[#00897B] border-[#00897B]/30'
-                        }`}>
-                          {initials}
-                        </div>
+                        {userItem.avatar_url || userItem.photo_url ? (
+                          <img
+                            src={userItem.avatar_url || userItem.photo_url}
+                            alt={userItem.name}
+                            className="w-8 h-8 rounded-full object-cover border border-[#00897B]/40 select-none shrink-0"
+                            style={{ width: '32px', height: '32px', borderRadius: '50%', clipPath: 'circle(50% at 50% 50%)', WebkitClipPath: 'circle(50% at 50% 50%)' }}
+                          />
+                        ) : (
+                          <div
+                            className={`w-8 h-8 rounded-full font-bold text-xs flex items-center justify-center border ${
+                              isDark 
+                                ? 'bg-[#00897B]/20 text-[#26A69A] border-[#00897B]/40' 
+                                : 'bg-[#00897B]/15 text-[#00897B] border-[#00897B]/30'
+                            }`}
+                            style={{ borderRadius: '50%' }}
+                          >
+                            {initials}
+                          </div>
+                        )}
                         {online ? (
                           <span
                             className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-slate-900 animate-pulse"
@@ -789,13 +801,33 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                   <ArrowLeft className="w-5 h-5 text-[#00897B]" />
                 </button>
 
-                <div className={`w-8 h-8 rounded-none font-bold text-xs flex items-center justify-center border ${
-                  isDark 
-                    ? 'bg-[#00897B]/20 text-[#26A69A] border-[#00897B]/40' 
-                    : 'bg-[#00897B]/15 text-[#00897B] border-[#00897B]/30'
-                }`}>
-                  {activeConvo.type === 'group' ? <Users className="w-4 h-4" /> : <UserIcon className="w-4 h-4" />}
-                </div>
+                {(() => {
+                  const otherUser = activeConvo.type === 'direct'
+                    ? allUsers.find((u) => u.id !== currentUser.id && activeConvo.participants.includes(u.id))
+                    : null;
+                  const otherPhoto = otherUser?.avatar_url || otherUser?.photo_url;
+
+                  if (otherPhoto) {
+                    return (
+                      <img
+                        src={otherPhoto}
+                        alt={otherUser?.name || 'Chat User'}
+                        className="w-8 h-8 rounded-full object-cover border border-[#00897B] shrink-0"
+                        style={{ width: '32px', height: '32px', borderRadius: '50%', clipPath: 'circle(50% at 50% 50%)', WebkitClipPath: 'circle(50% at 50% 50%)' }}
+                      />
+                    );
+                  }
+
+                  return (
+                    <div className={`w-8 h-8 rounded-full font-bold text-xs flex items-center justify-center border ${
+                      isDark 
+                        ? 'bg-[#00897B]/20 text-[#26A69A] border-[#00897B]/40' 
+                        : 'bg-[#00897B]/15 text-[#00897B] border-[#00897B]/30'
+                    }`} style={{ borderRadius: '50%' }}>
+                      {activeConvo.type === 'group' ? <Users className="w-4 h-4" /> : <UserIcon className="w-4 h-4" />}
+                    </div>
+                  );
+                })()}
                 <div>
                   <h3 className={`font-bold text-xs sm:text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>
                     {getConvoTitle(activeConvo)}
@@ -851,6 +883,9 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
 
                 const imgSrc = msg.image_url || (msg.content && msg.content.startsWith('data:image/') ? msg.content : null);
                 const hasTextContent = msg.content && !msg.content.startsWith('data:image/') && msg.content !== '📷 Image' && msg.content !== '📷 ছবি';
+                
+                const senderUser = allUsers.find((u) => u.id === msg.sender_id);
+                const senderPhoto = senderUser?.avatar_url || senderUser?.photo_url || (isMe ? (currentUser.avatar_url || currentUser.photo_url) : null);
 
                 return (
                   <div
@@ -860,6 +895,21 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                     <div className={`flex items-center space-x-1.5 mb-1 text-[10px] ${
                       isDark ? 'text-slate-400' : 'text-slate-600'
                     }`}>
+                      {senderPhoto ? (
+                        <img
+                          src={senderPhoto}
+                          alt={msg.sender_name}
+                          className="w-5 h-5 rounded-full object-cover border border-[#00897B] shrink-0"
+                          style={{ width: '20px', height: '20px', borderRadius: '50%', clipPath: 'circle(50% at 50% 50%)', WebkitClipPath: 'circle(50% at 50% 50%)' }}
+                        />
+                      ) : (
+                        <div
+                          className="w-5 h-5 rounded-full bg-[#00897B] text-white flex items-center justify-center font-bold text-[9px] shrink-0"
+                          style={{ borderRadius: '50%' }}
+                        >
+                          {msg.sender_name[0]?.toUpperCase() || 'U'}
+                        </div>
+                      )}
                       <span className={`font-bold ${isDark ? 'text-slate-200' : 'text-slate-800'}`}>{msg.sender_name}</span>
                       <span>({msg.sender_role})</span>
                       <span>•</span>

@@ -351,11 +351,20 @@ export const SystemChatModal: React.FC<SystemChatModalProps> = ({
                       }`}
                     >
                       <div className="relative shrink-0">
-                        <div className={`w-9 h-9 rounded-full font-bold text-xs flex items-center justify-center ${
-                          isActive ? 'bg-white/20 text-white' : 'bg-blue-600/20 text-blue-500 border border-blue-500/30'
-                        }`}>
-                          {userItem.name[0]?.toUpperCase()}
-                        </div>
+                        {userItem.avatar_url || userItem.photo_url ? (
+                          <img
+                            src={userItem.avatar_url || userItem.photo_url}
+                            alt={userItem.name}
+                            className="w-9 h-9 rounded-full object-cover border border-blue-500/40 select-none shrink-0"
+                            style={{ width: '36px', height: '36px', borderRadius: '50%', clipPath: 'circle(50% at 50% 50%)', WebkitClipPath: 'circle(50% at 50% 50%)' }}
+                          />
+                        ) : (
+                          <div className={`w-9 h-9 rounded-full font-bold text-xs flex items-center justify-center ${
+                            isActive ? 'bg-white/20 text-white' : 'bg-blue-600/20 text-blue-500 border border-blue-500/30'
+                          }`} style={{ borderRadius: '50%' }}>
+                            {userItem.name[0]?.toUpperCase()}
+                          </div>
+                        )}
                         <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border-2 border-slate-900" />
                       </div>
 
@@ -468,12 +477,30 @@ export const SystemChatModal: React.FC<SystemChatModalProps> = ({
               <div className="flex-1 overflow-y-auto p-4 space-y-4">
                 {activeMessages.map((msg) => {
                   const isMe = msg.sender_id === currentUser.id;
+                  const senderUser = allUsers.find((u) => u.id === msg.sender_id);
+                  const senderPhoto = senderUser?.avatar_url || senderUser?.photo_url || (isMe ? (currentUser.avatar_url || currentUser.photo_url) : null);
+
                   return (
                     <div
                       key={msg.id}
                       className={`flex flex-col ${isMe ? 'items-end' : 'items-start'}`}
                     >
                       <div className="flex items-center space-x-1.5 mb-1 text-[10px] text-slate-400">
+                        {senderPhoto ? (
+                          <img
+                            src={senderPhoto}
+                            alt={msg.sender_name}
+                            className="w-4 h-4 rounded-full object-cover border border-[#00897B] shrink-0"
+                            style={{ width: '18px', height: '18px', borderRadius: '50%', clipPath: 'circle(50% at 50% 50%)', WebkitClipPath: 'circle(50% at 50% 50%)' }}
+                          />
+                        ) : (
+                          <div
+                            className="w-4 h-4 rounded-full bg-[#00897B] text-white flex items-center justify-center font-bold text-[8px] shrink-0"
+                            style={{ borderRadius: '50%' }}
+                          >
+                            {msg.sender_name[0]?.toUpperCase() || 'U'}
+                          </div>
+                        )}
                         <span className="font-semibold text-slate-700 dark:text-slate-300">{msg.sender_name}</span>
                         <span>({msg.sender_role})</span>
                         <span>•</span>
