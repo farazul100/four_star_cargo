@@ -86,6 +86,7 @@ export const exportProposalToExcel = (proposal: FlyingProposal, cartons: Carton[
             const custMark = c.customer_name && !c.customer_name.includes('Unassigned') 
               ? `${c.shipping_mark}<br/>${c.customer_name}` 
               : c.shipping_mark;
+            const trackingNo = c.tracking_number || c.master_tracking_number || c.pathao_tracking_code || c.packaging_number || `TRK-${c.ctn_no}`;
 
             return `
               <tr>
@@ -100,7 +101,7 @@ export const exportProposalToExcel = (proposal: FlyingProposal, cartons: Carton[
                 <td>${(c.net_weight || c.gross_weight * 0.9).toFixed(1)}</td>
                 <td>${c.gross_weight.toFixed(1)}</td>
                 <td>${c.cbm.toFixed(2)}</td>
-                <td>${c.tracking_number}</td>
+                <td>${trackingNo}</td>
               </tr>
             `;
           })
@@ -172,7 +173,7 @@ export const exportProposalToCSV = (proposal: FlyingProposal, cartons: Carton[])
       (c.net_weight || c.gross_weight * 0.9).toFixed(1),
       c.gross_weight.toFixed(1),
       c.cbm.toFixed(2),
-      c.tracking_number,
+      c.tracking_number || c.master_tracking_number || c.pathao_tracking_code || c.packaging_number || `TRK-${c.ctn_no}`,
     ]),
   ];
 
@@ -326,6 +327,7 @@ export const FlightManifestExportModal: React.FC<FlightManifestExportModalProps>
                       c.customer_name && !c.customer_name.includes('Unassigned')
                         ? `${c.shipping_mark}\n${c.customer_name}`
                         : c.shipping_mark;
+                    const trackingNo = c.tracking_number || c.master_tracking_number || c.pathao_tracking_code || c.packaging_number || `TRK-${c.ctn_no}`;
 
                     return (
                       <tr key={c.id} className="text-center">
@@ -342,7 +344,7 @@ export const FlightManifestExportModal: React.FC<FlightManifestExportModalProps>
                         <td className="p-2 border border-black">{(c.net_weight || c.gross_weight * 0.9).toFixed(1)}</td>
                         <td className="p-2 border border-black font-semibold">{c.gross_weight.toFixed(1)}</td>
                         <td className="p-2 border border-black">{c.cbm.toFixed(2)}</td>
-                        <td className="p-2 border border-black font-mono text-[11px]">{c.tracking_number}</td>
+                        <td className="p-2 border border-black font-mono text-[11px] font-semibold text-slate-800">{trackingNo}</td>
                       </tr>
                     );
                   })}
