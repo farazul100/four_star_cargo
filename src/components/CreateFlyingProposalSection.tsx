@@ -42,11 +42,9 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
   };
 
   // Form States
-  const originWarehouses = useMemo(() => warehouses.filter((w) => !w.is_final_destination), [warehouses]);
+  const allAvailableWarehouses = useMemo(() => warehouses, [warehouses]);
 
-  const [selectedOriginWhId, setSelectedOriginWhId] = useState<string>(
-    currentUser?.warehouse_id || originWarehouses[0]?.id || 'wh-china'
-  );
+  const [selectedOriginWhId, setSelectedOriginWhId] = useState<string>('all');
   const [selectedDestWhId] = useState<string>('wh-bd');
   const [flyingDate, setFlyingDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [flightNumber, setFlightNumber] = useState<string>('BS-206');
@@ -69,16 +67,28 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
     return () => unsubscribe();
   }, []);
 
-  // Filter available stock cartons in selected origin warehouse
+  // Filter available stock cartons in selected warehouse
   const availableStockCartons = useMemo(() => {
-    return cartons.filter(
-      (c) =>
-        (c.current_warehouse_id === selectedOriginWhId ||
-          (c.current_warehouse_name || '').toLowerCase().includes('guangzhou') ||
-          selectedOriginWhId === 'wh-china') &&
-        (c.status === 'booked' || c.status === 'received')
-    );
-  }, [cartons, selectedOriginWhId]);
+    return cartons.filter((c) => {
+      if (c.status !== 'booked' && c.status !== 'received') return false;
+      if (selectedOriginWhId === 'all') return true;
+
+      const targetWh = warehouses.find((w) => w.id === selectedOriginWhId);
+      const targetName = (targetWh?.name || '').toLowerCase();
+      const currentWhId = c.current_warehouse_id;
+      const currentWhName = (c.current_warehouse_name || '').toLowerCase();
+
+      if (currentWhId === selectedOriginWhId) return true;
+      if (targetName && currentWhName && currentWhName.includes(targetName)) return true;
+
+      if (selectedOriginWhId === 'wh-china' && (currentWhName.includes('guangzhou') || currentWhName.includes('china') || currentWhName.includes('can'))) return true;
+      if (selectedOriginWhId === 'wh-hk' && (currentWhName.includes('hong kong') || currentWhName.includes('hkg') || currentWhName.includes('হংকং'))) return true;
+      if (selectedOriginWhId === 'wh-dubai' && (currentWhName.includes('dubai') || currentWhName.includes('dxb') || currentWhName.includes('দুবাই'))) return true;
+      if (selectedOriginWhId === 'wh-bd' && (currentWhName.includes('dhaka') || currentWhName.includes('dac') || currentWhName.includes('ঢাকা'))) return true;
+
+      return false;
+    });
+  }, [cartons, selectedOriginWhId, warehouses]);
 
   const filteredCartons = useMemo(() => {
     if (!searchQuery.trim()) return availableStockCartons;
@@ -288,7 +298,8 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                   isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-slate-50 border-slate-300 text-slate-800'
                 }`}
               >
-                {originWarehouses.map((w) => (
+                <option value="all">{isBn ? 'সকল ওয়্যারহাউজ (All Hubs Inventory)' : 'All Warehouses / Hubs'}</option>
+                {allAvailableWarehouses.map((w) => (
                   <option key={w.id} value={w.id}>
                     {w.name}
                   </option>
