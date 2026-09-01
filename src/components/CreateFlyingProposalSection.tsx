@@ -390,6 +390,7 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                     />
                   </th>
                   <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">CTN NO</th>
+                  <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap text-emerald-700 dark:text-emerald-300">SHIPMENT CTN NO.</th>
                   <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">SHIPPING MARK</th>
                   <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">CUSTOMER NAME</th>
                   <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">TRACKING NO</th>
@@ -433,6 +434,9 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                         </td>
                         <td className="p-2.5 font-medium border-r border-slate-200/60 dark:border-slate-700/50 text-slate-800 dark:text-slate-200 whitespace-nowrap">
                           {c.ctn_no}
+                        </td>
+                        <td className="p-2.5 font-medium border-r border-slate-200/60 dark:border-slate-700/50 text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
+                          {c.packaging_number || c.master_group_id || `CTN-${c.ctn_no}`}
                         </td>
                         <td className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-medium text-blue-700 dark:text-sky-300 whitespace-nowrap">
                           {c.shipping_mark}
