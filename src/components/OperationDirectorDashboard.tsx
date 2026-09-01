@@ -386,6 +386,18 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
   }
 
   // --------------------------------------------------------------------------
+  // TAB: FINAL FLYING LIST
+  // --------------------------------------------------------------------------
+  if (activeTab === 'final_flying_list') {
+    return (
+      <FinalFlyingListSection
+        language={language}
+        theme={theme}
+      />
+    );
+  }
+
+  // --------------------------------------------------------------------------
   // MAIN OVERVIEW: EXECUTIVE OPERATIONS DASHBOARD (activeTab === 'dashboard')
   // --------------------------------------------------------------------------
   if (activeTab === 'dashboard') {
