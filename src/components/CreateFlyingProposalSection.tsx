@@ -1,23 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import {
   Plane,
-  Building2,
-  Calendar,
   Search,
-  CheckCircle2,
   Package,
-  PlusCircle,
-  XCircle,
-  Filter,
-  Check,
-  Send,
-  Sparkles,
   Layers,
-  Scale,
-  Box,
-  AlertCircle,
-  Clock,
-  ArrowRight,
+  Send,
 } from 'lucide-react';
 import { Carton, Warehouse, User, Language, FlyingProposal } from '../types';
 import { getHostingerDbData, saveHostingerDbMultiData, logSystemAuditAction, publishSystemNotification, subscribeToDbUpdates } from '../lib/db';
@@ -56,16 +43,15 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
 
   // Form States
   const originWarehouses = useMemo(() => warehouses.filter((w) => !w.is_final_destination), [warehouses]);
-  const destWarehouses = useMemo(() => warehouses.filter((w) => w.is_final_destination), [warehouses]);
 
   const [selectedOriginWhId, setSelectedOriginWhId] = useState<string>(
     currentUser?.warehouse_id || originWarehouses[0]?.id || 'wh-china'
   );
-  const [selectedDestWhId, setSelectedDestWhId] = useState<string>('wh-bd');
+  const [selectedDestWhId] = useState<string>('wh-bd');
   const [flyingDate, setFlyingDate] = useState<string>(new Date().toISOString().split('T')[0]);
   const [flightNumber, setFlightNumber] = useState<string>('BS-206');
   const [flyingName, setFlyingName] = useState<string>('Guangzhou Flight Batch #1');
-  const [airline, setAirline] = useState<string>('US-Bangla Airlines / Biman Cargo');
+  const [airline] = useState<string>('US-Bangla Airlines / Biman Cargo');
 
   // Carton Selection States
   const [selectedCartonIds, setSelectedCartonIds] = useState<string[]>([]);
@@ -145,7 +131,7 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
       addToast(
         'error',
         isBn ? 'কোনো কার্টুন নির্বাচন করা হয়নি!' : 'No Cartons Selected!',
-        isBn ? 'প্রস্তাবিত ফ্লাইটে অন্তত ১টি কার্টুন টিক দিয়ে নির্বাচন করুন।' : 'Please check at least 1 carton to include in flight proposal.'
+        isBn ? 'প্রস্তাবিত ফ্লাইটে অন্তত ১টি কার্টুন টিক দিয়ে নির্বাচন করুন।' : 'Please select at least 1 carton for flight proposal.'
       );
       return;
     }
@@ -222,22 +208,22 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 font-sans">
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
       {/* HEADER TITLE CARD */}
       <div
-        className={`p-6 rounded-2xl border transition-all shadow-xl space-y-3 ${
-          isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+        className={`p-5 rounded-xl border transition-colors shadow-xs space-y-3 ${
+          isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}
       >
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 border-slate-200 dark:border-slate-700">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b pb-3 border-slate-200 dark:border-slate-700">
           <div>
-            <h2 className="text-base font-semibold flex items-center space-x-2.5">
-              <Plane className="w-5 h-5 text-blue-500" />
+            <h2 className="text-sm font-semibold flex items-center space-x-2 text-slate-800 dark:text-slate-100">
+              <Plane className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               <span>{isBn ? 'নতুন ফ্লাইং প্রোপোজাল ও ফ্লাইট ব্যাচ জেনারেটর' : 'Create Flying Proposal & Flight Batch Builder'}</span>
             </h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-normal">
               {isBn
                 ? 'ওয়্যারহাউজের বুকিংকৃত কার্টুনসমূহ থেকে পছন্দমতো কার্টুন নির্বাচন করে নতুন ফ্লাইটের জন্য ব্যাচ জেনারেট করুন।'
                 : 'Select booked cartons from origin inventory and dispatch new flight payload batches.'}
@@ -245,31 +231,31 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
           </div>
 
           <div className="flex items-center space-x-2">
-            <span className="px-3.5 py-1.5 rounded-xl text-xs font-mono font-extrabold bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+            <span className="px-3 py-1 rounded-lg text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/40">
               {availableStockCartons.length} Cartons Available
             </span>
           </div>
         </div>
 
         {/* PAYLOAD METRICS SUMMARY BAR */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
-          <div className={`p-3.5 rounded-xl border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-blue-50/70 border-blue-200'}`}>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">{isBn ? 'সিলেক্টকৃত কার্টুন' : 'Selected Cartons'}</span>
-            <div className="text-base font-extrabold text-blue-600 dark:text-sky-300 font-mono mt-0.5">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
+          <div className={`p-3 rounded-lg border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-blue-50/50 border-blue-100'}`}>
+            <span className="text-slate-500 dark:text-slate-400 font-normal">{isBn ? 'সিলেক্টকৃত কার্টুন' : 'Selected Cartons'}</span>
+            <div className="text-sm font-semibold text-blue-700 dark:text-sky-300 mt-0.5">
               {selectedCartonIds.length} / {availableStockCartons.length} {isBn ? 'টি' : 'Pcs'}
             </div>
           </div>
 
-          <div className={`p-3.5 rounded-xl border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-emerald-50/70 border-emerald-200'}`}>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">{isBn ? 'মোট গ্রস ওজন (KG)' : 'Total Gross Weight'}</span>
-            <div className="text-base font-extrabold text-emerald-600 dark:text-emerald-400 font-mono mt-0.5">
+          <div className={`p-3 rounded-lg border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-emerald-50/50 border-emerald-100'}`}>
+            <span className="text-slate-500 dark:text-slate-400 font-normal">{isBn ? 'মোট গ্রস ওজন (KG)' : 'Total Gross Weight'}</span>
+            <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-400 mt-0.5">
               {totalSelectedWeight.toFixed(1)} KG
             </div>
           </div>
 
-          <div className={`p-3.5 rounded-xl border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-purple-50/70 border-purple-200'}`}>
-            <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase">{isBn ? 'মোট সিবিএম (CBM)' : 'Total CBM Volume'}</span>
-            <div className="text-base font-extrabold text-purple-600 dark:text-purple-300 font-mono mt-0.5">
+          <div className={`p-3 rounded-lg border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-purple-50/50 border-purple-100'}`}>
+            <span className="text-slate-500 dark:text-slate-400 font-normal">{isBn ? 'মোট সিবিএম (CBM)' : 'Total CBM Volume'}</span>
+            <div className="text-sm font-semibold text-purple-700 dark:text-purple-300 mt-0.5">
               {totalSelectedCbm.toFixed(2)} CBM
             </div>
           </div>
@@ -277,29 +263,29 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
       </div>
 
       {/* FLIGHT BUILDER FORM */}
-      <form onSubmit={handleSubmitProposal} className="space-y-6">
+      <form onSubmit={handleSubmitProposal} className="space-y-5">
         <div
-          className={`p-6 rounded-2xl border transition-all shadow-xl space-y-4 ${
-            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          className={`p-5 rounded-xl border transition-colors shadow-xs space-y-4 ${
+            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}
         >
-          <h3 className="text-xs font-extrabold uppercase tracking-wider text-blue-600 dark:text-blue-400 flex items-center space-x-2 border-b pb-3 border-slate-200 dark:border-slate-700">
-            <Layers className="w-4 h-4 text-blue-500" />
+          <h3 className="text-xs font-semibold text-blue-700 dark:text-blue-400 flex items-center space-x-2 border-b pb-2.5 border-slate-200 dark:border-slate-700">
+            <Layers className="w-4 h-4 text-blue-600 dark:text-blue-400" />
             <span>{isBn ? '১. ফ্লাইট বিস্তারিত তথ্য (Flight Configuration)' : '1. Flight Batch Details'}</span>
           </h3>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs font-normal">
             {/* Origin Warehouse */}
             <div>
-              <label className="block text-slate-500 dark:text-slate-400 font-bold mb-1.5">{isBn ? 'অরিজিন ওয়্যারহাউজ *' : 'Origin Hub *'}</label>
+              <label className="block text-slate-600 dark:text-slate-300 font-medium mb-1">{isBn ? 'অরিজিন ওয়্যারহাউজ *' : 'Origin Hub *'}</label>
               <select
                 value={selectedOriginWhId}
                 onChange={(e) => {
                   setSelectedOriginWhId(e.target.value);
                   setSelectedCartonIds([]);
                 }}
-                className={`w-full px-3 py-2 rounded-xl border text-xs font-bold focus:ring-2 focus:ring-blue-500 cursor-pointer ${
-                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                className={`w-full px-3 py-1.5 rounded-lg border text-xs font-normal focus:ring-1 focus:ring-blue-500 cursor-pointer ${
+                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-slate-50 border-slate-300 text-slate-800'
                 }`}
               >
                 {originWarehouses.map((w) => (
@@ -312,43 +298,43 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
 
             {/* Flying Date */}
             <div>
-              <label className="block text-slate-500 dark:text-slate-400 font-bold mb-1.5">{isBn ? 'ফ্লাইটের তারিখ *' : 'Flight Date *'}</label>
+              <label className="block text-slate-600 dark:text-slate-300 font-medium mb-1">{isBn ? 'ফ্লাইটের তারিখ *' : 'Flight Date *'}</label>
               <input
                 type="date"
                 required
                 value={flyingDate}
                 onChange={(e) => setFlyingDate(e.target.value)}
-                className={`w-full px-3 py-2 rounded-xl border text-xs font-mono font-bold focus:ring-2 focus:ring-blue-500 ${
-                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                className={`w-full px-3 py-1.5 rounded-lg border text-xs font-normal focus:ring-1 focus:ring-blue-500 ${
+                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-slate-50 border-slate-300 text-slate-800'
                 }`}
               />
             </div>
 
             {/* Flight Number */}
             <div>
-              <label className="block text-slate-500 dark:text-slate-400 font-bold mb-1.5">{isBn ? 'ফ্লাইট নম্বর / কোড *' : 'Flight Number *'}</label>
+              <label className="block text-slate-600 dark:text-slate-300 font-medium mb-1">{isBn ? 'ফ্লাইট নম্বর / কোড *' : 'Flight Number *'}</label>
               <input
                 type="text"
                 required
                 value={flightNumber}
                 onChange={(e) => setFlightNumber(e.target.value)}
                 placeholder="e.g. BS-206"
-                className={`w-full px-3 py-2 rounded-xl border text-xs font-mono font-bold focus:ring-2 focus:ring-blue-500 ${
-                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                className={`w-full px-3 py-1.5 rounded-lg border text-xs font-normal focus:ring-1 focus:ring-blue-500 ${
+                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-slate-50 border-slate-300 text-slate-800'
                 }`}
               />
             </div>
 
             {/* Flight Batch Name */}
             <div>
-              <label className="block text-slate-500 dark:text-slate-400 font-bold mb-1.5">{isBn ? 'ফ্লাইট ব্যাচের নাম' : 'Flight Batch Name'}</label>
+              <label className="block text-slate-600 dark:text-slate-300 font-medium mb-1">{isBn ? 'ফ্লাইট ব্যাচের নাম' : 'Flight Batch Name'}</label>
               <input
                 type="text"
                 value={flyingName}
                 onChange={(e) => setFlyingName(e.target.value)}
                 placeholder="Guangzhou Batch #1"
-                className={`w-full px-3 py-2 rounded-xl border text-xs font-bold focus:ring-2 focus:ring-blue-500 ${
-                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                className={`w-full px-3 py-1.5 rounded-lg border text-xs font-normal focus:ring-1 focus:ring-blue-500 ${
+                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-slate-50 border-slate-300 text-slate-800'
                 }`}
               />
             </div>
@@ -357,14 +343,14 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
 
         {/* CARTONS PAYLOAD SELECTOR */}
         <div
-          className={`rounded-2xl border transition-all shadow-xl overflow-hidden ${
-            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200/90 text-slate-900'
+          className={`rounded-xl border transition-colors shadow-xs overflow-hidden ${
+            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
           }`}
         >
           <div className="p-4 border-b flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-slate-200 dark:border-slate-700">
             <div className="flex items-center space-x-2">
-              <Package className="w-4 h-4 text-emerald-500" />
-              <h3 className="text-xs font-extrabold uppercase tracking-wider">
+              <Package className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+              <h3 className="text-xs font-semibold text-slate-800 dark:text-slate-100">
                 {isBn ? '২. প্রোপোজালে কার্টুন যুক্তকরণ (Cartons Inventory Payload)' : '2. Select Cartons Payload'}
               </h3>
             </div>
@@ -376,43 +362,43 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={isBn ? 'খুঁজুন: মার্ক, কাস্টমার, CTN, পণ্য...' : 'Filter mark, customer, ctn...'}
-                className={`w-full pl-9 pr-3 py-1.5 rounded-xl border text-xs font-semibold focus:ring-2 focus:ring-blue-500 ${
-                  isDark ? 'bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-400' : 'bg-slate-50 border-slate-300 text-slate-900'
+                className={`w-full pl-8 pr-3 py-1.5 rounded-lg border text-xs font-normal focus:ring-1 focus:ring-blue-500 ${
+                  isDark ? 'bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-400' : 'bg-slate-50 border-slate-300 text-slate-800'
                 }`}
               />
-              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
+              <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
             </div>
           </div>
 
           {/* Cartons Table List */}
-          <div className="overflow-x-auto max-h-[500px]">
+          <div className="overflow-x-auto max-h-[480px]">
             <table className="w-full text-left text-xs border-collapse min-w-[750px]">
               <thead
-                className={`uppercase text-[11px] font-mono font-extrabold border-b ${
-                  isDark ? 'bg-[#0F172A] text-white border-slate-700' : 'bg-slate-100 text-slate-900 border-slate-300'
+                className={`text-xs font-semibold border-b transition-colors ${
+                  isDark ? 'bg-[#0F172A] text-slate-300 border-slate-700' : 'bg-slate-50 text-slate-700 border-slate-200'
                 }`}
               >
                 <tr>
-                  <th className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50 w-10">
+                  <th className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50 w-10 font-normal">
                     <input
                       type="checkbox"
                       checked={
                         filteredCartons.length > 0 && selectedCartonIds.length === filteredCartons.length
                       }
                       onChange={handleToggleSelectAll}
-                      className="rounded border-slate-400 cursor-pointer accent-blue-600"
+                      className="rounded border-slate-300 cursor-pointer accent-blue-600"
                     />
                   </th>
-                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50">CTN NO</th>
-                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50">MARK & CUSTOMER</th>
-                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50">TRACKING NO</th>
-                  <th className="p-3 border-r border-slate-200/60 dark:border-slate-700/50">PRODUCT NAME</th>
-                  <th className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50">GROSS WT (KG)</th>
-                  <th className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50">CBM</th>
-                  <th className="p-3 text-center">STATUS</th>
+                  <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold">CTN NO</th>
+                  <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold">MARK & CUSTOMER</th>
+                  <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold">TRACKING NO</th>
+                  <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold">PRODUCT NAME</th>
+                  <th className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50 font-semibold">GROSS WT (KG)</th>
+                  <th className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50 font-semibold">CBM</th>
+                  <th className="p-2.5 text-center font-semibold">STATUS</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-200/60 dark:divide-slate-800/60">
+              <tbody className="divide-y divide-slate-200/60 dark:divide-slate-800/60 text-xs font-normal">
                 {filteredCartons.length > 0 ? (
                   filteredCartons.map((c) => {
                     const isSelected = selectedCartonIds.includes(c.id);
@@ -423,48 +409,48 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                         className={`transition-colors duration-150 cursor-pointer ${
                           isSelected
                             ? isDark
-                              ? 'bg-blue-950/70 text-white font-bold border-l-4 border-l-blue-500'
-                              : 'bg-blue-50 text-slate-900 font-bold border-l-4 border-l-blue-600'
+                              ? 'bg-blue-950/50 text-white border-l-4 border-l-blue-500'
+                              : 'bg-blue-50/80 text-slate-900 border-l-4 border-l-blue-600'
                             : isDark
                             ? 'bg-[#1E293B] hover:bg-slate-800 text-white'
-                            : 'bg-white hover:bg-slate-50 text-slate-900'
+                            : 'bg-white hover:bg-slate-50 text-slate-800'
                         }`}
                       >
-                        <td className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50">
+                        <td className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50">
                           <input
                             type="checkbox"
                             checked={isSelected}
                             onChange={() => handleToggleSelect(c.id)}
-                            className="rounded border-slate-400 cursor-pointer accent-blue-600"
+                            className="rounded border-slate-300 cursor-pointer accent-blue-600"
                           />
                         </td>
-                        <td className="p-3 font-mono font-extrabold border-r border-slate-200/60 dark:border-slate-700/50">
+                        <td className="p-2.5 font-medium border-r border-slate-200/60 dark:border-slate-700/50 text-slate-800 dark:text-slate-200">
                           {c.ctn_no}
                         </td>
-                        <td className="p-3 border-r border-slate-200/60 dark:border-slate-700/50">
-                          <div className="font-mono font-extrabold text-blue-600 dark:text-sky-300">
+                        <td className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50">
+                          <div className="font-semibold text-blue-700 dark:text-sky-300">
                             {c.shipping_mark}
                           </div>
                           {c.customer_name && !c.customer_name.includes('Unassigned') && (
-                            <div className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
-                              👤 {c.customer_name}
+                            <div className="text-[11px] font-normal text-emerald-700 dark:text-emerald-400 mt-0.5 flex items-center space-x-1">
+                              <span>👤 {c.customer_name}</span>
                             </div>
                           )}
                         </td>
-                        <td className="p-3 font-mono text-xs border-r border-slate-200/60 dark:border-slate-700/50">
+                        <td className="p-2.5 font-mono text-slate-600 dark:text-slate-300 border-r border-slate-200/60 dark:border-slate-700/50">
                           {c.tracking_number}
                         </td>
-                        <td className="p-3 border-r border-slate-200/60 dark:border-slate-700/50">
-                          <div className="font-bold text-xs truncate max-w-[200px]">{c.product_name_en}</div>
+                        <td className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50">
+                          <div className="font-normal text-slate-800 dark:text-slate-200 truncate max-w-[200px]">{c.product_name_en}</div>
                         </td>
-                        <td className="p-3 text-center font-mono font-bold text-emerald-600 dark:text-emerald-400 border-r border-slate-200/60 dark:border-slate-700/50">
+                        <td className="p-2.5 text-center font-medium text-slate-800 dark:text-slate-200 border-r border-slate-200/60 dark:border-slate-700/50">
                           {c.gross_weight} kg
                         </td>
-                        <td className="p-3 text-center font-mono font-bold text-purple-600 dark:text-purple-300 border-r border-slate-200/60 dark:border-slate-700/50">
+                        <td className="p-2.5 text-center font-medium text-slate-800 dark:text-slate-200 border-r border-slate-200/60 dark:border-slate-700/50">
                           {c.cbm} CBM
                         </td>
-                        <td className="p-3 text-center">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-extrabold uppercase bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                        <td className="p-2.5 text-center">
+                          <span className="px-2 py-0.5 rounded text-[10px] font-medium uppercase bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
                             {c.status}
                           </span>
                         </td>
@@ -474,8 +460,8 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                 ) : (
                   <tr>
                     <td colSpan={8} className="p-8 text-center text-slate-400">
-                      <Package className="w-8 h-8 mx-auto opacity-40 mb-2" />
-                      <div>{isBn ? 'ওয়্যারহাউজে কোনো স্টক কার্টুন পাওয়া যায়নি' : 'No available stock cartons found in this warehouse.'}</div>
+                      <Package className="w-7 h-7 mx-auto opacity-40 mb-2" />
+                      <div className="font-normal">{isBn ? 'ওয়্যারহাউজে কোনো স্টক কার্টুন পাওয়া যায়নি' : 'No available stock cartons found in this warehouse.'}</div>
                     </td>
                   </tr>
                 )}
@@ -485,20 +471,20 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
 
           {/* SUBMIT BUTTON BAR */}
           <div className="p-4 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between">
-            <div className="text-xs font-mono font-bold">
+            <div className="text-xs font-normal text-slate-600 dark:text-slate-400">
               <span>{selectedCartonIds.length} Cartons Selected</span>
             </div>
 
             <button
               type="submit"
               disabled={selectedCartonIds.length === 0}
-              className={`px-6 py-2.5 rounded-xl font-extrabold text-xs flex items-center space-x-2 transition-all cursor-pointer shadow-md ${
+              className={`px-5 py-2 rounded-lg font-medium text-xs flex items-center space-x-2 transition-colors cursor-pointer shadow-xs ${
                 selectedCartonIds.length > 0
-                  ? 'bg-blue-600 hover:bg-blue-500 text-white border border-blue-500'
-                  : 'bg-slate-300 dark:bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-400/30'
+                  ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                  : 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed'
               }`}
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-3.5 h-3.5" />
               <span>{isBn ? 'ফ্লাইং প্রোপোজাল সাবমিট করুন' : 'Submit Flying Proposal Batch'}</span>
             </button>
           </div>
