@@ -825,11 +825,23 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       {/* Customer Card Header */}
                       <div className="flex items-start justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
                         <div>
-                          <div className="text-xs font-mono text-blue-600 dark:text-blue-400 font-bold">
-                            {mark}
+                          <div className="text-xs font-mono text-blue-600 dark:text-blue-400 font-extrabold flex items-center space-x-1.5">
+                            <span>MARK: {mark}</span>
                           </div>
-                          <h3 className={`text-sm font-semibold mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                            {firstCarton?.product_name_en || 'Customer Shipment'}
+                          <div className="mt-1 flex items-center space-x-1">
+                            {firstCarton?.customer_name && !firstCarton.customer_name.includes('Unassigned') ? (
+                              <span className="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center space-x-1 shadow-2xs">
+                                <UserCheck className="w-3 h-3" />
+                                <span>{firstCarton.customer_name}</span>
+                              </span>
+                            ) : (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center space-x-1">
+                                <span>⚠️ Unassigned (Map Customer)</span>
+                              </span>
+                            )}
+                          </div>
+                          <h3 className={`text-xs font-medium mt-1 text-slate-500 dark:text-slate-400 truncate max-w-[200px]`}>
+                            {firstCarton?.product_name_en || 'Cargo Shipment'}
                           </h3>
                         </div>
 
@@ -853,6 +865,13 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
                       {/* Customer Card Details Grid */}
                       <div className="grid grid-cols-2 gap-3 pt-3 text-xs">
+                        <div className="col-span-2 p-2 rounded-xl bg-slate-50 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 flex items-center justify-between">
+                          <span className="text-[11px] text-slate-500 dark:text-slate-400 font-semibold">{isBn ? 'কাস্টমার অ্যাকাউন্ট:' : 'Customer Account:'}</span>
+                          <strong className="text-xs font-extrabold text-blue-600 dark:text-sky-300 font-sans flex items-center space-x-1">
+                            <User className="w-3.5 h-3.5 text-blue-500" />
+                            <span>{firstCarton?.customer_name || (isBn ? 'ম্যাপ করা হয়নি' : 'Unassigned')}</span>
+                          </strong>
+                        </div>
                         <div>
                           <span className="text-[10px] text-slate-500 block">{isBn ? 'মোট গ্রস ওজন' : 'Total Gross Weight'}</span>
                           <strong className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">{custGrossWt.toFixed(1)} KG</strong>
@@ -1152,6 +1171,16 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             {c.shipping_mark}
                           </span>
                         </div>
+                        {c.customer_name && !c.customer_name.includes('Unassigned') ? (
+                          <div className="text-[10px] font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5 truncate flex items-center space-x-1">
+                            <UserCheck className="w-3 h-3 text-emerald-500 inline" />
+                            <span>{c.customer_name}</span>
+                          </div>
+                        ) : (
+                          <div className="text-[9px] font-bold text-amber-500 dark:text-amber-400 mt-0.5 truncate">
+                            ⚠️ Unassigned
+                          </div>
+                        )}
                       </td>
 
                       <td className={`p-3 font-mono border-r truncate text-xs font-semibold ${
@@ -1300,8 +1329,22 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                     </span>
                   )}
                 </div>
-                <h3 className={`text-base font-bold mt-0.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  {activeCustomerCartons[0]?.product_name_en || 'Customer Shipment Profile'} (Excel Grid View)
+                <h3 className={`text-base font-bold mt-0.5 flex items-center space-x-2.5 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                  <span>{activeCustomerCartons[0]?.product_name_en || 'Customer Shipment Profile'}</span>
+                  {activeCustomerCartons[0]?.customer_name && !activeCustomerCartons[0].customer_name.includes('Unassigned') ? (
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center space-x-1 shadow-2xs">
+                      <UserCheck className="w-3.5 h-3.5" />
+                      <span>{activeCustomerCartons[0].customer_name}</span>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleOpenCustomerMapping(activeCustomerModalMark)}
+                      className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center space-x-1 cursor-pointer hover:bg-amber-500/25"
+                    >
+                      <span>⚠️ Map Customer</span>
+                    </button>
+                  )}
                 </h3>
               </div>
 
