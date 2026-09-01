@@ -132,61 +132,9 @@ export const exportProposalToExcel = (proposal: FlyingProposal, cartons: Carton[
 };
 
 export const exportProposalToCSV = (proposal: FlyingProposal, cartons: Carton[]) => {
-  const flightDate = proposal.date || new Date().toISOString().split('T')[0];
-  const lotNumber = proposal.flight_number || proposal.flying_name || 'BS-206';
-  const awbNumber = proposal.awb_number || '';
-  const hubName = proposal.warehouse_name || 'CHINA GUANGZHOU HUB';
-
-  const attachedCartons = cartons.filter(
-    (c) => (proposal.carton_ids || []).includes(c.id) || c.flight_number === proposal.flight_number
-  );
-  const listToExport = attachedCartons.length > 0 ? attachedCartons : cartons;
-
-  const totalWeight = proposal.total_weight || listToExport.reduce((sum, c) => sum + (c.gross_weight || 0), 0);
-
-  const rows = [
-    [`Date: ${flightDate} LOT- ${lotNumber} AWB(${awbNumber})`],
-    [`FOUR STAR CARGO (${hubName.toUpperCase()}) - WT( ${totalWeight.toFixed(1)} KG)`],
-    [
-      'SL/NO',
-      'ENTRY DATE',
-      'SHIPMENT CTN NO:',
-      'CTN NO:',
-      'Customer Shipping mark',
-      'Product name',
-      'Product Name (CN)',
-      'Quantity/CTN',
-      'N.Weight (KG)',
-      'G.Weight (KG)',
-      'CBM/CTN',
-      'TRACKING NO',
-    ],
-    ...listToExport.map((c, i) => [
-      i + 1,
-      c.created_at ? new Date(c.created_at).toISOString().slice(2, 10).replace(/-/g, ' ') : flightDate,
-      c.packaging_number || c.master_group_id || `CTN-${c.ctn_no}`,
-      c.ctn_no,
-      `"${(c.customer_name ? `${c.shipping_mark} / ${c.customer_name}` : c.shipping_mark).replace(/"/g, '""')}"`,
-      `"${(c.product_name_en || '').replace(/"/g, '""')}"`,
-      `"${(c.product_name_cn || '').replace(/"/g, '""')}"`,
-      c.quantity || 1,
-      (c.net_weight || c.gross_weight * 0.9).toFixed(1),
-      c.gross_weight.toFixed(1),
-      c.cbm.toFixed(2),
-      c.tracking_number || c.master_tracking_number || c.pathao_tracking_code || c.packaging_number || `TRK-${c.ctn_no}`,
-    ]),
-  ];
-
-  const csvContent = '\uFEFF' + rows.map((e) => e.join(',')).join('\n');
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const link = document.createElement('a');
-  link.href = url;
-  link.download = `Flight_Manifest_${lotNumber}_GoogleSheet.csv`;
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
-  URL.revokeObjectURL(url);
+  // Plain CSV strips background colors, borders, and cell merging in Google Sheets/Excel.
+  // Using styled Excel XML format guarantees full design preservation (Yellow Lot Header, Blue Cargo Header, Borders, Fonts) when imported into Google Sheets!
+  exportProposalToExcel(proposal, cartons);
 };
 
 export const FlightManifestExportModal: React.FC<FlightManifestExportModalProps> = ({
@@ -253,7 +201,7 @@ export const FlightManifestExportModal: React.FC<FlightManifestExportModalProps>
               className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-emerald-600 hover:bg-emerald-700 text-white flex items-center space-x-1.5 transition-colors cursor-pointer shadow-xs"
             >
               <FileSpreadsheet className="w-3.5 h-3.5" />
-              <span>{isBn ? 'এক্সেল ডাউনলোড (.xlsx)' : 'Download Excel (.xlsx)'}</span>
+              <span>{isBn ? 'এক্সেল ফাইল (ডিজাইন সহ)' : 'Download Excel (.xlsx)'}</span>
             </button>
 
             <button
@@ -261,7 +209,7 @@ export const FlightManifestExportModal: React.FC<FlightManifestExportModalProps>
               className="px-3.5 py-1.5 rounded-lg text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white flex items-center space-x-1.5 transition-colors cursor-pointer shadow-xs"
             >
               <Download className="w-3.5 h-3.5" />
-              <span>{isBn ? 'গুগল শিট (.csv)' : 'Google Sheet (.csv)'}</span>
+              <span>{isBn ? 'গুগল শিট (ডিজাইন সহ)' : 'Google Sheet (Styled)'}</span>
             </button>
 
             <button
