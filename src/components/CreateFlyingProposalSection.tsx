@@ -231,7 +231,7 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
           </div>
 
           <div className="flex items-center space-x-2">
-            <span className="px-3 py-1 rounded-lg text-xs font-medium bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800/40">
+            <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
               {availableStockCartons.length} Cartons Available
             </span>
           </div>
@@ -239,23 +239,23 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
 
         {/* PAYLOAD METRICS SUMMARY BAR */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-1 text-xs">
-          <div className={`p-3 rounded-lg border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-blue-50/50 border-blue-100'}`}>
+          <div className={`p-3 rounded-lg border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-white border-slate-200'}`}>
             <span className="text-slate-500 dark:text-slate-400 font-normal">{isBn ? 'সিলেক্টকৃত কার্টুন' : 'Selected Cartons'}</span>
-            <div className="text-sm font-semibold text-blue-700 dark:text-sky-300 mt-0.5">
+            <div className="text-sm font-semibold text-slate-800 dark:text-slate-100 mt-0.5">
               {selectedCartonIds.length} / {availableStockCartons.length} {isBn ? 'টি' : 'Pcs'}
             </div>
           </div>
 
-          <div className={`p-3 rounded-lg border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-emerald-50/50 border-emerald-100'}`}>
+          <div className={`p-3 rounded-lg border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-white border-slate-200'}`}>
             <span className="text-slate-500 dark:text-slate-400 font-normal">{isBn ? 'মোট গ্রস ওজন (KG)' : 'Total Gross Weight'}</span>
-            <div className="text-sm font-semibold text-emerald-700 dark:text-emerald-400 mt-0.5">
+            <div className="text-sm font-semibold text-slate-800 dark:text-slate-100 mt-0.5">
               {totalSelectedWeight.toFixed(1)} KG
             </div>
           </div>
 
-          <div className={`p-3 rounded-lg border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-purple-50/50 border-purple-100'}`}>
+          <div className={`p-3 rounded-lg border ${isDark ? 'bg-[#0F172A] border-slate-700' : 'bg-white border-slate-200'}`}>
             <span className="text-slate-500 dark:text-slate-400 font-normal">{isBn ? 'মোট সিবিএম (CBM)' : 'Total CBM Volume'}</span>
-            <div className="text-sm font-semibold text-purple-700 dark:text-purple-300 mt-0.5">
+            <div className="text-sm font-semibold text-slate-800 dark:text-slate-100 mt-0.5">
               {totalSelectedCbm.toFixed(2)} CBM
             </div>
           </div>
@@ -471,7 +471,7 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                           {c.cbm} CBM
                         </td>
                         <td className="p-2.5 text-center whitespace-nowrap">
-                          <span className="px-2 py-0.5 rounded text-[10px] font-medium uppercase bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800/40">
+                          <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase">
                             {c.status}
                           </span>
                         </td>
