@@ -437,9 +437,29 @@ export const SystemChatModal: React.FC<SystemChatModalProps> = ({
               {/* CHAT HEADER BAR */}
               <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-slate-50/50 dark:bg-slate-900/40">
                 <div className="flex items-center space-x-3">
-                  <div className="p-2.5 rounded-full bg-blue-500/10 text-blue-500">
-                    {activeConvo.type === 'group' ? <Users className="w-5 h-5" /> : <UserIcon className="w-5 h-5" />}
-                  </div>
+                  {(() => {
+                    const otherUser = activeConvo.type === 'direct'
+                      ? allUsers.find((u) => u.id !== currentUser.id && activeConvo.participants.includes(u.id))
+                      : null;
+                    const otherPhoto = otherUser?.avatar_url || otherUser?.photo_url;
+
+                    if (otherPhoto) {
+                      return (
+                        <img
+                          src={otherPhoto}
+                          alt={otherUser?.name || 'Chat User'}
+                          className="w-9 h-9 rounded-full object-cover border border-[#00897B] shrink-0"
+                          style={{ width: '36px', height: '36px', borderRadius: '50%', clipPath: 'circle(50% at 50% 50%)', WebkitClipPath: 'circle(50% at 50% 50%)' }}
+                        />
+                      );
+                    }
+
+                    return (
+                      <div className="p-2 rounded-full bg-blue-500/10 text-blue-500 shrink-0" style={{ borderRadius: '50%' }}>
+                        {activeConvo.type === 'group' ? <Users className="w-5 h-5" /> : <UserIcon className="w-5 h-5" />}
+                      </div>
+                    );
+                  })()}
                   <div>
                     <h3 className="font-bold text-sm text-slate-900 dark:text-white">
                       {getConvoTitle(activeConvo)}

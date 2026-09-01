@@ -402,10 +402,22 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
         }`}>
           <div className="flex items-center space-x-4">
             <div className="relative">
-              <div className={`w-16 h-16 rounded-2xl border flex items-center justify-center font-bold text-xl shadow-xs ${
-                isDark ? 'bg-teal-950/60 border-teal-800 text-teal-300' : 'bg-emerald-50 border-emerald-200 text-[#00897B]'
-              }`}>
-                {selectedUserForAnalytics.name.charAt(0)}
+              <div
+                className={`w-16 h-16 rounded-full border flex items-center justify-center font-bold text-xl shadow-xs overflow-hidden ${
+                  isDark ? 'bg-teal-950/60 border-teal-800 text-teal-300' : 'bg-emerald-50 border-emerald-200 text-[#00897B]'
+                }`}
+                style={{ borderRadius: '50%', clipPath: 'circle(50% at 50% 50%)' }}
+              >
+                {selectedUserForAnalytics.avatar_url || selectedUserForAnalytics.photo_url ? (
+                  <img
+                    src={selectedUserForAnalytics.avatar_url || selectedUserForAnalytics.photo_url}
+                    alt={selectedUserForAnalytics.name}
+                    className="w-full h-full object-cover"
+                    style={{ borderRadius: '50%' }}
+                  />
+                ) : (
+                  selectedUserForAnalytics.name.charAt(0)
+                )}
               </div>
               <span className="w-4 h-4 rounded-full bg-emerald-500 border-2 border-white dark:border-[#1E293B] absolute -bottom-0.5 -right-0.5" title="Active & Connected" />
             </div>
@@ -738,10 +750,22 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
                     {/* Name */}
                     <td className="p-3.5">
                       <div className="flex items-center space-x-2.5">
-                        <div className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs font-semibold ${
-                          isDark ? 'bg-teal-950/40 border-teal-800 text-teal-300' : 'bg-emerald-50 border-emerald-200 text-[#00897B]'
-                        }`}>
-                          {u.name.charAt(0)}
+                        <div
+                          className={`w-8 h-8 rounded-full border flex items-center justify-center text-xs font-semibold overflow-hidden shrink-0 ${
+                            isDark ? 'bg-teal-950/40 border-teal-800 text-teal-300' : 'bg-emerald-50 border-emerald-200 text-[#00897B]'
+                          }`}
+                          style={{ borderRadius: '50%', clipPath: 'circle(50% at 50% 50%)' }}
+                        >
+                          {u.avatar_url || u.photo_url ? (
+                            <img
+                              src={u.avatar_url || u.photo_url}
+                              alt={u.name}
+                              className="w-full h-full object-cover"
+                              style={{ borderRadius: '50%' }}
+                            />
+                          ) : (
+                            u.name.charAt(0)
+                          )}
                         </div>
                         <div>
                           <p className={`font-semibold text-xs ${isDark ? 'text-white' : 'text-slate-900'}`}>{u.name}</p>

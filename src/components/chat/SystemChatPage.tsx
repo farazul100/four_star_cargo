@@ -682,11 +682,14 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                             : 'hover:bg-slate-200/60 text-slate-900 border-transparent'
                       }`}
                     >
-                      <div className={`w-8 h-8 rounded-none shrink-0 font-bold text-xs flex items-center justify-center border ${
-                        isDark 
-                          ? 'bg-[#00897B]/20 text-[#26A69A] border-[#00897B]/40' 
-                          : 'bg-[#00897B]/15 text-[#00897B] border-[#00897B]/30'
-                      }`}>
+                      <div
+                        className={`w-8 h-8 rounded-full shrink-0 font-bold text-xs flex items-center justify-center border ${
+                          isDark 
+                            ? 'bg-[#00897B]/20 text-[#26A69A] border-[#00897B]/40' 
+                            : 'bg-[#00897B]/15 text-[#00897B] border-[#00897B]/30'
+                        }`}
+                        style={{ borderRadius: '50%' }}
+                      >
                         <Users className="w-4 h-4" />
                       </div>
 
