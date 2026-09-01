@@ -45,7 +45,7 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
     setTimeout(() => setToastMsg(null), 3500);
   };
 
-  // Auto Image Compressor Handler
+  // Auto Image Compressor Handler with Physical Circle Clipping
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -73,11 +73,16 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
         canvas.height = MAX_SIZE;
         const ctx = canvas.getContext('2d');
         if (ctx) {
+          // Physical 100% Circle Clipping Mask on Canvas
+          ctx.beginPath();
+          ctx.arc(MAX_SIZE / 2, MAX_SIZE / 2, MAX_SIZE / 2, 0, Math.PI * 2, true);
+          ctx.closePath();
+          ctx.clip();
           ctx.drawImage(img, cropX, cropY, minDim, minDim, 0, 0, MAX_SIZE, MAX_SIZE);
         }
 
-        // Compress JPEG image to 0.82 quality (~15-25KB)
-        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.82);
+        // Export as PNG so transparent round outer padding stays completely transparent
+        const compressedBase64 = canvas.toDataURL('image/png');
         setPhotoUrl(compressedBase64);
 
         // Save to Hostinger Database
@@ -118,13 +123,47 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
           'UPDATE_PROFILE_PHOTO',
           'user',
           currentUser.id,
-          `প্রোফাইল ছবি অটো-কমপ্রেস করে সফলভাবে সেভ করা হয়েছে`
+          `গোল প্রোফাইল ছবি অটো-কমপ্রেস করে সফলভাবে সেভ করা হয়েছে`
         );
 
-        showToast(isBn ? 'প্রোফাইল ছবি অটো-কমপ্রেস করে সফলভাবে সেভ করা হয়েছে!' : 'Profile photo auto-compressed & saved successfully!');
+        showToast(isBn ? 'গোল প্রোফাইল ছবি সফলভাবে সেভ করা হয়েছে!' : 'Circle profile photo saved successfully!');
       };
     };
     reader.readAsDataURL(file);
+  };
+
+  // Remove Photo Handler
+  const handleRemovePhoto = () => {
+    setPhotoUrl('');
+    const data = getHostingerDbData();
+    const updatedUsers = (data.users || []).map((u: any) =>
+      u.id === currentUser.id
+        ? {
+            ...u,
+            avatar_url: '',
+            photo_url: '',
+          }
+        : u
+    );
+    saveHostingerDbData('fsc_vps_users', updatedUsers);
+    saveHostingerDbData('users', updatedUsers);
+
+    const activeUserRaw = localStorage.getItem('fsc_active_user');
+    if (activeUserRaw) {
+      try {
+        const activeUserObj = JSON.parse(activeUserRaw);
+        delete activeUserObj.avatar_url;
+        delete activeUserObj.photo_url;
+        localStorage.setItem('fsc_active_user', JSON.stringify(activeUserObj));
+      } catch (err) {}
+    }
+
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key: 'users', data: updatedUsers } }));
+      window.dispatchEvent(new CustomEvent('fsc_user_updated', { detail: { user: { ...currentUser, avatar_url: '', photo_url: '' } } }));
+    }
+
+    showToast(isBn ? 'ছবি রিমুভ করা হয়েছে!' : 'Photo removed successfully!');
   };
 
   // Avatar Badge Initials
@@ -333,43 +372,68 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
           <div className="flex flex-col items-center space-y-3 shrink-0">
             <div
               onClick={() => fileInputRef.current?.click()}
-              className="relative group cursor-pointer w-28 h-28 sm:w-36 sm:h-36 border-4 border-[#00897B] shadow-2xl flex items-center justify-center bg-slate-900 transition-all hover:scale-105 hover:border-amber-500"
-              style={{ borderRadius: '9999px', overflow: 'hidden' }}
-              title={isBn ? 'গ্যালারি থেকে ছবি পরিবর্তন করতে ক্লিক করুন' : 'Click to change profile photo'}
+              className="relative group cursor-pointer flex items-center justify-center bg-[#00897B] transition-all hover:scale-105 shadow-2xl"
+              style={{
+                width: '135px',
+                height: '135px',
+                borderRadius: '50%',
+                overflow: 'hidden',
+                border: '4px solid #00897B',
+                boxShadow: '0 10px 25px -5px rgba(0, 137, 123, 0.4)',
+              }}
+              title={isBn ? 'গ্যালারি থেকে গোল ছবি আপলোড করুন' : 'Click to upload circle photo'}
             >
               {photoUrl ? (
                 <img
                   src={photoUrl}
                   alt={currentUser.name}
                   className="w-full h-full object-cover"
-                  style={{ borderRadius: '9999px' }}
+                  style={{ borderRadius: '50%', width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               ) : (
-                <span className="font-black text-2xl sm:text-4xl text-amber-400 select-none">
-                  {getInitials(currentUser.name)}
-                </span>
+                <div
+                  className="w-full h-full flex items-center justify-center bg-[#00897B] text-white select-none"
+                  style={{ borderRadius: '50%' }}
+                >
+                  <span className="font-black text-3xl text-amber-300">
+                    {getInitials(currentUser.name)}
+                  </span>
+                </div>
               )}
 
               {/* Hover Overlay with Camera Icon */}
               <div
-                className="absolute inset-0 bg-black/65 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-all backdrop-blur-[2px]"
-                style={{ borderRadius: '9999px' }}
+                className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-all backdrop-blur-[2px]"
+                style={{ borderRadius: '50%' }}
               >
                 <Camera className="w-8 h-8 text-amber-400 animate-bounce mb-1" />
                 <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">
-                  {isBn ? 'ছবি পরিবর্তন' : 'Change Photo'}
+                  {isBn ? 'গোল ছবি আপলোড' : 'Change Photo'}
                 </span>
               </div>
             </div>
 
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="text-xs font-semibold text-[#00897B] hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 bg-transparent border-0 outline-none cursor-pointer flex items-center gap-1.5 transition-colors"
-            >
-              <Camera className="w-3.5 h-3.5" />
-              <span>{isBn ? 'ছবি আপলোড করতে ক্লিক করুন (রাউন্ড ফ্রেম)' : 'Click to Upload Photo (Round Frame)'}</span>
-            </button>
+            <div className="flex items-center space-x-2">
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="px-3 py-1.5 rounded-xl text-xs font-semibold bg-[#00897B] hover:bg-[#00796B] text-white border-0 outline-none cursor-pointer flex items-center gap-1.5 transition-colors shadow-xs"
+              >
+                <Camera className="w-3.5 h-3.5" />
+                <span>{isBn ? 'গোল ছবি আপলোড' : 'Upload Circle Photo'}</span>
+              </button>
+
+              {photoUrl && (
+                <button
+                  type="button"
+                  onClick={handleRemovePhoto}
+                  className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-rose-500/10 hover:bg-rose-500/20 text-rose-500 border border-rose-500/30 outline-none cursor-pointer transition-colors"
+                  title={isBn ? 'ছবি মুছে ফেলুন' : 'Remove photo'}
+                >
+                  {isBn ? 'রিমুভ' : 'Remove'}
+                </button>
+              )}
+            </div>
           </div>
 
           {/* Right Details Grid */}
