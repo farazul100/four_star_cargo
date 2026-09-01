@@ -45,7 +45,7 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
     setTimeout(() => setToastMsg(null), 3500);
   };
 
-  // Auto Image Compressor Handler for Any Photo Shape
+  // Auto Image Compressor Handler for 100% Guaranteed Circle Shape
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -61,31 +61,28 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
       img.src = event.target?.result as string;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_DIM = 400;
+        const MAX_SIZE = 300;
         let width = img.width;
         let height = img.height;
 
-        if (width > height) {
-          if (width > MAX_DIM) {
-            height = Math.round((height * MAX_DIM) / width);
-            width = MAX_DIM;
-          }
-        } else {
-          if (height > MAX_DIM) {
-            width = Math.round((width * MAX_DIM) / height);
-            height = MAX_DIM;
-          }
-        }
+        const minDim = Math.min(width, height);
+        const cropX = (width - minDim) / 2;
+        const cropY = (height - minDim) / 2;
 
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = MAX_SIZE;
+        canvas.height = MAX_SIZE;
         const ctx = canvas.getContext('2d');
         if (ctx) {
-          ctx.drawImage(img, 0, 0, width, height);
+          // Physical 100% Circle Clipping Mask on Canvas
+          ctx.beginPath();
+          ctx.arc(MAX_SIZE / 2, MAX_SIZE / 2, MAX_SIZE / 2, 0, Math.PI * 2, true);
+          ctx.closePath();
+          ctx.clip();
+          ctx.drawImage(img, cropX, cropY, minDim, minDim, 0, 0, MAX_SIZE, MAX_SIZE);
         }
 
-        // Compress JPEG image to 0.82 quality (~20-35KB size)
-        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.82);
+        // Export as PNG so transparent round outer padding stays completely transparent
+        const compressedBase64 = canvas.toDataURL('image/png');
         setPhotoUrl(compressedBase64);
 
         // Save to Hostinger Database
@@ -383,6 +380,8 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
                 overflow: 'hidden',
                 border: '4px solid #00897B',
                 boxShadow: '0 10px 25px -5px rgba(0, 137, 123, 0.4)',
+                clipPath: 'circle(50% at 50% 50%)',
+                WebkitClipPath: 'circle(50% at 50% 50%)',
               }}
               title={isBn ? 'গ্যালারি থেকে গোল ছবি আপলোড করুন' : 'Click to upload circle photo'}
             >
@@ -391,12 +390,23 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
                   src={photoUrl}
                   alt={currentUser.name}
                   className="w-full h-full object-cover"
-                  style={{ borderRadius: '50%', width: '100%', height: '100%', objectFit: 'cover' }}
+                  style={{
+                    borderRadius: '50%',
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'cover',
+                    clipPath: 'circle(50% at 50% 50%)',
+                    WebkitClipPath: 'circle(50% at 50% 50%)',
+                  }}
                 />
               ) : (
                 <div
                   className="w-full h-full flex items-center justify-center bg-[#00897B] text-white select-none"
-                  style={{ borderRadius: '50%' }}
+                  style={{
+                    borderRadius: '50%',
+                    clipPath: 'circle(50% at 50% 50%)',
+                    WebkitClipPath: 'circle(50% at 50% 50%)',
+                  }}
                 >
                   <span className="font-black text-3xl text-amber-300">
                     {getInitials(currentUser.name)}
@@ -407,7 +417,11 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
               {/* Hover Overlay with Camera Icon */}
               <div
                 className="absolute inset-0 bg-black/70 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-all backdrop-blur-[2px]"
-                style={{ borderRadius: '50%' }}
+                style={{
+                  borderRadius: '50%',
+                  clipPath: 'circle(50% at 50% 50%)',
+                  WebkitClipPath: 'circle(50% at 50% 50%)',
+                }}
               >
                 <Camera className="w-8 h-8 text-amber-400 animate-bounce mb-1" />
                 <span className="text-[11px] font-bold text-amber-300 uppercase tracking-wider">
