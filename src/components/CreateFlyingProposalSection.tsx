@@ -385,8 +385,12 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                       checked={
                         filteredCartons.length > 0 && selectedCartonIds.length === filteredCartons.length
                       }
-                      onChange={handleToggleSelectAll}
-                      className="rounded border-slate-300 cursor-pointer accent-blue-600"
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        handleToggleSelectAll();
+                      }}
+                      onClick={(e) => e.stopPropagation()}
+                      className="rounded border-slate-300 cursor-pointer accent-blue-600 w-4 h-4"
                     />
                   </th>
                   <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">CTN NO</th>
@@ -424,12 +428,16 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                             : 'bg-white hover:bg-slate-50 text-slate-800'
                         }`}
                       >
-                        <td className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50">
+                        <td className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50" onClick={(e) => e.stopPropagation()}>
                           <input
                             type="checkbox"
                             checked={isSelected}
-                            onChange={() => handleToggleSelect(c.id)}
-                            className="rounded border-slate-300 cursor-pointer accent-blue-600"
+                            onChange={(e) => {
+                              e.stopPropagation();
+                              handleToggleSelect(c.id);
+                            }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="rounded border-slate-300 cursor-pointer accent-blue-600 w-4 h-4"
                           />
                         </td>
                         <td className="p-2.5 font-medium border-r border-slate-200/60 dark:border-slate-700/50 text-slate-800 dark:text-slate-200 whitespace-nowrap">
