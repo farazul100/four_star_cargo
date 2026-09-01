@@ -350,13 +350,21 @@ export const Header: React.FC<HeaderProps> = ({
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className="flex items-center space-x-2 bg-transparent border-0 outline-none cursor-pointer p-1 rounded-xl hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
             >
-              {/* Solid Colored Circle Badge */}
-              <div
-                translate="no"
-                className={`notranslate w-8 h-8 rounded-full bg-[#00897B] text-white flex items-center justify-center font-bold text-xs shadow-xs select-none`}
-              >
-                {userBadge.initials}
-              </div>
+              {/* Solid Colored Circle Badge or Uploaded Photo */}
+              {currentUser.avatar_url || currentUser.photo_url ? (
+                <img
+                  src={currentUser.avatar_url || currentUser.photo_url}
+                  alt={userBadge.name}
+                  className="w-8 h-8 rounded-full object-cover border border-[#00897B] shadow-xs select-none"
+                />
+              ) : (
+                <div
+                  translate="no"
+                  className={`notranslate w-8 h-8 rounded-full bg-[#00897B] text-white flex items-center justify-center font-bold text-xs shadow-xs select-none`}
+                >
+                  {userBadge.initials}
+                </div>
+              )}
 
               {/* User Created Name Label */}
               <span

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { User, Language, Theme } from '../types';
 import { User as UserIcon, Globe, Volume2, Key, CheckCircle2, Camera, Shield } from 'lucide-react';
 import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../lib/db';
@@ -18,6 +18,9 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
 }) => {
   const isBn = language === 'bn';
   const isDark = theme === 'dark';
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [photoUrl, setPhotoUrl] = useState<string>(currentUser.avatar_url || currentUser.photo_url || '');
 
   // Profile Form State
   const [name, setName] = useState(currentUser.name || 'Super Admin');
@@ -40,6 +43,88 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
   const showToast = (text: string, type: 'success' | 'error' = 'success') => {
     setToastMsg({ type, text });
     setTimeout(() => setToastMsg(null), 3500);
+  };
+
+  // Auto Image Compressor Handler
+  const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      showToast(isBn ? 'অনুগ্রহ করে ইমেজ ফাইল নির্বাচন করুন!' : 'Please select a valid image file!', 'error');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.src = event.target?.result as string;
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_SIZE = 250;
+        let width = img.width;
+        let height = img.height;
+
+        const minDim = Math.min(width, height);
+        const cropX = (width - minDim) / 2;
+        const cropY = (height - minDim) / 2;
+
+        canvas.width = MAX_SIZE;
+        canvas.height = MAX_SIZE;
+        const ctx = canvas.getContext('2d');
+        if (ctx) {
+          ctx.drawImage(img, cropX, cropY, minDim, minDim, 0, 0, MAX_SIZE, MAX_SIZE);
+        }
+
+        // Compress JPEG image to 0.82 quality (~15-25KB)
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.82);
+        setPhotoUrl(compressedBase64);
+
+        // Save to Hostinger Database
+        const data = getHostingerDbData();
+        const updatedUsers = (data.users || []).map((u: any) =>
+          u.id === currentUser.id
+            ? {
+                ...u,
+                avatar_url: compressedBase64,
+                photo_url: compressedBase64,
+              }
+            : u
+        );
+        saveHostingerDbData('fsc_vps_users', updatedUsers);
+        saveHostingerDbData('users', updatedUsers);
+
+        // Update active user in localStorage & trigger update event
+        const activeUserRaw = localStorage.getItem('fsc_active_user');
+        if (activeUserRaw) {
+          try {
+            const activeUserObj = JSON.parse(activeUserRaw);
+            const updatedActiveUser = {
+              ...activeUserObj,
+              avatar_url: compressedBase64,
+              photo_url: compressedBase64,
+            };
+            localStorage.setItem('fsc_active_user', JSON.stringify(updatedActiveUser));
+          } catch (err) {}
+        }
+
+        if (typeof window !== 'undefined') {
+          window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key: 'users', data: updatedUsers } }));
+          window.dispatchEvent(new CustomEvent('fsc_user_updated', { detail: { user: { ...currentUser, avatar_url: compressedBase64 } } }));
+        }
+
+        logSystemAuditAction(
+          currentUser,
+          'UPDATE_PROFILE_PHOTO',
+          'user',
+          currentUser.id,
+          `প্রোফাইল ছবি অটো-কমপ্রেস করে সফলভাবে সেভ করা হয়েছে`
+        );
+
+        showToast(isBn ? 'প্রোফাইল ছবি অটো-কমপ্রেস করে সফলভাবে সেভ করা হয়েছে!' : 'Profile photo auto-compressed & saved successfully!');
+      };
+    };
+    reader.readAsDataURL(file);
   };
 
   // Avatar Badge Initials
@@ -235,18 +320,50 @@ export const UserProfileSettings: React.FC<UserProfileSettingsProps> = ({
         </h3>
 
         <div className="flex flex-col md:flex-row items-center md:items-start space-y-6 md:space-y-0 md:space-x-10">
-          {/* Left Avatar Section */}
-          <div className="flex flex-col items-center space-y-2 shrink-0">
-            <div className="relative group cursor-pointer">
-              <div className="w-24 h-24 rounded-full bg-[#FFEEDD] dark:bg-slate-800 border border-orange-200 dark:border-slate-700 text-[#EA580C] dark:text-orange-400 flex items-center justify-center font-bold text-2xl shadow-sm">
-                {getInitials(currentUser.name)}
-              </div>
-              <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center text-white transition-opacity">
-                <Camera className="w-6 h-6" />
+          {/* Hidden Image Upload File Input */}
+          <input
+            type="file"
+            ref={fileInputRef}
+            accept="image/*"
+            className="hidden"
+            onChange={handlePhotoSelect}
+          />
+
+          {/* Left Circular Avatar Section */}
+          <div className="flex flex-col items-center space-y-3 shrink-0">
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              className="relative group cursor-pointer w-28 h-28 sm:w-32 sm:h-32 rounded-full border-4 border-[#00897B] shadow-xl overflow-hidden flex items-center justify-center bg-teal-50 dark:bg-slate-800 transition-all hover:scale-105 hover:border-amber-500"
+              title={isBn ? 'গ্যালারি থেকে ছবি পরিবর্তন করতে ক্লিক করুন' : 'Click to change profile photo'}
+            >
+              {photoUrl ? (
+                <img
+                  src={photoUrl}
+                  alt={currentUser.name}
+                  className="w-full h-full object-cover rounded-full"
+                />
+              ) : (
+                <span className="font-black text-2xl sm:text-3xl text-[#00897B] dark:text-teal-400 select-none">
+                  {getInitials(currentUser.name)}
+                </span>
+              )}
+
+              {/* Hover Overlay with Camera Icon */}
+              <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 flex flex-col items-center justify-center text-white transition-all backdrop-blur-[2px]">
+                <Camera className="w-7 h-7 text-amber-400 animate-bounce mb-1" />
+                <span className="text-[10px] font-bold text-amber-300 uppercase tracking-wider">
+                  {isBn ? 'ছবি আপলোড' : 'Change Photo'}
+                </span>
               </div>
             </div>
-            <button className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 bg-transparent border-0 outline-none cursor-pointer">
-              {isBn ? 'ছবি পরিবর্তন করতে ক্লিক করুন' : 'Click to change photo'}
+
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="text-xs font-semibold text-[#00897B] hover:text-teal-700 dark:text-teal-400 dark:hover:text-teal-300 bg-transparent border-0 outline-none cursor-pointer flex items-center gap-1.5 transition-colors"
+            >
+              <Camera className="w-3.5 h-3.5" />
+              <span>{isBn ? 'ছবি আপলোড করতে ক্লিক করুন (অটো-সাইজ কমবে)' : 'Click to Upload Photo (Auto-compressed)'}</span>
             </button>
           </div>
 

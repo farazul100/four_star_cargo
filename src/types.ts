@@ -38,6 +38,7 @@ export interface User {
   role: UserRole;
   phone?: string;
   avatar_url?: string;
+  photo_url?: string;
   default_language?: string;
   notification_volume?: number;
   department?: string;
