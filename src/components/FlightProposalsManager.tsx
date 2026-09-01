@@ -24,7 +24,7 @@ import {
   Scale,
 } from 'lucide-react';
 import { FlyingProposal, Carton, Language, Theme, AuditLog } from '../types';
-import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSystemAuditAction } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSystemAuditAction, getProposalDisplayCode } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
 import { FlightManifestExportModal, exportProposalToExcel, exportProposalToCSV } from './FlightManifestExportModal';
@@ -615,7 +615,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
 
                         <div>
                           <div className="flex items-center space-x-2">
-                            <span className={`font-mono font-medium text-sm ${isDark ? 'text-teal-400' : 'text-[#00897B]'}`}>#{prop.id.toUpperCase()}</span>
+                             <span className={`font-mono font-medium text-sm ${isDark ? 'text-teal-400' : 'text-[#00897B]'}`}>{getProposalDisplayCode(prop)}</span>
                             {prop.flight_number && (
                               <span className={`px-2 py-0.5 rounded-none text-[10px] font-normal border font-mono ${
                                 isDark ? 'bg-blue-950/60 text-blue-300 border-blue-800' : 'bg-blue-50 text-blue-900 border-blue-200'

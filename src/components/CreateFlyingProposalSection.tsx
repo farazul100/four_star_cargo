@@ -149,8 +149,13 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
     const originWhObj = warehouses.find((w) => w.id === selectedOriginWhId);
     const destWhObj = warehouses.find((w) => w.id === selectedDestWhId);
 
+    const randSeq = Math.floor(100 + Math.random() * 900);
+    const cleanFlight = (flightNumber.trim() || 'BS-206').replace(/\s+/g, '');
+    const proposalCode = `#LOT-${cleanFlight}-${randSeq}`;
+
     const newProposal: FlyingProposal = {
-      id: `prop-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+      id: `prop-${Date.now()}-${randSeq}`,
+      proposal_code: proposalCode,
       flying_name: flyingName.trim() || `Flight Batch ${flightNumber}`,
       warehouse_id: selectedOriginWhId,
       warehouse_name: originWhObj?.name || 'Guangzhou Air Hub',

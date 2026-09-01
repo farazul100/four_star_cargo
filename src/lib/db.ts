@@ -1192,3 +1192,22 @@ export const performFactorySystemReset = async (currentUser?: any) => {
 
   return true;
 };
+
+export const getProposalDisplayCode = (prop?: { id: string; flight_number?: string; date?: string; proposal_code?: string } | null) => {
+  if (!prop) return '';
+  if (prop.proposal_code) return prop.proposal_code;
+
+  const flightNum = (prop.flight_number || 'BS-206').replace(/\s+/g, '');
+  const rawId = prop.id || '';
+
+  const parts = rawId.split('-');
+  const seqSuffix = parts.length > 1 && parts[parts.length - 1].length <= 5
+    ? parts[parts.length - 1]
+    : rawId.slice(-3);
+
+  if (rawId.startsWith('prop-') || rawId.length > 15) {
+    return `#LOT-${flightNum}-${seqSuffix || '01'}`;
+  }
+
+  return rawId.startsWith('#') ? rawId : `#${rawId.toUpperCase()}`;
+};

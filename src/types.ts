@@ -127,6 +127,7 @@ export interface FlyingProposal {
   warehouse_name: string;
   destination_warehouse_id?: string;
   destination_warehouse_name?: string;
+  proposal_code?: string; // Human-readable Flight Batch/Proposal Lot Code e.g. "LOT-BS-206-326"
   proposed_by: string;
   proposed_by_name: string;
   date: string;

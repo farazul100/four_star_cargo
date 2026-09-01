@@ -2,6 +2,7 @@ import React from 'react';
 import { Printer, Download, FileSpreadsheet, X, Plane } from 'lucide-react';
 import { FlyingProposal, Carton, Language } from '../types';
 import { useTheme } from '../context/ThemeContext';
+import { getProposalDisplayCode } from '../lib/db';
 
 interface FlightManifestExportModalProps {
   proposal: FlyingProposal;
@@ -12,7 +13,7 @@ interface FlightManifestExportModalProps {
 
 export const exportProposalToExcel = (proposal: FlyingProposal, cartons: Carton[]) => {
   const flightDate = proposal.date || new Date().toISOString().split('T')[0];
-  const lotNumber = proposal.flight_number || proposal.flying_name || 'BS-206';
+  const lotNumber = getProposalDisplayCode(proposal);
   const awbNumber = proposal.awb_number || '';
   const hubName = proposal.warehouse_name || 'CHINA GUANGZHOU HUB';
 
@@ -148,7 +149,7 @@ export const FlightManifestExportModal: React.FC<FlightManifestExportModalProps>
   const isBn = language === 'bn';
 
   const flightDate = proposal.date || new Date().toISOString().split('T')[0];
-  const lotNumber = proposal.flight_number || proposal.flying_name || 'BS-206';
+  const lotNumber = getProposalDisplayCode(proposal);
   const awbNumber = proposal.awb_number || '';
   const hubName = proposal.warehouse_name || 'CHINA GUANGZHOU HUB';
 
