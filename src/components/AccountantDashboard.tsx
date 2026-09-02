@@ -116,10 +116,39 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
   const [expVoucherNo, setExpVoucherNo] = useState(`VCH-${Math.floor(1000 + Math.random() * 9000)}`);
   const [expNotes, setExpNotes] = useState('');
 
-  // Report Date Range Filter
-  const [reportStartDate, setReportStartDate] = useState('2026-08-01');
-  const [reportEndDate, setReportEndDate] = useState(new Date().toISOString().split('T')[0]);
+  // Report Date Range Filter & Preset Timeframes ('today' | 'weekly' | 'monthly' | 'yearly' | 'custom')
+  const [timePreset, setTimePreset] = useState<'today' | 'weekly' | 'monthly' | 'yearly' | 'custom'>('monthly');
+  const [reportStartDate, setReportStartDate] = useState(() => {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), 1).toISOString().split('T')[0];
+  });
+  const [reportEndDate, setReportEndDate] = useState(() => new Date().toISOString().split('T')[0]);
   const [reportCustFilter, setReportCustFilter] = useState('all');
+
+  // Helper to apply preset date ranges (Daily, Weekly, Monthly, Yearly)
+  const applyTimePreset = (mode: 'today' | 'weekly' | 'monthly' | 'yearly' | 'custom') => {
+    setTimePreset(mode);
+    const today = new Date();
+    const todayStr = today.toISOString().split('T')[0];
+
+    if (mode === 'today') {
+      setReportStartDate(todayStr);
+      setReportEndDate(todayStr);
+    } else if (mode === 'weekly') {
+      const d = new Date(today);
+      d.setDate(d.getDate() - 7);
+      setReportStartDate(d.toISOString().split('T')[0]);
+      setReportEndDate(todayStr);
+    } else if (mode === 'monthly') {
+      const d = new Date(today.getFullYear(), today.getMonth(), 1);
+      setReportStartDate(d.toISOString().split('T')[0]);
+      setReportEndDate(todayStr);
+    } else if (mode === 'yearly') {
+      const d = new Date(today.getFullYear(), 0, 1);
+      setReportStartDate(d.toISOString().split('T')[0]);
+      setReportEndDate(todayStr);
+    }
+  };
 
   // Helper to format ISO timestamp cleanly into Date & Time
   const formatDateTime = (isoStr: string) => {
@@ -327,20 +356,144 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
     );
   };
 
-  // Export CSV Handler
-  const handleExportCSV = () => {
-    let csvContent = 'data:text/csv;charset=utf-8,Date,Customer Code,Customer Name,Type,Amount,Source,Entered By,Note\n';
-    ledgerEntries.forEach((l) => {
-      csvContent += `${l.created_at.split('T')[0]},${l.customer_code},"${l.customer_name}",${l.type},${l.amount},${l.source},"${l.entered_by_name}","${l.note}"\n`;
+  // Comprehensive UTF-8 BOM CSV Financial Statement Export Handler
+  const handleExportCSVReport = (entries: LedgerEntry[], exps: ExpenseItem[], label: string) => {
+    const totalB = entries.filter((l) => l.type === 'charge').reduce((a, c) => a + c.amount, 0);
+    const totalP = entries.filter((l) => l.type === 'payment').reduce((a, c) => a + c.amount, 0);
+    const totalE = exps.reduce((a, c) => a + c.amount, 0);
+    const net = totalP - totalE;
+
+    const bom = '\uFEFF';
+    let csv = bom + `M/S FOUR STAR CARGO — ${label.toUpperCase()} FINANCIAL STATEMENT\n`;
+    csv += `Period Range,${reportStartDate} to ${reportEndDate}\n`;
+    csv += `Report Generated At,${new Date().toLocaleString()}\n\n`;
+
+    csv += `FINANCIAL STATEMENT SUMMARY\n`;
+    csv += `Total Billed Charges (BDT ৳),${totalB}\n`;
+    csv += `Total Cash/Payment Collected (BDT ৳),${totalP}\n`;
+    csv += `Total Operating Expenses (BDT ৳),${totalE}\n`;
+    csv += `Net Operating Cashflow (BDT ৳),${net}\n`;
+    csv += `Total Outstanding Dues Balance (BDT ৳),${totalCompanyDue}\n\n`;
+
+    csv += `CUSTOMER LEDGER TRANSACTIONS (${entries.length} Records)\n`;
+    csv += `Date,Customer Code,Customer Name,Type,Amount (BDT ৳),Payment Method,Reference No,Entered By,Notes\n`;
+    entries.forEach((l) => {
+      csv += `"${l.created_at.split('T')[0]}","${l.customer_code}","${(l.customer_name || '').replace(/"/g, '""')}","${l.type === 'charge' ? 'CHARGE (+)' : 'PAYMENT (-)'}",${l.amount},"${l.payment_method || '-'}","${l.reference_no || ''}","${(l.entered_by_name || '').replace(/"/g, '""')}","${(l.note || '').replace(/"/g, '""')}"\n`;
     });
-    const encodedUri = encodeURI(csvContent);
+
+    csv += `\nOPERATING EXPENSES VOUCHERS (${exps.length} Records)\n`;
+    csv += `Date,Voucher No,Category,Title,Amount (BDT ৳),Payment Method,Recorded By,Notes\n`;
+    exps.forEach((e) => {
+      csv += `"${e.date}","${e.voucher_no}","${e.category}","${(e.title || '').replace(/"/g, '""')}",${e.amount},"${e.payment_method || '-'}","${(e.created_by || '').replace(/"/g, '""')}","${(e.notes || '').replace(/"/g, '""')}"\n`;
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `FourStarCargo_Financial_Ledger_${new Date().toISOString().split('T')[0]}.csv`);
+    link.href = URL.createObjectURL(blob);
+    link.download = `FourStarCargo_${label.replace(/\s+/g, '_')}_Financial_Statement_${new Date().toISOString().split('T')[0]}.csv`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
-    addToast('success', isBn ? 'CSV লেজার রিপোর্ট ডাউনলোড সম্পন্ন!' : 'CSV Report Exported!');
+    addToast('success', isBn ? `${label} CSV স্টেটমেন্ট ডাউনলোড সম্পন্ন!` : `${label} CSV Report Exported!`);
+  };
+
+  // Comprehensive Excel (.xlsx) Spreadsheet Export Handler
+  const handleExportExcelReport = (entries: LedgerEntry[], exps: ExpenseItem[], label: string) => {
+    const totalB = entries.filter((l) => l.type === 'charge').reduce((a, c) => a + c.amount, 0);
+    const totalP = entries.filter((l) => l.type === 'payment').reduce((a, c) => a + c.amount, 0);
+    const totalE = exps.reduce((a, c) => a + c.amount, 0);
+    const net = totalP - totalE;
+
+    const xml = `<?xml version="1.0"?>
+<?mso-application progid="Excel.Sheet"?>
+<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+ xmlns:o="urn:schemas-microsoft-com:office:office"
+ xmlns:x="urn:schemas-microsoft-com:office:excel"
+ xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+<Styles>
+ <Style ss:ID="Header"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#00897B" ss:Pattern="Solid"/></Style>
+ <Style ss:ID="SubHeader"><Font ss:Bold="1" ss:Color="#FFFFFF"/><Interior ss:Color="#0284C7" ss:Pattern="Solid"/></Style>
+ <Style ss:ID="Title"><Font ss:Size="14" ss:Bold="1" ss:Color="#00897B"/></Style>
+ <Style ss:ID="Bold"><Font ss:Bold="1"/></Style>
+ <Style ss:ID="Number"><NumberFormat ss:Format="#,##0"/></Style>
+</Styles>
+<Worksheet ss:Name="Financial Statement">
+<Table>
+ <Column ss:Width="100"/>
+ <Column ss:Width="120"/>
+ <Column ss:Width="160"/>
+ <Column ss:Width="100"/>
+ <Column ss:Width="110"/>
+ <Column ss:Width="110"/>
+ <Column ss:Width="140"/>
+ <Column ss:Width="220"/>
+ <Row><Cell ss:StyleID="Title"><Data ss:Type="String">M/S Four Star Cargo — ${label} Financial Statement</Data></Cell></Row>
+ <Row><Cell><Data ss:Type="String">Period: ${reportStartDate} to ${reportEndDate}</Data></Cell></Row>
+ <Row><Cell><Data ss:Type="String">Generated At: ${new Date().toLocaleString()}</Data></Cell></Row>
+ <Row></Row>
+ <Row><Cell ss:StyleID="Bold"><Data ss:Type="String">A-to-Z Financial Summary</Data></Cell></Row>
+ <Row><Cell><Data ss:Type="String">Total Charges Billed:</Data></Cell><Cell ss:StyleID="Number"><Data ss:Type="Number">${totalB}</Data></Cell></Row>
+ <Row><Cell><Data ss:Type="String">Total Cash/Payment Collected:</Data></Cell><Cell ss:StyleID="Number"><Data ss:Type="Number">${totalP}</Data></Cell></Row>
+ <Row><Cell><Data ss:Type="String">Total Operating Expenses:</Data></Cell><Cell ss:StyleID="Number"><Data ss:Type="Number">${totalE}</Data></Cell></Row>
+ <Row><Cell><Data ss:Type="String">Net Cashflow Balance:</Data></Cell><Cell ss:StyleID="Number"><Data ss:Type="Number">${net}</Data></Cell></Row>
+ <Row></Row>
+ <Row><Cell ss:StyleID="Title"><Data ss:Type="String">Customer Ledger Transactions (${entries.length} Records)</Data></Cell></Row>
+ <Row>
+  <Cell ss:StyleID="Header"><Data ss:Type="String">Date</Data></Cell>
+  <Cell ss:StyleID="Header"><Data ss:Type="String">Customer Code</Data></Cell>
+  <Cell ss:StyleID="Header"><Data ss:Type="String">Customer Name</Data></Cell>
+  <Cell ss:StyleID="Header"><Data ss:Type="String">Type</Data></Cell>
+  <Cell ss:StyleID="Header"><Data ss:Type="String">Amount (BDT ৳)</Data></Cell>
+  <Cell ss:StyleID="Header"><Data ss:Type="String">Payment Method</Data></Cell>
+  <Cell ss:StyleID="Header"><Data ss:Type="String">Entered By</Data></Cell>
+  <Cell ss:StyleID="Header"><Data ss:Type="String">Notes &amp; Details</Data></Cell>
+ </Row>
+ ${entries.map(l => `
+ <Row>
+  <Cell><Data ss:Type="String">${l.created_at.split('T')[0]}</Data></Cell>
+  <Cell><Data ss:Type="String">${l.customer_code}</Data></Cell>
+  <Cell><Data ss:Type="String">${(l.customer_name || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</Data></Cell>
+  <Cell><Data ss:Type="String">${l.type === 'charge' ? 'CHARGE (+)' : 'PAYMENT (-)'}</Data></Cell>
+  <Cell ss:StyleID="Number"><Data ss:Type="Number">${l.amount}</Data></Cell>
+  <Cell><Data ss:Type="String">${l.payment_method || '-'}</Data></Cell>
+  <Cell><Data ss:Type="String">${(l.entered_by_name || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</Data></Cell>
+  <Cell><Data ss:Type="String">${(l.note || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</Data></Cell>
+ </Row>`).join('')}
+ <Row></Row>
+ <Row><Cell ss:StyleID="Title"><Data ss:Type="String">Operating Expenses Vouchers (${exps.length} Records)</Data></Cell></Row>
+ <Row>
+  <Cell ss:StyleID="SubHeader"><Data ss:Type="String">Date</Data></Cell>
+  <Cell ss:StyleID="SubHeader"><Data ss:Type="String">Voucher No</Data></Cell>
+  <Cell ss:StyleID="SubHeader"><Data ss:Type="String">Category</Data></Cell>
+  <Cell ss:StyleID="SubHeader"><Data ss:Type="String">Title</Data></Cell>
+  <Cell ss:StyleID="SubHeader"><Data ss:Type="String">Amount (BDT ৳)</Data></Cell>
+  <Cell ss:StyleID="SubHeader"><Data ss:Type="String">Payment Method</Data></Cell>
+  <Cell ss:StyleID="SubHeader"><Data ss:Type="String">Recorded By</Data></Cell>
+  <Cell ss:StyleID="SubHeader"><Data ss:Type="String">Notes</Data></Cell>
+ </Row>
+ ${exps.map(e => `
+ <Row>
+  <Cell><Data ss:Type="String">${e.date}</Data></Cell>
+  <Cell><Data ss:Type="String">${e.voucher_no}</Data></Cell>
+  <Cell><Data ss:Type="String">${e.category}</Data></Cell>
+  <Cell><Data ss:Type="String">${(e.title || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</Data></Cell>
+  <Cell ss:StyleID="Number"><Data ss:Type="Number">${e.amount}</Data></Cell>
+  <Cell><Data ss:Type="String">${e.payment_method || '-'}</Data></Cell>
+  <Cell><Data ss:Type="String">${(e.created_by || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</Data></Cell>
+  <Cell><Data ss:Type="String">${(e.notes || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</Data></Cell>
+ </Row>`).join('')}
+</Table>
+</Worksheet>
+</Workbook>`;
+
+    const blob = new Blob([xml], { type: 'application/vnd.ms-excel' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `FourStarCargo_${label.replace(/\s+/g, '_')}_Financial_Statement_${new Date().toISOString().split('T')[0]}.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    addToast('success', isBn ? `${label} Excel (.xlsx) স্টেটমেন্ট ডাউনলোড সম্পন্ন!` : `${label} Excel (.xlsx) Report Exported!`);
   };
 
   // Add Expense Voucher Handler (Live Sync with Super Admin & Persisted to Hostinger DB)
@@ -480,13 +633,25 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
             </button>
 
             <button
-              onClick={handleExportCSV}
+              onClick={() => handleExportCSVReport(ledgerEntries, expenses || [], 'Overall Summary')}
               className={`px-3.5 py-2 rounded-none text-xs font-normal border transition-all flex items-center space-x-1.5 cursor-pointer ${
                 isDark ? 'bg-[#0B1622] hover:bg-[#1E3247] text-[#8FA3AD] hover:text-white border-[#1E3247]' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
               }`}
+              title={isBn ? 'সিএসভি ডাউনলোড' : 'CSV Export'}
             >
               <Download className="w-4 h-4 text-[#00897B]" />
-              <span className="font-light">{isBn ? 'CSV অডিট ডাউনলোড' : 'CSV Export'}</span>
+              <span className="font-light">{isBn ? '📥 CSV Export' : '📥 CSV Export'}</span>
+            </button>
+
+            <button
+              onClick={() => handleExportExcelReport(ledgerEntries, expenses || [], 'Overall Summary')}
+              className={`px-3.5 py-2 rounded-none text-xs font-normal border transition-all flex items-center space-x-1.5 cursor-pointer ${
+                isDark ? 'bg-[#0B1622] hover:bg-[#1E3247] text-[#1FB6A8] hover:text-white border-[#1E3247]' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
+              }`}
+              title={isBn ? 'এক্সেল স্প্রেডশীট ডাউনলোড' : 'Excel Export'}
+            >
+              <FileSpreadsheet className="w-4 h-4 text-[#0284C7]" />
+              <span className="font-light">{isBn ? '📊 Excel (.xlsx)' : '📊 Excel (.xlsx)'}</span>
             </button>
           </div>
         </div>
@@ -978,7 +1143,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
   }
 
   // --------------------------------------------------------------------------
-  // TAB 1: REPORTS VIEW
+  // TAB 1: A-TO-Z FINANCIAL STATEMENT & REPORTS VIEW (Daily/Weekly/Monthly/Yearly)
   // --------------------------------------------------------------------------
   if (viewMode === 'reports') {
     const reportEntries = ledgerEntries.filter((l) => {
@@ -988,84 +1153,260 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
       return matchesCust && matchesDate;
     });
 
+    const reportExpenses = (expenses || []).filter((e) => {
+      const dateStr = e.date;
+      return dateStr >= reportStartDate && dateStr <= reportEndDate;
+    });
+
+    const filterLabel =
+      timePreset === 'today'
+        ? isBn ? 'দৈনিক' : 'Daily'
+        : timePreset === 'weekly'
+        ? isBn ? 'সাপ্তাহিক' : 'Weekly'
+        : timePreset === 'monthly'
+        ? isBn ? 'মাসিক' : 'Monthly'
+        : timePreset === 'yearly'
+        ? isBn ? 'বাতসরিক' : 'Yearly'
+        : isBn ? 'কাস্টম' : 'Custom Range';
+
+    const periodTotalBilled = reportEntries.filter((l) => l.type === 'charge').reduce((a, c) => a + c.amount, 0);
+    const periodTotalPaid = reportEntries.filter((l) => l.type === 'payment').reduce((a, c) => a + c.amount, 0);
+    const periodTotalExpenses = reportExpenses.reduce((a, c) => a + c.amount, 0);
+    const periodNetCashflow = periodTotalPaid - periodTotalExpenses;
+
     return (
       <div className="space-y-6">
         <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
-        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
+        {/* Headline & Export Action Bar */}
+        <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
           <div>
             <h2 className={`text-xl font-bold font-poppins flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
               <FileSpreadsheet className="w-5 h-5 text-[#00897B]" />
-              <span>{isBn ? 'ফিন্যান্সিয়াল লেজার ও ফিল্টারড রিপোর্টস' : 'Financial Ledger Activity Reports'}</span>
+              <span>{isBn ? 'এ টু জেড ফিন্যান্সিয়াল ফিল্টার্ড স্টেটমেন্ট ও রিপোর্টস' : 'A-to-Z Financial Statement & Filtered Reports'}</span>
             </h2>
-            <p className={`text-xs ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>
-              {isBn ? 'তারিখ ও কাস্টমার অনুযায়ী ফিল্টার করে স্টেটমেন্ট ডাউনলোড করুন' : 'Date-range filtered ledger activity with CSV export'}
+            <p className={`text-xs mt-0.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>
+              {isBn
+                ? 'দৈনিক, সাপ্তাহিক, মাসিক ও বাতসরিক ফিল্টার করে এ টু জেড হিসাব-নিকাশ সিএসভি এবং এক্সেল ফাইলে ডাউনলোড করুন'
+                : 'Filter Daily, Weekly, Monthly & Yearly financial statements and export to CSV or Excel (.xlsx)'}
             </p>
           </div>
 
-          <button
-            onClick={handleExportCSV}
-            className="flex items-center justify-center space-x-2 py-2.5 px-5 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-normal text-xs transition-all shadow-sm cursor-pointer"
-          >
-            <Download className="w-4 h-4" />
-            <span className="font-light">{isBn ? 'CSV লেজার স্টেটমেন্ট ডাউনলোড' : 'Export CSV Report'}</span>
-          </button>
-        </div>
-
-        {/* Date Filter Bar */}
-        <div className={`border rounded-none p-4 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs ${
-          isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-sm'
-        }`}>
-          <div>
-            <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'শুরূতের তারিখ' : 'Start Date'}</label>
-            <input
-              type="date"
-              value={reportStartDate}
-              onChange={(e) => setReportStartDate(e.target.value)}
-              className={`w-full border rounded-none p-2 font-mono outline-none ${
-                isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
-              }`}
-            />
-          </div>
-
-          <div>
-            <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'শেষের তারিখ' : 'End Date'}</label>
-            <input
-              type="date"
-              value={reportEndDate}
-              onChange={(e) => setReportEndDate(e.target.value)}
-              className={`w-full border rounded-none p-2 font-mono outline-none ${
-                isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
-              }`}
-            />
-          </div>
-
-          <div>
-            <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'কাস্টমার ফিল্টার' : 'Filter Customer'}</label>
-            <select
-              value={reportCustFilter}
-              onChange={(e) => setReportCustFilter(e.target.value)}
-              className={`w-full border rounded-none p-2 outline-none font-light ${
-                isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
-              }`}
+          <div className="flex items-center space-x-2 flex-wrap gap-2">
+            <button
+              onClick={() => handleExportCSVReport(reportEntries, reportExpenses, `${filterLabel} Report`)}
+              className="flex items-center space-x-1.5 py-2.5 px-4 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-semibold text-xs transition-all shadow-sm cursor-pointer"
+              title={isBn ? 'সিএসভি ফাইল ডাউনলোড করুন' : 'Export CSV File'}
             >
-              <option value="all">{isBn ? 'সকল কাস্টমার' : 'All Customers'}</option>
-              {customers.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} ({c.customer_code})
-                </option>
-              ))}
-            </select>
+              <Download className="w-4 h-4" />
+              <span>{isBn ? '📥 CSV ডাউনলোড (.csv)' : 'Export CSV (.csv)'}</span>
+            </button>
+
+            <button
+              onClick={() => handleExportExcelReport(reportEntries, reportExpenses, `${filterLabel} Report`)}
+              className="flex items-center space-x-1.5 py-2.5 px-4 rounded-none bg-[#0284C7] hover:bg-[#0369A1] text-white font-semibold text-xs transition-all shadow-sm cursor-pointer"
+              title={isBn ? 'এক্সেল স্প্রেডশীট ফাইল ডাউনলোড করুন' : 'Export Excel File'}
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              <span>{isBn ? '📊 Excel ডাউনলোড (.xlsx)' : 'Export Excel (.xlsx)'}</span>
+            </button>
           </div>
         </div>
 
-        {/* Reports Table */}
+        {/* 1. Timeframe Preset Filter Bar (Daily, Weekly, Monthly, Yearly, Custom) */}
+        <div className={`border rounded-none p-4 space-y-4 shadow-sm ${
+          isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
+        }`}>
+          <div className="flex items-center justify-between flex-wrap gap-2 border-b pb-3 border-slate-200 dark:border-[#1E3247]">
+            <span className={`text-xs font-bold uppercase tracking-wider ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
+              🗓️ {isBn ? 'ফিল্টার সময়সীমা বেছে নিন (Timeframe Filter)' : 'Select Filter Period'}
+            </span>
+
+            {/* Quick Preset Buttons */}
+            <div className="flex items-center space-x-1 flex-wrap gap-1">
+              <button
+                type="button"
+                onClick={() => applyTimePreset('today')}
+                className={`px-3 py-1.5 rounded-none text-xs font-medium transition-all cursor-pointer ${
+                  timePreset === 'today'
+                    ? 'bg-[#00897B] text-white font-bold shadow-xs'
+                    : isDark ? 'bg-[#0B1622] text-[#8FA3AD] hover:text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                ☀️ {isBn ? 'দৈনিক (Today)' : 'Daily (Today)'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => applyTimePreset('weekly')}
+                className={`px-3 py-1.5 rounded-none text-xs font-medium transition-all cursor-pointer ${
+                  timePreset === 'weekly'
+                    ? 'bg-[#00897B] text-white font-bold shadow-xs'
+                    : isDark ? 'bg-[#0B1622] text-[#8FA3AD] hover:text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                📅 {isBn ? 'সাপ্তাহিক (7 Days)' : 'Weekly (7 Days)'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => applyTimePreset('monthly')}
+                className={`px-3 py-1.5 rounded-none text-xs font-medium transition-all cursor-pointer ${
+                  timePreset === 'monthly'
+                    ? 'bg-[#00897B] text-white font-bold shadow-xs'
+                    : isDark ? 'bg-[#0B1622] text-[#8FA3AD] hover:text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                📆 {isBn ? 'মাসিক (This Month)' : 'Monthly'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => applyTimePreset('yearly')}
+                className={`px-3 py-1.5 rounded-none text-xs font-medium transition-all cursor-pointer ${
+                  timePreset === 'yearly'
+                    ? 'bg-[#00897B] text-white font-bold shadow-xs'
+                    : isDark ? 'bg-[#0B1622] text-[#8FA3AD] hover:text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                🗓️ {isBn ? 'বাতসরিক (This Year)' : 'Yearly (2026)'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTimePreset('custom')}
+                className={`px-3 py-1.5 rounded-none text-xs font-medium transition-all cursor-pointer ${
+                  timePreset === 'custom'
+                    ? 'bg-[#0284C7] text-white font-bold shadow-xs'
+                    : isDark ? 'bg-[#0B1622] text-[#8FA3AD] hover:text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                }`}
+              >
+                🛠️ {isBn ? 'কাস্টমারিক সীমা' : 'Custom Range'}
+              </button>
+            </div>
+          </div>
+
+          {/* Date Picker & Customer Selector */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+            <div>
+              <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'শুরুর তারিখ (From)' : 'Start Date'}</label>
+              <input
+                type="date"
+                value={reportStartDate}
+                onChange={(e) => {
+                  setReportStartDate(e.target.value);
+                  setTimePreset('custom');
+                }}
+                className={`w-full border rounded-none p-2 font-mono outline-none ${
+                  isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                }`}
+              />
+            </div>
+
+            <div>
+              <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'শেষের তারিখ (To)' : 'End Date'}</label>
+              <input
+                type="date"
+                value={reportEndDate}
+                onChange={(e) => {
+                  setReportEndDate(e.target.value);
+                  setTimePreset('custom');
+                }}
+                className={`w-full border rounded-none p-2 font-mono outline-none ${
+                  isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                }`}
+              />
+            </div>
+
+            <div>
+              <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'কাস্টমার ফিল্টার' : 'Filter Customer'}</label>
+              <select
+                value={reportCustFilter}
+                onChange={(e) => setReportCustFilter(e.target.value)}
+                className={`w-full border rounded-none p-2 outline-none font-light ${
+                  isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                }`}
+              >
+                <option value="all">{isBn ? 'সকল কাস্টমার' : 'All Customers'}</option>
+                {customers.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} ({c.customer_code})
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {/* 2. Filtered Period A-to-Z Summary Metrics Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className={`border rounded-none p-4 space-y-1 ${
+            isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
+          }`}>
+            <span className={`text-[11px] font-medium uppercase tracking-wider ${isDark ? 'text-amber-400' : 'text-amber-700'}`}>
+              {filterLabel} {isBn ? 'বকেয়া চার্জ বিলিং' : 'Billed Charges'}
+            </span>
+            <div className="text-2xl font-bold font-mono text-amber-600 dark:text-amber-400">
+              ৳{periodTotalBilled.toLocaleString()}
+            </div>
+            <span className={`text-[10px] block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              {reportEntries.filter(l => l.type === 'charge').length} Charge Records
+            </span>
+          </div>
+
+          <div className={`border rounded-none p-4 space-y-1 ${
+            isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
+          }`}>
+            <span className={`text-[11px] font-medium uppercase tracking-wider ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`}>
+              {filterLabel} {isBn ? 'ক্যাশ/ব্যাংক মোট আদায়' : 'Cash Collected'}
+            </span>
+            <div className="text-2xl font-bold font-mono text-emerald-600 dark:text-emerald-400">
+              ৳{periodTotalPaid.toLocaleString()}
+            </div>
+            <span className={`text-[10px] block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              {reportEntries.filter(l => l.type === 'payment').length} Payment Records
+            </span>
+          </div>
+
+          <div className={`border rounded-none p-4 space-y-1 ${
+            isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
+          }`}>
+            <span className={`text-[11px] font-medium uppercase tracking-wider ${isDark ? 'text-rose-400' : 'text-rose-700'}`}>
+              {filterLabel} {isBn ? 'পরিচালন মোট খরচ' : 'Operating Expenses'}
+            </span>
+            <div className="text-2xl font-bold font-mono text-rose-600 dark:text-rose-400">
+              ৳{periodTotalExpenses.toLocaleString()}
+            </div>
+            <span className={`text-[10px] block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              {reportExpenses.length} Expense Vouchers
+            </span>
+          </div>
+
+          <div className={`border rounded-none p-4 space-y-1 ${
+            isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
+          }`}>
+            <span className={`text-[11px] font-medium uppercase tracking-wider ${isDark ? 'text-[#1FB6A8]' : 'text-[#00897B]'}`}>
+              {filterLabel} {isBn ? 'নিট ক্যাশফ্লো ব্যালেন্স' : 'Net Cashflow'}
+            </span>
+            <div className={`text-2xl font-bold font-mono ${periodNetCashflow >= 0 ? 'text-[#00897B] dark:text-[#1FB6A8]' : 'text-rose-600'}`}>
+              ৳{periodNetCashflow.toLocaleString()}
+            </div>
+            <span className={`text-[10px] block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              {isBn ? 'আদায় মাইনাস পরিচালন ব্যয়' : 'Collected minus Expenses'}
+            </span>
+          </div>
+        </div>
+
+        {/* 3. Detailed Filtered Ledger Table */}
         <div className={`border rounded-none overflow-hidden shadow-sm ${
           isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
           <div className={`p-4 border-b flex items-center justify-between ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
-            <h3 className="text-sm font-bold">{isBn ? 'ফিল্টারড ট্রানজ্যাকশন এন্ট্রি' : 'Filtered Transaction Entries'}</h3>
-            <span className="text-xs text-[#00897B] font-mono">{reportEntries.length} Records</span>
+            <h3 className="text-sm font-bold flex items-center space-x-2">
+              <FileText className="w-4 h-4 text-[#00897B]" />
+              <span>{isBn ? `${filterLabel} ফিল্টারড ট্রানজ্যাকশন ও স্টেটমেন্ট` : `${filterLabel} Filtered Statement Ledger`}</span>
+            </h3>
+            <span className="text-xs text-[#00897B] font-mono font-bold">{reportEntries.length} Ledger Records</span>
           </div>
 
           <div className="overflow-x-auto">
