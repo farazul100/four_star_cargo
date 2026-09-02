@@ -1422,24 +1422,24 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
               <tbody className={`divide-y ${isDark ? 'divide-[#1E3247]' : 'divide-slate-200'}`}>
                 {reportEntries.map((re) => (
                   <tr key={re.id} className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
-                    <td className={`p-3.5 font-mono ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{re.created_at.split('T')[0]}</td>
-                    <td className="p-3.5 font-mono text-[#00897B] font-bold">{re.customer_code}</td>
-                    <td className={`p-3.5 font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{re.customer_name}</td>
+                    <td className={`p-3.5 font-mono font-semibold ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>{re.created_at.split('T')[0]}</td>
+                    <td className="p-3.5 font-mono text-[#00897B] font-extrabold">{re.customer_code}</td>
+                    <td className={`p-3.5 font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{re.customer_name}</td>
                     <td className="p-3.5">
                       <span
-                        className={`px-2.5 py-0.5 rounded-none text-[10px] font-normal uppercase ${
+                        className={`font-extrabold text-xs uppercase ${
                           re.type === 'charge'
-                            ? 'bg-amber-500/20 text-amber-600 dark:text-amber-300'
-                            : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300'
+                            ? 'text-amber-700 dark:text-amber-400'
+                            : 'text-emerald-700 dark:text-emerald-400'
                         }`}
                       >
-                        {re.type}
+                        {re.type === 'charge' ? 'CHARGE (+)' : 'PAYMENT (-)'}
                       </span>
                     </td>
-                    <td className={`p-3.5 font-bold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>৳{re.amount.toLocaleString()}</td>
-                    <td className={`p-3.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>
+                    <td className={`p-3.5 font-extrabold font-mono text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>৳{re.amount.toLocaleString()}</td>
+                    <td className={`p-3.5 font-medium ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>
                       {re.source === 'auto_cash_collection' ? (
-                        <span className="text-emerald-600 dark:text-emerald-400 font-normal flex items-center space-x-1">
+                        <span className="text-emerald-700 dark:text-emerald-400 font-bold flex items-center space-x-1">
                           <DollarSign className="w-3.5 h-3.5" />
                           <span>Auto Cash ({re.entered_by_name})</span>
                         </span>
@@ -1447,7 +1447,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                         <span>Manual ({re.entered_by_name})</span>
                       )}
                     </td>
-                    <td className={`p-3.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{re.note}</td>
+                    <td className={`p-3.5 font-medium ${isDark ? 'text-slate-300' : 'text-slate-800'}`}>{re.note}</td>
                   </tr>
                 ))}
               </tbody>

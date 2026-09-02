@@ -90,8 +90,8 @@ export const AccountsDashboardPage: React.FC = () => {
       subtitle: lang === 'bn' ? 'কাস্টমার বকেয়া, রিসিভড পেমেন্ট ও রানিং ব্যালেন্স হিসাব' : 'Track customer outstanding dues, recorded payments & live running balance',
     },
     reports: {
-      title: lang === 'bn' ? 'ফাইনান্সিয়াল অডিট রিপোর্টস ও স্টেটমেন্ট' : 'Financial Activity & Audit Reports',
-      subtitle: lang === 'bn' ? 'তারিখ ভিত্তিক ফিল্টার এবং CSV রিপোর্ট এক্সপোর্ট' : 'Date-range filtered ledger activity statements with CSV export',
+      title: '',
+      subtitle: '',
     },
     expenses: {
       title: lang === 'bn' ? 'কোম্পানি বাজেট ও খরচ ভাউচার (Super Admin Live Sync)' : 'Company Budget & Expense Vouchers',
