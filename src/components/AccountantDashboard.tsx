@@ -1178,24 +1178,19 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
       <div className="space-y-6">
         <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
-        {/* Headline & Export Action Bar */}
-        <div className={`flex flex-col md:flex-row md:items-center justify-between gap-4 border-b pb-4 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
-          <div>
-            <h2 className={`text-xl font-bold font-poppins flex items-center space-x-2 ${isDark ? 'text-white' : 'text-slate-900'}`}>
-              <FileSpreadsheet className="w-5 h-5 text-[#00897B]" />
-              <span>{isBn ? 'এ টু জেড ফিন্যান্সিয়াল ফিল্টার্ড স্টেটমেন্ট ও রিপোর্টস' : 'A-to-Z Financial Statement & Filtered Reports'}</span>
-            </h2>
-            <p className={`text-xs mt-0.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>
-              {isBn
-                ? 'দৈনিক, সাপ্তাহিক, মাসিক ও বাতসরিক ফিল্টার করে এ টু জেড হিসাব-নিকাশ সিএসভি এবং এক্সেল ফাইলে ডাউনলোড করুন'
-                : 'Filter Daily, Weekly, Monthly & Yearly financial statements and export to CSV or Excel (.xlsx)'}
-            </p>
+        {/* Export Action Bar */}
+        <div className={`flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b pb-4 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
+          <div className="flex items-center space-x-2">
+            <FileSpreadsheet className="w-5 h-5 text-[#00897B]" />
+            <span className={`text-base font-bold font-poppins ${isDark ? 'text-white' : 'text-slate-900'}`}>
+              {isBn ? 'এ টু জেড ফিন্যান্সিয়াল রিপোর্টস' : 'Financial Reports'}
+            </span>
           </div>
 
           <div className="flex items-center space-x-2 flex-wrap gap-2">
             <button
               onClick={() => handleExportCSVReport(reportEntries, reportExpenses, `${filterLabel} Report`)}
-              className="flex items-center space-x-1.5 py-2.5 px-4 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-semibold text-xs transition-all shadow-sm cursor-pointer"
+              className="flex items-center space-x-1.5 py-2 px-4 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-semibold text-xs transition-all shadow-sm cursor-pointer"
               title={isBn ? 'সিএসভি ফাইল ডাউনলোড করুন' : 'Export CSV File'}
             >
               <Download className="w-4 h-4" />
@@ -1204,7 +1199,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
             <button
               onClick={() => handleExportExcelReport(reportEntries, reportExpenses, `${filterLabel} Report`)}
-              className="flex items-center space-x-1.5 py-2.5 px-4 rounded-none bg-[#0284C7] hover:bg-[#0369A1] text-white font-semibold text-xs transition-all shadow-sm cursor-pointer"
+              className="flex items-center space-x-1.5 py-2 px-4 rounded-none bg-[#0284C7] hover:bg-[#0369A1] text-white font-semibold text-xs transition-all shadow-sm cursor-pointer"
               title={isBn ? 'এক্সেল স্প্রেডশীট ফাইল ডাউনলোড করুন' : 'Export Excel File'}
             >
               <FileSpreadsheet className="w-4 h-4" />
