@@ -218,6 +218,8 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
     switch (cat) {
       case 'shipping':
         return isBn ? 'এয়ার ফ্রাইট ও শিপিং চার্জ' : 'Flight & Freight Cargo';
+      case 'daily_cost':
+        return isBn ? 'ডেইলি কস্ট (Daily Cost)' : 'Daily Cost';
       case 'warehouse_rent':
         return isBn ? 'ওয়্যারহাউজ ভাড়া ও লিজ' : 'Warehouse Rent & Maintenance';
       case 'salary':
@@ -693,29 +695,42 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
           </div>
         </div>
 
-        {/* 7. Record New Expense Modal */}
+        {/* 7. Record New Expense Modal (Sleek, Spacious & Executive Design) */}
         {showAddModal && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4 z-50">
-            <div className={`w-full max-w-lg border rounded-none p-6 space-y-4 shadow-2xl relative ${
-              isDark ? 'bg-[#1E293B] border-[#1FB6A8]/40 text-white' : 'bg-white border-slate-300 text-slate-900'
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-in fade-in-50 duration-200">
+            <div className={`w-full max-w-2xl rounded-2xl border p-6 sm:p-8 space-y-6 shadow-2xl relative animate-in zoom-in-95 duration-200 ${
+              isDark ? 'bg-[#1E293B] border-[#1FB6A8]/40 text-white' : 'bg-white border-slate-200 text-slate-900'
             }`}>
-              <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-[#1E3247]">
-                <h3 className="text-base font-bold flex items-center space-x-2">
-                  <PlusCircle className="w-5 h-5 text-[#00897B]" />
-                  <span>{isBn ? 'নতুন খরচ / ভাউচার তৈরি করুন' : 'Record New Expense Voucher'}</span>
-                </h3>
+              {/* Modal Header Bar */}
+              <div className="flex items-start justify-between border-b pb-4 border-slate-200 dark:border-[#1E3247]">
+                <div className="flex items-center space-x-3">
+                  <div className="w-11 h-11 rounded-xl bg-[#00897B]/10 dark:bg-[#00897B]/20 flex items-center justify-center text-[#00897B] font-bold shadow-xs">
+                    <PlusCircle className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold font-poppins flex items-center space-x-2">
+                      <span>{isBn ? 'নতুন খরচ / ভাউচার রেকর্ড এন্ট্রি' : 'Record New Expense Voucher'}</span>
+                    </h3>
+                    <p className={`text-xs mt-0.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>
+                      {isBn ? 'কোম্পানির যেকোনো খরচের ভাউচার ইনপুট দিন (সুপার এডমিনে অটো সিঙ্ক)' : 'Enter operational expense details live-synced with Super Admin'}
+                    </p>
+                  </div>
+                </div>
+
                 <button
+                  type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="text-slate-400 hover:text-white text-xs p-1"
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
                 >
                   ✕
                 </button>
               </div>
 
-              <form onSubmit={handleCreateExpense} className="space-y-3.5 text-xs">
+              <form onSubmit={handleCreateExpense} className="space-y-5 text-xs">
+                {/* 1. Title Input (Full Width) */}
                 <div>
-                  <label className={`block font-light mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
-                    {isBn ? 'খরচের বিবরণ / শিরোনাম:' : 'Expense Title:'}
+                  <label className={`block font-semibold mb-1.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-700'}`}>
+                    {isBn ? 'খরচের বিবরণ / শিরোনাম *' : 'Expense Title *'}
                   </label>
                   <input
                     type="text"
@@ -723,37 +738,39 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                     value={expTitle}
                     onChange={(e) => setExpTitle(e.target.value)}
                     placeholder={isBn ? 'যেমন: ঢাকা ওয়্যারহাউজ আগস্ট লিজ বা ফ্ল্যাট ফ্রাইট ফি' : 'e.g. Flight Charter Cargo Fee'}
-                    className={`w-full border rounded-none p-2.5 outline-none font-light ${
-                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
+                    className={`w-full border rounded-xl p-3 text-sm outline-none transition-all font-medium ${
+                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8] focus:ring-2 focus:ring-[#1FB6A8]/20' : 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20'
                     }`}
                   />
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* 2. Category & Amount (2 Columns) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className={`block font-light mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
-                      {isBn ? 'খরচের খাত / ক্যাটাগরি:' : 'Expense Category:'}
+                    <label className={`block font-semibold mb-1.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-700'}`}>
+                      {isBn ? 'খরচের খাত / ক্যাটাগরি *' : 'Expense Category *'}
                     </label>
                     <select
                       value={expCategory}
                       onChange={(e) => setExpCategory(e.target.value as ExpenseItem['category'])}
-                      className={`w-full border rounded-none p-2.5 outline-none font-light ${
-                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-white border-slate-300 text-slate-900'
+                      className={`w-full border rounded-xl p-3 text-xs outline-none transition-all font-medium ${
+                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-[#00897B]'
                       }`}
                     >
-                      <option value="shipping">Air Freight & Shipping Fee</option>
-                      <option value="warehouse_rent">Warehouse Rent & Maintenance</option>
-                      <option value="salary">Staff Salary & Allowance</option>
-                      <option value="customs">Customs Duty & Clearance</option>
-                      <option value="packing_transport">Packing & Local Transport</option>
-                      <option value="utilities">Utilities & Bills</option>
-                      <option value="other">Other Administrative Expenses</option>
+                      <option value="shipping">✈️ Flight Cargo & Shipping Fee</option>
+                      <option value="daily_cost">🗓️ Daily Cost (ডেইলি কস্ট)</option>
+                      <option value="warehouse_rent">🏢 Warehouse Rent & Maintenance</option>
+                      <option value="salary">👥 Staff Salary & Allowance</option>
+                      <option value="customs">🛃 Customs Duty & Clearance</option>
+                      <option value="packing_transport">🚚 Packing & Local Transport</option>
+                      <option value="utilities">⚡ Utilities & Bills</option>
+                      <option value="other">📦 Other Administrative Expenses</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className={`block font-light mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
-                      {isBn ? 'টাকার পরিমাণ (৳):' : 'Amount (৳):'}
+                    <label className={`block font-semibold mb-1.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-700'}`}>
+                      {isBn ? 'টাকার পরিমাণ (BDT ৳) *' : 'Amount (BDT ৳) *'}
                     </label>
                     <input
                       type="number"
@@ -762,83 +779,88 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                       value={expAmount}
                       onChange={(e) => setExpAmount(e.target.value)}
                       placeholder="e.g. 50000"
-                      className={`w-full border rounded-none p-2.5 outline-none font-mono font-bold ${
-                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
+                      className={`w-full border rounded-xl p-3 text-sm outline-none font-mono font-bold transition-all ${
+                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8] focus:ring-2 focus:ring-[#1FB6A8]/20' : 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20'
                       }`}
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {/* 3. Expense Date & Payment Method (2 Columns) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className={`block font-light mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
-                      {isBn ? 'তারিখ:' : 'Expense Date:'}
+                    <label className={`block font-semibold mb-1.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-700'}`}>
+                      {isBn ? 'খরচের তারিখ *' : 'Expense Date *'}
                     </label>
                     <input
                       type="date"
                       required
                       value={expDate}
                       onChange={(e) => setExpDate(e.target.value)}
-                      className={`w-full border rounded-none p-2 font-mono outline-none ${
-                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-white border-slate-300 text-slate-900'
+                      className={`w-full border rounded-xl p-3 text-xs font-mono outline-none transition-all ${
+                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-[#00897B]'
                       }`}
                     />
                   </div>
 
                   <div>
-                    <label className={`block font-light mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
-                      {isBn ? 'পেমেন্ট মেথড:' : 'Payment Method:'}
+                    <label className={`block font-semibold mb-1.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-700'}`}>
+                      {isBn ? 'পেমেন্ট মেথড *' : 'Payment Method *'}
                     </label>
                     <select
                       value={expPaymentMethod}
                       onChange={(e) => setExpPaymentMethod(e.target.value as ExpenseItem['payment_method'])}
-                      className={`w-full border rounded-none p-2.5 outline-none font-light ${
-                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-white border-slate-300 text-slate-900'
+                      className={`w-full border rounded-xl p-3 text-xs outline-none transition-all font-medium ${
+                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-[#00897B]'
                       }`}
                     >
-                      <option value="bank_transfer">Bank Transfer (ব্যাংক ট্রান্সফার)</option>
-                      <option value="cash">Cash (ক্যাশ পেমেন্ট)</option>
-                      <option value="mobile_banking">Mobile Banking (বিকাশ/নগদ)</option>
+                      <option value="bank_transfer">🏦 Bank Transfer (ব্যাংক ট্রান্সফার)</option>
+                      <option value="cash">💵 Cash (ক্যাশ পেমেন্ট)</option>
+                      <option value="mobile_banking">📱 Mobile Banking (bKash/Nagad)</option>
                     </select>
                   </div>
                 </div>
 
-                <div>
-                  <label className={`block font-light mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
-                    {isBn ? 'ভাউচার নম্বর (ঐচ্ছিক):' : 'Voucher No (Optional):'}
-                  </label>
-                  <input
-                    type="text"
-                    value={expVoucherNo}
-                    onChange={(e) => setExpVoucherNo(e.target.value)}
-                    placeholder="e.g. VCH-8812"
-                    className={`w-full border rounded-none p-2.5 outline-none font-mono ${
-                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-white border-slate-300 text-slate-900'
-                    }`}
-                  />
+                {/* 4. Voucher No & Notes (2 Columns) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className={`block font-semibold mb-1.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-700'}`}>
+                      {isBn ? 'ভাউচার নম্বর (ঐচ্ছিক):' : 'Voucher No (Optional):'}
+                    </label>
+                    <input
+                      type="text"
+                      value={expVoucherNo}
+                      onChange={(e) => setExpVoucherNo(e.target.value)}
+                      placeholder="e.g. VCH-8812"
+                      className={`w-full border rounded-xl p-3 text-xs outline-none font-mono transition-all ${
+                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-[#00897B]'
+                      }`}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={`block font-semibold mb-1.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-700'}`}>
+                      {isBn ? 'নোট / অতিরিক্ত তথ্য:' : 'Notes / References:'}
+                    </label>
+                    <input
+                      type="text"
+                      value={expNotes}
+                      onChange={(e) => setExpNotes(e.target.value)}
+                      placeholder={isBn ? 'অতিরিক্ত তথ্য বা রেফারেন্স...' : 'Add notes or reference...'}
+                      className={`w-full border rounded-xl p-3 text-xs outline-none font-medium transition-all ${
+                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-[#00897B]'
+                      }`}
+                    />
+                  </div>
                 </div>
 
-                <div>
-                  <label className={`block font-light mb-1 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
-                    {isBn ? 'নোট / অতিরিক্ত তথ্য:' : 'Notes / References:'}
-                  </label>
-                  <textarea
-                    rows={2}
-                    value={expNotes}
-                    onChange={(e) => setExpNotes(e.target.value)}
-                    placeholder={isBn ? 'অতিরিক্ত তথ্য লিখুন...' : 'Add notes or reference...'}
-                    className={`w-full border rounded-none p-2.5 outline-none font-light ${
-                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
-                    }`}
-                  />
-                </div>
-
-                <div className="flex justify-end space-x-2 pt-3 border-t border-slate-200 dark:border-[#1E3247]">
+                {/* Action Buttons */}
+                <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200 dark:border-[#1E3247]">
                   <button
                     type="button"
                     onClick={() => setShowAddModal(false)}
-                    className={`px-4 py-2 rounded-none text-xs font-light border transition-all cursor-pointer ${
-                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-[#8FA3AD]' : 'bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200'
+                    className={`px-5 py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-[#8FA3AD] hover:text-white' : 'bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200'
                     }`}
                   >
                     {isBn ? 'বাতিল' : 'Cancel'}
@@ -846,9 +868,10 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
 
                   <button
                     type="submit"
-                    className="px-5 py-2 rounded-none text-xs font-light bg-[#00897B] text-white hover:bg-[#00796B] transition-all cursor-pointer shadow-xs"
+                    className="px-6 py-2.5 rounded-xl text-xs font-bold bg-gradient-to-r from-[#00897B] to-[#00796B] hover:from-[#00796B] hover:to-[#00695C] text-white transition-all cursor-pointer shadow-md flex items-center space-x-2"
                   >
-                    {isBn ? 'খরচ সংরক্ষণ করুন' : 'Save Expense Voucher'}
+                    <PlusCircle className="w-4 h-4" />
+                    <span>{isBn ? 'খরচ সংরক্ষণ করুন' : 'Save Expense Voucher'}</span>
                   </button>
                 </div>
               </form>

@@ -194,7 +194,7 @@ export interface AuditLog {
 export interface ExpenseItem {
   id: string;
   title: string;
-  category: 'shipping' | 'warehouse_rent' | 'salary' | 'customs' | 'packing_transport' | 'utilities' | 'other';
+  category: 'shipping' | 'warehouse_rent' | 'salary' | 'customs' | 'packing_transport' | 'utilities' | 'daily_cost' | 'other';
   amount: number;
   date: string;
   payment_method: 'cash' | 'bank_transfer' | 'mobile_banking';

@@ -926,54 +926,84 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
         {/* Quick Add Expense Voucher Modal (Live Synced with Super Admin) */}
         {showAddExpenseModal && (
-          <div className="fixed inset-0 bg-black/70 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-50 flex items-center justify-center p-4 animate-in fade-in-50 duration-200">
             <form
               onSubmit={handleSaveExpenseVoucher}
-              className={`border rounded-none p-6 max-w-md w-full space-y-4 shadow-2xl animate-in zoom-in-95 ${
-                isDark ? 'bg-[#1E293B] border-[#1FB6A8]/40 text-white' : 'bg-white border-slate-300 text-slate-900'
+              className={`rounded-2xl p-6 sm:p-8 max-w-2xl w-full space-y-6 shadow-2xl animate-in zoom-in-95 border duration-200 ${
+                isDark ? 'bg-[#1E293B] border-[#1FB6A8]/40 text-white' : 'bg-white border-slate-200 text-slate-900'
               }`}
             >
-              <h3 className="text-base font-bold flex items-center space-x-2">
-                <Wallet className="w-5 h-5 text-amber-500" />
-                <span>{isBn ? 'নতুন খরচ ভাউচার ইনপুট (Super Admin Sync)' : 'Record New Expense Voucher'}</span>
-              </h3>
+              {/* Header Bar */}
+              <div className="flex items-start justify-between border-b pb-4 border-slate-200 dark:border-[#1E3247]">
+                <div className="flex items-center space-x-3">
+                  <div className="w-11 h-11 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 font-bold shadow-xs">
+                    <Wallet className="w-6 h-6" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-bold font-poppins flex items-center space-x-2">
+                      <span>{isBn ? 'নতুন খরচ ভাউচার ইনপুট (Super Admin Sync)' : 'Record New Expense Voucher'}</span>
+                    </h3>
+                    <p className={`text-xs mt-0.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>
+                      {isBn ? 'কোম্পানির যেকোনো খরচের ভাউচার ইনপুট দিন (সুপার এডমিনে অটো সিঙ্ক)' : 'Enter operational expense details live-synced with Super Admin'}
+                    </p>
+                  </div>
+                </div>
 
-              <div className="space-y-3 text-xs">
+                <button
+                  type="button"
+                  onClick={() => setShowAddExpenseModal(false)}
+                  className="w-8 h-8 rounded-full flex items-center justify-center text-slate-400 hover:text-slate-700 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-slate-800 transition-all cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              <div className="space-y-5 text-xs">
+                {/* Title Input */}
                 <div>
-                  <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'ভাউচার শিরোনাম / বিবরণ *' : 'Voucher Title *'}</label>
+                  <label className={`block font-semibold mb-1.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-700'}`}>
+                    {isBn ? 'ভাউচার শিরোনাম / বিবরণ *' : 'Voucher Title *'}
+                  </label>
                   <input
                     type="text"
                     required
                     value={expTitle}
                     onChange={(e) => setExpTitle(e.target.value)}
                     placeholder="e.g. ঢাকা এয়ারপোর্ট কার্গো কাস্টমস ক্লিয়ারেন্স বিল"
-                    className={`w-full border rounded-none p-2.5 outline-none font-light ${
-                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
+                    className={`w-full border rounded-xl p-3 text-sm outline-none font-medium transition-all ${
+                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8] focus:ring-2 focus:ring-[#1FB6A8]/20' : 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20'
                     }`}
                   />
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
+                {/* Category & Amount (2 Columns) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
-                    <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'ক্যাটাগরি' : 'Category'}</label>
+                    <label className={`block font-semibold mb-1.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-700'}`}>
+                      {isBn ? 'ক্যাটাগরি / খরচের খাত *' : 'Category *'}
+                    </label>
                     <select
                       value={expCategory}
                       onChange={(e) => setExpCategory(e.target.value as any)}
-                      className={`w-full border rounded-none p-2.5 outline-none font-light ${
-                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-white border-slate-300 text-slate-900'
+                      className={`w-full border rounded-xl p-3 text-xs outline-none font-medium transition-all ${
+                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-[#00897B]'
                       }`}
                     >
                       <option value="shipping">✈️ Flight Cargo Shipping</option>
+                      <option value="daily_cost">🗓️ Daily Cost (ডেইলি কস্ট)</option>
                       <option value="warehouse_rent">🏢 Warehouse Rent & Lease</option>
-                      <option value="salary">👥 Staff Salary</option>
-                      <option value="customs">🛃 Customs Duty & Tax</option>
+                      <option value="salary">👥 Staff Salary & Allowance</option>
+                      <option value="customs">🛃 Customs Duty & Clearance</option>
                       <option value="packing_transport">🚚 Transit & Packing</option>
+                      <option value="utilities">⚡ Utilities & Bills</option>
                       <option value="other">📦 Other Operations</option>
                     </select>
                   </div>
 
                   <div>
-                    <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'টাকার পরিমাণ (BDT ৳) *' : 'Amount (BDT ৳) *'}</label>
+                    <label className={`block font-semibold mb-1.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-700'}`}>
+                      {isBn ? 'টাকার পরিমাণ (BDT ৳) *' : 'Amount (BDT ৳) *'}
+                    </label>
                     <input
                       type="number"
                       required
@@ -981,54 +1011,64 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                       value={expAmount}
                       onChange={(e) => setExpAmount(e.target.value)}
                       placeholder="e.g. 85000"
-                      className={`w-full border rounded-none p-2.5 font-mono outline-none ${
-                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
+                      className={`w-full border rounded-xl p-3 text-sm outline-none font-mono font-bold transition-all ${
+                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8] focus:ring-2 focus:ring-[#1FB6A8]/20' : 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-[#00897B] focus:ring-2 focus:ring-[#00897B]/20'
                       }`}
                     />
                   </div>
                 </div>
 
-                <div>
-                  <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'ভাউচার নাম্বার' : 'Voucher No'}</label>
-                  <input
-                    type="text"
-                    value={expVoucherNo}
-                    onChange={(e) => setExpVoucherNo(e.target.value)}
-                    className={`w-full border rounded-none p-2.5 font-mono outline-none ${
-                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-white border-slate-300 text-slate-900'
-                    }`}
-                  />
-                </div>
+                {/* Voucher No & Notes (2 Columns) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label className={`block font-semibold mb-1.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-700'}`}>
+                      {isBn ? 'ভাউচার নাম্বার (ঐচ্ছিক)' : 'Voucher No (Optional)'}
+                    </label>
+                    <input
+                      type="text"
+                      value={expVoucherNo}
+                      onChange={(e) => setExpVoucherNo(e.target.value)}
+                      placeholder="e.g. VCH-8812"
+                      className={`w-full border rounded-xl p-3 text-xs font-mono outline-none transition-all ${
+                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-[#00897B]'
+                      }`}
+                    />
+                  </div>
 
-                <div>
-                  <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>{isBn ? 'অতিরিক্ত নোট (Optional)' : 'Notes'}</label>
-                  <input
-                    type="text"
-                    value={expNotes}
-                    onChange={(e) => setExpNotes(e.target.value)}
-                    placeholder="নোট বা ব্যাংক ট্রান্সফার নম্বর"
-                    className={`w-full border rounded-none p-2.5 outline-none font-light ${
-                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-white border-slate-300 text-slate-900'
-                    }`}
-                  />
+                  <div>
+                    <label className={`block font-semibold mb-1.5 ${isDark ? 'text-[#8FA3AD]' : 'text-slate-700'}`}>
+                      {isBn ? 'অতিরিক্ত নোট (Optional)' : 'Notes'}
+                    </label>
+                    <input
+                      type="text"
+                      value={expNotes}
+                      onChange={(e) => setExpNotes(e.target.value)}
+                      placeholder={isBn ? 'নোট বা ব্যাংক ট্রান্সফার নম্বর' : 'Add notes or reference...'}
+                      className={`w-full border rounded-xl p-3 text-xs outline-none font-medium transition-all ${
+                        isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-[#00897B]'
+                      }`}
+                    />
+                  </div>
                 </div>
               </div>
 
-              <div className="flex justify-end space-x-2 pt-2">
+              {/* Action Buttons */}
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-slate-200 dark:border-[#1E3247]">
                 <button
                   type="button"
                   onClick={() => setShowAddExpenseModal(false)}
-                  className={`px-4 py-2 rounded-none text-xs font-normal hover:text-white cursor-pointer ${
-                    isDark ? 'bg-[#0B1622] text-[#8FA3AD]' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  className={`px-5 py-2.5 rounded-xl text-xs font-semibold border transition-all cursor-pointer ${
+                    isDark ? 'bg-[#0B1622] border-[#1E3247] text-[#8FA3AD] hover:text-white' : 'bg-slate-100 border-slate-300 text-slate-700 hover:bg-slate-200'
                   }`}
                 >
-                  <span className="font-light">{isBn ? 'বাতিল' : 'Cancel'}</span>
+                  {isBn ? 'বাতিল' : 'Cancel'}
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-normal text-xs cursor-pointer shadow-sm"
+                  className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-[#00897B] to-[#00796B] hover:from-[#00796B] hover:to-[#00695C] text-white font-bold text-xs cursor-pointer shadow-md transition-all flex items-center space-x-2"
                 >
-                  <span className="font-light">{isBn ? 'সেভ করুন ও সুপার এডমিনে সিঙ্ক করুন' : 'Save & Sync Super Admin'}</span>
+                  <Wallet className="w-4 h-4" />
+                  <span>{isBn ? 'সেভ করুন ও সুপার এডমিনে সিঙ্ক করুন' : 'Save & Sync Super Admin'}</span>
                 </button>
               </div>
             </form>
