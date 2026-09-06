@@ -718,22 +718,22 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
         {/* TOP SUMMARY KPIS */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className={`p-3.5 rounded-xl border transition-all ${isDark ? 'bg-[#0F172A] border-slate-700/80' : 'bg-slate-50 border-slate-200'}`}>
+          <div className={`p-3.5 rounded-xl border transition-all ${isDark ? 'bg-[#0F172A] border-slate-700/80' : 'bg-white border-slate-200'}`}>
             <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase font-bold tracking-wider">{isBn ? 'মোট কাস্টমার' : 'Total Customers'}</div>
             <div className="text-base font-extrabold text-blue-600 dark:text-blue-400 mt-1 font-mono">{customerGroupKeys.length} {isBn ? 'জন' : 'Customers'}</div>
           </div>
 
-          <div className={`p-3.5 rounded-xl border transition-all ${isDark ? 'bg-[#0F172A] border-slate-700/80' : 'bg-slate-50 border-slate-200'}`}>
+          <div className={`p-3.5 rounded-xl border transition-all ${isDark ? 'bg-[#0F172A] border-slate-700/80' : 'bg-white border-slate-200'}`}>
             <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase font-bold tracking-wider">{isBn ? 'মোট কার্টুন সংখ্যা' : 'Total Cartons'}</div>
             <div className={`text-base font-extrabold mt-1 font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>{totalCartonCount} {isBn ? 'টি' : 'Cartons'}</div>
           </div>
 
-          <div className={`p-3.5 rounded-xl border transition-all ${isDark ? 'bg-[#0F172A] border-slate-700/80' : 'bg-slate-50 border-slate-200'}`}>
+          <div className={`p-3.5 rounded-xl border transition-all ${isDark ? 'bg-[#0F172A] border-slate-700/80' : 'bg-white border-slate-200'}`}>
             <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase font-bold tracking-wider">{isBn ? 'মোট গ্রস ওজন' : 'Total Gross Weight'}</div>
             <div className="text-base font-extrabold text-emerald-600 dark:text-emerald-400 mt-1 font-mono">{totalGrossWeight.toFixed(1)} KG</div>
           </div>
 
-          <div className={`p-3.5 rounded-xl border transition-all ${isDark ? 'bg-[#0F172A] border-slate-700/80' : 'bg-slate-50 border-slate-200'}`}>
+          <div className={`p-3.5 rounded-xl border transition-all ${isDark ? 'bg-[#0F172A] border-slate-700/80' : 'bg-white border-slate-200'}`}>
             <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase font-bold tracking-wider">{isBn ? 'মোট সিবিএম ভলিউম' : 'Total CBM Volume'}</div>
             <div className="text-base font-extrabold text-purple-600 dark:text-purple-300 mt-1 font-mono">{totalCbmVolume.toFixed(2)} CBM</div>
           </div>
@@ -751,7 +751,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               onChange={(e) => setSearchQuery(e.target.value)}
               placeholder={isBn ? 'খুঁজুন: শিপিং মার্ক, কার্টুন নং, ট্র্যাকিং বা পণ্য...' : 'Search mark, CTN, tracking...'}
               className={`w-full pl-9 pr-3 py-2 rounded-lg border text-xs font-semibold focus:ring-2 focus:ring-blue-500 ${
-                isDark ? 'bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-400' : 'bg-slate-50 border-slate-300 text-slate-900 placeholder:text-slate-500'
+                isDark ? 'bg-[#0F172A] border-slate-600 text-white placeholder:text-slate-400' : 'bg-white border-slate-200 text-slate-900 placeholder:text-slate-400'
               }`}
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-2.5" />
@@ -768,7 +768,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               }}
               disabled={isWarehouseIncharge}
               className={`w-full px-3 py-2 rounded-lg border text-xs font-bold focus:ring-2 focus:ring-blue-500 cursor-pointer ${
-                isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'
               } ${isWarehouseIncharge ? 'opacity-90 cursor-not-allowed bg-slate-100 dark:bg-slate-800' : ''}`}
             >
               {!isWarehouseIncharge && (
@@ -795,7 +795,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               value={selectedDestinationFilter}
               onChange={(e) => setSelectedDestinationFilter(e.target.value)}
               className={`w-full px-3 py-2 rounded-lg border text-xs font-bold focus:ring-2 focus:ring-blue-500 cursor-pointer ${
-                isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'
               }`}
             >
               <option value="all">
@@ -824,7 +824,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               value={selectedStatus}
               onChange={(e) => setSelectedStatus(e.target.value)}
               className={`w-full px-3 py-2 rounded-lg border text-xs font-bold font-mono focus:ring-2 focus:ring-blue-500 cursor-pointer ${
-                isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+                isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'
               }`}
             >
               <option value="all">{isBn ? 'সকল বুকিং স্ট্যাটাস' : 'All Booking Status'}</option>
@@ -908,7 +908,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       {/* Customer Card Details Grid */}
                       <div className="grid grid-cols-2 gap-3 pt-3 text-xs">
                         <div className={`col-span-2 p-2.5 rounded-xl border flex items-center justify-between transition-colors ${
-                          isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-blue-50/70 border-blue-200/90 text-slate-900'
+                          isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
                         }`}>
                           <span className={`text-[11px] font-bold ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{isBn ? 'কাস্টমার অ্যাকাউন্ট:' : 'Customer Account:'}</span>
                           <strong className={`text-xs font-extrabold font-sans flex items-center space-x-1.5 ${

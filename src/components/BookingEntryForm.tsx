@@ -1200,7 +1200,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         {/* ------------------------------------------------------------- */}
         {/* Section C: METHOD 1 ONLY: FAST WEIGHT SEQUENCE PASTING FOR N.WT & G.WT */}
         {/* ------------------------------------------------------------- */}
-        <div className="p-5 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-4">
+        <div className="p-5 rounded-2xl border border-slate-200 bg-white space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Scale className="w-4 h-4 text-[#059669]" />
@@ -1231,7 +1231,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   value={netWeightsListInput}
                   onChange={(e) => setNetWeightsListInput(e.target.value)}
                   placeholder="11.2, 11.5, 10.8..."
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 text-xs font-mono font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
                 />
                 <button
                   type="button"
@@ -1261,7 +1261,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   value={grossWeightsListInput}
                   onChange={(e) => setGrossWeightsListInput(e.target.value)}
                   placeholder="12.5, 12.8, 11.9..."
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 text-xs font-mono font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
                 />
                 <button
                   type="button"
@@ -1277,7 +1277,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         </div>
 
         {/* Section D: Shared Photo Attachment & Generate Preview Button */}
-        <div className="p-4 rounded-xl border border-slate-200 bg-slate-50/70 text-slate-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="p-4 rounded-xl border border-slate-200 bg-white text-slate-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <div className="text-xs font-bold text-slate-900">
               {isBn ? 'প্যাকেজিং স্লিপ বা প্রোডাক্টের ছবি সংযুক্তি' : 'Packaging Slip / Proof Photo Attachment'}
