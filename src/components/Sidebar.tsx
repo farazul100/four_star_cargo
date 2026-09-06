@@ -279,10 +279,10 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     }}
                     className={`w-full flex items-center space-x-3 px-3.5 py-2.5 rounded-xl text-[13.5px] transition-all duration-150 cursor-pointer ${
                       isActive
-                        ? 'bg-[#00897B] text-white font-bold shadow-md border border-[#00796B]'
+                        ? 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-medium shadow-xs'
                         : isDark
                         ? 'text-[#A0A0A0] hover:text-white hover:bg-slate-800/60'
-                        : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
                     }`}
                   >
                     <Icon
