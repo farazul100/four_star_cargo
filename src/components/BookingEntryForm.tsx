@@ -49,6 +49,17 @@ interface BatchCartonRow {
   is_merged?: boolean;
 }
 
+interface ProductLineItem {
+  id: string;
+  product_name_en: string;
+  product_name_cn: string;
+  carton_count: number | '';
+  qty_per_carton: number | '';
+  net_weight: number | '';
+  gross_weight: number | '';
+  cbm: number | '';
+}
+
 export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
   warehouses,
   currentUser,
@@ -88,7 +99,53 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
   // Destination Warehouse Selector State
   const [destWhId, setDestWhId] = useState('wh-bd');
 
-  // Product & Spec Details for the Batch (BLANK BY DEFAULT IN PRODUCTION)
+  // Multi-Product Line Items State
+  const [productLines, setProductLines] = useState<ProductLineItem[]>([
+    {
+      id: 'prod-init-1',
+      product_name_en: '',
+      product_name_cn: '',
+      carton_count: '',
+      qty_per_carton: '',
+      net_weight: '',
+      gross_weight: '',
+      cbm: '',
+    },
+  ]);
+
+  const handleAddProductLine = () => {
+    setProductLines((prev) => [
+      ...prev,
+      {
+        id: `prod-${Date.now()}-${prev.length + 1}`,
+        product_name_en: '',
+        product_name_cn: '',
+        carton_count: '',
+        qty_per_carton: prev[0]?.qty_per_carton || '',
+        net_weight: prev[0]?.net_weight || '',
+        gross_weight: prev[0]?.gross_weight || '',
+        cbm: prev[0]?.cbm || '',
+      },
+    ]);
+  };
+
+  const handleRemoveProductLine = (id: string) => {
+    if (productLines.length <= 1) return;
+    setProductLines((prev) => prev.filter((p) => p.id !== id));
+  };
+
+  const handleProductLineChange = (id: string, field: keyof ProductLineItem, value: any) => {
+    setProductLines((prev) =>
+      prev.map((p) => (p.id === id ? { ...p, [field]: value } : p))
+    );
+  };
+
+  const totalCartonsAcrossProducts = productLines.reduce(
+    (sum, item) => sum + (typeof item.carton_count === 'number' ? item.carton_count : 0),
+    0
+  );
+
+  // Legacy fallback states
   const [batchProdNameEn, setBatchProdNameEn] = useState('');
   const [batchProdNameCn, setBatchProdNameCn] = useState('');
   const [batchCartonCount, setBatchCartonCount] = useState<number | ''>('');
@@ -157,20 +214,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       })
     : [];
 
-  // Core Helper: Generate Live Preview Rows from Real Form Values (supporting weight sequence lists)
-  const generatePreviewFromHeader = (
-    countNum: number,
-    markStr: string,
-    prodEn: string,
-    prodCn: string,
-    qtyVal: number,
-    netWtVal: number,
-    grossWtVal: number,
-    cbmVal: number,
-    prefixStr: string,
-    ctnPreStr: string,
-    startNoVal: number
-  ) => {
+  // Core Helper: Generate Live Preview Rows from Real Form Values (supporting dynamic multi-product line items)
+  const generatePreviewFromHeader = () => {
     const parsedNetWeights = netWeightsListInput
       .split(/[\s,;\n]+/)
       .map((v) => parseFloat(v))
@@ -181,60 +226,67 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       .map((v) => parseFloat(v))
       .filter((n) => !isNaN(n) && n > 0);
 
-    // Auto-detect count if countNum is not specified but weight lists exist
-    const actualCount = Math.max(
-      1,
-      Math.min(200, countNum > 0 ? countNum : Math.max(parsedGrossWeights.length, parsedNetWeights.length, 1))
-    );
-
-    const activeMark = markStr.trim();
-    const boxCode = prefixStr.trim() || 'BOX-';
+    const activeMark = (shippingMark.trim() || `${markPrefix.trim()}${markCode.trim()}`).trim();
+    const boxCode = boxPrefix.trim() || 'BOX-';
     const bStartNo = Math.max(1, typeof boxStartNum === 'number' ? boxStartNum : 101);
-    const ctnPre = ctnPreStr.trim() || 'CTN-';
-    const startNo = Math.max(1, startNoVal || 1);
+    const ctnPre = cartonPrefix.trim() || 'CTN-';
+    const startNo = Math.max(1, typeof cartonStartNum === 'number' ? cartonStartNum : 1);
 
-    const newRows: BatchCartonRow[] = [];
     const baseCodeNum = parseInt(markCode.trim());
     const preStr = markPrefix.trim();
 
-    for (let i = 0; i < actualCount; i++) {
-      const currentNum = startNo + i;
-      const padNum = currentNum < 10 ? `0${currentNum}` : `${currentNum}`;
+    const newRows: BatchCartonRow[] = [];
+    let globalCartonIndex = 0;
 
-      const currentBoxNum = bStartNo + i;
-      const padBoxNum = currentBoxNum < 10 ? `0${currentBoxNum}` : `${currentBoxNum}`;
+    productLines.forEach((pItem, pIdx) => {
+      const prodCount = typeof pItem.carton_count === 'number' && pItem.carton_count > 0 ? pItem.carton_count : 1;
+      const prodEn = pItem.product_name_en.trim() || (pIdx === 0 ? (batchProdNameEn.trim() || 'General Cargo / তৈরি পোশাক') : `Item #${pIdx + 1}`);
+      const prodCn = pItem.product_name_cn.trim() || prodEn;
+      const qtyVal = typeof pItem.qty_per_carton === 'number' && pItem.qty_per_carton > 0 ? pItem.qty_per_carton : (Number(batchQtyPerCarton) || 50);
+      const grossWtVal = typeof pItem.gross_weight === 'number' && pItem.gross_weight > 0 ? pItem.gross_weight : (Number(batchGrossWeight) || 12.5);
+      const netWtVal = typeof pItem.net_weight === 'number' && pItem.net_weight > 0 ? pItem.net_weight : (Number(batchNetWeight) || Math.round(grossWtVal * 0.9 * 10) / 10);
+      const cbmVal = typeof pItem.cbm === 'number' && pItem.cbm > 0 ? pItem.cbm : (Number(batchCbm) || 0.15);
 
-      // Calculate auto-incrementing Shipping Mark (e.g. AL-DHAKA-88, AL-DHAKA-89, AL-DHAKA-90...)
-      let rowShippingMark = activeMark;
-      if (!isNaN(baseCodeNum)) {
-        rowShippingMark = `${preStr}${baseCodeNum + i}`;
-      } else if (activeMark) {
-        rowShippingMark = i === 0 ? activeMark : `${activeMark}-${i + 1}`;
+      for (let i = 0; i < prodCount; i++) {
+        const currentNum = startNo + globalCartonIndex;
+        const padNum = currentNum < 10 ? `0${currentNum}` : `${currentNum}`;
+
+        const currentBoxNum = bStartNo + globalCartonIndex;
+        const padBoxNum = currentBoxNum < 10 ? `0${currentBoxNum}` : `${currentBoxNum}`;
+
+        let rowShippingMark = activeMark;
+        if (!isNaN(baseCodeNum)) {
+          rowShippingMark = `${preStr}${baseCodeNum + globalCartonIndex}`;
+        } else if (activeMark) {
+          rowShippingMark = globalCartonIndex === 0 ? activeMark : `${activeMark}-${globalCartonIndex + 1}`;
+        }
+
+        const rowGross = parsedGrossWeights[globalCartonIndex] !== undefined ? parsedGrossWeights[globalCartonIndex] : grossWtVal;
+        const rowNet =
+          parsedNetWeights[globalCartonIndex] !== undefined
+            ? parsedNetWeights[globalCartonIndex]
+            : parsedGrossWeights[globalCartonIndex] !== undefined
+            ? Math.round(rowGross * 0.9 * 10) / 10
+            : netWtVal;
+
+        newRows.push({
+          id: `prev-row-${Date.now()}-${globalCartonIndex}`,
+          entry_date: todayStr,
+          ctn_no: `${ctnPre}${padNum}`,
+          packaging_number: `${boxCode}${padBoxNum}`,
+          shipping_mark: rowShippingMark,
+          product_name_en: prodEn,
+          product_name_cn: prodCn,
+          quantity: qtyVal,
+          net_weight: rowNet,
+          gross_weight: rowGross,
+          cbm: cbmVal,
+          photo_url: batchPhotoUrl || undefined,
+        });
+
+        globalCartonIndex++;
       }
-
-      const rowGross = parsedGrossWeights[i] !== undefined ? parsedGrossWeights[i] : grossWtVal;
-      const rowNet =
-        parsedNetWeights[i] !== undefined
-          ? parsedNetWeights[i]
-          : parsedGrossWeights[i] !== undefined
-          ? Math.round(rowGross * 0.9 * 10) / 10
-          : netWtVal;
-
-      newRows.push({
-        id: `prev-row-${Date.now()}-${i}`,
-        entry_date: todayStr,
-        ctn_no: `${ctnPre}${padNum}`,
-        packaging_number: `${boxCode}${padBoxNum}`,
-        shipping_mark: rowShippingMark,
-        product_name_en: prodEn,
-        product_name_cn: prodCn.trim() || prodEn.trim(),
-        quantity: qtyVal,
-        net_weight: rowNet,
-        gross_weight: rowGross,
-        cbm: cbmVal,
-        photo_url: batchPhotoUrl || undefined,
-      });
-    }
+    });
 
     setPreviewRows(newRows);
     return newRows;
@@ -252,22 +304,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       return;
     }
 
-    const parsedNetWeights = netWeightsListInput
-      .split(/[\s,;\n]+/)
-      .map((v) => parseFloat(v))
-      .filter((n) => !isNaN(n) && n > 0);
-
-    const parsedGrossWeights = grossWeightsListInput
-      .split(/[\s,;\n]+/)
-      .map((v) => parseFloat(v))
-      .filter((n) => !isNaN(n) && n > 0);
-
-    // Smart Auto-Defaults for smooth instant booking without frustrating validation stops
     const finalTrackingNo = masterTrackingNumber.trim() || `EXP-${Math.floor(Math.random() * 899999 + 100000)}`;
     if (!masterTrackingNumber.trim()) setMasterTrackingNumber(finalTrackingNo);
-
-    const finalProdEn = batchProdNameEn.trim() || 'General Cargo / তৈরি পোশাক';
-    if (!batchProdNameEn.trim()) setBatchProdNameEn(finalProdEn);
 
     const finalMarkCode = markCode.trim() || '01';
     if (!markCode.trim()) setMarkCode(finalMarkCode);
@@ -275,29 +313,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
     const finalMarkPrefix = markPrefix.trim() || 'SM-DHAKA-';
     if (!markPrefix.trim()) setMarkPrefix(finalMarkPrefix);
 
-    const maxWeightListLen = Math.max(parsedGrossWeights.length, parsedNetWeights.length);
-    const ctnCount = Number(batchCartonCount) > 0 ? Number(batchCartonCount) : (maxWeightListLen > 0 ? maxWeightListLen : 1);
-    if (!batchCartonCount) setBatchCartonCount(ctnCount);
-
-    const qtyVal = Number(batchQtyPerCarton) > 0 ? Number(batchQtyPerCarton) : 50;
-    const grossWt = Number(batchGrossWeight) > 0 ? Number(batchGrossWeight) : 12.5;
-    const netWt = Number(batchNetWeight) > 0 ? Number(batchNetWeight) : 11.2;
-    const cbmVal = Number(batchCbm) > 0 ? Number(batchCbm) : 0.15;
-
-    const markToUse = `${finalMarkPrefix}${finalMarkCode}`;
-    generatePreviewFromHeader(
-      ctnCount,
-      markToUse,
-      finalProdEn,
-      batchProdNameCn,
-      qtyVal,
-      netWt,
-      grossWt,
-      cbmVal,
-      boxPrefix,
-      cartonPrefix,
-      Number(cartonStartNum) || 1
-    );
+    const generatedRows = generatePreviewFromHeader();
+    const ctnCount = generatedRows.length;
 
     setSuccessMsg(
       isBn
@@ -1029,58 +1046,20 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
         {/* Section B: Product & Batch Specification Form */}
         <div className="space-y-4">
-          <div className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-1.5">
-            <span>{isBn ? '📦 কার্টুন ও পণ্যের বিবরণ (Batch Specification Form)' : 'Batch Product & Carton Specification Form'}</span>
+          <div className="flex items-center justify-between">
+            <div className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-1.5">
+              <span>{isBn ? '📦 কার্টুন ও পণ্যের বিবরণ (Multi-Product & Batch Specifications)' : 'Batch Product & Carton Specification Form'}</span>
+            </div>
+            <div className="px-3 py-1 bg-emerald-50 text-[#059669] border border-emerald-200 rounded-lg text-xs font-bold font-mono">
+              {isBn ? `মোট কার্টুন: ${totalCartonsAcrossProducts || 0} CTN` : `Total Cartons: ${totalCartonsAcrossProducts || 0} CTN`}
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
-            {/* Product Name EN */}
-            <div>
-              <label className="block text-[13px] font-bold text-slate-900 mb-1.5 flex items-center">
-                {isBn ? 'ইংরেজি পণ্য নাম' : 'Product English Name'} <span className="text-[#EE5D50] font-bold ml-1">*</span>
-              </label>
-              <input
-                type="text"
-                value={batchProdNameEn}
-                onChange={(e) => setBatchProdNameEn(e.target.value)}
-                placeholder="Enter Product Name"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-[13px] font-medium transition-all placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
-              />
-            </div>
-
-            {/* Product Name CN */}
-            <div>
-              <label className="block text-[13px] font-bold text-slate-900 mb-1.5 flex items-center">
-                {isBn ? 'চাইনিজ পণ্য নাম (中文品名)' : 'Chinese Product Name'} <span className="text-[#EE5D50] font-bold ml-1">*</span>
-              </label>
-              <input
-                type="text"
-                value={batchProdNameCn}
-                onChange={(e) => setBatchProdNameCn(e.target.value)}
-                placeholder="e.g. 男士棉质T恤"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-[13px] font-medium transition-all placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
-              />
-            </div>
-
-            {/* Total Cartons Count */}
-            <div>
-              <label className="block text-[13px] font-bold text-slate-900 mb-1.5 flex items-center">
-                {isBn ? 'মোট কার্টুন সংখ্যা (1-100+)' : 'Total Cartons Count'} <span className="text-[#EE5D50] font-bold ml-1">*</span>
-              </label>
-              <input
-                type="number"
-                min={1}
-                max={200}
-                value={batchCartonCount}
-                onChange={(e) => setBatchCartonCount(e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                placeholder="e.g. 10"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center transition-all placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
-              />
-            </div>
-
+          {/* CUSTOMIZABLE CARTON & SHIPMENT PREFIX CONFIG (Global for batch) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/80">
             {/* CUSTOMIZABLE CARTON PREFIX & START NUMBER */}
             <div>
-              <label className="block text-[13px] font-bold text-slate-900 mb-1.5 flex items-center">
+              <label className="block text-[12px] font-bold text-slate-900 mb-1 flex items-center">
                 {isBn ? 'কার্টুন কোড (প্রিফিক্স + শুরু)' : 'Custom Carton Code (Prefix + Start)'}
               </label>
               <div className="flex items-center space-x-2">
@@ -1090,7 +1069,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   onChange={(e) => setCartonPrefix(e.target.value)}
                   placeholder="CTN-"
                   title={isBn ? 'কার্টুন নামের আগের প্রেফিক্স' : 'Carton prefix before number'}
-                  className="w-3/5 px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold transition-all placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                  className="w-3/5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
                 />
                 <input
                   type="number"
@@ -1099,14 +1078,14 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   onChange={(e) => setCartonStartNum(e.target.value === '' ? '' : parseInt(e.target.value) || 1)}
                   placeholder="1"
                   title={isBn ? 'কার্টুন শুরু নম্বর' : 'Start number'}
-                  className="w-2/5 px-3 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center transition-all placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                  className="w-2/5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
                 />
               </div>
             </div>
 
             {/* CUSTOMIZABLE SHIPMENT CTN NO. PREFIX & START NUMBER */}
             <div>
-              <label className="block text-[13px] font-bold text-[#059669] mb-1.5 flex items-center">
+              <label className="block text-[12px] font-bold text-[#059669] mb-1 flex items-center">
                 {isBn ? 'শিপমেন্ট কার্টুন নম্বর (প্রিফিক্স + শুরু)' : 'Shipment Ctn NO. (Prefix + Start)'}
               </label>
               <div className="flex items-center space-x-2">
@@ -1116,7 +1095,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   onChange={(e) => setBoxPrefix(e.target.value)}
                   placeholder="BOX-"
                   title={isBn ? 'শিপমেন্ট কার্টুন প্রেফিক্স' : 'Shipment Ctn NO. prefix'}
-                  className="w-3/5 px-4 py-3 rounded-xl border border-slate-200 bg-white text-[#059669] text-[13px] font-mono font-bold transition-all placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                  className="w-3/5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-[#059669] text-[13px] font-mono font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
                 />
                 <input
                   type="number"
@@ -1125,76 +1104,157 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   onChange={(e) => setBoxStartNum(e.target.value === '' ? '' : parseInt(e.target.value) || 101)}
                   placeholder="101"
                   title={isBn ? 'শিপমেন্ট কার্টুন শুরু নম্বর' : 'Start number'}
-                  className="w-2/5 px-3 py-3 rounded-xl border border-slate-200 bg-white text-[#059669] text-[13px] font-mono font-bold text-center transition-all placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                  className="w-2/5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-[#059669] text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
                 />
               </div>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            {/* Qty per Carton */}
-            <div>
-              <label className="block text-[13px] font-bold text-slate-900 mb-1.5 flex items-center">
-                {isBn ? 'পরিমাণ/CTN (PCS)' : 'Qty per Carton (PCS)'} <span className="text-[#EE5D50] font-bold ml-1">*</span>
-              </label>
-              <input
-                type="number"
-                min={1}
-                value={batchQtyPerCarton}
-                onChange={(e) => setBatchQtyPerCarton(e.target.value === '' ? '' : parseInt(e.target.value) || '')}
-                placeholder="e.g. 50"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center transition-all placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
-              />
-            </div>
+          {/* DYNAMIC PRODUCT LINES */}
+          <div className="space-y-4">
+            {productLines.map((prod, idx) => (
+              <div key={prod.id} className="p-4 rounded-xl border border-slate-200 bg-white shadow-sm space-y-3 relative transition-all hover:border-slate-300">
+                <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+                  <span className="text-xs font-bold text-slate-800 flex items-center space-x-1.5">
+                    <span className="w-5 h-5 rounded-full bg-slate-900 text-white text-[11px] flex items-center justify-center font-mono font-bold">
+                      {idx + 1}
+                    </span>
+                    <span>{isBn ? `প্রোডাক্ট #${idx + 1}` : `Product Item #${idx + 1}`}</span>
+                  </span>
 
-            {/* Net Weight */}
-            <div>
-              <label className="block text-[13px] font-bold text-slate-900 mb-1.5 flex items-center">
-                {isBn ? 'গড় নিট ওজন/CTN (KG)' : 'Avg Net Weight (KG)'} <span className="text-[#EE5D50] font-bold ml-1">*</span>
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                min={0.1}
-                value={batchNetWeight}
-                onChange={(e) => setBatchNetWeight(e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
-                placeholder="e.g. 11.2"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center transition-all placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
-              />
-            </div>
+                  {productLines.length > 1 && (
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveProductLine(prod.id)}
+                      className="px-2.5 py-1 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg flex items-center space-x-1 font-medium transition-colors cursor-pointer"
+                      title={isBn ? 'প্রোডাক্ট ডিলিট করুন' : 'Remove product'}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                      <span>{isBn ? 'মুছে ফেলুন' : 'Remove'}</span>
+                    </button>
+                  )}
+                </div>
 
-            {/* Gross Weight */}
-            <div>
-              <label className="block text-[13px] font-bold text-slate-900 mb-1.5 flex items-center">
-                {isBn ? 'গড় গ্রস ওজন/CTN (KG)' : 'Avg Gross Weight (KG)'} <span className="text-[#EE5D50] font-bold ml-1">*</span>
-              </label>
-              <input
-                type="number"
-                step="0.1"
-                min={0.1}
-                value={batchGrossWeight}
-                onChange={(e) => setBatchGrossWeight(e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
-                placeholder="e.g. 12.5"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center transition-all placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
-              />
-            </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
+                  {/* Product EN */}
+                  <div className="lg:col-span-2">
+                    <label className="block text-[12px] font-bold text-slate-900 mb-1">
+                      {isBn ? 'ইংরেজি পণ্য নাম' : 'Product English Name'} <span className="text-[#EE5D50]">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={prod.product_name_en}
+                      onChange={(e) => handleProductLineChange(prod.id, 'product_name_en', e.target.value)}
+                      placeholder="e.g. Men T-Shirt / Jeans"
+                      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                    />
+                  </div>
 
-            {/* CBM */}
-            <div>
-              <label className="block text-[13px] font-bold text-slate-900 mb-1.5 flex items-center">
-                {isBn ? 'ভলিউম CBM/CTN' : 'CBM per Carton'} <span className="text-[#EE5D50] font-bold ml-1">*</span>
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min={0.01}
-                value={batchCbm}
-                onChange={(e) => setBatchCbm(e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
-                placeholder="e.g. 0.15"
-                className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center transition-all placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
-              />
-            </div>
+                  {/* Product CN */}
+                  <div className="lg:col-span-2">
+                    <label className="block text-[12px] font-bold text-slate-900 mb-1">
+                      {isBn ? 'চাইনিজ পণ্য নাম (中文)' : 'Chinese Name'}
+                    </label>
+                    <input
+                      type="text"
+                      value={prod.product_name_cn}
+                      onChange={(e) => handleProductLineChange(prod.id, 'product_name_cn', e.target.value)}
+                      placeholder="e.g. 男士T恤"
+                      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                    />
+                  </div>
+
+                  {/* Carton Count for this product */}
+                  <div>
+                    <label className="block text-[12px] font-bold text-slate-900 mb-1">
+                      {isBn ? 'কার্টুন সংখ্যা (CTN)' : 'Cartons Count'} <span className="text-[#EE5D50]">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={prod.carton_count}
+                      onChange={(e) => handleProductLineChange(prod.id, 'carton_count', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                      placeholder="e.g. 10"
+                      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                    />
+                  </div>
+
+                  {/* Qty per carton */}
+                  <div>
+                    <label className="block text-[12px] font-bold text-slate-900 mb-1">
+                      {isBn ? 'পরিমাণ/CTN (PCS)' : 'Qty/CTN'} <span className="text-[#EE5D50]">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      min={1}
+                      value={prod.qty_per_carton}
+                      onChange={(e) => handleProductLineChange(prod.id, 'qty_per_carton', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
+                      placeholder="e.g. 50"
+                      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                    />
+                  </div>
+
+                  {/* Gross Weight per carton */}
+                  <div>
+                    <label className="block text-[12px] font-bold text-slate-900 mb-1">
+                      {isBn ? 'গ্রস ওজন (KG)' : 'Gross Wt (KG)'} <span className="text-[#EE5D50]">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min={0.1}
+                      value={prod.gross_weight}
+                      onChange={(e) => handleProductLineChange(prod.id, 'gross_weight', e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
+                      placeholder="e.g. 12.5"
+                      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                    />
+                  </div>
+
+                  {/* Net Weight per carton */}
+                  <div>
+                    <label className="block text-[12px] font-bold text-slate-900 mb-1">
+                      {isBn ? 'নিট ওজন (KG)' : 'Net Wt (KG)'}
+                    </label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      min={0.1}
+                      value={prod.net_weight}
+                      onChange={(e) => handleProductLineChange(prod.id, 'net_weight', e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
+                      placeholder="e.g. 11.2"
+                      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                    />
+                  </div>
+
+                  {/* CBM per carton */}
+                  <div>
+                    <label className="block text-[12px] font-bold text-slate-900 mb-1">
+                      {isBn ? 'ভলিউম CBM' : 'CBM/CTN'} <span className="text-[#EE5D50]">*</span>
+                    </label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min={0.01}
+                      value={prod.cbm}
+                      onChange={(e) => handleProductLineChange(prod.id, 'cbm', e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
+                      placeholder="e.g. 0.15"
+                      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                    />
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
+
+          {/* ADD PRODUCT LINE BUTTON */}
+          <button
+            type="button"
+            onClick={handleAddProductLine}
+            className="w-full py-3 px-4 border-2 border-dashed border-emerald-300 hover:border-emerald-500 bg-emerald-50/50 hover:bg-emerald-50 text-[#059669] font-bold text-xs rounded-xl flex items-center justify-center space-x-2 transition-all cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>{isBn ? '+ আরও প্রোডাক্ট যোগ করুন (+ Add Another Product)' : '+ Add Another Product'}</span>
+          </button>
         </div>
 
         {/* ------------------------------------------------------------- */}
