@@ -67,10 +67,10 @@ body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, span, p, div, a {
 }
 
 /* =========================================================
-   LIGHT THEME OVERRIDES (UNIFORM #F8FAFC PAGE & #FFFFFF CARDS)
+   LIGHT THEME OVERRIDES (SINGLE SEAMLESS UNIFORM WHITE BACKGROUND)
    ========================================================= */
 html.light, html.light body, body {
-  background-color: #F8FAFC !important;
+  background-color: #FFFFFF !important;
   color: #0F172A !important;
 }
 
@@ -78,10 +78,11 @@ html.light, html.light body, body {
 html.light main,
 html.light .bg-\[\#141414\],
 html.light .bg-\[\#F4F5F7\],
+html.light .bg-\[\#F8FAFC\],
 html.light .bg-slate-950,
 html.light .bg-\[\#0F172A\],
 html.light .bg-slate-900 {
-  background-color: #F8FAFC !important;
+  background-color: #FFFFFF !important;
   color: #0F172A !important;
 }
 
@@ -91,10 +92,10 @@ html.light aside,
 html.light nav {
   background-color: #FFFFFF !important;
   color: #0F172A !important;
-  border-color: #CBD5E1 !important;
+  border-color: #E2E8F0 !important;
 }
 
-/* All Cards, Containers, Sections & Content Panels - Pure White Layer */
+/* All Cards, Containers, Sections & Content Panels - Single Pure White Layer */
 html.light .bg-\[\#1C1C1E\],
 html.light .bg-\[\#18181A\],
 html.light .bg-\[\#11202F\],
@@ -109,11 +110,11 @@ html.light .dark\:bg-slate-900,
 html.light .dark\:bg-slate-950 {
   background-color: #FFFFFF !important;
   color: #0F172A !important;
-  border-color: #CBD5E1 !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+  border-color: #E2E8F0 !important;
+  box-shadow: none !important;
 }
 
-/* Inner Accent Sub-panels & Inputs - Clean Light Slate Tint */
+/* Inner Accent Sub-panels & Inputs - Pure White Alignment */
 html.light .bg-slate-50,
 html.light .bg-slate-100,
 html.light .bg-gray-50,
@@ -125,7 +126,7 @@ html.light .bg-slate-50\/90,
 html.light .bg-\[\#0F172A\]\/80,
 html.light .bg-\[\#1E293B\]\/80,
 html.light .bg-\[\#1E293B\]\/60 {
-  background-color: #F8FAFC !important;
+  background-color: #FFFFFF !important;
   color: #0F172A !important;
   border-color: #E2E8F0 !important;
 }
