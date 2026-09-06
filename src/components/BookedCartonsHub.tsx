@@ -877,7 +877,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                                 <span>{firstCarton.customer_name}</span>
                               </span>
                             ) : (
-                              <span className="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center space-x-1">
+                              <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 dark:bg-amber-950/80 text-[#78350F] dark:text-amber-200 border border-amber-300 dark:border-amber-700/80 flex items-center space-x-1 shadow-xs">
                                 <span>⚠️ Unassigned (Map Customer)</span>
                               </span>
                             )}
@@ -1223,8 +1223,8 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             <span>{c.customer_name}</span>
                           </div>
                         ) : (
-                          <div className="text-[9px] font-bold text-amber-500 dark:text-amber-400 mt-0.5 truncate">
-                            ⚠️ Unassigned
+                          <div className="text-[10px] font-bold text-[#78350F] dark:text-amber-200 mt-0.5 truncate bg-amber-100 dark:bg-amber-950/80 px-2 py-0.5 rounded-md border border-amber-300 dark:border-amber-700/80 inline-flex items-center space-x-1">
+                            <span>⚠️ Unassigned</span>
                           </div>
                         )}
                       </td>
