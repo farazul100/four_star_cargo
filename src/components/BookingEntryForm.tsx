@@ -917,7 +917,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       {/* ------------------------------------------------------------- */}
       {/* 1. TOP SMART BATCH INPUT FORM (EGROCER VENDOR THEME COMPLIANT) */}
       {/* ------------------------------------------------------------- */}
-      <div className="p-8 rounded-2xl border border-slate-200/90 bg-white text-slate-900 shadow-[0_10px_30px_rgba(112,144,176,0.06)] space-y-6">
+      <div className="space-y-6 pt-2">
         {/* Card Header & Sub-Tab Bar */}
         <div className="flex flex-col md:flex-row md:items-center justify-between border-b pb-3 border-slate-200 gap-4">
           <div className="flex items-center space-x-8">
@@ -1200,7 +1200,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         {/* ------------------------------------------------------------- */}
         {/* Section C: METHOD 1 ONLY: FAST WEIGHT SEQUENCE PASTING FOR N.WT & G.WT */}
         {/* ------------------------------------------------------------- */}
-        <div className="p-5 rounded-2xl border border-slate-200 bg-white space-y-4">
+        <div className="pt-2 space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Scale className="w-4 h-4 text-[#059669]" />
@@ -1215,7 +1215,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
             {/* Net Weight Sequence Paste */}
-            <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2.5">
+            <div className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 space-y-2.5">
               <div>
                 <label className="block text-xs font-bold text-slate-900">
                   {isBn ? '১. নিট ওজন (N. Weight) তালিকা পেস্ট করুন:' : '1. Paste Net Weights (N. Weight) List:'}
@@ -1245,7 +1245,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
             </div>
 
             {/* Gross Weight Sequence Paste */}
-            <div className="p-4 rounded-xl border border-slate-200 bg-white space-y-2.5">
+            <div className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 space-y-2.5">
               <div>
                 <label className="block text-xs font-bold text-slate-900">
                   {isBn ? '২. গ্রস ওজন (G. Weight) তালিকা পেস্ট করুন:' : '2. Paste Gross Weights (G. Weight) List:'}
@@ -1277,7 +1277,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         </div>
 
         {/* Section D: Shared Photo Attachment & Generate Preview Button */}
-        <div className="p-4 rounded-xl border border-slate-200 bg-white text-slate-900 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="pt-3 pb-1 border-t border-slate-200/80 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <div className="text-xs font-bold text-slate-900">
               {isBn ? 'প্যাকেজিং স্লিপ বা প্রোডাক্টের ছবি সংযুক্তি' : 'Packaging Slip / Proof Photo Attachment'}
