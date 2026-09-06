@@ -119,6 +119,7 @@ export interface Carton {
   customer_name?: string;
   current_warehouse_name?: string;
   destination_warehouse_name?: string;
+  route_name?: string;
 }
 
 export interface FlyingProposal {

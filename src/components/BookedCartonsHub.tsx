@@ -1269,7 +1269,13 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       <td className={`p-3 border-r text-xs font-semibold truncate ${
                         isDark ? 'text-slate-100 border-slate-700' : 'text-slate-800 border-slate-200'
                       }`}>
-                        {c.destination_warehouse_name || warehouses.find((w) => w.id === c.destination_warehouse_id)?.name || 'Bangladesh Hub'}
+                        {c.route_name ? (
+                          <span className="px-2 py-0.5 rounded bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-mono text-[11px] font-bold border border-purple-200 dark:border-purple-800/80 inline-flex items-center space-x-1">
+                            <span>{c.route_name}</span>
+                          </span>
+                        ) : (
+                          c.destination_warehouse_name || warehouses.find((w) => w.id === c.destination_warehouse_id)?.name || 'Bangladesh Hub'
+                        )}
                       </td>
 
                       <td className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50">

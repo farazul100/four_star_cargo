@@ -44,6 +44,9 @@ interface BatchCartonRow {
   net_weight: number;
   gross_weight: number;
   cbm: number;
+  origin_wh_id?: string;
+  destination_wh_id?: string;
+  route_name?: string;
   photo_url?: string;
   master_group_id?: string;
   is_merged?: boolean;
@@ -58,6 +61,8 @@ interface ProductLineItem {
   net_weight: number | '';
   gross_weight: number | '';
   cbm: number | '';
+  origin_wh_id?: string;
+  destination_wh_id?: string;
 }
 
 export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
@@ -110,6 +115,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       net_weight: '',
       gross_weight: '',
       cbm: '',
+      origin_wh_id: myWhId || 'wh-china',
+      destination_wh_id: destWhId || 'wh-bd',
     },
   ]);
 
@@ -125,6 +132,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         net_weight: prev[0]?.net_weight || '',
         gross_weight: prev[0]?.gross_weight || '',
         cbm: prev[0]?.cbm || '',
+        origin_wh_id: prev[prev.length - 1]?.origin_wh_id || myWhId || 'wh-china',
+        destination_wh_id: prev[prev.length - 1]?.destination_wh_id || destWhId || 'wh-bd',
       },
     ]);
   };
@@ -247,6 +256,14 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       const netWtVal = typeof pItem.net_weight === 'number' && pItem.net_weight > 0 ? pItem.net_weight : (Number(batchNetWeight) || Math.round(grossWtVal * 0.9 * 10) / 10);
       const cbmVal = typeof pItem.cbm === 'number' && pItem.cbm > 0 ? pItem.cbm : (Number(batchCbm) || 0.15);
 
+      const origId = pItem.origin_wh_id || myWhId || 'wh-china';
+      const destId = pItem.destination_wh_id || destWhId || 'wh-bd';
+      const origWhObj = warehouses.find((w) => w.id === origId);
+      const destWhObj = warehouses.find((w) => w.id === destId);
+      const origCode = origWhObj ? (origWhObj.code || origWhObj.name.split(' ')[0]) : 'CAN-01';
+      const destCode = destWhObj ? (destWhObj.code || destWhObj.name.split(' ')[0]) : 'DAC-01';
+      const routeStr = `${origCode} ✈️ ➔ ${destCode}`;
+
       for (let i = 0; i < prodCount; i++) {
         const currentNum = startNo + globalCartonIndex;
         const padNum = currentNum < 10 ? `0${currentNum}` : `${currentNum}`;
@@ -281,6 +298,9 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
           net_weight: rowNet,
           gross_weight: rowGross,
           cbm: cbmVal,
+          origin_wh_id: origId,
+          destination_wh_id: destId,
+          route_name: routeStr,
           photo_url: batchPhotoUrl || undefined,
         });
 
@@ -820,31 +840,39 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
     const customer = processCustomerBooking(selectedCustomer, customerSearchInput, totalBatchWeight);
     const finalMark = shippingMark.trim() || customer.shipping_mark || `${markPrefix.trim()}${markCode.trim()}`;
 
-    const newCartonObjects: Carton[] = previewRows.map((r, idx) => ({
-      id: `fsc-carton-${Date.now()}-${idx + 1}`,
-      ctn_no: r.ctn_no.trim() || `CTN-${idx + 1}`,
-      packaging_number: r.packaging_number.trim() || `BOX-${101 + idx}`,
-      shipping_mark: r.shipping_mark || finalMark,
-      tracking_number: masterTrackingNumber.trim(),
-      master_tracking_number: masterTrackingNumber.trim(),
-      product_name_en: r.product_name_en,
-      product_name_cn: r.product_name_cn.trim() || r.product_name_en.trim(),
-      quantity: r.quantity || 1,
-      net_weight: r.net_weight || Math.round((r.gross_weight * 0.9) * 10) / 10,
-      gross_weight: r.gross_weight || 1,
-      cbm: r.cbm || 0.05,
-      photo_url: r.photo_url || batchPhotoUrl || undefined,
-      current_warehouse_id: myWhId,
-      destination_warehouse_id: destWhId,
-      status: 'booked',
-      booked_by: currentUser.id,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      current_warehouse_name: myWh?.name,
-      destination_warehouse_name: warehouses.find((w) => w.id === destWhId)?.name,
-      master_group_id: r.master_group_id,
-      is_merged: r.is_merged,
-    }));
+    const newCartonObjects: Carton[] = previewRows.map((r, idx) => {
+      const origId = r.origin_wh_id || myWhId;
+      const destId = r.destination_wh_id || destWhId;
+      const origWhObj = warehouses.find((w) => w.id === origId);
+      const destWhObj = warehouses.find((w) => w.id === destId);
+
+      return {
+        id: `fsc-carton-${Date.now()}-${idx + 1}`,
+        ctn_no: r.ctn_no.trim() || `CTN-${idx + 1}`,
+        packaging_number: r.packaging_number.trim() || `BOX-${101 + idx}`,
+        shipping_mark: r.shipping_mark || finalMark,
+        tracking_number: masterTrackingNumber.trim(),
+        master_tracking_number: masterTrackingNumber.trim(),
+        product_name_en: r.product_name_en,
+        product_name_cn: r.product_name_cn.trim() || r.product_name_en.trim(),
+        quantity: r.quantity || 1,
+        net_weight: r.net_weight || Math.round((r.gross_weight * 0.9) * 10) / 10,
+        gross_weight: r.gross_weight || 1,
+        cbm: r.cbm || 0.05,
+        photo_url: r.photo_url || batchPhotoUrl || undefined,
+        current_warehouse_id: origId,
+        destination_warehouse_id: destId,
+        status: 'booked',
+        booked_by: currentUser.id,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        current_warehouse_name: origWhObj?.name || myWh?.name,
+        destination_warehouse_name: destWhObj?.name || warehouses.find((w) => w.id === destWhId)?.name,
+        route_name: r.route_name,
+        master_group_id: r.master_group_id,
+        is_merged: r.is_merged,
+      };
+    });
 
     // Save cartons to central database & propagate state (Filter out previous cartons with same tracking number)
     const finalTrackingNo = masterTrackingNumber.trim() || `EXP-${Math.floor(Math.random() * 899999 + 100000)}`;
@@ -1135,7 +1163,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-7 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-9 gap-3">
                   {/* Product EN */}
                   <div className="lg:col-span-2">
                     <label className="block text-[12px] font-bold text-slate-900 mb-1">
@@ -1151,9 +1179,9 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   </div>
 
                   {/* Product CN */}
-                  <div className="lg:col-span-2">
+                  <div className="lg:col-span-1">
                     <label className="block text-[12px] font-bold text-slate-900 mb-1">
-                      {isBn ? 'চাইনিজ পণ্য নাম (中文)' : 'Chinese Name'}
+                      {isBn ? 'চাইনিজ নাম' : 'Chinese Name'}
                     </label>
                     <input
                       type="text"
@@ -1164,10 +1192,44 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     />
                   </div>
 
+                  {/* Route (Origin -> Destination) */}
+                  <div className="lg:col-span-2">
+                    <label className="block text-[12px] font-bold text-slate-900 mb-1">
+                      {isBn ? 'রুট (অরিজিন ➔ গন্তব্য)' : 'Route (Origin ➔ Destination)'}
+                    </label>
+                    <div className="flex items-center space-x-1">
+                      <select
+                        value={prod.origin_wh_id || myWhId || 'wh-china'}
+                        onChange={(e) => handleProductLineChange(prod.id, 'origin_wh_id', e.target.value)}
+                        className="w-1/2 px-2 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[11px] font-bold focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none cursor-pointer truncate"
+                        title={isBn ? 'অরিজিন ওয়্যারহাউজ' : 'Origin Hub'}
+                      >
+                        {warehouses.map((w) => (
+                          <option key={w.id} value={w.id}>
+                            {w.code || w.name.split(' ')[0]}
+                          </option>
+                        ))}
+                      </select>
+                      <span className="text-slate-400 font-bold text-xs">➔</span>
+                      <select
+                        value={prod.destination_wh_id || destWhId || 'wh-bd'}
+                        onChange={(e) => handleProductLineChange(prod.id, 'destination_wh_id', e.target.value)}
+                        className="w-1/2 px-2 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[11px] font-bold focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none cursor-pointer truncate"
+                        title={isBn ? 'গন্তব্য ওয়্যারহাউজ' : 'Destination Hub'}
+                      >
+                        {warehouses.map((w) => (
+                          <option key={w.id} value={w.id}>
+                            {w.code || w.name.split(' ')[0]}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
                   {/* Carton Count for this product */}
                   <div>
                     <label className="block text-[12px] font-bold text-slate-900 mb-1">
-                      {isBn ? 'কার্টুন সংখ্যা (CTN)' : 'Cartons Count'} <span className="text-[#EE5D50]">*</span>
+                      {isBn ? 'কার্টুন (CTN)' : 'Cartons'} <span className="text-[#EE5D50]">*</span>
                     </label>
                     <input
                       type="number"
@@ -1175,14 +1237,14 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.carton_count}
                       onChange={(e) => handleProductLineChange(prod.id, 'carton_count', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                       placeholder="e.g. 10"
-                      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      className="w-full px-2.5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
                     />
                   </div>
 
                   {/* Qty per carton */}
                   <div>
                     <label className="block text-[12px] font-bold text-slate-900 mb-1">
-                      {isBn ? 'পরিমাণ/CTN (PCS)' : 'Qty/CTN'} <span className="text-[#EE5D50]">*</span>
+                      {isBn ? 'পরিমাণ/CTN' : 'Qty/CTN'} <span className="text-[#EE5D50]">*</span>
                     </label>
                     <input
                       type="number"
@@ -1190,14 +1252,14 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.qty_per_carton}
                       onChange={(e) => handleProductLineChange(prod.id, 'qty_per_carton', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                       placeholder="e.g. 50"
-                      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      className="w-full px-2.5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
                     />
                   </div>
 
                   {/* Gross Weight per carton */}
                   <div>
                     <label className="block text-[12px] font-bold text-slate-900 mb-1">
-                      {isBn ? 'গ্রস ওজন (KG)' : 'Gross Wt (KG)'} <span className="text-[#EE5D50]">*</span>
+                      {isBn ? 'গ্রস ওজন' : 'Gross Wt'} <span className="text-[#EE5D50]">*</span>
                     </label>
                     <input
                       type="number"
@@ -1206,14 +1268,14 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.gross_weight}
                       onChange={(e) => handleProductLineChange(prod.id, 'gross_weight', e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
                       placeholder="e.g. 12.5"
-                      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      className="w-full px-2.5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
                     />
                   </div>
 
                   {/* Net Weight per carton */}
                   <div>
                     <label className="block text-[12px] font-bold text-slate-900 mb-1">
-                      {isBn ? 'নিট ওজন (KG)' : 'Net Wt (KG)'}
+                      {isBn ? 'নিট ওজন' : 'Net Wt'}
                     </label>
                     <input
                       type="number"
@@ -1222,14 +1284,14 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.net_weight}
                       onChange={(e) => handleProductLineChange(prod.id, 'net_weight', e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
                       placeholder="e.g. 11.2"
-                      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      className="w-full px-2.5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
                     />
                   </div>
 
                   {/* CBM per carton */}
                   <div>
                     <label className="block text-[12px] font-bold text-slate-900 mb-1">
-                      {isBn ? 'ভলিউম CBM' : 'CBM/CTN'} <span className="text-[#EE5D50]">*</span>
+                      {isBn ? 'ভলিউম' : 'CBM/CTN'} <span className="text-[#EE5D50]">*</span>
                     </label>
                     <input
                       type="number"
@@ -1435,18 +1497,20 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs border-collapse border border-slate-200 dark:border-slate-700 table-fixed min-w-[1250px]">
               <colgroup>
-                <col style={{ width: '65px' }} />
-                <col style={{ width: '115px' }} />
+                <col style={{ width: '60px' }} />
+                <col style={{ width: '105px' }} />
+                <col style={{ width: '120px' }} />
                 <col style={{ width: '130px' }} />
                 <col style={{ width: '140px' }} />
-                <col style={{ width: '260px' }} />
-                <col style={{ width: '85px' }} />
-                <col style={{ width: '85px' }} />
-                <col style={{ width: '85px' }} />
+                <col style={{ width: '220px' }} />
+                <col style={{ width: '160px' }} />
+                <col style={{ width: '75px' }} />
                 <col style={{ width: '80px' }} />
+                <col style={{ width: '80px' }} />
+                <col style={{ width: '75px' }} />
                 <col style={{ width: '120px' }} />
                 <col style={{ width: '85px' }} />
-                <col style={{ width: '110px' }} />
+                <col style={{ width: '90px' }} />
               </colgroup>
               <thead className={`uppercase text-[10px] tracking-wider border-b border-slate-200 dark:border-slate-700 font-medium ${
                 isDark ? 'bg-[#1E293B] text-slate-300' : 'bg-slate-100 text-slate-700'
@@ -1466,6 +1530,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium text-emerald-600 dark:text-emerald-400">SHIPMENT CTN NO.</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium text-blue-600 dark:text-blue-400">SHIPPING MARK</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">PRODUCT NAME (EN & CN)</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium text-purple-600 dark:text-purple-400 text-center">{isBn ? 'রুট (অরিজিন ➔ গন্তব্য)' : 'ROUTE / DESTINATION'}</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">QTY (PCS)</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">N.WEIGHT</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">G.WEIGHT</th>
@@ -1609,6 +1674,13 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                             }`}
                           />
                         </div>
+                      </td>
+
+                      {/* Route (Origin -> Destination) */}
+                      <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden align-middle">
+                        <span className="px-2 py-1 rounded-md bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300 font-mono text-[11px] font-bold border border-purple-200 dark:border-purple-800/80 inline-flex items-center space-x-1 truncate w-full justify-center">
+                          <span>{r.route_name || 'CAN ✈️ ➔ DAC'}</span>
+                        </span>
                       </td>
 
                       {/* Quantity/CTN */}
