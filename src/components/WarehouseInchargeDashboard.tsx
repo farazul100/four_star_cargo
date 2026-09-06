@@ -497,16 +497,16 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
 
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs font-normal">
-                <thead className={`uppercase text-[10px] border-b border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'bg-[#1E293B] text-white' : 'bg-slate-100 text-slate-900'}`}>
+                <thead className={`uppercase text-[10px] border-b border-slate-200 dark:border-slate-700 font-semibold ${isDark ? 'bg-[#1E293B] text-white' : 'bg-slate-100 text-slate-900'}`}>
                   <tr>
-                    <th className={`p-3 w-10 text-center font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>Select</th>
-                    <th className={`p-3 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>CTN NO</th>
-                    <th className="p-3 font-extrabold text-emerald-400">SHIPMENT CTN NO.</th>
-                    <th className={`p-3 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>TRACKING ID</th>
-                    <th className={`p-3 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>SHIPPING MARK</th>
-                    <th className={`p-3 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>PRODUCT NAME</th>
-                    <th className={`p-3 text-center font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>SPECIFICATIONS</th>
-                    <th className={`p-3 text-center font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>VOLUME</th>
+                    <th className={`p-3 w-10 text-center font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Select</th>
+                    <th className={`p-3 font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>CTN NO</th>
+                    <th className="p-3 font-semibold text-emerald-500 dark:text-emerald-400">SHIPMENT CTN NO.</th>
+                    <th className={`p-3 font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>TRACKING ID</th>
+                    <th className={`p-3 font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>SHIPPING MARK</th>
+                    <th className={`p-3 font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>PRODUCT NAME</th>
+                    <th className={`p-3 text-center font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>SPECIFICATIONS</th>
+                    <th className={`p-3 text-center font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>VOLUME</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-slate-800 text-slate-700 dark:text-slate-300">
@@ -528,22 +528,22 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                             className="w-4 h-4 rounded-md text-blue-600 border-slate-300 cursor-pointer accent-[#00897B]"
                           />
                         </td>
-                        <td className={`p-3 font-mono font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                        <td className={`p-3 font-mono font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>
                           {c.ctn_no}
                         </td>
-                        <td className="p-3 font-mono font-extrabold text-emerald-400">
+                        <td className="p-3 font-mono font-semibold text-emerald-500 dark:text-emerald-400">
                           {c.packaging_number || '-'}
                         </td>
-                        <td className={`p-3 font-mono font-semibold ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
+                        <td className={`p-3 font-mono font-medium ${isDark ? 'text-slate-100' : 'text-slate-800'}`}>
                           {c.tracking_number}
                         </td>
-                        <td className="p-3 font-mono text-sky-300 font-extrabold">
-                          <span className="px-2 py-0.5 rounded-md bg-blue-500/20 border border-blue-500/30 text-[11px]">
+                        <td className="p-3 font-mono text-sky-600 dark:text-sky-300 font-semibold">
+                          <span className="px-2 py-0.5 rounded-md bg-blue-500/15 border border-blue-500/25 text-[11px]">
                             {c.shipping_mark}
                           </span>
                         </td>
                         <td className="p-3 font-sans truncate max-w-[200px]">
-                          <div className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.product_name_en}</div>
+                          <div className={`font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.product_name_en}</div>
                           {c.product_name_cn && <div className={`text-[10px] font-medium ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>{c.product_name_cn}</div>}
                         </td>
                         <td className="p-3 text-center font-mono text-slate-600 dark:text-slate-300">
