@@ -245,7 +245,9 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
     setErrorMsg('');
     setSuccessMsg('');
 
-    if (!customerSearchInput.trim() && !selectedCustomer) {
+    const effectiveMark = shippingMark.trim() || `${markPrefix.trim()}${markCode.trim()}`;
+
+    if (!customerSearchInput.trim() && !selectedCustomer && !effectiveMark) {
       setErrorMsg(isBn ? 'অনুগ্রহ করে কাস্টমার নাম বা শিপিং মার্ক প্রদান করুন!' : 'Please select/enter Customer Name or Shipping Mark!');
       return;
     }
@@ -968,29 +970,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
           </div>
         )}
 
-        {/* Section A: Customer & Shipping Mark Config */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-          {/* Anonymized Cargo Privacy Badge */}
-          <div className="relative">
-            <label className={`block text-xs mb-1 font-extrabold ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
-              {isBn ? 'গোপনীয় কার্গো বুকিং মোড (অ্যানোনিমাস)' : 'Anonymized Cargo Booking Mode *'}
-            </label>
-            <div className={`p-2.5 rounded-xl border flex items-center space-x-2.5 ${
-              isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
-            }`}>
-              <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 shrink-0">
-                <ShieldCheck className="w-4.5 h-4.5 text-emerald-400" />
-              </div>
-              <div>
-                <div className={`text-xs font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                  {isBn ? 'কাস্টমার ইনপুট নিষ্ক্রিয় (প্রাইভেসি সুরক্ষিত)' : 'Customer Info Hidden'}
-                </div>
-                <div className={`text-[10px] font-semibold ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>
-                  {isBn ? 'শিপিং মার্ক দিয়ে বুকিং হবে। কাস্টমার ট্যাগিং ঢাকা অপারেশন টিম করবে।' : 'Only Shipping Mark used. Customer mapped by Ops.'}
-                </div>
-              </div>
-            </div>
-          </div>
+        {/* Section A: Shipping Mark & Tracking Config */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
           {/* CUSTOMIZABLE SHIPPING MARK PREFIX & CODE */}
           <div>
