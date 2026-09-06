@@ -67,36 +67,67 @@ body, button, input, select, textarea, h1, h2, h3, h4, h5, h6, span, p, div, a {
 }
 
 /* =========================================================
-   LIGHT THEME OVERRIDES (HIGH VISIBILITY VIBRANT UI & TEXT)
+   LIGHT THEME OVERRIDES (UNIFORM #F8FAFC PAGE & #FFFFFF CARDS)
    ========================================================= */
-html.light, html.light body {
+html.light, html.light body, body {
   background-color: #F8FAFC !important;
   color: #0F172A !important;
 }
 
-/* Canvas & Containers */
-html.light .bg-\[\#141414\] {
+/* Canvas & App Page Main Wrapper */
+html.light main,
+html.light .bg-\[\#141414\],
+html.light .bg-\[\#F4F5F7\],
+html.light .bg-slate-950,
+html.light .bg-\[\#0F172A\],
+html.light .bg-slate-900 {
   background-color: #F8FAFC !important;
   color: #0F172A !important;
 }
 
-/* Header & Sidebar */
+/* Header & Sidebar Navbar Panels */
 html.light header,
-html.light aside {
+html.light aside,
+html.light nav {
   background-color: #FFFFFF !important;
   color: #0F172A !important;
   border-color: #CBD5E1 !important;
 }
 
-/* Cards & Content Panels */
+/* All Cards, Containers, Sections & Content Panels - Pure White Layer */
 html.light .bg-\[\#1C1C1E\],
 html.light .bg-\[\#18181A\],
 html.light .bg-\[\#11202F\],
-html.light .bg-\[\#18181B\] {
+html.light .bg-\[\#18181B\],
+html.light .bg-\[\#1E293B\],
+html.light .bg-\[\#0F172A\],
+html.light .bg-slate-800,
+html.light .bg-slate-900,
+html.light .dark\:bg-\[\#1E293B\],
+html.light .dark\:bg-slate-800,
+html.light .dark\:bg-slate-900,
+html.light .dark\:bg-slate-950 {
   background-color: #FFFFFF !important;
   color: #0F172A !important;
   border-color: #CBD5E1 !important;
-  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.08);
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.04);
+}
+
+/* Inner Accent Sub-panels & Inputs - Clean Light Slate Tint */
+html.light .bg-slate-50,
+html.light .bg-slate-100,
+html.light .bg-gray-50,
+html.light .bg-gray-100,
+html.light .bg-blue-50\/50,
+html.light .bg-blue-50\/70,
+html.light .bg-slate-50\/70,
+html.light .bg-slate-50\/90,
+html.light .bg-\[\#0F172A\]\/80,
+html.light .bg-\[\#1E293B\]\/80,
+html.light .bg-\[\#1E293B\]\/60 {
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+  border-color: #E2E8F0 !important;
 }
 
 /* Hover & Active Pill States */
@@ -115,20 +146,19 @@ html.light .hover\:bg-\[\#242426\]:hover {
 html.light .border-\[\#2C2C2E\],
 html.light .border-\[\#2C2C2E\]\/80,
 html.light .border-\[\#2C2C2E\]\/60,
-html.light .border-\[\#1E3247\] {
+html.light .border-\[\#1E3247\],
+html.light .border-slate-700,
+html.light .dark\:border-slate-700 {
   border-color: #CBD5E1 !important;
 }
 
 /* Typography Overrides for High Visibility & Contrast */
 html.light .text-\[\#9E9E9E\],
 html.light .text-\[\#8FA3AD\],
-html.light .text-\[\#7C7C7C\] {
-  color: #334155 !important;
-}
-
+html.light .text-\[\#7C7C7C\],
 html.light .text-slate-400,
 html.light .text-slate-500 {
-  color: #334155 !important;
+  color: #475569 !important;
 }
 
 html.light .text-slate-600,
@@ -137,8 +167,11 @@ html.light .text-slate-700 {
 }
 
 html.light .text-slate-800,
-html.light .text-slate-900 {
-  color: #020617 !important;
+html.light .text-slate-900,
+html.light .dark\:text-white,
+html.light .dark\:text-slate-200,
+html.light .dark\:text-slate-100 {
+  color: #0F172A !important;
 }
 
 /* Form Controls, Inputs & Selects */
@@ -147,28 +180,7 @@ html.light input,
 html.light textarea {
   background-color: #FFFFFF !important;
   color: #111827 !important;
-  border-color: #E5E7EB !important;
-}
-
-/* Light Mode Overrides for Tailwind Dark Utilities */
-html.light .bg-slate-900,
-html.light .bg-slate-800,
-html.light .bg-slate-950,
-html.light .dark\:bg-slate-900,
-html.light .dark\:bg-slate-800,
-html.light .dark\:bg-slate-950 {
-  background-color: #F8FAFC !important;
-  color: #0F172A !important;
-  border-color: #E2E8F0 !important;
-}
-
-html.light .bg-slate-900\/80,
-html.light .bg-slate-900\/60,
-html.light .bg-slate-900\/40,
-html.light .dark\:bg-slate-900\/60 {
-  background-color: #F1F5F9 !important;
-  color: #0F172A !important;
-  border-color: #E2E8F0 !important;
+  border-color: #CBD5E1 !important;
 }
 
 /* Table Headers & Rows */
