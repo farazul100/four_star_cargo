@@ -137,8 +137,12 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedDestWh, setSelectedDestWh] = useState('all');
   const [selectedDestinationFilter, setSelectedDestinationFilter] = useState('all');
-  const [selectedStatus, setSelectedStatus] = useState('all');
+  const [selectedStatus, setSelectedStatus] = useState('booked');
   const [selectedCustomerFilter, setSelectedCustomerFilter] = useState('all');
+  const [selectedProductFilter, setSelectedProductFilter] = useState('all');
+  const [selectedDateFilter, setSelectedDateFilter] = useState<'all' | 'today' | 'yesterday' | 'this_week' | 'this_month' | 'custom'>('all');
+  const [customStartDate, setCustomStartDate] = useState('');
+  const [customEndDate, setCustomEndDate] = useState('');
 
   // Customer Detail Modal View
   const [activeCustomerModalMark, setActiveCustomerModalMark] = useState<string | null>(null);
@@ -522,6 +526,88 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   }, [warehouses, isWarehouseIncharge, myWhId]);
 
   // -------------------------------------------------------------
+  // DYNAMIC FILTER DERIVATIONS (PRODUCTS & CUSTOMERS)
+  // -------------------------------------------------------------
+  // Available unique products in stock/cartons
+  const availableProductsList = React.useMemo(() => {
+    const map = new Map<string, { name: string; count: number; totalKg: number }>();
+    accessibleCartons.forEach((c) => {
+      if (selectedStatus !== 'all' && c.status !== selectedStatus) return;
+      const name = (c.product_name_en || '').trim();
+      if (!name) return;
+      const key = name.toLowerCase();
+      const existing = map.get(key) || { name, count: 0, totalKg: 0 };
+      existing.count += 1;
+      existing.totalKg += c.gross_weight || 0;
+      map.set(key, existing);
+    });
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [accessibleCartons, selectedStatus]);
+
+  // Available unique customers in stock/cartons
+  const availableCustomersList = React.useMemo(() => {
+    const map = new Map<string, { id: string; name: string; count: number; totalKg: number }>();
+    accessibleCartons.forEach((c) => {
+      if (selectedStatus !== 'all' && c.status !== selectedStatus) return;
+      const name = c.customer_name || (c.shipping_mark ? `Mark: ${c.shipping_mark}` : 'Unassigned');
+      const key = c.customer_id || c.customer_name || c.shipping_mark || 'unassigned';
+      const existing = map.get(key) || { id: key, name, count: 0, totalKg: 0 };
+      existing.count += 1;
+      existing.totalKg += c.gross_weight || 0;
+      map.set(key, existing);
+    });
+    return Array.from(map.values()).sort((a, b) => a.name.localeCompare(b.name));
+  }, [accessibleCartons, selectedStatus]);
+
+  // Helper for Date Range Filter
+  const matchesDateFilter = (createdAtStr?: string) => {
+    if (selectedDateFilter === 'all' || !createdAtStr) return true;
+
+    const cartonDate = new Date(createdAtStr);
+    if (isNaN(cartonDate.getTime())) return true;
+
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+    if (selectedDateFilter === 'today') {
+      const cartonDay = new Date(cartonDate.getFullYear(), cartonDate.getMonth(), cartonDate.getDate());
+      return cartonDay.getTime() === today.getTime();
+    }
+
+    if (selectedDateFilter === 'yesterday') {
+      const yesterday = new Date(today);
+      yesterday.setDate(yesterday.getDate() - 1);
+      const cartonDay = new Date(cartonDate.getFullYear(), cartonDate.getMonth(), cartonDate.getDate());
+      return cartonDay.getTime() === yesterday.getTime();
+    }
+
+    if (selectedDateFilter === 'this_week') {
+      const dayOfWeek = today.getDay();
+      const startOfWeek = new Date(today);
+      startOfWeek.setDate(today.getDate() - dayOfWeek);
+      return cartonDate >= startOfWeek;
+    }
+
+    if (selectedDateFilter === 'this_month') {
+      return cartonDate.getFullYear() === now.getFullYear() && cartonDate.getMonth() === now.getMonth();
+    }
+
+    if (selectedDateFilter === 'custom') {
+      if (customStartDate) {
+        const start = new Date(customStartDate + 'T00:00:00');
+        if (cartonDate < start) return false;
+      }
+      if (customEndDate) {
+        const end = new Date(customEndDate + 'T23:59:59');
+        if (cartonDate > end) return false;
+      }
+      return true;
+    }
+
+    return true;
+  };
+
+  // -------------------------------------------------------------
   // FILTERING LOGIC
   // -------------------------------------------------------------
   const filteredCartons = accessibleCartons.filter((c) => {
@@ -560,7 +646,27 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         ? !isBdBound
         : destWhId === selectedDestinationFilter;
 
-    return matchesSearch && matchesWh && matchesStatus && matchesDest;
+    // Product Filter Match
+    const matchesProduct =
+      selectedProductFilter === 'all'
+        ? true
+        : (c.product_name_en || '').trim().toLowerCase() === selectedProductFilter.trim().toLowerCase() ||
+          (c.product_name_cn || '').trim().toLowerCase() === selectedProductFilter.trim().toLowerCase();
+
+    // Customer Filter Match
+    const matchesCustomer =
+      selectedCustomerFilter === 'all'
+        ? true
+        : selectedCustomerFilter === 'unassigned'
+        ? !c.customer_name || c.customer_name.includes('Unassigned')
+        : c.customer_id === selectedCustomerFilter ||
+          c.customer_name === selectedCustomerFilter ||
+          c.shipping_mark === selectedCustomerFilter;
+
+    // Date Filter Match
+    const matchesDate = matchesDateFilter(c.created_at);
+
+    return matchesSearch && matchesWh && matchesStatus && matchesDest && matchesProduct && matchesCustomer && matchesDate;
   });
 
   // Group Cartons strictly by Master Tracking Number
@@ -827,15 +933,178 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'
               }`}
             >
-              <option value="all">{isBn ? 'সকল বুকিং স্ট্যাটাস' : 'All Booking Status'}</option>
-              <option value="booked">Booked (বুকিংকৃত)</option>
-              <option value="proposed">Proposed (ফ্লাইং প্রোপোজাল)</option>
-              <option value="in_transit">In Transit (পরিবহনে)</option>
-              <option value="received">Received (রিসিভড)</option>
-              <option value="delivered">Delivered (ডেলিভার্ড)</option>
+              <option value="booked">📦 {isBn ? 'বর্তমান ওয়্যারহাউজ স্টক (Active Stock Only)' : 'Active WH Stock Only (Booked)'}</option>
+              <option value="all">📋 {isBn ? 'সকল বুকিং ইতিহাস (All Status History)' : 'All Booking History'}</option>
+              <option value="proposed">✈️ Proposed (ফ্লাইং প্রোপোজাল)</option>
+              <option value="in_transit">🚚 In Transit (পরিবহনে)</option>
+              <option value="received">🏢 Received (রিসিভড)</option>
+              <option value="delivered">✅ Delivered (ডেলিভার্ড)</option>
             </select>
           </div>
         </div>
+
+        {/* ------------------------------------------------------------- */}
+        {/* ROW 2: SPECIFIC PRODUCT, CUSTOMER & DATE FILTERS */}
+        {/* ------------------------------------------------------------- */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 pt-2 border-t border-slate-200/80 dark:border-slate-700/80">
+          {/* Dynamic Product Dropdown */}
+          <div className="relative">
+            <select
+              value={selectedProductFilter}
+              onChange={(e) => setSelectedProductFilter(e.target.value)}
+              className={`w-full px-3 py-2 rounded-lg border text-xs font-bold focus:ring-2 focus:ring-blue-500 cursor-pointer ${
+                isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'
+              }`}
+            >
+              <option value="all">
+                {isBn ? `📦 সকল পণ্য / প্রোডাক্ট (${availableProductsList.length} প্রকার)` : `📦 All Products (${availableProductsList.length} Types)`}
+              </option>
+              {availableProductsList.map((p) => (
+                <option key={p.name} value={p.name}>
+                  📦 {p.name} ({p.count} {isBn ? 'কার্টুন' : 'Cartons'} - {p.totalKg.toFixed(1)} KG)
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Dynamic Customer Dropdown */}
+          <div className="relative">
+            <select
+              value={selectedCustomerFilter}
+              onChange={(e) => setSelectedCustomerFilter(e.target.value)}
+              className={`w-full px-3 py-2 rounded-lg border text-xs font-bold focus:ring-2 focus:ring-blue-500 cursor-pointer ${
+                isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'
+              }`}
+            >
+              <option value="all">
+                {isBn ? `👤 সকল কাস্টমার (${availableCustomersList.length} জন)` : `👤 All Customers (${availableCustomersList.length})`}
+              </option>
+              <option value="unassigned">
+                {isBn ? '⚠️ ম্যাপ না করা কাস্টমার (Unassigned)' : '⚠️ Unassigned Customers'}
+              </option>
+              {availableCustomersList.map((cust) => (
+                <option key={cust.id} value={cust.id}>
+                  👤 {cust.name} ({cust.count} {isBn ? 'কার্টুন' : 'Cartons'})
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {/* Date Filter Dropdown */}
+          <div className="relative">
+            <select
+              value={selectedDateFilter}
+              onChange={(e) => setSelectedDateFilter(e.target.value as any)}
+              className={`w-full px-3 py-2 rounded-lg border text-xs font-bold focus:ring-2 focus:ring-blue-500 cursor-pointer ${
+                isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-200 text-slate-900'
+              }`}
+            >
+              <option value="all">{isBn ? '📅 সকল তারিখ (All Time)' : '📅 All Time'}</option>
+              <option value="today">{isBn ? '📅 আজকে (Today)' : '📅 Today'}</option>
+              <option value="yesterday">{isBn ? '📅গতকাল (Yesterday)' : '📅 Yesterday'}</option>
+              <option value="this_week">{isBn ? '📅 এই সপ্তাহে (This Week)' : '📅 This Week'}</option>
+              <option value="this_month">{isBn ? '📅 এই মাসে (This Month)' : '📅 This Month'}</option>
+              <option value="custom">{isBn ? '⚙️ কাস্টম তারিখ (Custom Date Range)' : '⚙️ Custom Date Range'}</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Custom Date Range Inputs */}
+        {selectedDateFilter === 'custom' && (
+          <div className="flex flex-wrap items-center gap-3 bg-slate-100 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200 dark:border-slate-700/80 transition-all">
+            <span className="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center space-x-1.5">
+              <Calendar className="w-4 h-4 text-blue-500" />
+              <span>{isBn ? 'নির্দিষ্ট তারিখ রেঞ্জ নির্বাচন:' : 'Select Custom Date Range:'}</span>
+            </span>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs font-semibold text-slate-500">{isBn ? 'হতে:' : 'From:'}</span>
+              <input
+                type="date"
+                value={customStartDate}
+                onChange={(e) => setCustomStartDate(e.target.value)}
+                className={`px-3 py-1.5 rounded-lg border text-xs font-mono font-semibold ${
+                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-900'
+                }`}
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <span className="text-xs font-semibold text-slate-500">{isBn ? 'পর্যন্ত:' : 'To:'}</span>
+              <input
+                type="date"
+                value={customEndDate}
+                onChange={(e) => setCustomEndDate(e.target.value)}
+                className={`px-3 py-1.5 rounded-lg border text-xs font-mono font-semibold ${
+                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-900'
+                }`}
+              />
+            </div>
+            {(customStartDate || customEndDate) && (
+              <button
+                type="button"
+                onClick={() => {
+                  setCustomStartDate('');
+                  setCustomEndDate('');
+                }}
+                className="px-2.5 py-1.5 bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400 text-xs font-bold rounded-lg cursor-pointer transition-all border border-red-500/20"
+              >
+                {isBn ? 'তারিখ মুছুন' : 'Clear Dates'}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Highlight Summary Card when filtering specific product / customer / date */}
+        {(selectedProductFilter !== 'all' || selectedCustomerFilter !== 'all' || selectedDateFilter !== 'all' || searchQuery.trim()) && (
+          <div className="p-4 rounded-xl bg-gradient-to-r from-emerald-900/90 via-teal-900/90 to-blue-900/90 border border-emerald-500/50 text-white shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-4 mt-1 transition-all">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-emerald-500/20 rounded-xl border border-emerald-400/40 shadow-inner">
+                <Scale className="w-6 h-6 text-emerald-300" />
+              </div>
+              <div>
+                <div className="text-[11px] uppercase tracking-wider font-mono font-extrabold text-emerald-300 flex items-center space-x-2">
+                  <span>🎯 {isBn ? 'ফিল্টারকৃত নির্দিষ্ট প্রোডাক্টের ওয়্যারহাউজ কেজি ও ভলিউম হিসাব' : 'Filtered Product Specific Weight & Stock Result'}</span>
+                  {selectedProductFilter !== 'all' && (
+                    <span className="px-2 py-0.5 rounded bg-emerald-500/30 text-white font-bold border border-emerald-400/40">
+                      {selectedProductFilter}
+                    </span>
+                  )}
+                </div>
+                <h3 className="text-base md:text-lg font-black text-white mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
+                  <span>
+                    {isBn ? 'মোট কারেন্ট কেজি:' : 'Total Weight:'} <strong className="text-emerald-300 font-mono font-black">{totalGrossWeight.toFixed(1)} KG</strong>
+                  </span>
+                  <span className="text-emerald-500/50 hidden sm:inline">|</span>
+                  <span>
+                    {isBn ? 'মোট ভলিউম:' : 'Total CBM:'} <strong className="text-purple-300 font-mono font-black">{totalCbmVolume.toFixed(2)} CBM</strong>
+                  </span>
+                  <span className="text-emerald-500/50 hidden sm:inline">|</span>
+                  <span>
+                    {isBn ? 'মোট কার্টুন:' : 'Total Cartons:'} <strong className="text-sky-300 font-mono font-black">{totalCartonCount} CTN</strong>
+                  </span>
+                </h3>
+              </div>
+            </div>
+
+            <div className="flex items-center space-x-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setSelectedProductFilter('all');
+                  setSelectedCustomerFilter('all');
+                  setSelectedDateFilter('all');
+                  setCustomStartDate('');
+                  setCustomEndDate('');
+                  setSearchQuery('');
+                  setSelectedStatus('booked');
+                }}
+                className="px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-white text-xs font-extrabold border border-white/20 transition-all cursor-pointer shadow-xs flex items-center space-x-1"
+              >
+                <X className="w-3.5 h-3.5" />
+                <span>{isBn ? 'ফিল্টার রিসেট' : 'Reset All Filters'}</span>
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* ------------------------------------------------------------- */}
