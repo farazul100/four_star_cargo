@@ -45,6 +45,7 @@ interface BatchCartonRow {
   gross_weight: number;
   cbm: number;
   origin_wh_id?: string;
+  transit_wh_id?: string;
   destination_wh_id?: string;
   route_name?: string;
   photo_url?: string;
@@ -62,6 +63,7 @@ interface ProductLineItem {
   gross_weight: number | '';
   cbm: number | '';
   origin_wh_id?: string;
+  transit_wh_id?: string;
   destination_wh_id?: string;
 }
 
@@ -116,6 +118,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       gross_weight: '',
       cbm: '',
       origin_wh_id: myWhId || 'wh-china',
+      transit_wh_id: '',
       destination_wh_id: destWhId || 'wh-bd',
     },
   ]);
@@ -133,6 +136,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         gross_weight: prev[0]?.gross_weight || '',
         cbm: prev[0]?.cbm || '',
         origin_wh_id: prev[prev.length - 1]?.origin_wh_id || myWhId || 'wh-china',
+        transit_wh_id: prev[prev.length - 1]?.transit_wh_id || '',
         destination_wh_id: prev[prev.length - 1]?.destination_wh_id || destWhId || 'wh-bd',
       },
     ]);
@@ -257,12 +261,16 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       const cbmVal = typeof pItem.cbm === 'number' && pItem.cbm > 0 ? pItem.cbm : (Number(batchCbm) || 0.15);
 
       const origId = pItem.origin_wh_id || myWhId || 'wh-china';
+      const transitId = pItem.transit_wh_id || '';
       const destId = pItem.destination_wh_id || destWhId || 'wh-bd';
       const origWhObj = warehouses.find((w) => w.id === origId);
+      const transitWhObj = warehouses.find((w) => w.id === transitId);
       const destWhObj = warehouses.find((w) => w.id === destId);
       const origCode = origWhObj ? (origWhObj.code || origWhObj.name.split(' ')[0]) : 'CAN-01';
+      const transitCode = transitWhObj ? (transitWhObj.code || transitWhObj.name.split(' ')[0]) : '';
       const destCode = destWhObj ? (destWhObj.code || destWhObj.name.split(' ')[0]) : 'DAC-01';
-      const routeStr = `${origCode} ✈️ ➔ ${destCode}`;
+
+      const routeStr = transitCode ? `${origCode} ✈️ ➔ ${transitCode} ➔ ${destCode}` : `${origCode} ✈️ ➔ ${destCode}`;
 
       for (let i = 0; i < prodCount; i++) {
         const currentNum = startNo + globalCartonIndex;
@@ -299,6 +307,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
           gross_weight: rowGross,
           cbm: cbmVal,
           origin_wh_id: origId,
+          transit_wh_id: transitId,
           destination_wh_id: destId,
           route_name: routeStr,
           photo_url: batchPhotoUrl || undefined,
@@ -868,6 +877,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         updated_at: new Date().toISOString(),
         current_warehouse_name: origWhObj?.name || myWh?.name,
         destination_warehouse_name: destWhObj?.name || warehouses.find((w) => w.id === destWhId)?.name,
+        transit_warehouse_id: r.transit_wh_id,
+        transit_warehouse_name: warehouses.find((w) => w.id === r.transit_wh_id)?.name,
         route_name: r.route_name,
         master_group_id: r.master_group_id,
         is_merged: r.is_merged,
@@ -1137,25 +1148,25 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
               </div>
             </div>
           </div>
-
-          {/* DYNAMIC PRODUCT LINES */}
-          <div className="space-y-4">
+                       {/* DYNAMIC PRODUCT LINES */}
+          <div className="space-y-5">
             {productLines.map((prod, idx) => (
-              <div key={prod.id} className="p-4 rounded-xl border border-slate-200 bg-white shadow-sm space-y-3 relative transition-all hover:border-slate-300">
-                <div className="flex items-center justify-between pb-2 border-b border-slate-100">
-                  <span className="text-xs font-bold text-slate-800 flex items-center space-x-1.5">
-                    <span className="w-5 h-5 rounded-full bg-slate-900 text-white text-[11px] flex items-center justify-center font-mono font-bold">
+              <div key={prod.id} className="p-5 rounded-2xl border border-slate-200/90 bg-white shadow-xs space-y-4 relative transition-all hover:border-slate-300">
+                {/* Header bar for product line */}
+                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                  <span className="text-xs font-bold text-slate-900 flex items-center space-x-2">
+                    <span className="w-6 h-6 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center font-mono font-bold">
                       {idx + 1}
                     </span>
-                    <span>{isBn ? `প্রোডাক্ট #${idx + 1}` : `Product Item #${idx + 1}`}</span>
+                    <span className="text-sm font-bold">{isBn ? `প্রোডাক্ট আইটেম #${idx + 1}` : `Product Item #${idx + 1}`}</span>
                   </span>
 
                   {productLines.length > 1 && (
                     <button
                       type="button"
                       onClick={() => handleRemoveProductLine(prod.id)}
-                      className="px-2.5 py-1 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-lg flex items-center space-x-1 font-medium transition-colors cursor-pointer"
-                      title={isBn ? 'প্রোডাক্ট ডিলিট করুন' : 'Remove product'}
+                      className="px-3 py-1.5 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl flex items-center space-x-1 font-bold transition-colors cursor-pointer border border-rose-200/70"
+                      title={isBn ? 'প্রোডাক্ট আইটেম ডিলিট করুন' : 'Remove product item'}
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                       <span>{isBn ? 'মুছে ফেলুন' : 'Remove'}</span>
@@ -1163,73 +1174,105 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   )}
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-9 gap-3">
+                {/* ROW 1: Product English Name, Chinese Name & Multi-Country Transit Route Selector */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
                   {/* Product EN */}
-                  <div className="lg:col-span-2">
-                    <label className="block text-[12px] font-bold text-slate-900 mb-1">
-                      {isBn ? 'ইংরেজি পণ্য নাম' : 'Product English Name'} <span className="text-[#EE5D50]">*</span>
+                  <div className="lg:col-span-4">
+                    <label className="block text-xs font-bold text-slate-900 mb-1.5 flex items-center">
+                      {isBn ? 'ইংরেজি পণ্য নাম' : 'Product English Name'} <span className="text-[#EE5D50] font-bold ml-1">*</span>
                     </label>
                     <input
                       type="text"
                       value={prod.product_name_en}
                       onChange={(e) => handleProductLineChange(prod.id, 'product_name_en', e.target.value)}
-                      placeholder="e.g. Men T-Shirt / Jeans"
-                      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      placeholder="e.g. Men T-Shirt / Cotton Jeans"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
                     />
                   </div>
 
                   {/* Product CN */}
-                  <div className="lg:col-span-1">
-                    <label className="block text-[12px] font-bold text-slate-900 mb-1">
-                      {isBn ? 'চাইনিজ নাম' : 'Chinese Name'}
+                  <div className="lg:col-span-3">
+                    <label className="block text-xs font-bold text-slate-900 mb-1.5">
+                      {isBn ? 'চাইনিজ নাম (中文品名)' : 'Chinese Product Name'}
                     </label>
                     <input
                       type="text"
                       value={prod.product_name_cn}
                       onChange={(e) => handleProductLineChange(prod.id, 'product_name_cn', e.target.value)}
-                      placeholder="e.g. 男士T恤"
-                      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      placeholder="e.g. 男士棉质T恤"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
                     />
                   </div>
 
-                  {/* Route (Origin -> Destination) */}
-                  <div className="lg:col-span-2">
-                    <label className="block text-[12px] font-bold text-slate-900 mb-1">
-                      {isBn ? 'রুট (অরিজিন ➔ গন্তব্য)' : 'Route (Origin ➔ Destination)'}
+                  {/* Multi-Country Transit Route (Origin ➔ Transit (Optional) ➔ Destination) */}
+                  <div className="lg:col-span-5">
+                    <label className="block text-xs font-bold text-slate-900 mb-1.5 flex items-center justify-between">
+                      <span>{isBn ? 'শিপিং রুট (অরিজিন ➔ ট্রানজিট ➔ গন্তব্য)' : 'Route (Origin ➔ Transit ➔ Destination)'}</span>
+                      <span className="text-[11px] font-mono text-[#059669] font-bold">
+                        {prod.transit_wh_id ? '🌐 ট্রানজিট শিপমেন্ট' : '✈️ সরাসরি (Direct)'}
+                      </span>
                     </label>
-                    <div className="flex items-center space-x-1">
+                    <div className="flex items-center space-x-1.5">
+                      {/* ORIGIN HUB */}
                       <select
                         value={prod.origin_wh_id || myWhId || 'wh-china'}
                         onChange={(e) => handleProductLineChange(prod.id, 'origin_wh_id', e.target.value)}
-                        className="w-1/2 px-2 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[11px] font-bold focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none cursor-pointer truncate"
-                        title={isBn ? 'অরিজিন ওয়্যারহাউজ' : 'Origin Hub'}
+                        className="w-1/3 px-3 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-bold font-mono focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none cursor-pointer"
+                        title={isBn ? 'অরিজিন ওয়্যারহাউজ (Origin Hub)' : 'Origin Hub'}
                       >
                         {warehouses.map((w) => (
                           <option key={w.id} value={w.id}>
-                            {w.code || w.name.split(' ')[0]}
+                            {w.name} ({w.code})
                           </option>
                         ))}
                       </select>
-                      <span className="text-slate-400 font-bold text-xs">➔</span>
+
+                      <span className="text-slate-400 font-bold text-xs shrink-0">➔</span>
+
+                      {/* TRANSIT / VIA HUB (OPTIONAL) */}
+                      <select
+                        value={prod.transit_wh_id || ''}
+                        onChange={(e) => handleProductLineChange(prod.id, 'transit_wh_id', e.target.value)}
+                        className={`w-1/3 px-3 py-3 rounded-xl border text-xs font-bold font-mono focus:ring-2 outline-none cursor-pointer ${
+                          prod.transit_wh_id
+                            ? 'border-indigo-300 bg-indigo-50/70 text-indigo-900 focus:border-indigo-500 focus:ring-indigo-500/15'
+                            : 'border-slate-200 bg-white text-slate-600 focus:border-[#059669] focus:ring-[#059669]/15'
+                        }`}
+                        title={isBn ? 'ট্রানজিট/ভায়া হাব (যদি একাধিক দেশে ট্রানজিট হয়)' : 'Transit/Via Hub (Optional)'}
+                      >
+                        <option value="">{isBn ? '🚫 কোনো ট্রানজিট নেই (Direct)' : '🚫 Direct (No Transit)'}</option>
+                        {warehouses.map((w) => (
+                          <option key={w.id} value={w.id}>
+                            ভায়া: {w.name} ({w.code})
+                          </option>
+                        ))}
+                      </select>
+
+                      <span className="text-slate-400 font-bold text-xs shrink-0">➔</span>
+
+                      {/* DESTINATION HUB */}
                       <select
                         value={prod.destination_wh_id || destWhId || 'wh-bd'}
                         onChange={(e) => handleProductLineChange(prod.id, 'destination_wh_id', e.target.value)}
-                        className="w-1/2 px-2 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[11px] font-bold focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none cursor-pointer truncate"
-                        title={isBn ? 'গন্তব্য ওয়্যারহাউজ' : 'Destination Hub'}
+                        className="w-1/3 px-3 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-bold font-mono focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none cursor-pointer"
+                        title={isBn ? 'গন্তব্য ওয়্যারহাউজ (Destination Hub)' : 'Destination Hub'}
                       >
                         {warehouses.map((w) => (
                           <option key={w.id} value={w.id}>
-                            {w.code || w.name.split(' ')[0]}
+                            {w.name} ({w.code})
                           </option>
                         ))}
                       </select>
                     </div>
                   </div>
+                </div>
 
+                {/* ROW 2: Physical Specifications (5 Spacious Columns) */}
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 pt-1">
                   {/* Carton Count for this product */}
                   <div>
-                    <label className="block text-[12px] font-bold text-slate-900 mb-1">
-                      {isBn ? 'কার্টুন (CTN)' : 'Cartons'} <span className="text-[#EE5D50]">*</span>
+                    <label className="block text-xs font-bold text-slate-900 mb-1.5">
+                      {isBn ? 'কার্টুন সংখ্যা (CTN)' : 'Cartons Count'} <span className="text-[#EE5D50] font-bold">*</span>
                     </label>
                     <input
                       type="number"
@@ -1237,14 +1280,14 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.carton_count}
                       onChange={(e) => handleProductLineChange(prod.id, 'carton_count', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                       placeholder="e.g. 10"
-                      className="w-full px-2.5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
                     />
                   </div>
 
                   {/* Qty per carton */}
                   <div>
-                    <label className="block text-[12px] font-bold text-slate-900 mb-1">
-                      {isBn ? 'পরিমাণ/CTN' : 'Qty/CTN'} <span className="text-[#EE5D50]">*</span>
+                    <label className="block text-xs font-bold text-slate-900 mb-1.5">
+                      {isBn ? 'পরিমাণ/CTN (PCS)' : 'Qty per Carton (PCS)'} <span className="text-[#EE5D50] font-bold">*</span>
                     </label>
                     <input
                       type="number"
@@ -1252,14 +1295,14 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.qty_per_carton}
                       onChange={(e) => handleProductLineChange(prod.id, 'qty_per_carton', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                       placeholder="e.g. 50"
-                      className="w-full px-2.5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
                     />
                   </div>
 
                   {/* Gross Weight per carton */}
                   <div>
-                    <label className="block text-[12px] font-bold text-slate-900 mb-1">
-                      {isBn ? 'গ্রস ওজন' : 'Gross Wt'} <span className="text-[#EE5D50]">*</span>
+                    <label className="block text-xs font-bold text-slate-900 mb-1.5">
+                      {isBn ? 'গড় গ্রস ওজন (KG)' : 'Avg Gross Weight (KG)'} <span className="text-[#EE5D50] font-bold">*</span>
                     </label>
                     <input
                       type="number"
@@ -1268,14 +1311,14 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.gross_weight}
                       onChange={(e) => handleProductLineChange(prod.id, 'gross_weight', e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
                       placeholder="e.g. 12.5"
-                      className="w-full px-2.5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
                     />
                   </div>
 
                   {/* Net Weight per carton */}
                   <div>
-                    <label className="block text-[12px] font-bold text-slate-900 mb-1">
-                      {isBn ? 'নিট ওজন' : 'Net Wt'}
+                    <label className="block text-xs font-bold text-slate-900 mb-1.5">
+                      {isBn ? 'গড় নিট ওজন (KG)' : 'Avg Net Weight (KG)'}
                     </label>
                     <input
                       type="number"
@@ -1284,14 +1327,14 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.net_weight}
                       onChange={(e) => handleProductLineChange(prod.id, 'net_weight', e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
                       placeholder="e.g. 11.2"
-                      className="w-full px-2.5 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
                     />
                   </div>
 
                   {/* CBM per carton */}
                   <div>
-                    <label className="block text-[12px] font-bold text-slate-900 mb-1">
-                      {isBn ? 'ভলিউম' : 'CBM/CTN'} <span className="text-[#EE5D50]">*</span>
+                    <label className="block text-xs font-bold text-slate-900 mb-1.5">
+                      {isBn ? 'ভলিউম CBM/CTN' : 'CBM per Carton'} <span className="text-[#EE5D50] font-bold">*</span>
                     </label>
                     <input
                       type="number"
@@ -1300,7 +1343,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.cbm}
                       onChange={(e) => handleProductLineChange(prod.id, 'cbm', e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
                       placeholder="e.g. 0.15"
-                      className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
                     />
                   </div>
                 </div>

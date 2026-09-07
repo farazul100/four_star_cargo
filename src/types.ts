@@ -119,6 +119,8 @@ export interface Carton {
   customer_name?: string;
   current_warehouse_name?: string;
   destination_warehouse_name?: string;
+  transit_warehouse_id?: string;
+  transit_warehouse_name?: string;
   route_name?: string;
 }
 
