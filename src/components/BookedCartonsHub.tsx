@@ -50,28 +50,35 @@ export const extractCartonNumber = (ctnNo: string): number => {
 };
 
 /**
- * Natural carton comparator: Sorts by numeric carton number (CTN-01 -> CTN-02 -> CTN-03)
- * while preserving sub-item grouping for merged cartons.
+ * Natural carton comparator for FIFO (First In, First Out) ordering:
+ * Sorts earliest entry first (by created_at timestamp and numeric carton number CTN-01 -> CTN-02).
  */
 export const compareCartonsNaturally = (a: Carton, b: Carton): number => {
+  // Primary: Sort by created_at timestamp (earliest entry first - FIFO)
+  const timeA = a.created_at ? new Date(a.created_at).getTime() : 0;
+  const timeB = b.created_at ? new Date(b.created_at).getTime() : 0;
+
+  if (timeA !== timeB && timeA > 0 && timeB > 0) {
+    return timeA - timeB; // Earliest timestamp first (FIFO)
+  }
+
+  // Secondary: Sort by numeric carton number (1, 2, 3...)
   const numA = extractCartonNumber(a.ctn_no);
   const numB = extractCartonNumber(b.ctn_no);
 
-  // Primary: Sort by numeric carton number (1, 2, 3...)
   if (numA !== numB) {
     return numA - numB;
   }
 
-  // Secondary: Sort by ctn_no string if numbers match
+  // Tertiary: Sort by ctn_no string if numbers match
   const ctnComp = (a.ctn_no || '').localeCompare(b.ctn_no || '', undefined, { numeric: true });
   if (ctnComp !== 0) return ctnComp;
 
-  // Tertiary: Keep cartons with same master_group_id together
+  // Quaternary: Keep cartons with same master_group_id together
   if (a.master_group_id && b.master_group_id && a.master_group_id !== b.master_group_id) {
     return a.master_group_id.localeCompare(b.master_group_id);
   }
 
-  // Quaternary: Sort by shipping_mark
   return (a.shipping_mark || '').localeCompare(b.shipping_mark || '', undefined, { numeric: true });
 };
 
@@ -680,7 +687,17 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     return acc;
   }, {});
 
-  const customerGroupKeys = Object.keys(customerGroupsMap);
+  // FIFO Sorted Customer Group Keys (Earliest entry batch/carton first at top)
+  const customerGroupKeys = React.useMemo(() => {
+    return Object.keys(customerGroupsMap).sort((keyA, keyB) => {
+      const groupA = customerGroupsMap[keyA] || [];
+      const groupB = customerGroupsMap[keyB] || [];
+      if (groupA.length === 0 || groupB.length === 0) return 0;
+      const firstA = [...groupA].sort(compareCartonsNaturally)[0];
+      const firstB = [...groupB].sort(compareCartonsNaturally)[0];
+      return compareCartonsNaturally(firstA, firstB);
+    });
+  }, [customerGroupsMap]);
 
   // Unique Shipping Marks for Filter Dropdown
   const allShippingMarks = Array.from(new Set(liveRealtimeCartons.map((c) => c.shipping_mark).filter(Boolean)));
