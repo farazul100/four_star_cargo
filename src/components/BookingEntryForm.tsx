@@ -65,6 +65,8 @@ interface ProductLineItem {
   origin_wh_id?: string;
   transit_wh_id?: string;
   destination_wh_id?: string;
+  net_weights_input?: string;
+  gross_weights_input?: string;
 }
 
 export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
@@ -120,6 +122,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       origin_wh_id: myWhId || 'wh-china',
       transit_wh_id: '',
       destination_wh_id: destWhId || 'wh-bd',
+      net_weights_input: '',
+      gross_weights_input: '',
     },
   ]);
 
@@ -138,6 +142,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         origin_wh_id: prev[prev.length - 1]?.origin_wh_id || myWhId || 'wh-china',
         transit_wh_id: prev[prev.length - 1]?.transit_wh_id || '',
         destination_wh_id: prev[prev.length - 1]?.destination_wh_id || destWhId || 'wh-bd',
+        net_weights_input: '',
+        gross_weights_input: '',
       },
     ]);
   };
@@ -272,6 +278,17 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
       const routeStr = transitCode ? `${origCode} ✈️ ➔ ${transitCode} ➔ ${destCode}` : `${origCode} ✈️ ➔ ${destCode}`;
 
+      // Parse product-specific weight lists inside each product card
+      const itemNetWeights = (pItem.net_weights_input || '')
+        .split(/[\s,;\n]+/)
+        .map((v) => parseFloat(v))
+        .filter((n) => !isNaN(n) && n > 0);
+
+      const itemGrossWeights = (pItem.gross_weights_input || '')
+        .split(/[\s,;\n]+/)
+        .map((v) => parseFloat(v))
+        .filter((n) => !isNaN(n) && n > 0);
+
       for (let i = 0; i < prodCount; i++) {
         const currentNum = startNo + globalCartonIndex;
         const padNum = currentNum < 10 ? `0${currentNum}` : `${currentNum}`;
@@ -286,11 +303,19 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
           rowShippingMark = globalCartonIndex === 0 ? activeMark : `${activeMark}-${globalCartonIndex + 1}`;
         }
 
-        const rowGross = parsedGrossWeights[globalCartonIndex] !== undefined ? parsedGrossWeights[globalCartonIndex] : grossWtVal;
-        const rowNet =
-          parsedNetWeights[globalCartonIndex] !== undefined
-            ? parsedNetWeights[globalCartonIndex]
+        const rowGross =
+          itemGrossWeights[i] !== undefined
+            ? itemGrossWeights[i]
             : parsedGrossWeights[globalCartonIndex] !== undefined
+            ? parsedGrossWeights[globalCartonIndex]
+            : grossWtVal;
+
+        const rowNet =
+          itemNetWeights[i] !== undefined
+            ? itemNetWeights[i]
+            : parsedNetWeights[globalCartonIndex] !== undefined
+            ? parsedNetWeights[globalCartonIndex]
+            : itemGrossWeights[i] !== undefined
             ? Math.round(rowGross * 0.9 * 10) / 10
             : netWtVal;
 
@@ -1347,6 +1372,53 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     />
                   </div>
                 </div>
+
+                {/* ROW 3: Integrated Weight Sequence Paste Tool for this Product Item */}
+                <div className="pt-3.5 mt-2 border-t border-slate-100 bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-2.5">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
+                    <div className="flex items-center space-x-2">
+                      <Scale className="w-4 h-4 text-[#059669]" />
+                      <span className="text-xs font-bold text-slate-900">
+                        {isBn
+                          ? `⚖️ এই প্রোডাক্টের (${prod.product_name_en || `আইটেম #${idx + 1}`}) কার্টুন ওজন দ্রুত পেস্ট টুল`
+                          : `⚖️ Fast Weight Sequence Paste Tool for ${prod.product_name_en || `Product Item #${idx + 1}`}`}
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-slate-500 font-mono font-medium">
+                      {isBn ? 'কমা বা স্পেস দিয়ে ওজন পেস্ট করুন (যেমন: 11.2, 11.5, 10.8)' : 'Comma or space separated (e.g. 11.2, 11.5, 10.8)'}
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                    {/* Net Weight Sequence */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-800 mb-1">
+                        {isBn ? '১. নিট ওজন (N. Weight) তালিকা পেস্ট করুন:' : '1. Paste Net Weights (N. Weight) List:'}
+                      </label>
+                      <input
+                        type="text"
+                        value={prod.net_weights_input || ''}
+                        onChange={(e) => handleProductLineChange(prod.id, 'net_weights_input', e.target.value)}
+                        placeholder="e.g. 11.2, 11.5, 10.8, 11.4"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      />
+                    </div>
+
+                    {/* Gross Weight Sequence */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-slate-800 mb-1">
+                        {isBn ? '২. গ্রস ওজন (G. Weight) তালিকা পেস্ট করুন:' : '2. Paste Gross Weights (G. Weight) List:'}
+                      </label>
+                      <input
+                        type="text"
+                        value={prod.gross_weights_input || ''}
+                        onChange={(e) => handleProductLineChange(prod.id, 'gross_weights_input', e.target.value)}
+                        placeholder="e.g. 12.5, 12.8, 11.9, 12.6"
+                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
             ))}
           </div>
@@ -1360,85 +1432,6 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
             <Plus className="w-4 h-4" />
             <span>{isBn ? '+ আরও প্রোডাক্ট যোগ করুন (+ Add Another Product)' : '+ Add Another Product'}</span>
           </button>
-        </div>
-
-        {/* ------------------------------------------------------------- */}
-        {/* Section C: METHOD 1 ONLY: FAST WEIGHT SEQUENCE PASTING FOR N.WT & G.WT */}
-        {/* ------------------------------------------------------------- */}
-        <div className="pt-2 space-y-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Scale className="w-4 h-4 text-[#059669]" />
-              <span className="text-xs font-bold text-slate-900">
-                {isBn ? '⚖️ কার্টুনের ইনডিভিজুয়াল ওজন দ্রুত পেস্ট টুল (N. Weight & G. Weight Sequence Paste)' : 'Fast Weight Sequence Paste Tool (N. Weight & G. Weight)'}
-              </span>
-            </div>
-            <span className="text-[11px] text-slate-600 font-mono font-medium">
-              {isBn ? 'কমা বা স্পেস দিয়ে ওজন পেস্ট করুন' : 'Comma or space separated'}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
-            {/* Net Weight Sequence Paste */}
-            <div className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 space-y-2.5">
-              <div>
-                <label className="block text-xs font-bold text-slate-900">
-                  {isBn ? '১. নিট ওজন (N. Weight) তালিকা পেস্ট করুন:' : '1. Paste Net Weights (N. Weight) List:'}
-                </label>
-                <p className="text-[11px] text-slate-500 font-medium mt-0.5">
-                  {isBn ? 'যেমন: 11.2, 11.5, 10.8, 11.4' : 'e.g. 11.2, 11.5, 10.8, 11.4'}
-                </p>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <input
-                  type="text"
-                  value={netWeightsListInput}
-                  onChange={(e) => setNetWeightsListInput(e.target.value)}
-                  placeholder="11.2, 11.5, 10.8..."
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={handleApplyNetWeightsList}
-                  className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold whitespace-nowrap cursor-pointer flex items-center space-x-1 shadow-xs border-0 outline-none"
-                >
-                  <ListPlus className="w-3.5 h-3.5" />
-                  <span>{isBn ? 'এপ্লাই N.WT' : 'Apply N.WT'}</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Gross Weight Sequence Paste */}
-            <div className="p-4 rounded-xl border border-slate-200/80 bg-slate-50/50 space-y-2.5">
-              <div>
-                <label className="block text-xs font-bold text-slate-900">
-                  {isBn ? '২. গ্রস ওজন (G. Weight) তালিকা পেস্ট করুন:' : '2. Paste Gross Weights (G. Weight) List:'}
-                </label>
-                <p className="text-[11px] text-slate-500 font-medium mt-0.5">
-                  {isBn ? 'যেমন: 12.5, 12.8, 11.9, 12.6' : 'e.g. 12.5, 12.8, 11.9, 12.6'}
-                </p>
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <input
-                  type="text"
-                  value={grossWeightsListInput}
-                  onChange={(e) => setGrossWeightsListInput(e.target.value)}
-                  placeholder="12.5, 12.8, 11.9..."
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
-                />
-                <button
-                  type="button"
-                  onClick={handleApplyGrossWeightsList}
-                  className="px-4 py-2 rounded-xl bg-[#059669] hover:bg-[#047857] text-white text-xs font-bold whitespace-nowrap cursor-pointer flex items-center space-x-1 shadow-xs border-0 outline-none"
-                >
-                  <ListPlus className="w-3.5 h-3.5" />
-                  <span>{isBn ? 'এপ্লাই G.WT' : 'Apply G.WT'}</span>
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Section D: Shared Photo Attachment & Generate Preview Button */}
