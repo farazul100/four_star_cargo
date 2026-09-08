@@ -1037,9 +1037,9 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
             <button
               type="button"
               onClick={handleUpdatePreviewButton}
-              className="px-5 py-2.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-bold text-xs transition-all shadow-xs flex items-center space-x-1.5 cursor-pointer select-none border-0 outline-none"
+              className="px-6 py-3.5 rounded-xl bg-[#059669] hover:bg-[#047857] text-white font-extrabold text-sm transition-all shadow-md flex items-center space-x-2 cursor-pointer select-none border-0 outline-none"
             >
-              <Zap className="w-4 h-4 shrink-0" />
+              <Zap className="w-4.5 h-4.5 shrink-0" />
               <span>{isBn ? '⚡ প্রিভিউ জেনারেট করুন' : '⚡ Generate & Update Preview'}</span>
             </button>
           </div>
@@ -1067,17 +1067,17 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
           {/* CUSTOMIZABLE SHIPPING MARK PREFIX & CODE */}
           <div>
-            <label className="block text-[13px] font-bold text-slate-900 mb-1.5 flex items-center">
+            <label className="block text-sm font-extrabold text-slate-900 mb-2 flex items-center">
               {isBn ? 'শিপিং মার্ক কাস্টমাইজেশন (প্রিফিক্স + কোড)' : 'Custom Shipping Mark (Prefix + Code)'} <span className="text-[#EE5D50] font-bold ml-1">*</span>
             </label>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2.5">
               <input
                 type="text"
                 value={markPrefix}
                 onChange={(e) => setMarkPrefix(e.target.value)}
                 placeholder="e.g. SM-DHAKA-"
                 title={isBn ? 'নাম্বারের আগের লেখাটুকু (Prefix string)' : 'Prefix before number'}
-                className="w-2/3 px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                className="w-2/3 px-4.5 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm md:text-base font-mono font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
               />
               <input
                 type="text"
@@ -1085,17 +1085,17 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 onChange={(e) => setMarkCode(e.target.value)}
                 placeholder="e.g. 88"
                 title={isBn ? 'কোড নম্বর (Code number)' : 'Code number'}
-                className="w-1/3 px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                className="w-1/3 px-4.5 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm md:text-base font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
               />
             </div>
-            <div className="text-[12px] font-mono text-slate-600 font-medium mt-1.5">
-              শিপিং মার্ক: <strong className="text-[#059669] font-bold">{shippingMark || (markPrefix || markCode ? `${markPrefix}${markCode}` : 'N/A')}</strong>
+            <div className="text-xs font-mono text-slate-700 font-bold mt-2">
+              শিপিং মার্ক: <strong className="text-[#059669] font-black text-sm">{shippingMark || (markPrefix || markCode ? `${markPrefix}${markCode}` : 'N/A')}</strong>
             </div>
           </div>
 
           {/* Master Tracking Number */}
           <div>
-            <label className="block text-[13px] font-bold text-slate-900 mb-1.5 flex items-center">
+            <label className="block text-sm font-extrabold text-slate-900 mb-2 flex items-center">
               {isBn ? 'মাস্টার ট্র্যাকিং নম্বর (একই ট্র্যাকিং আইডি)' : 'Master Tracking Number (Shared ID)'} <span className="text-[#EE5D50] font-bold ml-1">*</span>
             </label>
             <input
@@ -1103,7 +1103,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
               value={masterTrackingNumber}
               onChange={(e) => setMasterTrackingNumber(e.target.value)}
               placeholder="e.g. EXP-994801"
-              className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+              className="w-full px-4.5 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm md:text-base font-mono font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
             />
           </div>
         </div>
@@ -1111,29 +1111,29 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         {/* Section B: Product & Batch Specification Form */}
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <div className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center space-x-1.5">
+            <div className="text-sm font-black text-slate-900 uppercase tracking-wider flex items-center space-x-1.5">
               <span>{isBn ? '📦 কার্টুন ও পণ্যের বিবরণ (Multi-Product & Batch Specifications)' : 'Batch Product & Carton Specification Form'}</span>
             </div>
-            <div className="px-3 py-1 bg-emerald-50 text-[#059669] border border-emerald-200 rounded-lg text-xs font-bold font-mono">
+            <div className="px-4 py-1.5 bg-emerald-100/80 text-[#059669] border border-emerald-300 rounded-xl text-xs md:text-sm font-extrabold font-mono shadow-2xs">
               {isBn ? `মোট কার্টুন: ${totalCartonsAcrossProducts || 0} CTN` : `Total Cartons: ${totalCartonsAcrossProducts || 0} CTN`}
             </div>
           </div>
 
           {/* CUSTOMIZABLE CARTON & SHIPMENT PREFIX CONFIG (Global for batch) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-3.5 bg-slate-50/80 rounded-xl border border-slate-200/80">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-4 bg-slate-50/90 rounded-2xl border-2 border-slate-200">
             {/* CUSTOMIZABLE CARTON PREFIX & START NUMBER */}
             <div>
-              <label className="block text-[12px] font-bold text-slate-900 mb-1 flex items-center">
+              <label className="block text-xs md:text-sm font-extrabold text-slate-900 mb-1.5 flex items-center">
                 {isBn ? 'কার্টুন কোড (প্রিফিক্স + শুরু)' : 'Custom Carton Code (Prefix + Start)'}
               </label>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2.5">
                 <input
                   type="text"
                   value={cartonPrefix}
                   onChange={(e) => setCartonPrefix(e.target.value)}
                   placeholder="CTN-"
                   title={isBn ? 'কার্টুন নামের আগের প্রেফিক্স' : 'Carton prefix before number'}
-                  className="w-3/5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                  className="w-3/5 px-4 py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm font-mono font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                 />
                 <input
                   type="number"
@@ -1142,24 +1142,24 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   onChange={(e) => setCartonStartNum(e.target.value === '' ? '' : parseInt(e.target.value) || 1)}
                   placeholder="1"
                   title={isBn ? 'কার্টুন শুরু নম্বর' : 'Start number'}
-                  className="w-2/5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-slate-900 text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                  className="w-2/5 px-4 py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                 />
               </div>
             </div>
 
             {/* CUSTOMIZABLE SHIPMENT CTN NO. PREFIX & START NUMBER */}
             <div>
-              <label className="block text-[12px] font-bold text-[#059669] mb-1 flex items-center">
+              <label className="block text-xs md:text-sm font-extrabold text-[#059669] mb-1.5 flex items-center">
                 {isBn ? 'শিপমেন্ট কার্টুন নম্বর (প্রিফিক্স + শুরু)' : 'Shipment Ctn NO. (Prefix + Start)'}
               </label>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2.5">
                 <input
                   type="text"
                   value={boxPrefix}
                   onChange={(e) => setBoxPrefix(e.target.value)}
                   placeholder="BOX-"
                   title={isBn ? 'শিপমেন্ট কার্টুন প্রেফিক্স' : 'Shipment Ctn NO. prefix'}
-                  className="w-3/5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-[#059669] text-[13px] font-mono font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                  className="w-3/5 px-4 py-3 rounded-xl border-2 border-slate-300 bg-white text-[#059669] text-sm font-mono font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                 />
                 <input
                   type="number"
@@ -1168,42 +1168,42 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   onChange={(e) => setBoxStartNum(e.target.value === '' ? '' : parseInt(e.target.value) || 101)}
                   placeholder="101"
                   title={isBn ? 'শিপমেন্ট কার্টুন শুরু নম্বর' : 'Start number'}
-                  className="w-2/5 px-3 py-2 rounded-lg border border-slate-200 bg-white text-[#059669] text-[13px] font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                  className="w-2/5 px-4 py-3 rounded-xl border-2 border-slate-300 bg-white text-[#059669] text-sm font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                 />
               </div>
             </div>
           </div>
                        {/* DYNAMIC PRODUCT LINES */}
-          <div className="space-y-5">
+          <div className="space-y-6">
             {productLines.map((prod, idx) => (
-              <div key={prod.id} className="p-5 rounded-2xl border border-slate-200/90 bg-white shadow-xs space-y-4 relative transition-all hover:border-slate-300">
+              <div key={prod.id} className="p-6 rounded-2xl border-2 border-slate-200 bg-white shadow-sm space-y-5 relative transition-all hover:border-slate-300">
                 {/* Header bar for product line */}
-                <div className="flex items-center justify-between pb-3 border-b border-slate-100">
-                  <span className="text-xs font-bold text-slate-900 flex items-center space-x-2">
-                    <span className="w-6 h-6 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center font-mono font-bold">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+                  <span className="text-sm font-extrabold text-slate-900 flex items-center space-x-2.5">
+                    <span className="w-7 h-7 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center font-mono font-black shadow-xs">
                       {idx + 1}
                     </span>
-                    <span className="text-sm font-bold">{isBn ? `প্রোডাক্ট আইটেম #${idx + 1}` : `Product Item #${idx + 1}`}</span>
+                    <span className="text-base font-black text-slate-900">{isBn ? `প্রোডাক্ট আইটেম #${idx + 1}` : `Product Item #${idx + 1}`}</span>
                   </span>
 
                   {productLines.length > 1 && (
                     <button
                       type="button"
                       onClick={() => handleRemoveProductLine(prod.id)}
-                      className="px-3 py-1.5 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl flex items-center space-x-1 font-bold transition-colors cursor-pointer border border-rose-200/70"
+                      className="px-3.5 py-2 text-xs text-rose-600 hover:text-rose-700 hover:bg-rose-50 rounded-xl flex items-center space-x-1.5 font-bold transition-colors cursor-pointer border border-rose-300"
                       title={isBn ? 'প্রোডাক্ট আইটেম ডিলিট করুন' : 'Remove product item'}
                     >
-                      <Trash2 className="w-3.5 h-3.5" />
+                      <Trash2 className="w-4 h-4" />
                       <span>{isBn ? 'মুছে ফেলুন' : 'Remove'}</span>
                     </button>
                   )}
                 </div>
 
                 {/* ROW 1: Product English Name, Chinese Name & Multi-Country Transit Route Selector */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5">
                   {/* Product EN */}
                   <div className="lg:col-span-4">
-                    <label className="block text-xs font-bold text-slate-900 mb-1.5 flex items-center">
+                    <label className="block text-sm font-extrabold text-slate-900 mb-2 flex items-center">
                       {isBn ? 'ইংরেজি পণ্য নাম' : 'Product English Name'} <span className="text-[#EE5D50] font-bold ml-1">*</span>
                     </label>
                     <input
@@ -1211,13 +1211,13 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.product_name_en}
                       onChange={(e) => handleProductLineChange(prod.id, 'product_name_en', e.target.value)}
                       placeholder="e.g. Men T-Shirt / Cotton Jeans"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      className="w-full px-4.5 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm md:text-base font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                     />
                   </div>
 
                   {/* Product CN */}
                   <div className="lg:col-span-3">
-                    <label className="block text-xs font-bold text-slate-900 mb-1.5">
+                    <label className="block text-sm font-extrabold text-slate-900 mb-2">
                       {isBn ? 'চাইনিজ নাম (中文品名)' : 'Chinese Product Name'}
                     </label>
                     <input
@@ -1225,24 +1225,24 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.product_name_cn}
                       onChange={(e) => handleProductLineChange(prod.id, 'product_name_cn', e.target.value)}
                       placeholder="e.g. 男士棉质T恤"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      className="w-full px-4.5 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm md:text-base font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                     />
                   </div>
 
                   {/* Multi-Country Transit Route (Origin ➔ Transit (Optional) ➔ Destination) */}
                   <div className="lg:col-span-5">
-                    <label className="block text-xs font-bold text-slate-900 mb-1.5 flex items-center justify-between">
+                    <label className="block text-sm font-extrabold text-slate-900 mb-2 flex items-center justify-between">
                       <span>{isBn ? 'শিপিং রুট (অরিজিন ➔ ট্রানজিট ➔ গন্তব্য)' : 'Route (Origin ➔ Transit ➔ Destination)'}</span>
-                      <span className="text-[11px] font-mono text-[#059669] font-bold">
+                      <span className="text-xs font-mono text-[#059669] font-black">
                         {prod.transit_wh_id ? '🌐 ট্রানজিট শিপমেন্ট' : '✈️ সরাসরি (Direct)'}
                       </span>
                     </label>
-                    <div className="flex items-center space-x-1.5">
+                    <div className="flex items-center space-x-2">
                       {/* ORIGIN HUB */}
                       <select
                         value={prod.origin_wh_id || myWhId || 'wh-china'}
                         onChange={(e) => handleProductLineChange(prod.id, 'origin_wh_id', e.target.value)}
-                        className="w-1/3 px-3 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-bold font-mono focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none cursor-pointer"
+                        className="w-1/3 px-3 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-xs md:text-sm font-extrabold font-mono focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none cursor-pointer shadow-2xs"
                         title={isBn ? 'অরিজিন ওয়্যারহাউজ (Origin Hub)' : 'Origin Hub'}
                       >
                         {warehouses.map((w) => (
@@ -1252,16 +1252,16 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                         ))}
                       </select>
 
-                      <span className="text-slate-400 font-bold text-xs shrink-0">➔</span>
+                      <span className="text-slate-500 font-black text-sm shrink-0">➔</span>
 
                       {/* TRANSIT / VIA HUB (OPTIONAL) */}
                       <select
                         value={prod.transit_wh_id || ''}
                         onChange={(e) => handleProductLineChange(prod.id, 'transit_wh_id', e.target.value)}
-                        className={`w-1/3 px-3 py-3 rounded-xl border text-xs font-bold font-mono focus:ring-2 outline-none cursor-pointer ${
+                        className={`w-1/3 px-3 py-3.5 rounded-xl border-2 text-xs md:text-sm font-extrabold font-mono focus:ring-4 outline-none cursor-pointer shadow-2xs ${
                           prod.transit_wh_id
-                            ? 'border-indigo-300 bg-indigo-50/70 text-indigo-900 focus:border-indigo-500 focus:ring-indigo-500/15'
-                            : 'border-slate-200 bg-white text-slate-600 focus:border-[#059669] focus:ring-[#059669]/15'
+                            ? 'border-indigo-400 bg-indigo-50 text-indigo-950 focus:border-indigo-600 focus:ring-indigo-500/20'
+                            : 'border-slate-300 bg-white text-slate-700 focus:border-[#059669] focus:ring-[#059669]/15'
                         }`}
                         title={isBn ? 'ট্রানজিট/ভায়া হাব (যদি একাধিক দেশে ট্রানজিট হয়)' : 'Transit/Via Hub (Optional)'}
                       >
@@ -1273,13 +1273,13 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                         ))}
                       </select>
 
-                      <span className="text-slate-400 font-bold text-xs shrink-0">➔</span>
+                      <span className="text-slate-500 font-black text-sm shrink-0">➔</span>
 
                       {/* DESTINATION HUB */}
                       <select
                         value={prod.destination_wh_id || destWhId || 'wh-bd'}
                         onChange={(e) => handleProductLineChange(prod.id, 'destination_wh_id', e.target.value)}
-                        className="w-1/3 px-3 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-bold font-mono focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none cursor-pointer"
+                        className="w-1/3 px-3 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-xs md:text-sm font-extrabold font-mono focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none cursor-pointer shadow-2xs"
                         title={isBn ? 'গন্তব্য ওয়্যারহাউজ (Destination Hub)' : 'Destination Hub'}
                       >
                         {warehouses.map((w) => (
@@ -1296,7 +1296,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 pt-1">
                   {/* Carton Count for this product */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-900 mb-1.5">
+                    <label className="block text-xs md:text-sm font-extrabold text-slate-900 mb-2">
                       {isBn ? 'কার্টুন সংখ্যা (CTN)' : 'Cartons Count'} <span className="text-[#EE5D50] font-bold">*</span>
                     </label>
                     <input
@@ -1305,13 +1305,13 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.carton_count}
                       onChange={(e) => handleProductLineChange(prod.id, 'carton_count', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                       placeholder="e.g. 10"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm md:text-base font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                     />
                   </div>
 
                   {/* Qty per carton */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-900 mb-1.5">
+                    <label className="block text-xs md:text-sm font-extrabold text-slate-900 mb-2">
                       {isBn ? 'পরিমাণ/CTN (PCS)' : 'Qty per Carton (PCS)'} <span className="text-[#EE5D50] font-bold">*</span>
                     </label>
                     <input
@@ -1320,13 +1320,13 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.qty_per_carton}
                       onChange={(e) => handleProductLineChange(prod.id, 'qty_per_carton', e.target.value === '' ? '' : parseInt(e.target.value) || '')}
                       placeholder="e.g. 50"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm md:text-base font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                     />
                   </div>
 
                   {/* Gross Weight per carton */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-900 mb-1.5">
+                    <label className="block text-xs md:text-sm font-extrabold text-slate-900 mb-2">
                       {isBn ? 'গড় গ্রস ওজন (KG)' : 'Avg Gross Weight (KG)'} <span className="text-[#EE5D50] font-bold">*</span>
                     </label>
                     <input
@@ -1336,13 +1336,13 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.gross_weight}
                       onChange={(e) => handleProductLineChange(prod.id, 'gross_weight', e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
                       placeholder="e.g. 12.5"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm md:text-base font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                     />
                   </div>
 
                   {/* Net Weight per carton */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-900 mb-1.5">
+                    <label className="block text-xs md:text-sm font-extrabold text-slate-900 mb-2">
                       {isBn ? 'গড় নিট ওজন (KG)' : 'Avg Net Weight (KG)'}
                     </label>
                     <input
@@ -1352,13 +1352,13 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.net_weight}
                       onChange={(e) => handleProductLineChange(prod.id, 'net_weight', e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
                       placeholder="e.g. 11.2"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm md:text-base font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                     />
                   </div>
 
                   {/* CBM per carton */}
                   <div>
-                    <label className="block text-xs font-bold text-slate-900 mb-1.5">
+                    <label className="block text-xs md:text-sm font-extrabold text-slate-900 mb-2">
                       {isBn ? 'ভলিউম CBM/CTN' : 'CBM per Carton'} <span className="text-[#EE5D50] font-bold">*</span>
                     </label>
                     <input
@@ -1368,23 +1368,23 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.cbm}
                       onChange={(e) => handleProductLineChange(prod.id, 'cbm', e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
                       placeholder="e.g. 0.15"
-                      className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                      className="w-full px-4 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm md:text-base font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                     />
                   </div>
                 </div>
 
                 {/* ROW 3: Integrated Weight Sequence Paste Tool for this Product Item */}
-                <div className="pt-3.5 mt-2 border-t border-slate-100 bg-slate-50/70 p-4 rounded-xl border border-slate-200/80 space-y-2.5">
+                <div className="pt-4 mt-2 border-t-2 border-slate-200 bg-slate-50/80 p-4.5 rounded-xl border-2 border-slate-200 space-y-3">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1">
                     <div className="flex items-center space-x-2">
-                      <Scale className="w-4 h-4 text-[#059669]" />
-                      <span className="text-xs font-bold text-slate-900">
+                      <Scale className="w-4.5 h-4.5 text-[#059669]" />
+                      <span className="text-xs md:text-sm font-extrabold text-slate-900">
                         {isBn
                           ? `⚖️ এই প্রোডাক্টের (${prod.product_name_en || `আইটেম #${idx + 1}`}) কার্টুন ওজন দ্রুত পেস্ট টুল`
                           : `⚖️ Fast Weight Sequence Paste Tool for ${prod.product_name_en || `Product Item #${idx + 1}`}`}
                       </span>
                     </div>
-                    <span className="text-[11px] text-slate-500 font-mono font-medium">
+                    <span className="text-xs text-slate-600 font-mono font-bold">
                       {isBn ? 'কমা বা স্পেস দিয়ে ওজন পেস্ট করুন (যেমন: 11.2, 11.5, 10.8)' : 'Comma or space separated (e.g. 11.2, 11.5, 10.8)'}
                     </span>
                   </div>
@@ -1392,7 +1392,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
                     {/* Net Weight Sequence */}
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-800 mb-1">
+                      <label className="block text-xs md:text-sm font-extrabold text-slate-900 mb-1.5">
                         {isBn ? '১. নিট ওজন (N. Weight) তালিকা পেস্ট করুন:' : '1. Paste Net Weights (N. Weight) List:'}
                       </label>
                       <input
@@ -1400,13 +1400,13 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                         value={prod.net_weights_input || ''}
                         onChange={(e) => handleProductLineChange(prod.id, 'net_weights_input', e.target.value)}
                         placeholder="e.g. 11.2, 11.5, 10.8, 11.4"
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-xs md:text-sm font-mono font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                       />
                     </div>
 
                     {/* Gross Weight Sequence */}
                     <div>
-                      <label className="block text-[11px] font-bold text-slate-800 mb-1">
+                      <label className="block text-xs md:text-sm font-extrabold text-slate-900 mb-1.5">
                         {isBn ? '২. গ্রস ওজন (G. Weight) তালিকা পেস্ট করুন:' : '2. Paste Gross Weights (G. Weight) List:'}
                       </label>
                       <input
@@ -1414,7 +1414,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                         value={prod.gross_weights_input || ''}
                         onChange={(e) => handleProductLineChange(prod.id, 'gross_weights_input', e.target.value)}
                         placeholder="e.g. 12.5, 12.8, 11.9, 12.6"
-                        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-900 text-xs font-mono font-medium placeholder:text-slate-400 focus:border-[#059669] focus:ring-2 focus:ring-[#059669]/15 outline-none"
+                        className="w-full px-4 py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-xs md:text-sm font-mono font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                       />
                     </div>
                   </div>
@@ -1427,9 +1427,9 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
           <button
             type="button"
             onClick={handleAddProductLine}
-            className="w-full py-3 px-4 border-2 border-dashed border-emerald-300 hover:border-emerald-500 bg-emerald-50/50 hover:bg-emerald-50 text-[#059669] font-bold text-xs rounded-xl flex items-center justify-center space-x-2 transition-all cursor-pointer"
+            className="w-full py-4 px-5 border-2 border-dashed border-emerald-400 hover:border-emerald-600 bg-emerald-50/60 hover:bg-emerald-100/70 text-[#059669] font-black text-xs md:text-sm rounded-2xl flex items-center justify-center space-x-2 transition-all cursor-pointer shadow-2xs"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-5 h-5" />
             <span>{isBn ? '+ আরও প্রোডাক্ট যোগ করুন (+ Add Another Product)' : '+ Add Another Product'}</span>
           </button>
         </div>
