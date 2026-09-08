@@ -50,6 +50,16 @@ export const extractCartonNumber = (ctnNo: string): number => {
 };
 
 /**
+ * Helper to get group key for merged cartons.
+ */
+export const getCartonGroupKey = (c: Carton): string | null => {
+  if (!c) return null;
+  if (c.master_group_id) return c.master_group_id;
+  if (c.is_merged && c.ctn_no) return c.ctn_no.trim().toUpperCase();
+  return null;
+};
+
+/**
  * Natural carton comparator for FIFO (First In, First Out) ordering:
  * Sorts earliest entry first (by created_at timestamp and numeric carton number CTN-01 -> CTN-02).
  */
@@ -74,43 +84,104 @@ export const compareCartonsNaturally = (a: Carton, b: Carton): number => {
   const ctnComp = (a.ctn_no || '').localeCompare(b.ctn_no || '', undefined, { numeric: true });
   if (ctnComp !== 0) return ctnComp;
 
-  // Quaternary: Keep cartons with same master_group_id together
-  if (a.master_group_id && b.master_group_id && a.master_group_id !== b.master_group_id) {
-    return a.master_group_id.localeCompare(b.master_group_id);
-  }
-
   return (a.shipping_mark || '').localeCompare(b.shipping_mark || '', undefined, { numeric: true });
 };
 
 /**
+ * Sorts cartons for table display ensuring that merged sub-cartons belonging to the
+ * same master group are ALWAYS kept contiguous (adjacent) in the array.
+ * This prevents table rowSpan layout corruption across unrelated rows.
+ */
+export const sortCartonsForTableDisplay = (cartons: Carton[]): Carton[] => {
+  if (!cartons || cartons.length === 0) return [];
+
+  const groupMap = new Map<string, Carton[]>();
+  const independentCartons: Carton[] = [];
+
+  cartons.forEach((c) => {
+    const key = getCartonGroupKey(c);
+    if (key) {
+      const list = groupMap.get(key) || [];
+      list.push(c);
+      groupMap.set(key, list);
+    } else {
+      independentCartons.push(c);
+    }
+  });
+
+  interface SortUnit {
+    firstCarton: Carton;
+    items: Carton[];
+  }
+
+  const units: SortUnit[] = [];
+
+  groupMap.forEach((items) => {
+    if (items.length > 1) {
+      items.sort((a, b) => compareCartonsNaturally(a, b));
+      units.push({
+        firstCarton: items[0],
+        items: items,
+      });
+    } else {
+      items.forEach((item) => {
+        units.push({
+          firstCarton: item,
+          items: [item],
+        });
+      });
+    }
+  });
+
+  independentCartons.forEach((item) => {
+    units.push({
+      firstCarton: item,
+      items: [item],
+    });
+  });
+
+  units.sort((u1, u2) => compareCartonsNaturally(u1.firstCarton, u2.firstCarton));
+
+  const result: Carton[] = [];
+  units.forEach((u) => {
+    result.push(...u.items);
+  });
+
+  return result;
+};
+
+/**
  * Helper to determine rowSpan and grouping for merged cartons in table displays.
+ * Strictly operates on CONTIGUOUS (adjacent) items to ensure HTML table cells never misalign.
  */
 export const getCartonRowSpanInfo = (cartons: Carton[], index: number) => {
   const current = cartons[index];
   if (!current) return { isFirst: true, rowSpan: 1, isMerged: false };
 
-  // Group key: master_group_id OR uppercase ctn_no
-  const groupKey = current.master_group_id || (current.ctn_no ? current.ctn_no.trim().toUpperCase() : null);
+  const groupKey = getCartonGroupKey(current);
+  if (!groupKey) return { isFirst: true, rowSpan: 1, isMerged: false };
 
-  if (groupKey) {
-    const matchingIndices: number[] = [];
-    cartons.forEach((c, idx) => {
-      const k = c.master_group_id || (c.ctn_no ? c.ctn_no.trim().toUpperCase() : null);
-      if (k === groupKey) {
-        matchingIndices.push(idx);
-      }
-    });
-
-    if (matchingIndices.length > 1) {
-      const firstIdx = matchingIndices[0];
-      if (index === firstIdx) {
-        return { isFirst: true, rowSpan: matchingIndices.length, isMerged: true };
-      }
-      return { isFirst: false, rowSpan: 0, isMerged: true };
-    }
+  let firstIdx = index;
+  while (
+    firstIdx > 0 &&
+    getCartonGroupKey(cartons[firstIdx - 1]) === groupKey
+  ) {
+    firstIdx--;
   }
 
-  return { isFirst: true, rowSpan: 1, isMerged: false };
+  if (firstIdx !== index) {
+    return { isFirst: false, rowSpan: 0, isMerged: true };
+  }
+
+  let span = 0;
+  while (
+    index + span < cartons.length &&
+    getCartonGroupKey(cartons[index + span]) === groupKey
+  ) {
+    span++;
+  }
+
+  return { isFirst: true, rowSpan: span, isMerged: span > 1 };
 };
 
 export const getSlNumberForCartonRow = (cartons: Carton[], index: number) => {
@@ -743,12 +814,12 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       }
     }
 
-    return [...list].sort(compareCartonsNaturally);
+    return sortCartonsForTableDisplay(list);
   }, [activeCustomerModalMark, customerGroupsMap, accessibleCartons]);
 
   // Filtered Cartons Sorted for List View
   const sortedFilteredCartons = React.useMemo(() => {
-    return [...filteredCartons].sort(compareCartonsNaturally);
+    return sortCartonsForTableDisplay(filteredCartons);
   }, [filteredCartons]);
 
   const handleSaveEditedCarton = (e: React.FormEvent) => {
