@@ -972,13 +972,23 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   const totalGrossWeight = filteredCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0);
   const totalCbmVolume = filteredCartons.reduce((sum, c) => sum + (c.cbm || 0), 0);
 
-  // Instant Current WH Stock Breakdown (Physical Stock in Active Warehouse)
-  const currentWhStockCartons = accessibleCartons.filter((c) => c.status === 'booked' || c.status === 'received');
+  const effectiveWhFilter = isWarehouseIncharge && myWhId ? myWhId : selectedDestWh;
+
+  // Cartons scoped by selected warehouse filter (before status filter)
+  const whScopedCartons = React.useMemo(() => {
+    if (effectiveWhFilter === 'all') return accessibleCartons;
+    return accessibleCartons.filter(
+      (c) => c.current_warehouse_id === effectiveWhFilter || c.destination_warehouse_id === effectiveWhFilter
+    );
+  }, [accessibleCartons, effectiveWhFilter]);
+
+  // Instant Current WH Stock Breakdown (Physical Stock in Selected Warehouse)
+  const currentWhStockCartons = whScopedCartons.filter((c) => c.status === 'booked' || c.status === 'received');
   const currentWhStockMasterCount = new Set(currentWhStockCartons.map((c) => c.master_group_id || c.ctn_no)).size;
   const currentWhStockGrossWeight = currentWhStockCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0);
   const currentWhStockCbm = currentWhStockCartons.reduce((sum, c) => sum + (c.cbm || 0), 0);
-  const inTransitCount = accessibleCartons.filter((c) => c.status === 'in_transit').length;
-  const deliveredCount = accessibleCartons.filter((c) => c.status === 'delivered').length;
+  const inTransitCount = whScopedCartons.filter((c) => c.status === 'in_transit').length;
+  const deliveredCount = whScopedCartons.filter((c) => c.status === 'delivered').length;
 
   // Active Customer in Modal (Sorted naturally by carton number: CTN-01, CTN-02...)
   const activeCustomerCartons = React.useMemo(() => {
@@ -1124,7 +1134,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase font-bold tracking-wider">{isBn ? '📦 কার্টুন ইনভেন্টরি সংখ্যা' : 'Carton Inventory Count'}</div>
             <div className={`text-base font-extrabold mt-1 font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>{totalCartonCount} {isBn ? 'টি কার্টুন' : 'Cartons'}</div>
             <div className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center space-x-1">
-              <span>📦 {masterCartonCount} {isBn ? 'টি মাস্টার কার্টুন' : 'Master Cartons'}</span>
+              <span>📦 {masterCartonCount} {isBn ? 'টি মাস্টার কার্টুন' : 'Master Cartons'} ({sortedFilteredCartons.length > 0 ? getSlNumberForCartonRow(sortedFilteredCartons, sortedFilteredCartons.length - 1) : 0} {isBn ? 'টি টেবিল র' : 'Table Rows'})</span>
             </div>
           </div>
 
@@ -1624,7 +1634,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               </h3>
             </div>
             <span className="px-3.5 py-1 rounded-full text-xs font-mono font-extrabold bg-blue-600 text-white shadow-sm border border-blue-500">
-              {filteredCartons.length} Cartons Total
+              {filteredCartons.length} {isBn ? 'টি কার্টুন' : 'Cartons Total'} ({sortedFilteredCartons.length > 0 ? getSlNumberForCartonRow(sortedFilteredCartons, sortedFilteredCartons.length - 1) : 0} {isBn ? 'টি র/সারি' : 'Rows'})
             </span>
           </div>
 
