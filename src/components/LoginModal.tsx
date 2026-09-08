@@ -26,7 +26,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({
   const [error, setError] = useState('');
 
   const roleTitles: Record<UserRole, { bn: string; en: string }> = {
-    super_admin: { bn: 'সুপার এডমিন প্যানেল লগইন', en: 'Super Admin Panel Login' },
+    super_admin: { bn: 'ওনার প্যানেল লগইন', en: 'Owner Panel Login' },
     operation_director: { bn: 'অপারেশন ডিরেক্টর প্যানেল লগইন', en: 'Operation Director Panel Login' },
     warehouse_incharge: { bn: 'ওয়্যারহাউজ ইনচার্জ প্যানেল লগইন', en: 'Warehouse Incharge Panel Login' },
     accountant: { bn: 'অ্যাকাউন্টেন্ট প্যানেল লগইন', en: 'Accountant Panel Login' },

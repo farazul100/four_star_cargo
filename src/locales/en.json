@@ -17,7 +17,7 @@
   "login_button": "Login Now →",
   "demo_account_select": "Select Demo Account:",
 
-  "super_admin": "Super Admin Panel",
+  "super_admin": "Owner Panel",
   "super_admin_desc": "User management, multi-warehouse setup, full audit logs & company analytics",
 
   "operation_director": "Operation Director Panel",

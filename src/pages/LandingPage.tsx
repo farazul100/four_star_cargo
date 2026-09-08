@@ -18,7 +18,7 @@ export const LandingPage: React.FC = () => {
   const roleCards = [
     {
       role: 'super_admin' as UserRole,
-      title: lang === 'bn' ? 'সুপার এডমিন প্যানেল' : 'Super Admin Panel',
+      title: lang === 'bn' ? 'ওনার প্যানেল' : 'Owner Panel',
       desc: lang === 'bn' ? 'MD, Operations Manager, Warehouse Director' : 'MD, Operations Manager, Warehouse Director',
       loginRoute: '/admin/login',
       icon: ShieldCheck,

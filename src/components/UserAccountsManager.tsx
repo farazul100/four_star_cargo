@@ -287,7 +287,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
           <span className={`px-2.5 py-0.5 rounded-md text-[11px] font-medium border ${
             isDark ? 'bg-purple-950/60 text-purple-300 border-purple-800' : 'bg-purple-50 text-purple-800 border-purple-200'
           }`}>
-            👑 Super Admin
+            👑 Owner (ওনার)
           </span>
         );
       case 'operation_director':
@@ -971,7 +971,7 @@ export const UserAccountsManager: React.FC<UserAccountsManagerProps> = ({
                   <option value="warehouse_incharge">📦 Warehouse Incharge (ওয়্যারহাউজ কর্মকর্তা)</option>
                   <option value="operation_director">🎯 Operation Director (অপারেশন ডিরেক্টর)</option>
                   <option value="accountant">💰 Chief Accountant (চিফ একাউন্টেন্ট)</option>
-                  <option value="super_admin">👑 Super Admin (সুপার এডমিন)</option>
+                  <option value="super_admin">👑 Owner (ওনার)</option>
                 </select>
               </div>
 

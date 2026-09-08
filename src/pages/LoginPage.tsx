@@ -51,8 +51,8 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
   // Role Configuration matching Image 5
   const roleConfigs = {
     super_admin: {
-      title: lang === 'bn' ? 'সুপার এডমিন প্যানেল লগইন' : 'Super Admin Panel Login',
-      desc: lang === 'bn' ? 'সুপার এডমিন প্যানেল এক্সেস ও পরিচালনা' : 'Access super admin panel management',
+      title: lang === 'bn' ? 'ওনার প্যানেল লগইন' : 'Owner Panel Login',
+      desc: lang === 'bn' ? 'ওনার প্যানেল এক্সেস ও পরিচালনা' : 'Access owner panel management',
       icon: ShieldCheck,
       badgeBg: 'bg-[#00897B]',
       btnBg: 'bg-[#00897B] hover:bg-[#00695C]',

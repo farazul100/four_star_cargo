@@ -29,7 +29,7 @@ export const LandingPortal: React.FC<LandingPortalProps> = ({
   const roleCards = [
     {
       role: 'super_admin' as UserRole,
-      title: isBn ? 'সুপার এডমিন (Super Admin)' : 'Super Admin Panel',
+      title: isBn ? 'ওনার (Owner)' : 'Owner Panel',
       desc: isBn
         ? 'সম্পূর্ণ সিস্টেমের মালিকানা — ইউজার ম্যানেজমেন্ট, ওয়্যারহাউজ সেটআপ ও অডিট লগস'
         : 'Full system ownership — warehouse CRUD, user permissions & audit history',

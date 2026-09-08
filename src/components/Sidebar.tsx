@@ -53,7 +53,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
   const getRolePanelTitle = (role: string) => {
     switch (role) {
-      case 'super_admin': return isBn ? 'সুপার এডমিন প্যানেল' : 'Super Admin Panel';
+      case 'super_admin': return isBn ? 'ওনার প্যানেল' : 'Owner Panel';
       case 'operation_director': return isBn ? 'অপারেশনস ডিরেক্টর' : 'Operation Director Panel';
       case 'warehouse_incharge': return isBn ? 'ওয়্যারহাউস ইনচার্জ' : 'Warehouse Incharge Panel';
       case 'accountant': return isBn ? 'অ্যাকাউন্টেন্ট প্যানেল' : 'Accountant Panel';
