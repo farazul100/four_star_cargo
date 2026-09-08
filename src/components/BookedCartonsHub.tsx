@@ -247,7 +247,13 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     return getHostingerDbData().customers || [];
   });
 
+  const canPerformCustomerMapping = currentUser?.role === 'super_admin' || currentUser?.role === 'operation_director';
+
   const handleOpenCustomerMapping = (shippingMarkOrTracking: string) => {
+    if (!canPerformCustomerMapping) {
+      alert(isBn ? 'কাস্টমার ম্যাপিং করার অনুমতি শুধুমাত্র অপারেশন ডিরেক্টর বা সুপার এডমিন এর রয়েছে।' : 'Customer mapping is restricted to Operation Director or Super Admin only.');
+      return;
+    }
     const dbCusts = getHostingerDbData().customers || [];
     setAllDbCustomersList(dbCusts);
     setMapCustomerModalMark(shippingMarkOrTracking);
@@ -295,6 +301,10 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
   const handleSaveCustomerMapping = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!canPerformCustomerMapping) {
+      alert(isBn ? 'কাস্টমার ম্যাপিং করার অনুমতি শুধুমাত্র অপারেশন ডিরেক্টর বা সুপার এডমিন এর রয়েছে।' : 'Customer mapping is restricted to Operation Director or Super Admin only.');
+      return;
+    }
     if (!mapCustomerModalMark) return;
 
     const dbData = getHostingerDbData();
@@ -1255,7 +1265,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                               </span>
                             ) : (
                               <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 dark:bg-amber-950/80 text-[#78350F] dark:text-amber-200 border border-amber-300 dark:border-amber-700/80 flex items-center space-x-1 shadow-xs">
-                                <span>⚠️ Unassigned (Map Customer)</span>
+                                <span>{canPerformCustomerMapping ? '⚠️ Unassigned (Map Customer)' : '⚠️ Unassigned'}</span>
                               </span>
                             )}
                           </div>
@@ -1320,18 +1330,20 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                     {/* Card Action Footer */}
                     <div className="pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-xs gap-2">
                       <div className="flex items-center space-x-2">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleOpenCustomerMapping(mark);
-                          }}
-                          className="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold rounded flex items-center space-x-1 cursor-pointer transition-all shadow-xs"
-                          title={isBn ? 'এই শিপিং মার্কের সাথে কাস্টমার ট্যাগ করুন' : 'Map Customer to Shipping Mark'}
-                        >
-                          <UserCheck className="w-3.5 h-3.5" />
-                          <span>{isBn ? 'কাস্টমার ট্যাগ' : 'Map Customer'}</span>
-                        </button>
+                        {canPerformCustomerMapping && (
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenCustomerMapping(mark);
+                            }}
+                            className="px-2.5 py-1 bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-bold rounded flex items-center space-x-1 cursor-pointer transition-all shadow-xs"
+                            title={isBn ? 'এই শিপিং মার্কের সাথে কাস্টমার ট্যাগ করুন' : 'Map Customer to Shipping Mark'}
+                          >
+                            <UserCheck className="w-3.5 h-3.5" />
+                            <span>{isBn ? 'কাস্টমার ট্যাগ' : 'Map Customer'}</span>
+                          </button>
+                        )}
 
                         <button
                           type="button"
@@ -1765,7 +1777,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       <UserCheck className="w-3.5 h-3.5" />
                       <span>{activeCustomerCartons[0].customer_name}</span>
                     </span>
-                  ) : (
+                  ) : canPerformCustomerMapping ? (
                     <button
                       type="button"
                       onClick={() => handleOpenCustomerMapping(activeCustomerModalMark)}
@@ -1773,6 +1785,10 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                     >
                       <span>⚠️ Map Customer</span>
                     </button>
+                  ) : (
+                    <span className="px-2.5 py-0.5 rounded-full text-xs font-extrabold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/30 flex items-center space-x-1">
+                      <span>⚠️ Unassigned</span>
+                    </span>
                   )}
                 </h3>
               </div>
