@@ -25,6 +25,9 @@ import {
   UserCheck,
   UserPlus,
   Plus,
+  Palette,
+  Download,
+  FileSpreadsheet,
 } from 'lucide-react';
 import { Carton, Warehouse, User as UserType, Language, Customer } from '../types';
 import { useTheme } from '../context/ThemeContext';
@@ -246,6 +249,138 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   const [allDbCustomersList, setAllDbCustomersList] = useState<Customer[]>(() => {
     return getHostingerDbData().customers || [];
   });
+
+  // Single & Batch Row Color Picker State
+  const [colorPickerRowId, setColorPickerRowId] = useState<string | null>(null);
+
+  const ROW_COLOR_OPTIONS = [
+    { hex: '#FEF08A', name: 'Yellow', labelBn: 'হলুদ', bgClass: 'bg-amber-300' },
+    { hex: '#BBF7D0', name: 'Green', labelBn: 'সবুজ', bgClass: 'bg-emerald-300' },
+    { hex: '#BFDBFE', name: 'Blue', labelBn: 'নীল', bgClass: 'bg-blue-300' },
+    { hex: '#FECACA', name: 'Red', labelBn: 'লাল', bgClass: 'bg-rose-300' },
+    { hex: '#E9D5FF', name: 'Purple', labelBn: 'বেগুনি', bgClass: 'bg-purple-300' },
+    { hex: '#FED7AA', name: 'Orange', labelBn: 'কমলা', bgClass: 'bg-orange-300' },
+  ];
+
+  const handleApplyRowColor = (cartonIds: string[], colorHex: string | null) => {
+    if (!cartonIds || cartonIds.length === 0) return;
+
+    const targetIds = new Set(cartonIds);
+    const dbData = getHostingerDbData();
+    const currentCartons = dbData.cartons || liveRealtimeCartons || [];
+
+    const updatedCartons = currentCartons.map((c) => {
+      if (targetIds.has(c.id)) {
+        return {
+          ...c,
+          row_color: colorHex ? colorHex : undefined,
+          updated_at: new Date().toISOString(),
+        };
+      }
+      return c;
+    });
+
+    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+    setLiveRealtimeCartons(updatedCartons);
+
+    if (onUpdateCarton) {
+      updatedCartons.forEach((c) => {
+        if (targetIds.has(c.id)) {
+          onUpdateCarton(c);
+        }
+      });
+    }
+
+    logSystemAuditAction(
+      currentUser,
+      'UPDATE_CARTON_ROW_COLOR',
+      'carton',
+      cartonIds.join(','),
+      `ইউজার ${currentUser.name} (${currentUser.role}) ${cartonIds.length}টি কার্টুনের র কালার (${colorHex || 'সাদা/ডিফল্ট'}) আপডেট করেছেন`
+    );
+  };
+
+  const handleExportFormattedExcel = (cartonList: Carton[]) => {
+    if (!cartonList || cartonList.length === 0) {
+      alert(isBn ? 'ডাউনলোড করার মতো কোনো কার্টুন ডাটা পাওয়া যায়নি।' : 'No cartons available to export.');
+      return;
+    }
+
+    const rowsHtml = cartonList
+      .map((c, idx) => {
+        const bgColor = c.row_color ? c.row_color : '#FFFFFF';
+        const textColor = '#0F172A';
+        const destWh = warehouses.find((w) => w.id === c.destination_warehouse_id)?.name || c.destination_warehouse_name || 'Dhaka Central Hub';
+        const custName = c.customer_name || 'Unassigned';
+
+        return `
+          <tr style="background-color: ${bgColor}; color: ${textColor};">
+            <td style="border: 1px solid #CBD5E1; padding: 8px; text-align: center; font-weight: bold;">${idx + 1}</td>
+            <td style="border: 1px solid #CBD5E1; padding: 8px; font-weight: bold;">${c.ctn_no || 'N/A'}</td>
+            <td style="border: 1px solid #CBD5E1; padding: 8px; color: #047857; font-weight: bold;">${c.packaging_number || c.ctn_no || 'N/A'}</td>
+            <td style="border: 1px solid #CBD5E1; padding: 8px; color: #1D4ED8; font-weight: bold;">${c.shipping_mark || 'N/A'}</td>
+            <td style="border: 1px solid #CBD5E1; padding: 8px; font-family: monospace;">${c.tracking_number || c.master_tracking_number || 'N/A'}</td>
+            <td style="border: 1px solid #CBD5E1; padding: 8px;">${c.product_name_en || ''} ${c.product_name_cn ? `(${c.product_name_cn})` : ''}</td>
+            <td style="border: 1px solid #CBD5E1; padding: 8px; text-align: center; font-weight: bold;">${c.quantity || 0}</td>
+            <td style="border: 1px solid #CBD5E1; padding: 8px; text-align: right;">${(c.net_weight || 0).toFixed(1)} kg</td>
+            <td style="border: 1px solid #CBD5E1; padding: 8px; text-align: right; font-weight: bold; color: #047857;">${(c.gross_weight || 0).toFixed(1)} kg</td>
+            <td style="border: 1px solid #CBD5E1; padding: 8px; text-align: right; color: #6B21A8;">${(c.cbm || 0).toFixed(2)} CBM</td>
+            <td style="border: 1px solid #CBD5E1; padding: 8px;">${destWh}</td>
+            <td style="border: 1px solid #CBD5E1; padding: 8px; font-weight: bold;">${custName}</td>
+            <td style="border: 1px solid #CBD5E1; padding: 8px; text-align: center; font-weight: bold; text-transform: uppercase;">${c.status || 'BOOKED'}</td>
+          </tr>
+        `;
+      })
+      .join('');
+
+    const htmlTemplate = `
+      <html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel" xmlns="http://www.w3.org/TR/REC-html40">
+      <head>
+        <meta charset="utf-8" />
+        <style>
+          body { font-family: Arial, sans-serif; font-size: 12px; }
+          table { border-collapse: collapse; width: 100%; }
+          th { background-color: #0F172A; color: #FFFFFF; font-weight: bold; padding: 10px; border: 1px solid #334155; text-align: left; text-transform: uppercase; font-size: 11px; }
+        </style>
+      </head>
+      <body>
+        <h2 style="color: #0F172A; margin-bottom: 4px;">Four Star Cargo - Central Cartons Inventory List</h2>
+        <p style="color: #64748B; font-size: 11px; margin-top: 0;">Exported Date: ${new Date().toLocaleString()} | Total Cartons: ${cartonList.length}</p>
+        <table>
+          <thead>
+            <tr>
+              <th style="text-align: center;">SL</th>
+              <th>CTN NO</th>
+              <th>SHIPMENT CTN NO.</th>
+              <th>SHIPPING MARK</th>
+              <th>TRACKING NO</th>
+              <th>PRODUCT (EN & CN)</th>
+              <th style="text-align: center;">QTY</th>
+              <th style="text-align: right;">N.WT</th>
+              <th style="text-align: right;">G.WT</th>
+              <th style="text-align: right;">CBM</th>
+              <th>DESTINATION</th>
+              <th>CUSTOMER</th>
+              <th style="text-align: center;">STATUS</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${rowsHtml}
+          </tbody>
+        </table>
+      </body>
+      </html>
+    `;
+
+    const blob = new Blob([htmlTemplate], { type: 'application/vnd.ms-excel;charset=utf-8' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = `FourStarCargo_Inventory_${new Date().toISOString().slice(0, 10)}.xls`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
+  };
 
   const canPerformCustomerMapping = currentUser?.role === 'super_admin' || currentUser?.role === 'operation_director';
 
@@ -1419,13 +1554,13 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             </span>
           </div>
 
-          {/* Quick Bulk Merge Toolbar */}
-          <div className={`flex items-center justify-between p-3 border-b text-xs font-mono transition-colors ${
+          {/* Quick Bulk Merge, Row Color Palette & Formatted Excel Export Toolbar */}
+          <div className={`flex flex-wrap items-center justify-between gap-3 p-3 border-b text-xs font-mono transition-colors ${
             isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-slate-100 border-slate-200 text-slate-800'
           }`}>
             <div className="flex items-center space-x-2">
               <span className={`font-extrabold uppercase tracking-wide ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                {isBn ? 'মার্জ টুলবার (Merge Toolbar):' : 'Merge Toolbar:'}
+                {isBn ? 'লিস্ট টুলবার (List Toolbar):' : 'List Toolbar:'}
               </span>
               {selectedHubCartonIds.length > 0 && (
                 <span className="px-2.5 py-0.5 bg-[#00897B] text-white rounded-full text-[10px] font-extrabold shadow-2xs border border-[#00796B]">
@@ -1434,12 +1569,48 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               )}
             </div>
 
+            {/* Row Color Palette Selector */}
+            <div className="flex items-center space-x-2 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
+              <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200 flex items-center space-x-1">
+                <Palette className="w-3.5 h-3.5 text-amber-500" />
+                <span>{isBn ? 'র কালার হাইলাইট:' : 'Row Color Highlight:'}</span>
+              </span>
+              <div className="flex items-center space-x-1.5">
+                {ROW_COLOR_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.hex}
+                    type="button"
+                    onClick={() => {
+                      if (selectedHubCartonIds.length === 0) {
+                        alert(isBn ? 'অনুগ্রহ করে প্রথমে বামের টিক চিহ্ন দিয়ে অন্তত ১টি র সিলেক্ট করুন।' : 'Please select at least one row checkbox first.');
+                        return;
+                      }
+                      handleApplyRowColor(selectedHubCartonIds, opt.hex);
+                    }}
+                    className={`w-4.5 h-4.5 rounded-full border border-slate-400 hover:scale-125 transition-all cursor-pointer shadow-xs ${opt.bgClass}`}
+                    style={{ backgroundColor: opt.hex }}
+                    title={isBn ? `সিলেক্টকৃত ${selectedHubCartonIds.length}টি র-এ ${opt.labelBn} কালার সেট করুন` : `Apply ${opt.name} color to selected ${selectedHubCartonIds.length} rows`}
+                  />
+                ))}
+                {selectedHubCartonIds.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => handleApplyRowColor(selectedHubCartonIds, null)}
+                    className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-red-500 hover:text-white transition-colors cursor-pointer"
+                    title={isBn ? 'কালার রিমুভ করুন' : 'Clear Row Color'}
+                  >
+                    {isBn ? 'রিসেট' : 'Clear'}
+                  </button>
+                )}
+              </div>
+            </div>
+
             <div className="flex items-center space-x-2">
               <button
                 type="button"
                 onClick={() => handleBulkMergeInHub(sortedFilteredCartons)}
                 disabled={selectedHubCartonIds.length < 2}
-                className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                className={`px-3 py-1.5 text-xs font-extrabold rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
                   selectedHubCartonIds.length >= 2
                     ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md'
                     : isDark ? 'bg-slate-800 text-slate-400 border border-slate-700 cursor-not-allowed' : 'bg-slate-200 text-slate-500 border border-slate-300 cursor-not-allowed'
@@ -1447,19 +1618,30 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 title={isBn ? 'সিলেক্টকৃত কার্টুন মার্জ করে ১টি মাস্টার কার্টুন বানান' : 'Merge selected rows into 1 master carton'}
               >
                 <GitFork className="w-3.5 h-3.5" />
-                <span>{isBn ? '🔗 মার্জ করুন (Merge Selected)' : '🔗 Merge Selected'}</span>
+                <span>{isBn ? '🔗 মার্জ করুন' : '🔗 Merge Selected'}</span>
               </button>
 
               {selectedHubCartonIds.length > 0 && (
                 <button
                   type="button"
                   onClick={() => handleBulkUnmergeInHub(sortedFilteredCartons)}
-                  className="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-extrabold rounded-lg flex items-center space-x-1 shadow-md cursor-pointer"
+                  className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-extrabold rounded-lg flex items-center space-x-1 shadow-md cursor-pointer"
                   title={isBn ? 'সিলেক্টকৃত কার্টুন আলাদা/আনমার্জ করুন' : 'Unmerge selected cartons'}
                 >
-                  <span>{isBn ? '🔓 আলাদা করুন (Unmerge)' : '🔓 Unmerge'}</span>
+                  <span>{isBn ? '🔓 আলাদা করুন' : '🔓 Unmerge'}</span>
                 </button>
               )}
+
+              {/* Formatted Excel Export Button */}
+              <button
+                type="button"
+                onClick={() => handleExportFormattedExcel(sortedFilteredCartons)}
+                className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold rounded-lg flex items-center space-x-1.5 shadow-md transition-all cursor-pointer border border-emerald-500"
+                title={isBn ? 'কালার ও ডিজাইন সহ এক্সেল / গুগল শিট ফাইল হিসেবে ডাউনলোড করুন' : 'Export Formatted Excel / Google Sheets with Colors'}
+              >
+                <FileSpreadsheet className="w-4 h-4 text-emerald-100" />
+                <span>{isBn ? '📥 এক্সেল ডাউনলোড' : '📥 Export Excel'}</span>
+              </button>
             </div>
           </div>
 
@@ -1520,18 +1702,28 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                   return (
                     <tr
                       key={c.id}
+                      style={
+                        !isSelected && c.row_color
+                          ? {
+                              backgroundColor: isDark ? `${c.row_color}55` : c.row_color,
+                              color: isDark ? '#FFFFFF' : '#0F172A',
+                            }
+                          : undefined
+                      }
                       className={`transition-colors duration-150 ${
                         isSelected
                           ? isDark
                             ? 'bg-[#00897B]/70 text-white font-extrabold border-l-4 border-l-[#26A69A]'
                             : 'bg-[#00897B]/20 text-slate-900 font-extrabold border-l-4 border-l-[#00897B]'
-                          : spanInfo.isMerged
+                          : spanInfo.isMerged && !c.row_color
                           ? isDark
                             ? 'bg-[#1E1B4B]/80 hover:bg-[#2E2A72] text-white'
                             : 'bg-indigo-50/80 hover:bg-indigo-50 text-slate-900'
-                          : isDark
-                          ? 'bg-[#1E293B] hover:bg-[#283549] text-white'
-                          : 'bg-white hover:bg-slate-50 text-slate-900'
+                          : !c.row_color
+                          ? isDark
+                            ? 'bg-[#1E293B] hover:bg-[#283549] text-white'
+                            : 'bg-white hover:bg-slate-50 text-slate-900'
+                          : ''
                       }`}
                     >
                       {/* Checkbox Column */}
@@ -1686,6 +1878,51 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
                       <td className="p-3 text-center">
                         <div className="flex items-center justify-center space-x-1.5">
+                          {/* Row Color Picker Button & Popover */}
+                          <div className="relative inline-block">
+                            <button
+                              type="button"
+                              onClick={() => setColorPickerRowId(colorPickerRowId === c.id ? null : c.id)}
+                              className={`p-1.5 rounded-lg border transition-all cursor-pointer ${
+                                c.row_color
+                                  ? 'border-amber-400 bg-amber-300 text-amber-950 font-bold shadow-xs'
+                                  : isDark ? 'text-amber-300 bg-amber-950/40 hover:bg-amber-900/60 border-amber-800/60' : 'text-amber-700 bg-amber-50 hover:bg-amber-100 border-amber-200'
+                              }`}
+                              title={isBn ? 'এই র-এর কালার সিলেক্ট করুন' : 'Change Row Highlight Color'}
+                            >
+                              <Palette className="w-3.5 h-3.5" />
+                            </button>
+
+                            {colorPickerRowId === c.id && (
+                              <div className="absolute right-0 bottom-full mb-1.5 z-50 p-2 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 flex items-center space-x-1.5 animate-in zoom-in-95 min-w-[180px]">
+                                {ROW_COLOR_OPTIONS.map((opt) => (
+                                  <button
+                                    key={opt.hex}
+                                    type="button"
+                                    onClick={() => {
+                                      handleApplyRowColor([c.id], opt.hex);
+                                      setColorPickerRowId(null);
+                                    }}
+                                    className="w-5 h-5 rounded-full border border-slate-400 hover:scale-125 transition-transform cursor-pointer shadow-2xs"
+                                    style={{ backgroundColor: opt.hex }}
+                                    title={isBn ? opt.labelBn : opt.name}
+                                  />
+                                ))}
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    handleApplyRowColor([c.id], null);
+                                    setColorPickerRowId(null);
+                                  }}
+                                  className="w-5 h-5 rounded-full border border-slate-400 bg-slate-200 dark:bg-slate-700 text-[10px] font-bold text-slate-700 dark:text-slate-200 flex items-center justify-center cursor-pointer hover:bg-red-500 hover:text-white transition-colors"
+                                  title={isBn ? 'কালার রিমুভ করুন' : 'Remove Color'}
+                                >
+                                  ✕
+                                </button>
+                              </div>
+                            )}
+                          </div>
+
                           <button
                             type="button"
                             onClick={() => setSelectedCartonsForInvoiceModal([c])}
