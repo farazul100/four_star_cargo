@@ -1123,16 +1123,16 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
           </div>
         </div>
 
-        {/* TOP SUMMARY KPIS - ULTRA CLEAR WAREHOUSE STOCK CARDS */}
+        {/* TOP SUMMARY KPIS - VIBRANT HIGH-CONTRAST CARDS MATCHING SCREENSHOT 1 */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
           {/* CARD 1: Physical Warehouse Stock Right Now */}
           <div className={`p-4 rounded-xl border transition-all shadow-sm ${
-            isDark ? 'bg-[#0F172A] border-blue-500/40 text-white' : 'bg-blue-50/70 border-blue-200 text-slate-900'
+            isDark ? 'bg-[#0F172A] border-blue-500/50 text-white' : 'bg-white border-slate-200/90 text-slate-900'
           }`}>
-            <div className="text-[11px] text-blue-600 dark:text-sky-300 font-mono uppercase font-black tracking-wider flex items-center space-x-1.5">
-              <span>🏬 {isBn ? 'এখন ওয়্যারহাউজে স্টকে আছে' : 'Current Stock in WH'}</span>
+            <div className="text-[11px] text-blue-600 dark:text-sky-400 font-mono uppercase font-black tracking-wider flex items-center space-x-1.5">
+              <span>📦 {isBn ? 'এখন ওয়্যারহাউজে স্টকে আছে' : 'CURRENT STOCK IN WH'}</span>
             </div>
-            <div className="text-xl md:text-2xl font-black text-blue-700 dark:text-yellow-300 mt-1 font-mono">
+            <div className="text-xl md:text-2xl font-black text-blue-600 dark:text-blue-400 mt-1 font-mono">
               {currentWhStockCartons.length} {isBn ? 'টি কার্টুন' : 'Cartons'}
             </div>
             <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1 flex flex-wrap items-center gap-x-2">
@@ -1144,15 +1144,15 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
           {/* CARD 2: Total Booked History So Far */}
           <div className={`p-4 rounded-xl border transition-all shadow-sm ${
-            isDark ? 'bg-[#0F172A] border-purple-500/40 text-white' : 'bg-purple-50/70 border-purple-200 text-slate-900'
+            isDark ? 'bg-[#0F172A] border-purple-500/50 text-white' : 'bg-[#FAF5FF] border-purple-200/90 text-slate-900'
           }`}>
-            <div className="text-[11px] text-purple-600 dark:text-purple-300 font-mono uppercase font-black tracking-wider flex items-center space-x-1.5">
-              <span>📋 {isBn ? 'এখন অব্দি মোট বুকিং করা হয়েছে' : 'Total Booked So Far'}</span>
+            <div className="text-[11px] text-purple-600 dark:text-purple-400 font-mono uppercase font-black tracking-wider flex items-center space-x-1.5">
+              <span>📋 {isBn ? 'এখন অব্দি মোট বুকিং করা হয়েছে' : 'TOTAL BOOKED SO FAR'}</span>
             </div>
-            <div className="text-xl md:text-2xl font-black text-purple-700 dark:text-purple-300 mt-1 font-mono">
+            <div className="text-xl md:text-2xl font-black text-purple-700 dark:text-purple-400 mt-1 font-mono">
               {whScopedCartons.length} {isBn ? 'টি কার্টুন' : 'Cartons'}
             </div>
-            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1 flex items-center space-x-2">
+            <div className="text-[10px] font-bold text-slate-600 dark:text-slate-400 mt-1 flex items-center space-x-2">
               <span>👤 {customerGroupKeys.length} {isBn ? 'জন কাস্টমার' : 'Customers'}</span>
               <span>•</span>
               <span>🏷️ {allShippingMarks.length} {isBn ? 'টি মার্ক' : 'Marks'}</span>
@@ -1161,30 +1161,30 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
           {/* CARD 3: In Transit / Flying */}
           <div className={`p-4 rounded-xl border transition-all shadow-sm ${
-            isDark ? 'bg-[#0F172A] border-amber-500/40 text-white' : 'bg-amber-50/70 border-amber-200 text-slate-900'
+            isDark ? 'bg-[#0F172A] border-amber-500/50 text-white' : 'bg-[#FFFBEB] border-amber-200/90 text-slate-900'
           }`}>
-            <div className="text-[11px] text-amber-600 dark:text-amber-300 font-mono uppercase font-black tracking-wider flex items-center space-x-1.5">
-              <span>✈️ {isBn ? 'ফ্লাইং / ট্রানজিটে আছে' : 'In Transit / Flying'}</span>
+            <div className="text-[11px] text-amber-600 dark:text-amber-400 font-mono uppercase font-black tracking-wider flex items-center space-x-1.5">
+              <span>✈️ {isBn ? 'ফ্লাইং / ট্রানজিটে আছে' : 'IN TRANSIT / FLYING'}</span>
             </div>
             <div className="text-xl md:text-2xl font-black text-amber-600 dark:text-amber-400 mt-1 font-mono">
               {inTransitCount} {isBn ? 'টি কার্টুন' : 'Cartons'}
             </div>
-            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1">
+            <div className="text-[10px] font-bold text-slate-600 dark:text-slate-400 mt-1">
               {isBn ? 'গন্তব্য ওয়্যারহাউজের পথে' : 'En route to destination'}
             </div>
           </div>
 
           {/* CARD 4: Delivered */}
           <div className={`p-4 rounded-xl border transition-all shadow-sm ${
-            isDark ? 'bg-[#0F172A] border-emerald-500/40 text-white' : 'bg-emerald-50/70 border-emerald-200 text-slate-900'
+            isDark ? 'bg-[#0F172A] border-emerald-500/50 text-white' : 'bg-[#ECFDF5] border-emerald-200/90 text-slate-900'
           }`}>
-            <div className="text-[11px] text-emerald-600 dark:text-emerald-300 font-mono uppercase font-black tracking-wider flex items-center space-x-1.5">
-              <span>✅ {isBn ? 'ডেলিভারি সম্পন্ন' : 'Delivered Cartons'}</span>
+            <div className="text-[11px] text-emerald-600 dark:text-emerald-400 font-mono uppercase font-black tracking-wider flex items-center space-x-1.5">
+              <span>✅ {isBn ? 'ডেলিভারি সম্পন্ন' : 'DELIVERED CARTONS'}</span>
             </div>
             <div className="text-xl md:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1 font-mono">
               {deliveredCount} {isBn ? 'টি কার্টুন' : 'Cartons'}
             </div>
-            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1">
+            <div className="text-[10px] font-bold text-slate-600 dark:text-slate-400 mt-1">
               {isBn ? 'কাস্টমার রিসিভ করেছেন' : 'Delivered to customer'}
             </div>
           </div>
