@@ -650,13 +650,35 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     );
   };
 
-  // Selected Cartons Checkbox State for Excel-style Bulk Merge/Unmerge
+  // Selected Cartons Checkbox State for Excel-style Bulk Merge/Unmerge & Shift+Click Range Selection
   const [selectedHubCartonIds, setSelectedHubCartonIds] = useState<string[]>([]);
+  const [lastSelectedCartonIndex, setLastSelectedCartonIndex] = useState<number | null>(null);
 
-  const handleToggleSelectCarton = (id: string) => {
-    setSelectedHubCartonIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
+  const handleToggleSelectCarton = (
+    id: string,
+    index?: number,
+    event?: React.MouseEvent<any> | React.ChangeEvent<any>
+  ) => {
+    const isShiftKey = event && 'shiftKey' in event && (event as React.MouseEvent).shiftKey;
+
+    if (isShiftKey && lastSelectedCartonIndex !== null && index !== undefined && sortedFilteredCartons) {
+      const start = Math.min(lastSelectedCartonIndex, index);
+      const end = Math.max(lastSelectedCartonIndex, index);
+      const rangeIds = sortedFilteredCartons.slice(start, end + 1).map((c) => c.id);
+
+      setSelectedHubCartonIds((prev) => {
+        const set = new Set(prev);
+        rangeIds.forEach((rId) => set.add(rId));
+        return Array.from(set);
+      });
+    } else {
+      setSelectedHubCartonIds((prev) =>
+        prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      );
+      if (index !== undefined) {
+        setLastSelectedCartonIndex(index);
+      }
+    }
   };
 
   const handleToggleSelectAllInModal = (modalCartons: Carton[]) => {
@@ -1752,8 +1774,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                         <input
                           type="checkbox"
                           checked={isSelected}
-                          onChange={() => handleToggleSelectCarton(c.id)}
-                          className="rounded border-slate-400 cursor-pointer accent-blue-600"
+                          onClick={(e) => handleToggleSelectCarton(c.id, idx, e)}
+                          onChange={() => {}}
+                          className="rounded border-slate-400 cursor-pointer accent-blue-600 w-4 h-4"
                         />
                       </td>
 
@@ -2024,6 +2047,94 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 })}
               </tbody>
             </table>
+          </div>
+        </div>
+      )}
+
+      {/* ------------------------------------------------------------- */}
+      {/* FLOATING STICKY COLOR & SELECTION TOOLBAR (FLOATS AT BOTTOM) */}
+      {/* ------------------------------------------------------------- */}
+      {selectedHubCartonIds.length > 0 && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-3 px-4 py-3 rounded-2xl bg-slate-900/95 dark:bg-slate-950/95 text-white shadow-2xl border border-slate-700/80 backdrop-blur-md animate-in slide-in-from-bottom-5 duration-200 max-w-[95vw] overflow-x-auto">
+          <div className="flex items-center space-x-2 border-r border-slate-700 pr-3 font-mono text-xs whitespace-nowrap">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+            <span className="font-extrabold text-sky-300">
+              {selectedHubCartonIds.length} {isBn ? 'টি সিলেক্ট করা হয়েছে' : 'Selected'}
+            </span>
+          </div>
+
+          {/* Color Palette Strip */}
+          <div className="flex items-center space-x-1.5 border-r border-slate-700 pr-3">
+            <span className="text-[11px] font-bold text-slate-300 hidden md:inline-flex items-center space-x-1 whitespace-nowrap">
+              <Palette className="w-3.5 h-3.5 text-amber-400" />
+              <span>{isBn ? 'কালার সেট করুন:' : 'Color:'}</span>
+            </span>
+            <div className="flex items-center space-x-1.5">
+              {ROW_COLOR_OPTIONS.map((opt) => (
+                <button
+                  key={`float-${opt.hex}`}
+                  type="button"
+                  onClick={() => handleApplyRowColor(selectedHubCartonIds, opt.hex)}
+                  className="w-5 h-5 rounded-full border border-slate-400 hover:scale-125 transition-transform cursor-pointer shadow-xs"
+                  style={{ backgroundColor: opt.hex }}
+                  title={isBn ? `সিলেক্টকৃত ${selectedHubCartonIds.length}টি র-এ ${opt.labelBn} কালার সেট করুন` : `Apply ${opt.name} color`}
+                />
+              ))}
+              <label
+                className="relative w-5 h-5 rounded-full border border-slate-400 cursor-pointer overflow-hidden flex items-center justify-center bg-gradient-to-br from-red-400 via-green-400 to-blue-500 hover:scale-125 transition-transform shadow-xs"
+                title={isBn ? 'কাস্টম কালার নির্বাচন করুন' : 'Custom Color'}
+              >
+                <input
+                  type="color"
+                  onChange={(e) => handleApplyRowColor(selectedHubCartonIds, e.target.value)}
+                  className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                />
+              </label>
+              <button
+                type="button"
+                onClick={() => handleApplyRowColor(selectedHubCartonIds, null)}
+                className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-800 text-slate-300 hover:bg-red-600 hover:text-white transition-colors cursor-pointer border border-slate-700"
+                title={isBn ? 'কালার রিমুভ করুন' : 'Clear Color'}
+              >
+                {isBn ? 'রিসেট' : 'Clear'}
+              </button>
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="flex items-center space-x-2 whitespace-nowrap">
+            <button
+              type="button"
+              onClick={() => handleBulkMergeInHub(sortedFilteredCartons)}
+              disabled={selectedHubCartonIds.length < 2}
+              className={`px-3 py-1.5 text-xs font-extrabold rounded-lg flex items-center space-x-1 transition-all cursor-pointer ${
+                selectedHubCartonIds.length >= 2
+                  ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md'
+                  : 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed'
+              }`}
+            >
+              <GitFork className="w-3.5 h-3.5" />
+              <span>{isBn ? '🔗 মার্জ' : '🔗 Merge'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => handleExportFormattedExcel(sortedFilteredCartons.filter((c) => selectedHubCartonIds.includes(c.id)))}
+              className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-extrabold rounded-lg flex items-center space-x-1 shadow-md cursor-pointer border border-emerald-500"
+              title={isBn ? 'সিলেক্টকৃত কার্টুন এক্সেল ডাউনলোড' : 'Export Selected to Excel'}
+            >
+              <FileSpreadsheet className="w-4 h-4" />
+              <span>{isBn ? '📥 এক্সেল' : '📥 Excel'}</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSelectedHubCartonIds([])}
+              className="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-slate-800 cursor-pointer"
+              title={isBn ? 'সিলেকশন বাতিল করুন' : 'Clear Selection'}
+            >
+              <X className="w-4 h-4" />
+            </button>
           </div>
         </div>
       )}
