@@ -74,24 +74,22 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
 
     if (!query) return;
 
-    // 1. Find matching cartons across Tracking Number, Master Tracking Number, CTN No, Shipping Mark, Product Name, and Flight Number
+    // 1. Find matching cartons strictly by EXACT match of Tracking Number, Master Tracking Number, CTN No, Packaging Number, or Shipping Mark
     const matchingCartons = liveCartons.filter((c) => {
-      const tNo = (c.tracking_number || '').toLowerCase();
-      const mNo = (c.master_tracking_number || '').toLowerCase();
-      const ctn = (c.ctn_no || '').toLowerCase();
-      const mark = (c.shipping_mark || '').toLowerCase();
-      const prodEn = (c.product_name_en || '').toLowerCase();
-      const prodCn = (c.product_name_cn || '').toLowerCase();
-      const flt = (c.flight_number || '').toLowerCase();
+      const tNo = (c.tracking_number || '').toLowerCase().trim();
+      const mNo = (c.master_tracking_number || '').toLowerCase().trim();
+      const ctn = (c.ctn_no || '').toLowerCase().trim();
+      const pkgNo = (c.packaging_number || '').toLowerCase().trim();
+      const mark = (c.shipping_mark || '').toLowerCase().trim();
+      const grp = (c.master_group_id || '').toLowerCase().trim();
 
       return (
-        tNo.includes(query) ||
-        mNo.includes(query) ||
-        ctn.includes(query) ||
-        mark.includes(query) ||
-        prodEn.includes(query) ||
-        prodCn.includes(query) ||
-        flt.includes(query)
+        tNo === query ||
+        mNo === query ||
+        ctn === query ||
+        pkgNo === query ||
+        mark === query ||
+        grp === query
       );
     });
 

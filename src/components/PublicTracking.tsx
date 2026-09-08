@@ -33,14 +33,23 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
 
     if (!query) return;
 
-    // Search matching Master Tracking Number, CTN No, or Shipping Mark
+    // Search matching exact Master Tracking Number, CTN No, Packaging Number, or Shipping Mark
     const results = cartons.filter((c) => {
-      const matchTracking = (c.tracking_number || '').toLowerCase().includes(query) || (c.master_tracking_number || '').toLowerCase().includes(query);
-      const matchCtn = (c.ctn_no || '').toLowerCase().includes(query);
-      const matchShippingMark = (c.shipping_mark || '').toLowerCase().includes(query);
-      const matchPkg = (c.packaging_number || '').toLowerCase().includes(query);
+      const tNo = (c.tracking_number || '').toLowerCase().trim();
+      const mNo = (c.master_tracking_number || '').toLowerCase().trim();
+      const ctn = (c.ctn_no || '').toLowerCase().trim();
+      const pkgNo = (c.packaging_number || '').toLowerCase().trim();
+      const mark = (c.shipping_mark || '').toLowerCase().trim();
+      const grp = (c.master_group_id || '').toLowerCase().trim();
 
-      return matchTracking || matchCtn || matchShippingMark || matchPkg;
+      return (
+        tNo === query ||
+        mNo === query ||
+        ctn === query ||
+        pkgNo === query ||
+        mark === query ||
+        grp === query
+      );
     });
 
     setMatchedCartons(results);
