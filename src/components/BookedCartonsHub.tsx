@@ -895,7 +895,8 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
     const matchesWh =
       effectiveWhFilter === 'all' ||
-      c.current_warehouse_id === effectiveWhFilter;
+      c.current_warehouse_id === effectiveWhFilter ||
+      c.destination_warehouse_id === effectiveWhFilter;
 
     const matchesStatus = selectedStatus === 'all' || c.status === selectedStatus;
 
