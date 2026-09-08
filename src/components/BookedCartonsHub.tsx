@@ -966,10 +966,19 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   // Unique Shipping Marks for Filter Dropdown
   const allShippingMarks = Array.from(new Set(liveRealtimeCartons.map((c) => c.shipping_mark).filter(Boolean)));
 
-  // KPI Metrics
+  // KPI Metrics & Instant WH Stock Calculations
   const totalCartonCount = filteredCartons.length;
+  const masterCartonCount = new Set(filteredCartons.map((c) => c.master_group_id || c.ctn_no)).size;
   const totalGrossWeight = filteredCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0);
   const totalCbmVolume = filteredCartons.reduce((sum, c) => sum + (c.cbm || 0), 0);
+
+  // Instant Current WH Stock Breakdown (Physical Stock in Active Warehouse)
+  const currentWhStockCartons = accessibleCartons.filter((c) => c.status === 'booked' || c.status === 'received');
+  const currentWhStockMasterCount = new Set(currentWhStockCartons.map((c) => c.master_group_id || c.ctn_no)).size;
+  const currentWhStockGrossWeight = currentWhStockCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0);
+  const currentWhStockCbm = currentWhStockCartons.reduce((sum, c) => sum + (c.cbm || 0), 0);
+  const inTransitCount = accessibleCartons.filter((c) => c.status === 'in_transit').length;
+  const deliveredCount = accessibleCartons.filter((c) => c.status === 'delivered').length;
 
   // Active Customer in Modal (Sorted naturally by carton number: CTN-01, CTN-02...)
   const activeCustomerCartons = React.useMemo(() => {
@@ -1106,23 +1115,60 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         {/* TOP SUMMARY KPIS */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className={`p-3.5 rounded-xl border transition-all ${isDark ? 'bg-[#0F172A] border-slate-700/80' : 'bg-white border-slate-200'}`}>
-            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase font-bold tracking-wider">{isBn ? 'মোট কাস্টমার' : 'Total Customers'}</div>
+            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase font-bold tracking-wider">{isBn ? 'মোট কাস্টমার / শিপমেন্ট' : 'Total Customers / Shipments'}</div>
             <div className="text-base font-extrabold text-blue-600 dark:text-blue-400 mt-1 font-mono">{customerGroupKeys.length} {isBn ? 'জন' : 'Customers'}</div>
+            <div className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">{allShippingMarks.length} {isBn ? 'টি শিপিং মার্ক' : 'Shipping Marks'}</div>
           </div>
 
           <div className={`p-3.5 rounded-xl border transition-all ${isDark ? 'bg-[#0F172A] border-slate-700/80' : 'bg-white border-slate-200'}`}>
-            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase font-bold tracking-wider">{isBn ? 'মোট কার্টুন সংখ্যা' : 'Total Cartons'}</div>
-            <div className={`text-base font-extrabold mt-1 font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>{totalCartonCount} {isBn ? 'টি' : 'Cartons'}</div>
+            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase font-bold tracking-wider">{isBn ? '📦 কার্টুন ইনভেন্টরি সংখ্যা' : 'Carton Inventory Count'}</div>
+            <div className={`text-base font-extrabold mt-1 font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>{totalCartonCount} {isBn ? 'টি কার্টুন' : 'Cartons'}</div>
+            <div className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center space-x-1">
+              <span>📦 {masterCartonCount} {isBn ? 'টি মাস্টার কার্টুন' : 'Master Cartons'}</span>
+            </div>
           </div>
 
           <div className={`p-3.5 rounded-xl border transition-all ${isDark ? 'bg-[#0F172A] border-slate-700/80' : 'bg-white border-slate-200'}`}>
-            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase font-bold tracking-wider">{isBn ? 'মোট গ্রস ওজন' : 'Total Gross Weight'}</div>
+            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase font-bold tracking-wider">{isBn ? '⚖️ মোট গ্রস ওজন' : 'Total Gross Weight'}</div>
             <div className="text-base font-extrabold text-emerald-600 dark:text-emerald-400 mt-1 font-mono">{totalGrossWeight.toFixed(1)} KG</div>
+            <div className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">{isBn ? 'স্টক ওজন: ' : 'Stock Wt: '}{currentWhStockGrossWeight.toFixed(1)} KG</div>
           </div>
 
           <div className={`p-3.5 rounded-xl border transition-all ${isDark ? 'bg-[#0F172A] border-slate-700/80' : 'bg-white border-slate-200'}`}>
-            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase font-bold tracking-wider">{isBn ? 'মোট সিবিএম ভলিউম' : 'Total CBM Volume'}</div>
+            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase font-bold tracking-wider">{isBn ? '📐 মোট সিবিএম ভলিউম' : 'Total CBM Volume'}</div>
             <div className="text-base font-extrabold text-purple-600 dark:text-purple-300 mt-1 font-mono">{totalCbmVolume.toFixed(2)} CBM</div>
+            <div className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">{isBn ? 'স্টক ভলিউম: ' : 'Stock Vol: '}{currentWhStockCbm.toFixed(2)} CBM</div>
+          </div>
+        </div>
+
+        {/* INSTANT INVENTORY STOCK LIVE BANNER */}
+        <div className={`p-3.5 rounded-xl border flex flex-wrap items-center justify-between gap-3 text-xs font-mono font-bold shadow-xs ${
+          isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-blue-50/90 border-blue-200 text-slate-900'
+        }`}>
+          <div className="flex items-center space-x-2">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-blue-700 dark:text-sky-300 font-extrabold uppercase tracking-wide flex items-center space-x-1.5">
+              <Sparkles className="w-4 h-4 text-amber-500" />
+              <span>{isBn ? 'ইনস্ট্যান্ট ওয়্যারহাউজ ইনভেন্টরি স্টক স্ট্যাটাস:' : 'Instant WH Inventory Stock Live Status:'}</span>
+            </span>
+          </div>
+
+          <div className="flex items-center space-x-2.5 flex-wrap">
+            <span className="px-3 py-1 rounded-lg bg-blue-600 text-white font-extrabold shadow-2xs border border-blue-500 flex items-center space-x-1.5">
+              <span>🏬 {isBn ? 'বর্তমান ওয়া্যারহাউজ স্টক:' : 'In WH Stock:'}</span>
+              <strong className="text-yellow-300 text-xs">{currentWhStockCartons.length} {isBn ? 'টি কার্টুন' : 'Cartons'}</strong>
+              <span className="text-[10px] text-blue-100">({currentWhStockMasterCount} {isBn ? 'টি মাস্টার' : 'Master'})</span>
+            </span>
+
+            <span className="px-3 py-1 rounded-lg bg-amber-600 text-white font-extrabold shadow-2xs border border-amber-500 flex items-center space-x-1">
+              <span>✈️ {isBn ? 'ফ্লাইং/ট্রানজিট:' : 'In-Transit:'}</span>
+              <strong className="text-white">{inTransitCount} {isBn ? 'টি' : 'Cartons'}</strong>
+            </span>
+
+            <span className="px-3 py-1 rounded-lg bg-emerald-700 text-white font-extrabold shadow-2xs border border-emerald-600 flex items-center space-x-1">
+              <span>✅ {isBn ? 'ডেলিভার্ড/সম্পন্ন:' : 'Delivered:'}</span>
+              <strong className="text-white">{deliveredCount} {isBn ? 'টি' : 'Cartons'}</strong>
+            </span>
           </div>
         </div>
 
