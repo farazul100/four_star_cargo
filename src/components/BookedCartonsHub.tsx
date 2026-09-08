@@ -934,7 +934,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 }`}
               >
                 <ListFilter className="w-3.5 h-3.5" />
-                <span>{isBn ? '📋 সাধারণ টেবিল লিস্ট' : 'Table List'}</span>
+                <span>{isBn ? '📋 ওয়্যারহাউজ লিস্ট' : 'Warehouse List'}</span>
               </button>
             </div>
           </div>
