@@ -254,12 +254,18 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   const [colorPickerRowId, setColorPickerRowId] = useState<string | null>(null);
 
   const ROW_COLOR_OPTIONS = [
-    { hex: '#FEF08A', name: 'Yellow', labelBn: 'হলুদ', bgClass: 'bg-amber-300' },
-    { hex: '#BBF7D0', name: 'Green', labelBn: 'সবুজ', bgClass: 'bg-emerald-300' },
-    { hex: '#BFDBFE', name: 'Blue', labelBn: 'নীল', bgClass: 'bg-blue-300' },
-    { hex: '#FECACA', name: 'Red', labelBn: 'লাল', bgClass: 'bg-rose-300' },
-    { hex: '#E9D5FF', name: 'Purple', labelBn: 'বেগুনি', bgClass: 'bg-purple-300' },
-    { hex: '#FED7AA', name: 'Orange', labelBn: 'কমলা', bgClass: 'bg-orange-300' },
+    { hex: '#FEF08A', name: 'Light Yellow', labelBn: 'হলুদ' },
+    { hex: '#BBF7D0', name: 'Mint Green', labelBn: 'সবুজ' },
+    { hex: '#BFDBFE', name: 'Sky Blue', labelBn: 'নীল' },
+    { hex: '#FECACA', name: 'Soft Red', labelBn: 'লাল' },
+    { hex: '#E9D5FF', name: 'Soft Purple', labelBn: 'বেগুনি' },
+    { hex: '#FED7AA', name: 'Soft Orange', labelBn: 'কমলা' },
+    { hex: '#A5F3FC', name: 'Light Cyan', labelBn: 'সাইয়ান' },
+    { hex: '#FBCFE8', name: 'Rose Pink', labelBn: 'গোলাপী' },
+    { hex: '#D9F99D', name: 'Lime Green', labelBn: 'লাইম' },
+    { hex: '#FDE047', name: 'Golden Yellow', labelBn: 'সোনালী' },
+    { hex: '#E2E8F0', name: 'Silver Gray', labelBn: 'ধূসর' },
+    { hex: '#E7E5E4', name: 'Warm Tan', labelBn: 'বাদামী' },
   ];
 
   const handleApplyRowColor = (cartonIds: string[], colorHex: string | null) => {
@@ -1573,9 +1579,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             <div className="flex items-center space-x-2 bg-white dark:bg-slate-800 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 shadow-2xs">
               <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200 flex items-center space-x-1">
                 <Palette className="w-3.5 h-3.5 text-amber-500" />
-                <span>{isBn ? 'র কালার হাইলাইট:' : 'Row Color Highlight:'}</span>
+                <span>{isBn ? 'র ব্যাকগ্রাউন্ড কালার:' : 'Row Background Color:'}</span>
               </span>
-              <div className="flex items-center space-x-1.5">
+              <div className="flex items-center space-x-1.5 flex-wrap">
                 {ROW_COLOR_OPTIONS.map((opt) => (
                   <button
                     key={opt.hex}
@@ -1587,11 +1593,28 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       }
                       handleApplyRowColor(selectedHubCartonIds, opt.hex);
                     }}
-                    className={`w-4.5 h-4.5 rounded-full border border-slate-400 hover:scale-125 transition-all cursor-pointer shadow-xs ${opt.bgClass}`}
+                    className="w-4.5 h-4.5 rounded-full border border-slate-400 hover:scale-125 transition-all cursor-pointer shadow-2xs"
                     style={{ backgroundColor: opt.hex }}
                     title={isBn ? `সিলেক্টকৃত ${selectedHubCartonIds.length}টি র-এ ${opt.labelBn} কালার সেট করুন` : `Apply ${opt.name} color to selected ${selectedHubCartonIds.length} rows`}
                   />
                 ))}
+                {/* Custom Color Input Picker */}
+                <label
+                  className="relative w-4.5 h-4.5 rounded-full border border-slate-400 cursor-pointer overflow-hidden flex items-center justify-center bg-gradient-to-br from-red-400 via-green-400 to-blue-500 hover:scale-125 transition-transform shadow-2xs"
+                  title={isBn ? 'যেকোনো কাস্টম কালার নির্বাচন করুন (Custom Color Picker)' : 'Choose Custom Color'}
+                >
+                  <input
+                    type="color"
+                    onChange={(e) => {
+                      if (selectedHubCartonIds.length === 0) {
+                        alert(isBn ? 'অনুগ্রহ করে প্রথমে বামের টিক চিহ্ন দিয়ে অন্তত ১টি র সিলেক্ট করুন।' : 'Please select at least one row checkbox first.');
+                        return;
+                      }
+                      handleApplyRowColor(selectedHubCartonIds, e.target.value);
+                    }}
+                    className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                  />
+                </label>
                 {selectedHubCartonIds.length > 0 && (
                   <button
                     type="button"
@@ -1699,17 +1722,15 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                   const slNum = getSlNumberForCartonRow(sortedFilteredCartons, idx);
                   const isSelected = selectedHubCartonIds.includes(c.id);
 
+                  const rowBgStyle = !isSelected && c.row_color ? {
+                    backgroundColor: isDark ? `${c.row_color}66` : c.row_color,
+                    color: isDark ? '#FFFFFF' : '#0F172A',
+                  } : undefined;
+
                   return (
                     <tr
                       key={c.id}
-                      style={
-                        !isSelected && c.row_color
-                          ? {
-                              backgroundColor: isDark ? `${c.row_color}55` : c.row_color,
-                              color: isDark ? '#FFFFFF' : '#0F172A',
-                            }
-                          : undefined
-                      }
+                      style={rowBgStyle}
                       className={`transition-colors duration-150 ${
                         isSelected
                           ? isDark
@@ -1727,7 +1748,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       }`}
                     >
                       {/* Checkbox Column */}
-                      <td className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50">
+                      <td style={rowBgStyle} className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50">
                         <input
                           type="checkbox"
                           checked={isSelected}
@@ -1740,8 +1761,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       {spanInfo.isFirst && (
                         <td
                           rowSpan={spanInfo.rowSpan}
+                          style={rowBgStyle}
                           className={`p-3 text-center font-mono align-middle font-bold border-r border-slate-200/60 dark:border-slate-700/50 ${
-                            spanInfo.isMerged
+                            spanInfo.isMerged && !c.row_color
                               ? isDark
                                 ? 'bg-[#1E1B4B] text-indigo-200 border-r-2 border-r-indigo-400'
                                 : 'bg-indigo-50/80 text-indigo-800 border-r-2 border-r-indigo-500'
@@ -1758,8 +1780,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       {spanInfo.isFirst && (
                         <td
                           rowSpan={spanInfo.rowSpan}
+                          style={rowBgStyle}
                           className={`p-3 font-mono font-bold align-middle border-r border-slate-200/60 dark:border-slate-700/50 ${
-                            spanInfo.isMerged
+                            spanInfo.isMerged && !c.row_color
                               ? isDark
                                 ? 'bg-[#1E1B4B] text-indigo-200'
                                 : 'bg-indigo-50/80 text-indigo-900'
@@ -1781,6 +1804,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       {spanInfo.isFirst && (
                         <td
                           rowSpan={spanInfo.rowSpan}
+                          style={rowBgStyle}
                           className="p-3 font-mono font-bold align-middle border-r border-slate-200/60 dark:border-slate-700/50"
                         >
                           <span className={`font-mono font-extrabold text-xs tracking-wide ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
@@ -1789,7 +1813,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                         </td>
                       )}
 
-                      <td className="p-3 font-mono border-r border-slate-200/60 dark:border-slate-700/50">
+                      <td style={rowBgStyle} className="p-3 font-mono border-r border-slate-200/60 dark:border-slate-700/50">
                         <div className="flex items-center space-x-1">
                           {spanInfo.isMerged && !spanInfo.isFirst && (
                             <span className={`text-[10px] font-mono font-bold ${isDark ? 'text-indigo-300' : 'text-indigo-500'}`}>└</span>
@@ -1810,44 +1834,44 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                         )}
                       </td>
 
-                      <td className={`p-3 font-mono border-r truncate text-xs font-semibold ${
+                      <td style={rowBgStyle} className={`p-3 font-mono border-r truncate text-xs font-semibold ${
                         isDark ? 'text-slate-100 border-slate-700' : 'text-slate-800 border-slate-200'
                       }`}>
                         {c.tracking_number}
                       </td>
 
-                      <td className="p-3 border-r border-slate-200/60 dark:border-slate-700/50">
+                      <td style={rowBgStyle} className="p-3 border-r border-slate-200/60 dark:border-slate-700/50">
                         <div className={`font-extrabold text-xs leading-snug truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.product_name_en}</div>
                         {c.product_name_cn && (
                           <div className={`text-[10px] font-medium truncate mt-0.5 ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>{c.product_name_cn}</div>
                         )}
                       </td>
 
-                      <td className={`p-3 text-center font-mono border-r text-xs font-extrabold ${
+                      <td style={rowBgStyle} className={`p-3 text-center font-mono border-r text-xs font-extrabold ${
                         isDark ? 'text-white border-slate-700' : 'text-slate-900 border-slate-200'
                       }`}>
                         {c.quantity} pcs
                       </td>
 
-                      <td className={`p-3 text-center font-mono border-r text-xs font-semibold ${
+                      <td style={rowBgStyle} className={`p-3 text-center font-mono border-r text-xs font-semibold ${
                         isDark ? 'text-slate-100 border-slate-700' : 'text-slate-700 border-slate-200'
                       }`}>
                         {c.net_weight} kg
                       </td>
 
-                      <td className="p-3 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50">
+                      <td style={rowBgStyle} className="p-3 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50">
                         <span className={`font-mono text-xs font-extrabold ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
                           {c.gross_weight} kg
                         </span>
                       </td>
 
-                      <td className="p-3 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50">
+                      <td style={rowBgStyle} className="p-3 text-center font-mono border-r border-slate-200/60 dark:border-slate-700/50">
                         <span className={`font-mono text-xs font-extrabold ${isDark ? 'text-fuchsia-300' : 'text-purple-700'}`}>
                           {c.cbm}
                         </span>
                       </td>
 
-                      <td className={`p-3 border-r text-xs font-semibold truncate ${
+                      <td style={rowBgStyle} className={`p-3 border-r text-xs font-semibold truncate ${
                         isDark ? 'text-slate-100 border-slate-700' : 'text-slate-800 border-slate-200'
                       }`}>
                         {c.route_name ? (
@@ -1859,7 +1883,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                         )}
                       </td>
 
-                      <td className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50">
+                      <td style={rowBgStyle} className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50">
                         <span className={`inline-flex items-center gap-1.5 text-[11px] font-extrabold font-mono uppercase tracking-wider ${
                           c.status === 'booked'
                             ? isDark ? 'text-sky-300' : 'text-blue-700'
@@ -1876,7 +1900,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                         </span>
                       </td>
 
-                      <td className="p-3 text-center">
+                      <td style={rowBgStyle} className="p-3 text-center">
                         <div className="flex items-center justify-center space-x-1.5">
                           {/* Row Color Picker Button & Popover */}
                           <div className="relative inline-block">
@@ -1894,31 +1918,49 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             </button>
 
                             {colorPickerRowId === c.id && (
-                              <div className="absolute right-0 bottom-full mb-1.5 z-50 p-2 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 flex items-center space-x-1.5 animate-in zoom-in-95 min-w-[180px]">
-                                {ROW_COLOR_OPTIONS.map((opt) => (
+                              <div className="absolute right-0 bottom-full mb-1.5 z-50 p-2.5 bg-white dark:bg-slate-900 rounded-xl shadow-2xl border border-slate-200 dark:border-slate-700 animate-in zoom-in-95 w-56">
+                                <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mb-1.5 uppercase font-mono">
+                                  {isBn ? 'র ব্যাকগ্রাউন্ড কালার নির্বাচন করুন:' : 'Select Row Background Color:'}
+                                </div>
+                                <div className="grid grid-cols-6 gap-1.5">
+                                  {ROW_COLOR_OPTIONS.map((opt) => (
+                                    <button
+                                      key={opt.hex}
+                                      type="button"
+                                      onClick={() => {
+                                        handleApplyRowColor([c.id], opt.hex);
+                                        setColorPickerRowId(null);
+                                      }}
+                                      className="w-6 h-6 rounded-full border border-slate-300 hover:scale-125 transition-transform cursor-pointer shadow-2xs"
+                                      style={{ backgroundColor: opt.hex }}
+                                      title={isBn ? opt.labelBn : opt.name}
+                                    />
+                                  ))}
+                                </div>
+                                <div className="mt-2 pt-2 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between">
+                                  <label className="flex items-center space-x-1 text-[11px] font-bold text-blue-600 dark:text-blue-400 cursor-pointer hover:underline">
+                                    <input
+                                      type="color"
+                                      onChange={(e) => {
+                                        handleApplyRowColor([c.id], e.target.value);
+                                        setColorPickerRowId(null);
+                                      }}
+                                      className="w-4 h-4 rounded cursor-pointer border-none p-0 bg-transparent"
+                                    />
+                                    <span>{isBn ? '🎨 কাস্টম কালার' : '🎨 Custom Color'}</span>
+                                  </label>
+
                                   <button
-                                    key={opt.hex}
                                     type="button"
                                     onClick={() => {
-                                      handleApplyRowColor([c.id], opt.hex);
+                                      handleApplyRowColor([c.id], null);
                                       setColorPickerRowId(null);
                                     }}
-                                    className="w-5 h-5 rounded-full border border-slate-400 hover:scale-125 transition-transform cursor-pointer shadow-2xs"
-                                    style={{ backgroundColor: opt.hex }}
-                                    title={isBn ? opt.labelBn : opt.name}
-                                  />
-                                ))}
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    handleApplyRowColor([c.id], null);
-                                    setColorPickerRowId(null);
-                                  }}
-                                  className="w-5 h-5 rounded-full border border-slate-400 bg-slate-200 dark:bg-slate-700 text-[10px] font-bold text-slate-700 dark:text-slate-200 flex items-center justify-center cursor-pointer hover:bg-red-500 hover:text-white transition-colors"
-                                  title={isBn ? 'কালার রিমুভ করুন' : 'Remove Color'}
-                                >
-                                  ✕
-                                </button>
+                                    className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-100 dark:bg-slate-800 text-red-600 dark:text-red-400 hover:bg-red-500 hover:text-white transition-colors cursor-pointer"
+                                  >
+                                    {isBn ? 'রিসেট' : 'Clear'}
+                                  </button>
+                                </div>
                               </div>
                             )}
                           </div>
