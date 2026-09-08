@@ -122,6 +122,8 @@ export interface Carton {
   transit_warehouse_id?: string;
   transit_warehouse_name?: string;
   route_name?: string;
+  rate_per_kg?: number; // BDT per kg rate assigned during customer mapping
+  billed_amount?: number; // Total billed charge (final_weight * rate_per_kg)
 }
 
 export interface FlyingProposal {
@@ -160,6 +162,7 @@ export interface Customer {
   total_due: number;
   total_paid: number;
   total_billed?: number;
+  rate_per_kg?: number; // Standard/custom shipping rate per KG (৳/KG)
   status?: 'active' | 'vip' | 'blocked';
   created_at: string;
 }

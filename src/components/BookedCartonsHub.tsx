@@ -29,6 +29,7 @@ import {
 import { Carton, Warehouse, User as UserType, Language, Customer } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction, subscribeToDbUpdates } from '../lib/db';
+import { recalculateCustomerLedgerAndBilling } from '../lib/ledgerHelper';
 import { CartonInvoicesModal } from './CartonInvoicesModal';
 
 interface BookedCartonsHubProps {
@@ -238,6 +239,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   // Customer Assignment / Mapping Modal States
   const [mapCustomerModalMark, setMapCustomerModalMark] = useState<string | null>(null);
   const [mapSelectedCustomerId, setMapSelectedCustomerId] = useState<string>('');
+  const [mapRatePerKg, setMapRatePerKg] = useState<number>(750);
   const [isNewCustMapping, setIsNewCustMapping] = useState(false);
   const [newCustMappingName, setNewCustMappingName] = useState('');
   const [newCustMappingPhone, setNewCustMappingPhone] = useState('');
@@ -263,22 +265,32 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       return matchMark === targetKey || matchTrk === targetKey || matchMasterTrk === targetKey || matchGroup === targetKey;
     });
 
+    let selectedCustId = '';
+    let initialRate = targetCarton?.rate_per_kg || 750;
+
     if (targetCarton && targetCarton.customer_id) {
       const existingCust = dbCusts.find((c) => c.id === targetCarton.customer_id);
       if (existingCust) {
-        setMapSelectedCustomerId(existingCust.id);
-        return;
+        selectedCustId = existingCust.id;
+        initialRate = existingCust.rate_per_kg || targetCarton.rate_per_kg || 750;
       }
     }
 
-    const matchingCust = dbCusts.find(
-      (c) => c.shipping_mark && (c.shipping_mark.toLowerCase().trim() === targetKey || targetCarton?.shipping_mark?.toLowerCase().trim() === c.shipping_mark.toLowerCase().trim())
-    );
-    if (matchingCust) {
-      setMapSelectedCustomerId(matchingCust.id);
-    } else if (dbCusts.length > 0) {
-      setMapSelectedCustomerId(dbCusts[0].id);
+    if (!selectedCustId) {
+      const matchingCust = dbCusts.find(
+        (c) => c.shipping_mark && (c.shipping_mark.toLowerCase().trim() === targetKey || targetCarton?.shipping_mark?.toLowerCase().trim() === c.shipping_mark.toLowerCase().trim())
+      );
+      if (matchingCust) {
+        selectedCustId = matchingCust.id;
+        initialRate = matchingCust.rate_per_kg || targetCarton?.rate_per_kg || 750;
+      } else if (dbCusts.length > 0) {
+        selectedCustId = dbCusts[0].id;
+        initialRate = dbCusts[0].rate_per_kg || 750;
+      }
     }
+
+    setMapSelectedCustomerId(selectedCustId);
+    setMapRatePerKg(initialRate && initialRate > 0 ? initialRate : 750);
   };
 
   const handleSaveCustomerMapping = (e: React.FormEvent) => {
@@ -288,6 +300,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     const dbData = getHostingerDbData();
     let currentCusts = dbData.customers || [];
     let targetCust: Customer | undefined;
+    const finalRatePerKg = Number(mapRatePerKg) > 0 ? Number(mapRatePerKg) : 750;
 
     if (isNewCustMapping) {
       if (!newCustMappingName.trim()) return;
@@ -301,6 +314,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         total_billed: 0,
         total_paid: 0,
         total_due: 0,
+        rate_per_kg: finalRatePerKg,
         created_at: new Date().toISOString(),
       };
       currentCusts = [targetCust, ...currentCusts];
@@ -311,7 +325,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     if (!targetCust) return;
 
     const updatedCusts = currentCusts.map((c) =>
-      c.id === targetCust!.id ? { ...c, shipping_mark: mapCustomerModalMark } : c
+      c.id === targetCust!.id
+        ? { ...c, shipping_mark: mapCustomerModalMark, rate_per_kg: finalRatePerKg }
+        : c
     );
     saveHostingerDbData('fsc_vps_customers', updatedCusts);
 
@@ -334,6 +350,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
           customer_id: targetCust!.id,
           customer_code: targetCust!.customer_code,
           customer_name: targetCust!.name,
+          rate_per_kg: finalRatePerKg,
           updated_at: new Date().toISOString(),
         };
       }
@@ -341,10 +358,13 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     });
 
     saveHostingerDbData('fsc_vps_cartons', updatedCartons);
-    setLiveRealtimeCartons(updatedCartons);
+
+    // Auto recalculate Customer Billing & Ledger entries using BD Warehouse final weight & rate_per_kg
+    const recalculated = recalculateCustomerLedgerAndBilling(targetCust.id);
+    setLiveRealtimeCartons(recalculated.cartons);
 
     if (onUpdateCarton) {
-      updatedCartons.forEach((c) => {
+      recalculated.cartons.forEach((c) => {
         const matchMark = (c.shipping_mark || '').toLowerCase().trim();
         const matchTrk = (c.tracking_number || '').toLowerCase().trim();
         const matchMasterTrk = (c.master_tracking_number || '').toLowerCase().trim();
@@ -360,7 +380,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       'MAP_CUSTOMER_TO_MARK',
       'carton',
       mapCustomerModalMark,
-      `অপারেশন টিম শিপিং মার্ক / ট্র্যাকিং ${mapCustomerModalMark} এর সাথে কাস্টমার "${targetCust.name}" সফলভাবে ট্যাগ করেছেন`
+      `অপারেশন টিম শিপিং মার্ক ${mapCustomerModalMark} এর সাথে কাস্টমার "${targetCust.name}" (পার কেজি রেট ৳${finalRatePerKg}) ট্যাগ এবং কাস্টমার লেজার আপডেট করেছেন`
     );
 
     setMapCustomerModalMark(null);
@@ -2243,6 +2263,32 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                   </div>
                 </div>
               )}
+
+              {/* Rate Per KG Input Field */}
+              <div>
+                <label className={`block mb-1 font-extrabold ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                  {isBn ? 'শিপিং চার্জ রেট পার কেজি (৳/KG) *' : 'Shipping Rate Per KG (৳/KG) *'}
+                </label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 font-extrabold text-emerald-500 text-xs">৳</span>
+                  <input
+                    type="number"
+                    required
+                    min={1}
+                    value={mapRatePerKg}
+                    onChange={(e) => setMapRatePerKg(parseFloat(e.target.value) || 0)}
+                    placeholder="e.g. 750"
+                    className={`w-full border rounded-xl pl-7 pr-3 py-2 outline-none font-mono font-black text-sm ${
+                      isDark ? 'bg-[#0F172A] border-slate-600 text-emerald-300' : 'bg-white border-slate-300 text-emerald-700'
+                    }`}
+                  />
+                </div>
+                <p className="text-[11px] text-slate-400 mt-1 font-normal">
+                  {isBn
+                    ? '💡 বাংলাদেশ ওয়্যারহাউজে চুড়ান্ত পরিমাপকৃত ওজনের উপর এই রেট অনুযায়ী কাস্টমার অটোমেটিক লেজার ডেবিট চার্জ যুক্ত হবে।'
+                    : '💡 Customer auto-ledger charge will be calculated using this rate on final BD Warehouse weight.'}
+                </p>
+              </div>
             </div>
 
             <div className="flex justify-end space-x-2 pt-2">

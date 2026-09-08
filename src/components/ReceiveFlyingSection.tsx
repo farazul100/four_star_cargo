@@ -11,9 +11,9 @@ import {
   ArrowRight,
 } from 'lucide-react';
 import { FlyingProposal, Carton, Warehouse, User, Language } from '../types';
-import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
 import { getHostingerDbData, saveHostingerDbData, saveHostingerDbMultiData, logSystemAuditAction, formatWarehouseNameEn } from '../lib/db';
+import { recalculateCustomerLedgerAndBilling } from '../lib/ledgerHelper';
 
 interface ReceiveFlyingSectionProps {
   proposals?: FlyingProposal[];
@@ -308,6 +308,8 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
     setCartons(updatedCartons);
     saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+    const res1 = recalculateCustomerLedgerAndBilling();
+    if (res1.cartons) setCartons(res1.cartons);
 
     // Find the carton's flight number and update the proposal's total_weight in Super Admin DB
     const targetCartonObj = updatedCartons.find(
@@ -373,6 +375,8 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
     setCartons(updatedCartons);
     saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+    const resBulk = recalculateCustomerLedgerAndBilling();
+    if (resBulk.cartons) setCartons(resBulk.cartons);
 
     // Check if all flight cartons are received
     const flightCartons = updatedCartons.filter(
@@ -448,6 +452,8 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
     // 3. Save to Hostinger DB
     saveHostingerDbData('fsc_vps_proposals', updatedProposals);
     saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+    const resCalib = recalculateCustomerLedgerAndBilling();
+    if (resCalib.cartons) setCartons(resCalib.cartons);
 
     addToast(
       isBn
