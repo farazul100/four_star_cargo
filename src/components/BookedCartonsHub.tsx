@@ -1122,36 +1122,74 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
           </div>
         </div>
 
-        {/* TOP SUMMARY KPIS */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className={`p-3.5 rounded-xl border transition-all ${isDark ? 'bg-[#0F172A] border-slate-700/80' : 'bg-white border-slate-200'}`}>
-            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase font-bold tracking-wider">{isBn ? 'মোট কাস্টমার / শিপমেন্ট' : 'Total Customers / Shipments'}</div>
-            <div className="text-base font-extrabold text-blue-600 dark:text-blue-400 mt-1 font-mono">{customerGroupKeys.length} {isBn ? 'জন' : 'Customers'}</div>
-            <div className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">{allShippingMarks.length} {isBn ? 'টি শিপিং মার্ক' : 'Shipping Marks'}</div>
-          </div>
-
-          <div className={`p-3.5 rounded-xl border transition-all ${isDark ? 'bg-[#0F172A] border-slate-700/80' : 'bg-white border-slate-200'}`}>
-            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase font-bold tracking-wider">{isBn ? '📦 কার্টুন ইনভেন্টরি সংখ্যা' : 'Carton Inventory Count'}</div>
-            <div className={`text-base font-extrabold mt-1 font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>{totalCartonCount} {isBn ? 'টি কার্টুন' : 'Cartons'}</div>
-            <div className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 mt-0.5 flex items-center space-x-1">
-              <span>📦 {masterCartonCount} {isBn ? 'টি মাস্টার কার্টুন' : 'Master Cartons'} ({sortedFilteredCartons.length > 0 ? getSlNumberForCartonRow(sortedFilteredCartons, sortedFilteredCartons.length - 1) : 0} {isBn ? 'টি টেবিল র' : 'Table Rows'})</span>
+        {/* TOP SUMMARY KPIS - ULTRA CLEAR WAREHOUSE STOCK CARDS */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+          {/* CARD 1: Physical Warehouse Stock Right Now */}
+          <div className={`p-4 rounded-xl border transition-all shadow-sm ${
+            isDark ? 'bg-[#0F172A] border-blue-500/40 text-white' : 'bg-blue-50/70 border-blue-200 text-slate-900'
+          }`}>
+            <div className="text-[11px] text-blue-600 dark:text-sky-300 font-mono uppercase font-black tracking-wider flex items-center space-x-1.5">
+              <span>🏬 {isBn ? 'এখন ওয়্যারহাউজে স্টকে আছে' : 'Current Stock in WH'}</span>
+            </div>
+            <div className="text-xl md:text-2xl font-black text-blue-700 dark:text-yellow-300 mt-1 font-mono">
+              {currentWhStockCartons.length} {isBn ? 'টি কার্টুন' : 'Cartons'}
+            </div>
+            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1 flex flex-wrap items-center gap-x-2">
+              <span>⚖️ {currentWhStockGrossWeight.toFixed(1)} KG</span>
+              <span>•</span>
+              <span>📐 {currentWhStockCbm.toFixed(2)} CBM</span>
             </div>
           </div>
 
-          <div className={`p-3.5 rounded-xl border transition-all ${isDark ? 'bg-[#0F172A] border-slate-700/80' : 'bg-white border-slate-200'}`}>
-            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase font-bold tracking-wider">{isBn ? '⚖️ মোট গ্রস ওজন' : 'Total Gross Weight'}</div>
-            <div className="text-base font-extrabold text-emerald-600 dark:text-emerald-400 mt-1 font-mono">{totalGrossWeight.toFixed(1)} KG</div>
-            <div className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">{isBn ? 'স্টক ওজন: ' : 'Stock Wt: '}{currentWhStockGrossWeight.toFixed(1)} KG</div>
+          {/* CARD 2: Total Booked History So Far */}
+          <div className={`p-4 rounded-xl border transition-all shadow-sm ${
+            isDark ? 'bg-[#0F172A] border-purple-500/40 text-white' : 'bg-purple-50/70 border-purple-200 text-slate-900'
+          }`}>
+            <div className="text-[11px] text-purple-600 dark:text-purple-300 font-mono uppercase font-black tracking-wider flex items-center space-x-1.5">
+              <span>📋 {isBn ? 'এখন অব্দি মোট বুকিং করা হয়েছে' : 'Total Booked So Far'}</span>
+            </div>
+            <div className="text-xl md:text-2xl font-black text-purple-700 dark:text-purple-300 mt-1 font-mono">
+              {whScopedCartons.length} {isBn ? 'টি কার্টুন' : 'Cartons'}
+            </div>
+            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1 flex items-center space-x-2">
+              <span>👤 {customerGroupKeys.length} {isBn ? 'জন কাস্টমার' : 'Customers'}</span>
+              <span>•</span>
+              <span>🏷️ {allShippingMarks.length} {isBn ? 'টি মার্ক' : 'Marks'}</span>
+            </div>
           </div>
 
-          <div className={`p-3.5 rounded-xl border transition-all ${isDark ? 'bg-[#0F172A] border-slate-700/80' : 'bg-white border-slate-200'}`}>
-            <div className="text-[10px] text-slate-500 dark:text-slate-400 font-mono uppercase font-bold tracking-wider">{isBn ? '📐 মোট সিবিএম ভলিউম' : 'Total CBM Volume'}</div>
-            <div className="text-base font-extrabold text-purple-600 dark:text-purple-300 mt-1 font-mono">{totalCbmVolume.toFixed(2)} CBM</div>
-            <div className="text-[10px] font-semibold text-slate-500 dark:text-slate-400 mt-0.5">{isBn ? 'স্টক ভলিউম: ' : 'Stock Vol: '}{currentWhStockCbm.toFixed(2)} CBM</div>
+          {/* CARD 3: In Transit / Flying */}
+          <div className={`p-4 rounded-xl border transition-all shadow-sm ${
+            isDark ? 'bg-[#0F172A] border-amber-500/40 text-white' : 'bg-amber-50/70 border-amber-200 text-slate-900'
+          }`}>
+            <div className="text-[11px] text-amber-600 dark:text-amber-300 font-mono uppercase font-black tracking-wider flex items-center space-x-1.5">
+              <span>✈️ {isBn ? 'ফ্লাইং / ট্রানজিটে আছে' : 'In Transit / Flying'}</span>
+            </div>
+            <div className="text-xl md:text-2xl font-black text-amber-600 dark:text-amber-400 mt-1 font-mono">
+              {inTransitCount} {isBn ? 'টি কার্টুন' : 'Cartons'}
+            </div>
+            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1">
+              {isBn ? 'গন্তব্য ওয়্যারহাউজের পথে' : 'En route to destination'}
+            </div>
+          </div>
+
+          {/* CARD 4: Delivered */}
+          <div className={`p-4 rounded-xl border transition-all shadow-sm ${
+            isDark ? 'bg-[#0F172A] border-emerald-500/40 text-white' : 'bg-emerald-50/70 border-emerald-200 text-slate-900'
+          }`}>
+            <div className="text-[11px] text-emerald-600 dark:text-emerald-300 font-mono uppercase font-black tracking-wider flex items-center space-x-1.5">
+              <span>✅ {isBn ? 'ডেলিভারি সম্পন্ন' : 'Delivered Cartons'}</span>
+            </div>
+            <div className="text-xl md:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-1 font-mono">
+              {deliveredCount} {isBn ? 'টি কার্টুন' : 'Cartons'}
+            </div>
+            <div className="text-[10px] font-bold text-slate-500 dark:text-slate-400 mt-1">
+              {isBn ? 'কাস্টমার রিসিভ করেছেন' : 'Delivered to customer'}
+            </div>
           </div>
         </div>
 
-        {/* INSTANT INVENTORY STOCK LIVE BANNER */}
+        {/* INSTANT INVENTORY STOCK LIVE BANNER WITH CLEAR NOTE */}
         <div className={`p-3.5 rounded-xl border flex flex-wrap items-center justify-between gap-3 text-xs font-mono font-bold shadow-xs ${
           isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-blue-50/90 border-blue-200 text-slate-900'
         }`}>
@@ -1167,7 +1205,6 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             <span className="px-3 py-1 rounded-lg bg-blue-600 text-white font-extrabold shadow-2xs border border-blue-500 flex items-center space-x-1.5">
               <span>🏬 {isBn ? 'বর্তমান ওয়া্যারহাউজ স্টক:' : 'In WH Stock:'}</span>
               <strong className="text-yellow-300 text-xs">{currentWhStockCartons.length} {isBn ? 'টি কার্টুন' : 'Cartons'}</strong>
-              <span className="text-[10px] text-blue-100">({currentWhStockMasterCount} {isBn ? 'টি মাস্টার' : 'Master'})</span>
             </span>
 
             <span className="px-3 py-1 rounded-lg bg-amber-600 text-white font-extrabold shadow-2xs border border-amber-500 flex items-center space-x-1">
