@@ -1538,7 +1538,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
             </button>
 
             <button
-              onClick={handleExportCSV}
+              onClick={() => handleExportCSVReport(stats.entries, [], selectedCust.name)}
               className={`py-2 px-3 rounded-none text-xs font-normal border transition-all flex items-center space-x-1 cursor-pointer ${
                 isDark ? 'bg-[#0B1622] text-[#8FA3AD] border-[#1E3247]' : 'bg-slate-100 text-slate-700 border-slate-300'
               }`}
