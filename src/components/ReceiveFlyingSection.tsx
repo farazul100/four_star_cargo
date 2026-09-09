@@ -757,7 +757,11 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
             </div>
 
             <div className="space-y-4 text-xs font-normal">
-              <div className="p-3 rounded-xl bg-blue-500/20 border border-blue-500/30 text-sky-200 font-semibold leading-relaxed">
+              <div className={`p-3 rounded-xl border text-xs font-semibold leading-relaxed ${
+                isDark
+                  ? 'bg-blue-950/70 border-blue-700/80 text-sky-200'
+                  : 'bg-blue-50 border-blue-300 text-blue-950 font-extrabold'
+              }`}>
                 💡 {isBn
                   ? 'নোট: বাংলাদেশে আসার পর প্রোডাক্টের যে ওজন পরিমাপ করা হবে, সেটিই চূড়ান্ত সত্য ওজন হিসেবে গণ্য হবে এবং গ্রাহকের বিলে হিসাব হবে।'
                   : 'Note: Official gross weight measured upon arrival in Bangladesh is the final billable weight.'}
