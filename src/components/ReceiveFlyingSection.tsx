@@ -603,7 +603,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
                   return (
                     <tr key={gf.groupKey} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="p-3.5 font-mono text-sky-300 font-extrabold border-r border-b border-slate-200 dark:border-slate-700">
+                      <td className={`p-3.5 font-mono font-extrabold border-r border-b border-slate-200 dark:border-slate-700 ${isDark ? 'text-sky-300' : 'text-blue-900'}`}>
                         {gf.date || '2026-08-16'}
                       </td>
                       <td className="p-3.5 font-normal text-slate-900 dark:text-white border-r border-b border-slate-200 dark:border-slate-700">
@@ -611,7 +611,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                         <div className={`text-[10px] font-mono mt-0.5 font-semibold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>Flight Group: {gf.flight_number}</div>
                       </td>
                       <td className="p-3.5 font-mono text-slate-700 dark:text-slate-300 border-r border-b border-slate-200 dark:border-slate-700">
-                        <div className="font-extrabold text-sky-300">{gf.flight_number}</div>
+                        <div className={`font-extrabold ${isDark ? 'text-sky-300' : 'text-blue-900'}`}>{gf.flight_number}</div>
                         <div className={`text-[10px] mt-0.5 font-semibold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>AWB: {gf.awb_number}</div>
                       </td>
                       <td className="p-3.5 font-normal border-r border-b border-slate-200 dark:border-slate-700">
@@ -620,31 +620,43 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                           <span className={`text-[10px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>➔ 🇧🇩 DAC</span>
                         </span>
                       </td>
-                      <td className="p-3.5 text-sky-300 font-extrabold border-r border-b border-slate-200 dark:border-slate-700">
-                        <span className="font-extrabold text-sm text-white">{gf.total_cartons}</span> Cartons
+                      <td className={`p-3.5 font-extrabold border-r border-b border-slate-200 dark:border-slate-700 ${isDark ? 'text-sky-300' : 'text-slate-800'}`}>
+                        <span className={`font-extrabold text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>{gf.total_cartons}</span> {isBn ? 'কার্টুন' : 'Cartons'}
                       </td>
-                      <td className="p-3.5 font-mono font-extrabold text-white border-r border-b border-slate-200 dark:border-slate-700">
+                      <td className={`p-3.5 font-mono font-extrabold border-r border-b border-slate-200 dark:border-slate-700 ${isDark ? 'text-white' : 'text-slate-900'}`}>
                         <div className="flex items-center space-x-1.5">
-                          <span className="font-extrabold text-sm text-white">{gf.total_weight} kg</span>
+                          <span className={`font-extrabold text-sm ${isDark ? 'text-white' : 'text-slate-900'}`}>{gf.total_weight} kg</span>
                           <button
                             type="button"
                             onClick={() => handleOpenWeightCalibModal(gf.sampleProposal)}
-                            className="p-1 px-1.5 rounded-lg bg-blue-500/20 text-sky-300 hover:bg-blue-500/30 cursor-pointer transition-colors text-[10px] font-extrabold border border-blue-500/30"
+                            className={`p-1 px-2 rounded-md cursor-pointer transition-colors text-[11px] font-bold border ${
+                              isDark
+                                ? 'bg-blue-950/70 text-sky-300 hover:bg-blue-900/80 border-blue-700'
+                                : 'bg-blue-50 text-blue-900 hover:bg-blue-100 border-blue-300 font-extrabold shadow-2xs'
+                            }`}
                             title={isBn ? 'বাংলাদেশে মেপে পাওয়া ওজন টিউন/এডিট করুন' : 'Calibrate Official BD Weight'}
                           >
-                            ⚖️ এডিট
+                            ⚖️ {isBn ? 'এডিট' : 'Edit'}
                           </button>
                         </div>
                       </td>
                       <td className="p-3.5 border-r border-b border-slate-200 dark:border-slate-700">
                         {isArrivedBd ? (
-                          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold border border-emerald-500/30">
-                            <span>🛬 বাংলাদেশ এয়ারপোর্টে প্রাপ্ত</span>
+                          <span className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[10px] font-extrabold border ${
+                            isDark
+                              ? 'bg-emerald-950/70 text-emerald-300 border-emerald-800'
+                              : 'bg-emerald-50 text-emerald-900 border-emerald-300 font-extrabold shadow-2xs'
+                          }`}>
+                            <span>🛬 {isBn ? 'বাংলাদেশ এয়ারপোর্টে প্রাপ্ত' : 'Arrived at BD Airport'}</span>
                           </span>
                         ) : (
-                          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-blue-500/20 text-sky-300 text-[10px] font-extrabold border border-blue-500/30">
-                            <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-ping"></span>
-                            <span>✈️ মিড-এিয়ার ফ্লাইটে চলমান</span>
+                          <span className={`inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg text-[10px] font-extrabold border ${
+                            isDark
+                              ? 'bg-blue-950/70 text-sky-300 border-blue-800'
+                              : 'bg-blue-50 text-blue-900 border-blue-300 font-extrabold shadow-2xs'
+                          }`}>
+                            <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-sky-400 animate-ping"></span>
+                            <span>✈️ {isBn ? 'মিড-ফ্লাইয়ার ফ্লাইটে চলমান' : 'In Flight'}</span>
                           </span>
                         )}
                       </td>
