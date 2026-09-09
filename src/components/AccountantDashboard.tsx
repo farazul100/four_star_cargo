@@ -580,6 +580,267 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
   const totalExpenseAmount = (expenses || []).reduce((acc, curr) => acc + curr.amount, 0);
   const netCashflow = totalCollectedCash - totalExpenseAmount;
 
+  // Helper renderer for Invoice and Money Receipt Modals so they are accessible across all views
+  const renderInvoiceAndReceiptModals = () => {
+    return (
+      <>
+        {/* MODAL 1: OFFICIAL CUSTOMER INVOICE & FINANCIAL STATEMENT PRINT MODAL */}
+        {showInvoiceModal && selectedCust && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
+            <div className={`border rounded-xl p-6 max-w-4xl w-full space-y-6 shadow-2xl animate-in zoom-in-95 my-8 max-h-[90vh] overflow-y-auto ${
+              isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
+            }`}>
+              {/* Modal Actions Header */}
+              <div className="flex items-center justify-between border-b pb-4 border-slate-200 dark:border-slate-700 print:hidden">
+                <div className="flex items-center space-x-2">
+                  <Printer className="w-5 h-5 text-[#00897B]" />
+                  <h3 className="text-base font-extrabold">
+                    {isBn ? '📄 কাস্টমার অফিসিয়াল ইনভয়েস ও লেজার স্টেটমেন্ট' : 'Official Customer Invoice & Statement'}
+                  </h3>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <button
+                    type="button"
+                    onClick={() => window.print()}
+                    className="px-4 py-2 bg-[#00897B] hover:bg-[#00796B] text-white font-extrabold text-xs rounded-lg shadow-md transition-all flex items-center space-x-1.5 cursor-pointer"
+                  >
+                    <Printer className="w-4 h-4" />
+                    <span>{isBn ? '🖨️ ইনভয়েস প্রিন্ট / পেপার প্রিন্ট করুন' : 'Print Invoice'}</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setShowInvoiceModal(false)}
+                    className="px-3.5 py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
+                  >
+                    ✕ {isBn ? 'বন্ধ করুন' : 'Close'}
+                  </button>
+                </div>
+              </div>
+
+              {/* Printable A4 Invoice Document Container */}
+              <div id="printable-customer-invoice" className="p-6 bg-white text-slate-900 rounded-lg space-y-6 font-sans border border-slate-200 shadow-xs printable-document">
+                {/* Header Branding */}
+                <div className="flex flex-col sm:flex-row sm:items-start justify-between border-b-2 border-[#00897B] pb-4 gap-4">
+                  <div>
+                    <h1 className="text-2xl font-black text-[#00897B] tracking-tight">M/S FOUR STAR CARGO</h1>
+                    <p className="text-xs text-slate-600 font-semibold mt-0.5">International Air Cargo Freight & Logistics Services</p>
+                    <p className="text-[11px] text-slate-500 font-mono mt-1">
+                      Dhaka Central Freight Hub, Bangladesh • Hotline: +880 1700-000000
+                    </p>
+                  </div>
+                  <div className="text-right sm:text-right border-l-0 sm:border-l sm:pl-4 border-slate-200">
+                    <span className="text-xs uppercase font-extrabold px-3 py-1 bg-[#00897B]/10 text-[#00897B] rounded-md border border-[#00897B]/30 inline-block">
+                      FREIGHT INVOICE
+                    </span>
+                    <p className="text-xs font-mono text-slate-500 mt-2">
+                      Invoice No: <span className="font-bold text-slate-800">#INV-{selectedCust.customer_code}-{Date.now().toString().slice(-4)}</span>
+                    </p>
+                    <p className="text-xs font-mono text-slate-500 mt-0.5">
+                      Date: <span className="font-bold text-slate-800">{new Date().toLocaleDateString(isBn ? 'bn-BD' : 'en-US', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* Billed To Customer Info */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+                  <div>
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">BILLED TO (কাস্টমার তথ্য):</span>
+                    <h3 className="text-sm font-extrabold text-slate-900 mt-0.5">{selectedCust.name}</h3>
+                    <p className="font-mono text-slate-700 font-semibold mt-0.5">Phone: {selectedCust.phone}</p>
+                    <p className="text-slate-600 mt-0.5">{selectedCust.address}</p>
+                  </div>
+                  <div className="sm:text-right">
+                    <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">CARGO SHIPPING MARK:</span>
+                    <span className="inline-block mt-1 font-mono text-sm font-black px-3 py-1 bg-blue-100 text-blue-950 rounded-lg border border-blue-300">
+                      MARK: {selectedCust.shipping_mark || selectedCust.customer_code}
+                    </span>
+                    <p className="text-[11px] text-slate-500 font-mono mt-1">Customer Code: {selectedCust.customer_code}</p>
+                  </div>
+                </div>
+
+                {/* Balance Summary */}
+                {(() => {
+                  const s = getCustomerStats(selectedCust.customer_code);
+                  return (
+                    <>
+                      <div className="grid grid-cols-3 gap-3 text-center text-xs">
+                        <div className="p-3 bg-amber-50 rounded-xl border border-amber-200">
+                          <span className="text-[10px] font-bold text-amber-800 uppercase block">Total Billed Charges</span>
+                          <span className="text-base font-black font-mono text-amber-700">৳{s.totalCharges.toLocaleString()}</span>
+                        </div>
+                        <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
+                          <span className="text-[10px] font-bold text-emerald-800 uppercase block">Total Paid Collections</span>
+                          <span className="text-base font-black font-mono text-emerald-700">৳{s.totalPayments.toLocaleString()}</span>
+                        </div>
+                        <div className="p-3 bg-rose-50 rounded-xl border border-rose-200">
+                          <span className="text-[10px] font-bold text-rose-800 uppercase block">Net Balance Due</span>
+                          <span className="text-base font-black font-mono text-rose-700">৳{s.currentDue.toLocaleString()}</span>
+                        </div>
+                      </div>
+
+                      {/* Breakdown Table */}
+                      <div>
+                        <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-2">Itemized Freight Charges & Payment Breakdown</h4>
+                        <table className="w-full text-left text-xs border-collapse border border-slate-300">
+                          <thead>
+                            <tr className="bg-slate-100 text-slate-800 font-extrabold uppercase text-[10px] border-b border-slate-300">
+                              <th className="p-2 border-r border-slate-300">Date & Time</th>
+                              <th className="p-2 border-r border-slate-300">Type</th>
+                              <th className="p-2 border-r border-slate-300">Description & Details</th>
+                              <th className="p-2 border-r border-slate-300 text-right">Charge (৳)</th>
+                              <th className="p-2 border-r border-slate-300 text-right">Payment (৳)</th>
+                              <th className="p-2 text-right font-extrabold">Running Due (৳)</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-slate-200 font-mono">
+                            {s.entries.map((entry) => (
+                              <tr key={entry.id} className="hover:bg-slate-50 text-[11px]">
+                                <td className="p-2 border-r border-slate-200 whitespace-nowrap">{formatDateTime(entry.created_at)}</td>
+                                <td className="p-2 border-r border-slate-200 whitespace-nowrap font-sans font-bold text-[10px]">
+                                  {entry.type === 'charge' ? 'CHARGE (+)' : 'PAYMENT (-)'}
+                                </td>
+                                <td className="p-2 border-r border-slate-200 font-sans">{entry.note} {entry.reference_no ? `(Ref: ${entry.reference_no})` : ''}</td>
+                                <td className="p-2 border-r border-slate-200 text-right font-bold text-amber-700">
+                                  {entry.type === 'charge' ? `৳${entry.amount.toLocaleString()}` : '-'}
+                                </td>
+                                <td className="p-2 border-r border-slate-200 text-right font-bold text-emerald-700">
+                                  {entry.type === 'payment' ? `৳${entry.amount.toLocaleString()}` : '-'}
+                                </td>
+                                <td className="p-2 text-right font-black text-slate-900">
+                                  ৳{entry.runningBalance.toLocaleString()}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </>
+                  );
+                })()}
+
+                {/* Signatures & Footer */}
+                <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-end justify-between gap-6 text-xs">
+                  <div className="text-[11px] text-slate-500 space-y-1">
+                    <p className="font-bold text-slate-700">Terms & Conditions:</p>
+                    <p>• Goods will be released upon full payment settlement.</p>
+                    <p>• Computer-generated official freight statement & bill.</p>
+                  </div>
+                  <div className="text-center sm:text-right space-y-8">
+                    <div className="w-48 border-b-2 border-slate-400 pb-1">
+                      <span className="text-[10px] font-mono text-slate-400 font-bold">Authorized Accountant Signature</span>
+                    </div>
+                    <p className="text-xs font-extrabold text-slate-800">M/S FOUR STAR CARGO</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* MODAL 2: SINGLE TRANSACTION MONEY RECEIPT / CHARGE VOUCHER PRINT MODAL */}
+        {selectedSingleEntryForReceipt && (
+          <div className="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
+            <div className={`border rounded-xl p-6 max-w-lg w-full space-y-5 shadow-2xl animate-in zoom-in-95 ${
+              isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
+            }`}>
+              <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700 print:hidden">
+                <div className="flex items-center space-x-2">
+                  <Printer className="w-5 h-5 text-[#00897B]" />
+                  <h3 className="text-base font-extrabold">
+                    {selectedSingleEntryForReceipt.type === 'payment'
+                      ? (isBn ? '🧾 টাকা জমার অফিসিয়াল মানি রসিদ' : 'Official Money Receipt')
+                      : (isBn ? '📄 চার্জ এন্ট্রি ইনভয়েস ভাউচার' : 'Official Charge Voucher')}
+                  </h3>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedSingleEntryForReceipt(null)}
+                  className="text-slate-400 hover:text-white p-1 text-xs cursor-pointer"
+                >
+                  ✕
+                </button>
+              </div>
+
+              {/* Printable Single Receipt */}
+              <div id="printable-single-receipt" className="p-5 bg-white text-slate-900 rounded-lg border border-slate-300 space-y-4 font-sans shadow-xs printable-document">
+                <div className="flex justify-between items-start border-b-2 border-[#00897B] pb-3">
+                  <div>
+                    <h2 className="text-lg font-black text-[#00897B]">M/S FOUR STAR CARGO</h2>
+                    <p className="text-[10px] text-slate-500 font-semibold">Air Cargo & Freight Logistics Services</p>
+                  </div>
+                  <div className="text-right">
+                    <span className={`text-[10px] uppercase font-black px-2.5 py-0.5 rounded border ${
+                      selectedSingleEntryForReceipt.type === 'payment' ? 'bg-emerald-100 text-emerald-900 border-emerald-300' : 'bg-amber-100 text-amber-900 border-amber-300'
+                    }`}>
+                      {selectedSingleEntryForReceipt.type === 'payment' ? 'MONEY RECEIPT' : 'CHARGE VOUCHER'}
+                    </span>
+                    <p className="text-[10px] font-mono text-slate-400 mt-1">
+                      Date: {formatDateTime(selectedSingleEntryForReceipt.created_at)}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-lg border border-slate-200">
+                  <div>
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Customer:</span>
+                    <p className="font-extrabold text-slate-900">{selectedSingleEntryForReceipt.customer_name || selectedCust?.name}</p>
+                    <p className="font-mono text-slate-600 text-[11px]">{selectedSingleEntryForReceipt.customer_code}</p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] text-slate-400 uppercase font-bold block">Ref / Receipt No:</span>
+                    <p className="font-mono font-bold text-slate-800">{selectedSingleEntryForReceipt.reference_no || `#REC-${selectedSingleEntryForReceipt.id.slice(-5)}`}</p>
+                    {selectedSingleEntryForReceipt.payment_method && (
+                      <span className="text-[10px] uppercase font-mono bg-emerald-100 text-emerald-900 px-1.5 py-0.2 rounded font-bold">
+                        Method: {selectedSingleEntryForReceipt.payment_method}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="space-y-1 text-xs">
+                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Particulars / Details:</span>
+                  <p className="p-2.5 bg-slate-100 rounded-lg text-slate-800 font-semibold">{selectedSingleEntryForReceipt.note}</p>
+                </div>
+
+                <div className="flex justify-between items-center bg-[#00897B]/10 p-3 rounded-xl border border-[#00897B]/30">
+                  <span className="text-xs font-extrabold text-[#00897B] uppercase">Total Transaction Amount:</span>
+                  <span className="text-xl font-black font-mono text-[#00897B]">
+                    ৳{selectedSingleEntryForReceipt.amount.toLocaleString()}
+                  </span>
+                </div>
+
+                <div className="pt-4 border-t border-slate-200 flex justify-between items-end text-[10px] text-slate-500">
+                  <p>Entered By: {selectedSingleEntryForReceipt.entered_by_name || 'Accounts Staff'}</p>
+                  <div className="text-right border-t border-slate-400 pt-1 w-32 font-bold text-slate-700">
+                    Authorized Sign
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end space-x-2 pt-2 print:hidden">
+                <button
+                  type="button"
+                  onClick={() => setSelectedSingleEntryForReceipt(null)}
+                  className="px-4 py-2 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-white cursor-pointer"
+                >
+                  {isBn ? 'বাতিল' : 'Cancel'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => window.print()}
+                  className="px-4 py-2 rounded-lg text-xs font-extrabold bg-[#00897B] hover:bg-[#00796B] text-white shadow-md cursor-pointer flex items-center space-x-1.5"
+                >
+                  <Printer className="w-4 h-4" />
+                  <span>{isBn ? '🖨️ প্রিন্ট করুন' : 'Print Receipt'}</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </>
+    );
+  };
+
   // --------------------------------------------------------------------------
   // TAB: CARGO TRACKING SEARCH & LIVE MONITOR
   // --------------------------------------------------------------------------
@@ -2016,6 +2277,8 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
             </form>
           </div>
         )}
+
+        {renderInvoiceAndReceiptModals()}
       </div>
     );
   }
@@ -2291,263 +2554,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
         </div>
       )}
 
-      {/* -------------------------------------------------------------------------- */}
-      {/* MODAL 1: OFFICIAL CUSTOMER INVOICE & FINANCIAL STATEMENT PRINT MODAL       */}
-      {/* -------------------------------------------------------------------------- */}
-      {showInvoiceModal && selectedCust && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 flex items-center justify-center p-4 overflow-y-auto">
-          <div className={`border rounded-xl p-6 max-w-4xl w-full space-y-6 shadow-2xl animate-in zoom-in-95 my-8 max-h-[90vh] overflow-y-auto ${
-            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
-          }`}>
-            {/* Modal Actions Header */}
-            <div className="flex items-center justify-between border-b pb-4 border-slate-200 dark:border-slate-700 print:hidden">
-              <div className="flex items-center space-x-2">
-                <Printer className="w-5 h-5 text-[#00897B]" />
-                <h3 className="text-base font-extrabold">
-                  {isBn ? '📄 কাস্টমার অফিসিয়াল ইনভয়েস ও লেজার স্টেটমেন্ট' : 'Official Customer Invoice & Statement'}
-                </h3>
-              </div>
-              <div className="flex items-center space-x-3">
-                <button
-                  type="button"
-                  onClick={() => window.print()}
-                  className="px-4 py-2 bg-[#00897B] hover:bg-[#00796B] text-white font-extrabold text-xs rounded-lg shadow-md transition-all flex items-center space-x-1.5 cursor-pointer"
-                >
-                  <Printer className="w-4 h-4" />
-                  <span>{isBn ? '🖨️ ইনভয়েস প্রিন্ট / পেপার প্রিন্ট করুন' : 'Print Invoice'}</span>
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowInvoiceModal(false)}
-                  className="px-3.5 py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-white rounded-lg text-xs font-bold transition-all cursor-pointer"
-                >
-                  ✕ {isBn ? 'বন্ধ করুন' : 'Close'}
-                </button>
-              </div>
-            </div>
-
-            {/* Printable A4 Invoice Document Container */}
-            <div id="printable-customer-invoice" className="p-6 bg-white text-slate-900 rounded-lg space-y-6 font-sans border border-slate-200 shadow-xs printable-document">
-              {/* Header Branding */}
-              <div className="flex flex-col sm:flex-row sm:items-start justify-between border-b-2 border-[#00897B] pb-4 gap-4">
-                <div>
-                  <h1 className="text-2xl font-black text-[#00897B] tracking-tight">M/S FOUR STAR CARGO</h1>
-                  <p className="text-xs text-slate-600 font-semibold mt-0.5">International Air Cargo Freight & Logistics Services</p>
-                  <p className="text-[11px] text-slate-500 font-mono mt-1">
-                    Dhaka Central Freight Hub, Bangladesh • Hotline: +880 1700-000000
-                  </p>
-                </div>
-                <div className="text-right sm:text-right border-l-0 sm:border-l sm:pl-4 border-slate-200">
-                  <span className="text-xs uppercase font-extrabold px-3 py-1 bg-[#00897B]/10 text-[#00897B] rounded-md border border-[#00897B]/30 inline-block">
-                    FREIGHT INVOICE
-                  </span>
-                  <p className="text-xs font-mono text-slate-500 mt-2">
-                    Invoice No: <span className="font-bold text-slate-800">#INV-{selectedCust.customer_code}-{Date.now().toString().slice(-4)}</span>
-                  </p>
-                  <p className="text-xs font-mono text-slate-500 mt-0.5">
-                    Date: <span className="font-bold text-slate-800">{new Date().toLocaleDateString(isBn ? 'bn-BD' : 'en-US', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                  </p>
-                </div>
-              </div>
-
-              {/* Billed To Customer Info */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
-                <div>
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">BILLED TO (কাস্টমার তথ্য):</span>
-                  <h3 className="text-sm font-extrabold text-slate-900 mt-0.5">{selectedCust.name}</h3>
-                  <p className="font-mono text-slate-700 font-semibold mt-0.5">Phone: {selectedCust.phone}</p>
-                  <p className="text-slate-600 mt-0.5">{selectedCust.address}</p>
-                </div>
-                <div className="sm:text-right">
-                  <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">CARGO SHIPPING MARK:</span>
-                  <span className="inline-block mt-1 font-mono text-sm font-black px-3 py-1 bg-blue-100 text-blue-950 rounded-lg border border-blue-300">
-                    MARK: {selectedCust.shipping_mark || selectedCust.customer_code}
-                  </span>
-                  <p className="text-[11px] text-slate-500 font-mono mt-1">Customer Code: {selectedCust.customer_code}</p>
-                </div>
-              </div>
-
-              {/* Balance Summary */}
-              {(() => {
-                const s = getCustomerStats(selectedCust.customer_code);
-                return (
-                  <>
-                    <div className="grid grid-cols-3 gap-3 text-center text-xs">
-                      <div className="p-3 bg-amber-50 rounded-xl border border-amber-200">
-                        <span className="text-[10px] font-bold text-amber-800 uppercase block">Total Billed Charges</span>
-                        <span className="text-base font-black font-mono text-amber-700">৳{s.totalCharges.toLocaleString()}</span>
-                      </div>
-                      <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
-                        <span className="text-[10px] font-bold text-emerald-800 uppercase block">Total Paid Collections</span>
-                        <span className="text-base font-black font-mono text-emerald-700">৳{s.totalPayments.toLocaleString()}</span>
-                      </div>
-                      <div className="p-3 bg-rose-50 rounded-xl border border-rose-200">
-                        <span className="text-[10px] font-bold text-rose-800 uppercase block">Net Balance Due</span>
-                        <span className="text-base font-black font-mono text-rose-700">৳{s.currentDue.toLocaleString()}</span>
-                      </div>
-                    </div>
-
-                    {/* Breakdown Table */}
-                    <div>
-                      <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-2">Itemized Freight Charges & Payment Breakdown</h4>
-                      <table className="w-full text-left text-xs border-collapse border border-slate-300">
-                        <thead>
-                          <tr className="bg-slate-100 text-slate-800 font-extrabold uppercase text-[10px] border-b border-slate-300">
-                            <th className="p-2 border-r border-slate-300">Date & Time</th>
-                            <th className="p-2 border-r border-slate-300">Type</th>
-                            <th className="p-2 border-r border-slate-300">Description & Details</th>
-                            <th className="p-2 border-r border-slate-300 text-right">Charge (৳)</th>
-                            <th className="p-2 border-r border-slate-300 text-right">Payment (৳)</th>
-                            <th className="p-2 text-right font-extrabold">Running Due (৳)</th>
-                          </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-200 font-mono">
-                          {s.entries.map((entry) => (
-                            <tr key={entry.id} className="hover:bg-slate-50 text-[11px]">
-                              <td className="p-2 border-r border-slate-200 whitespace-nowrap">{formatDateTime(entry.created_at)}</td>
-                              <td className="p-2 border-r border-slate-200 whitespace-nowrap font-sans font-bold text-[10px]">
-                                {entry.type === 'charge' ? 'CHARGE (+)' : 'PAYMENT (-)'}
-                              </td>
-                              <td className="p-2 border-r border-slate-200 font-sans">{entry.note} {entry.reference_no ? `(Ref: ${entry.reference_no})` : ''}</td>
-                              <td className="p-2 border-r border-slate-200 text-right font-bold text-amber-700">
-                                {entry.type === 'charge' ? `৳${entry.amount.toLocaleString()}` : '-'}
-                              </td>
-                              <td className="p-2 border-r border-slate-200 text-right font-bold text-emerald-700">
-                                {entry.type === 'payment' ? `৳${entry.amount.toLocaleString()}` : '-'}
-                              </td>
-                              <td className="p-2 text-right font-black text-slate-900">
-                                ৳{entry.runningBalance.toLocaleString()}
-                              </td>
-                            </tr>
-                          ))}
-                        </tbody>
-                      </table>
-                    </div>
-                  </>
-                );
-              })()}
-
-              {/* Signatures & Footer */}
-              <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-end justify-between gap-6 text-xs">
-                <div className="text-[11px] text-slate-500 space-y-1">
-                  <p className="font-bold text-slate-700">Terms & Conditions:</p>
-                  <p>• Goods will be released upon full payment settlement.</p>
-                  <p>• Computer-generated official freight statement & bill.</p>
-                </div>
-                <div className="text-center sm:text-right space-y-8">
-                  <div className="w-48 border-b-2 border-slate-400 pb-1">
-                    <span className="text-[10px] font-mono text-slate-400 font-bold">Authorized Accountant Signature</span>
-                  </div>
-                  <p className="text-xs font-extrabold text-slate-800">M/S FOUR STAR CARGO</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* -------------------------------------------------------------------------- */}
-      {/* MODAL 2: SINGLE TRANSACTION MONEY RECEIPT / CHARGE VOUCHER PRINT MODAL     */}
-      {/* -------------------------------------------------------------------------- */}
-      {selectedSingleEntryForReceipt && (
-        <div className="fixed inset-0 bg-black/80 backdrop-blur-xs z-50 flex items-center justify-center p-4">
-          <div className={`border rounded-xl p-6 max-w-lg w-full space-y-5 shadow-2xl animate-in zoom-in-95 ${
-            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
-          }`}>
-            <div className="flex items-center justify-between border-b pb-3 border-slate-200 dark:border-slate-700 print:hidden">
-              <div className="flex items-center space-x-2">
-                <Printer className="w-5 h-5 text-[#00897B]" />
-                <h3 className="text-base font-extrabold">
-                  {selectedSingleEntryForReceipt.type === 'payment'
-                    ? (isBn ? '🧾 টাকা জমার অফিসিয়াল মানি রসিদ' : 'Official Money Receipt')
-                    : (isBn ? '📄 চার্জ এন্ট্রি ইনভয়েস ভাউচার' : 'Official Charge Voucher')}
-                </h3>
-              </div>
-              <button
-                type="button"
-                onClick={() => setSelectedSingleEntryForReceipt(null)}
-                className="text-slate-400 hover:text-white p-1 text-xs cursor-pointer"
-              >
-                ✕
-              </button>
-            </div>
-
-            {/* Printable Single Receipt */}
-            <div id="printable-single-receipt" className="p-5 bg-white text-slate-900 rounded-lg border border-slate-300 space-y-4 font-sans shadow-xs printable-document">
-              <div className="flex justify-between items-start border-b-2 border-[#00897B] pb-3">
-                <div>
-                  <h2 className="text-lg font-black text-[#00897B]">M/S FOUR STAR CARGO</h2>
-                  <p className="text-[10px] text-slate-500 font-semibold">Air Cargo & Freight Logistics Services</p>
-                </div>
-                <div className="text-right">
-                  <span className={`text-[10px] uppercase font-black px-2.5 py-0.5 rounded border ${
-                    selectedSingleEntryForReceipt.type === 'payment' ? 'bg-emerald-100 text-emerald-900 border-emerald-300' : 'bg-amber-100 text-amber-900 border-amber-300'
-                  }`}>
-                    {selectedSingleEntryForReceipt.type === 'payment' ? 'MONEY RECEIPT' : 'CHARGE VOUCHER'}
-                  </span>
-                  <p className="text-[10px] font-mono text-slate-400 mt-1">
-                    Date: {formatDateTime(selectedSingleEntryForReceipt.created_at)}
-                  </p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 text-xs bg-slate-50 p-3 rounded-lg border border-slate-200">
-                <div>
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Customer:</span>
-                  <p className="font-extrabold text-slate-900">{selectedSingleEntryForReceipt.customer_name || selectedCust?.name}</p>
-                  <p className="font-mono text-slate-600 text-[11px]">{selectedSingleEntryForReceipt.customer_code}</p>
-                </div>
-                <div className="text-right">
-                  <span className="text-[10px] text-slate-400 uppercase font-bold block">Ref / Receipt No:</span>
-                  <p className="font-mono font-bold text-slate-800">{selectedSingleEntryForReceipt.reference_no || `#REC-${selectedSingleEntryForReceipt.id.slice(-5)}`}</p>
-                  {selectedSingleEntryForReceipt.payment_method && (
-                    <span className="text-[10px] uppercase font-mono bg-emerald-100 text-emerald-900 px-1.5 py-0.2 rounded font-bold">
-                      Method: {selectedSingleEntryForReceipt.payment_method}
-                    </span>
-                  )}
-                </div>
-              </div>
-
-              <div className="space-y-1 text-xs">
-                <span className="text-[10px] text-slate-400 uppercase font-bold block">Particulars / Details:</span>
-                <p className="p-2.5 bg-slate-100 rounded-lg text-slate-800 font-semibold">{selectedSingleEntryForReceipt.note}</p>
-              </div>
-
-              <div className="flex justify-between items-center bg-[#00897B]/10 p-3 rounded-xl border border-[#00897B]/30">
-                <span className="text-xs font-extrabold text-[#00897B] uppercase">Total Transaction Amount:</span>
-                <span className="text-xl font-black font-mono text-[#00897B]">
-                  ৳{selectedSingleEntryForReceipt.amount.toLocaleString()}
-                </span>
-              </div>
-
-              <div className="pt-4 border-t border-slate-200 flex justify-between items-end text-[10px] text-slate-500">
-                <p>Entered By: {selectedSingleEntryForReceipt.entered_by_name || 'Accounts Staff'}</p>
-                <div className="text-right border-t border-slate-400 pt-1 w-32 font-bold text-slate-700">
-                  Authorized Sign
-                </div>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end space-x-2 pt-2 print:hidden">
-              <button
-                type="button"
-                onClick={() => setSelectedSingleEntryForReceipt(null)}
-                className="px-4 py-2 rounded-lg text-xs font-bold bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-white cursor-pointer"
-              >
-                {isBn ? 'বাতিল' : 'Cancel'}
-              </button>
-              <button
-                type="button"
-                onClick={() => window.print()}
-                className="px-4 py-2 rounded-lg text-xs font-extrabold bg-[#00897B] hover:bg-[#00796B] text-white shadow-md cursor-pointer flex items-center space-x-1.5"
-              >
-                <Printer className="w-4 h-4" />
-                <span>{isBn ? '🖨️ প্রিন্ট রসিদ' : 'Print Receipt'}</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {renderInvoiceAndReceiptModals()}
     </div>
   );
 };
