@@ -37,6 +37,7 @@ import { getHostingerDbData, saveHostingerDbData } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { numberToWords } from '../utils/numberToWords';
 import { printElement } from '../utils/printHelper';
+import { SearchableCustomerSelect } from './SearchableCustomerSelect';
 
 interface AccountantDashboardProps {
   ledgerEntries: LedgerEntry[];
@@ -2162,24 +2163,15 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                   <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
                     {isBn ? 'কাস্টমার নির্বাচন করুন *' : 'Select Customer *'}
                   </label>
-                  <select
+                  <SearchableCustomerSelect
+                    customers={customers}
+                    selectedCustomerId={entryCustId}
+                    onSelectCustomer={(id) => setEntryCustId(id)}
+                    getCustomerStats={getCustomerStats}
+                    isDark={isDark}
+                    isBn={isBn}
                     required
-                    value={entryCustId}
-                    onChange={(e) => setEntryCustId(e.target.value)}
-                    className={`w-full border rounded-none p-2.5 outline-none font-medium ${
-                      isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-white border-slate-300 text-slate-900'
-                    }`}
-                  >
-                    <option value="" disabled>-- কাস্টমার সিলেক্ট করুন --</option>
-                    {customers.map((c) => {
-                      const due = getCustomerStats(c.customer_code).currentDue;
-                      return (
-                        <option key={c.id} value={c.id}>
-                          {c.name} ({c.customer_code}) — [বর্তমান বকেয়া: ৳{due.toLocaleString()}]
-                        </option>
-                      );
-                    })}
-                  </select>
+                  />
                 </div>
 
                 {/* 2. Entry Type Toggle (Charge vs Payment) */}

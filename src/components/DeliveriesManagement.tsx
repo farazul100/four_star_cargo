@@ -17,6 +17,7 @@ import { ToastContainer, ToastMessage } from './Toast';
 import { INITIAL_CUSTOMERS } from '../mockData';
 import { useTheme } from '../context/ThemeContext';
 import { saveHostingerDbData, logSystemAuditAction } from '../lib/db';
+import { SearchableCustomerSelect } from './SearchableCustomerSelect';
 
 interface DeliveriesManagementProps {
   cartons: Carton[];
@@ -442,19 +443,18 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
               </div>
 
               {!isNewCustomer ? (
-                <select
-                  value={selectedCustomerId}
-                  onChange={(e) => setSelectedCustomerId(e.target.value)}
-                  className={`w-full border rounded-xl p-2.5 outline-none font-extrabold text-xs cursor-pointer ${
-                    isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'
-                  }`}
-                >
-                  {customersList.map((cust) => (
-                    <option key={cust.id} value={cust.id}>
-                      {cust.name} ({cust.customer_code}) — {cust.phone}
-                    </option>
-                  ))}
-                </select>
+                <SearchableCustomerSelect
+                  customers={customersList}
+                  selectedCustomerId={selectedCustomerId}
+                  onSelectCustomer={(id) => setSelectedCustomerId(id)}
+                  getCustomerStats={(custCode) => {
+                    const c = customersList.find((x) => x.customer_code === custCode);
+                    return { currentDue: c?.total_due || 0 };
+                  }}
+                  isDark={isDark}
+                  isBn={isBn}
+                  required
+                />
               ) : (
                 <div className={`grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl border ${
                   isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-slate-100 border-slate-200'
