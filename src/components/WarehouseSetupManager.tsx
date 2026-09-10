@@ -63,6 +63,8 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
   const [newWhName, setNewWhName] = useState('');
   const [newWhCode, setNewWhCode] = useState('');
   const [newWhCountry, setNewWhCountry] = useState('China 🇨🇳');
+  const [selectedCountryOption, setSelectedCountryOption] = useState('China 🇨🇳');
+  const [customCountryInput, setCustomCountryInput] = useState('');
   const [newWhCity, setNewWhCity] = useState('');
   const [newWhHubType, setNewWhHubType] = useState<'origin' | 'destination'>('origin');
   const [newWhAddress, setNewWhAddress] = useState('');
@@ -137,6 +139,9 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
     setNewWhAddress('');
     setNewWhPhone('');
     setNewWhCity('');
+    setSelectedCountryOption('China 🇨🇳');
+    setCustomCountryInput('');
+    setNewWhCountry('China 🇨🇳');
     setShowAddWhModal(false);
 
     addToast(
@@ -687,8 +692,16 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
                     {isBn ? 'দেশ (Country) *' : 'Country *'}
                   </label>
                   <select
-                    value={newWhCountry}
-                    onChange={(e) => setNewWhCountry(e.target.value)}
+                    value={selectedCountryOption}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setSelectedCountryOption(val);
+                      if (val !== 'custom') {
+                        setNewWhCountry(val);
+                      } else {
+                        setNewWhCountry(customCountryInput || '');
+                      }
+                    }}
                     className={`w-full border rounded-none py-2.5 px-3.5 outline-none font-light cursor-pointer transition-all ${
                       isDark
                         ? 'bg-[#1E293B] border-slate-700 text-white'
@@ -696,12 +709,29 @@ export const WarehouseSetupManager: React.FC<WarehouseSetupManagerProps> = ({
                     }`}
                   >
                     <option value="China 🇨🇳">China 🇨🇳</option>
+                    <option value="Japan 🇯🇵">Japan 🇯🇵</option>
                     <option value="Hong Kong 🇭🇰">Hong Kong 🇭🇰</option>
-                    <option value="Bangladesh 🇧🇩">Bangladesh 🇧🇩</option>
-                    <option value="UAE 🇦🇪">UAE (Dubai) 🇦🇪</option>
-                    <option value="UK 🇬🇧">United Kingdom 🇬🇧</option>
-                    <option value="USA 🇺🇸">United States 🇺🇸</option>
+                    <option value="South Korea 🇰🇷">South Korea 🇰🇷</option>
+                    <option value="custom">✏️ Other / Custom Country (কাস্টম টাইপ করুন)</option>
                   </select>
+
+                  {selectedCountryOption === 'custom' && (
+                    <input
+                      type="text"
+                      required
+                      placeholder={isBn ? 'কাস্টম দেশের নাম লিখুন (e.g. Taiwan, Germany...)' : 'Type custom country name...'}
+                      value={customCountryInput}
+                      onChange={(e) => {
+                        setCustomCountryInput(e.target.value);
+                        setNewWhCountry(e.target.value);
+                      }}
+                      className={`w-full mt-2 border rounded-none py-2 px-3 outline-none text-xs font-light transition-all ${
+                        isDark
+                          ? 'bg-[#0B1622] border-slate-600 text-white focus:border-[#00897B]'
+                          : 'bg-white border-slate-300 text-slate-900 focus:border-[#00897B]'
+                      }`}
+                    />
+                  )}
                 </div>
 
                 <div>
