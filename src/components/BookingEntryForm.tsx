@@ -1124,7 +1124,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
             {/* CUSTOMIZABLE CARTON PREFIX & START NUMBER */}
             <div>
               <label className="block text-xs md:text-sm font-extrabold text-slate-900 mb-1.5 flex items-center">
-                {isBn ? 'কার্টুন কোড (প্রিফিক্স + শুরু)' : 'Custom Carton Code (Prefix + Start)'}
+                {isBn ? 'ওয়্যারহাউজ কার্টুন নম্বর (প্রিফিক্স + শুরু)' : 'WAREHOUSE CARTON NUMBER (Prefix + Start)'}
               </label>
               <div className="flex items-center space-x-2.5">
                 <input
@@ -1132,7 +1132,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   value={cartonPrefix}
                   onChange={(e) => setCartonPrefix(e.target.value)}
                   placeholder="CTN-"
-                  title={isBn ? 'কার্টুন নামের আগের প্রেফিক্স' : 'Carton prefix before number'}
+                  title={isBn ? 'ওয়্যারহাউজ কার্টুন নামের আগের প্রেফিক্স' : 'Warehouse Carton Number prefix'}
                   className="w-3/5 px-4 py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm font-mono font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                 />
                 <input
@@ -1141,7 +1141,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   value={cartonStartNum}
                   onChange={(e) => setCartonStartNum(e.target.value === '' ? '' : parseInt(e.target.value) || 1)}
                   placeholder="1"
-                  title={isBn ? 'কার্টুন শুরু নম্বর' : 'Start number'}
+                  title={isBn ? 'ওয়্যারহাউজ কার্টুন শুরু নম্বর' : 'Warehouse Carton Number start'}
                   className="w-2/5 px-4 py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                 />
               </div>
@@ -1562,7 +1562,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     />
                   </th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">ENTRY DATE</th>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">CTN NO. & CODE</th>
+                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">WAREHOUSE CARTON NUMBER</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium text-emerald-600 dark:text-emerald-400">SHIPMENT CTN NO.</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium text-blue-600 dark:text-blue-400">SHIPPING MARK</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">PRODUCT NAME (EN & CN)</th>

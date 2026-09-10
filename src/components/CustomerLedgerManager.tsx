@@ -481,7 +481,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                   isDark ? 'bg-[#1E293B] text-slate-400 border-slate-700/80' : 'bg-slate-50/80 text-slate-500 border-slate-200/70'
                 }`}>
                   <tr>
-                    <th className="p-3.5">Carton Code</th>
+                    <th className="p-3.5">WAREHOUSE CARTON NUMBER</th>
                     <th className="p-3.5">কার্টুনের নিজস্ব শিপিং মার্ক</th>
                     <th className="p-3.5">Product Details</th>
                     <th className="p-3.5">Gross Weight</th>
