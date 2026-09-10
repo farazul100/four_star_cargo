@@ -1982,7 +1982,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                 {selectedCust.customer_code}
               </span>
               {selectedCust.shipping_mark && (
-                <span className="text-[10px] bg-blue-500/20 text-blue-600 dark:text-blue-300 px-2 py-0.5 rounded-none font-mono">
+                <span className="text-xs font-mono font-extrabold px-2.5 py-0.5 rounded-none bg-sky-100 text-sky-950 border border-sky-300 dark:bg-sky-950/80 dark:text-sky-200 dark:border-sky-800 shadow-2xs">
                   MARK: {selectedCust.shipping_mark}
                 </span>
               )}
