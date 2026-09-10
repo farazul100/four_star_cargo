@@ -174,7 +174,7 @@ export interface LedgerEntry {
   customer_code: string;
   customer_name: string;
   shipping_mark?: string;
-  type: 'charge' | 'payment';
+  type: 'charge' | 'payment' | 'refund';
   amount: number;
   payment_method?: 'cash' | 'bkash' | 'nagad' | 'bank_wire' | 'check';
   reference_no?: string;

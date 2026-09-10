@@ -23,6 +23,7 @@ import {
   Activity,
   BarChart3,
   PieChart,
+  RotateCcw,
   ShieldCheck,
   CheckCircle2,
   RefreshCw,
@@ -109,7 +110,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
   // Add Manual Ledger Entry Form Modal State (Easy 1-Click Due/Payment Entry)
   const [showAddLedgerModal, setShowAddLedgerModal] = useState(false);
   const [entryCustId, setEntryCustId] = useState<string>('');
-  const [entryType, setEntryType] = useState<'charge' | 'payment'>('charge');
+  const [entryType, setEntryType] = useState<'charge' | 'payment' | 'refund'>('charge');
   const [entryAmount, setEntryAmount] = useState<string>('');
   const [entryNote, setEntryNote] = useState('');
   const [entryRefNo, setEntryRefNo] = useState('');
@@ -192,7 +193,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
     let accumulator = 0;
     const entriesWithBalance = sortedChronological.map((entry) => {
-      if (entry.type === 'charge') {
+      if (entry.type === 'charge' || entry.type === 'refund') {
         accumulator += entry.amount;
       } else {
         accumulator -= entry.amount;
@@ -206,10 +207,13 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
     const totalCharges = rawEntries
       .filter((l) => l.type === 'charge')
       .reduce((acc, curr) => acc + curr.amount, 0);
+    const totalRefunds = rawEntries
+      .filter((l) => l.type === 'refund')
+      .reduce((acc, curr) => acc + curr.amount, 0);
     const totalPayments = rawEntries
       .filter((l) => l.type === 'payment')
       .reduce((acc, curr) => acc + curr.amount, 0);
-    const currentDue = totalCharges - totalPayments;
+    const currentDue = (totalCharges + totalRefunds) - totalPayments;
 
     return {
       totalCharges,
@@ -220,7 +224,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
   };
 
   // Open Quick Ledger Entry Modal Helper
-  const openQuickLedgerModal = (customerId?: string, defaultType: 'charge' | 'payment' = 'charge') => {
+  const openQuickLedgerModal = (customerId?: string, defaultType: 'charge' | 'payment' | 'refund' = 'charge') => {
     const targetId = customerId || selectedCustomerId || (customers[0]?.id ?? '');
     setEntryCustId(targetId);
     setEntryType(defaultType);
@@ -266,13 +270,17 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
     const totalCharges = rawEntries
       .filter((l) => l.type === 'charge')
       .reduce((acc, curr) => acc + curr.amount, 0);
+    const totalRefunds = rawEntries
+      .filter((l) => l.type === 'refund')
+      .reduce((acc, curr) => acc + curr.amount, 0);
     const totalPayments = rawEntries
       .filter((l) => l.type === 'payment')
       .reduce((acc, curr) => acc + curr.amount, 0);
     return {
       totalCharges,
+      totalRefunds,
       totalPayments,
-      currentDue: totalCharges - totalPayments,
+      currentDue: (totalCharges + totalRefunds) - totalPayments,
     };
   };
 
@@ -294,9 +302,9 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
       customer_name: cust.name,
       type: entryType,
       amount: Number(entryAmount),
-      payment_method: entryType === 'payment' ? entryPaymentMethod : undefined,
+      payment_method: (entryType === 'payment' || entryType === 'refund') ? entryPaymentMethod : undefined,
       reference_no: entryRefNo.trim() || undefined,
-      note: entryNote.trim() || (entryType === 'charge' ? 'কার্গো শিপিং ও হ্যান্ডলিং চার্জ' : 'ক্যাশ/ব্যাংক পেমেন্ট পরিশোধ'),
+      note: entryNote.trim() || (entryType === 'charge' ? 'কার্গো শিপিং ও হ্যান্ডলিং চার্জ' : entryType === 'refund' ? 'কাস্টমার রিফান্ড এন্ট্রি' : 'ক্যাশ/ব্যাংক পেমেন্ট পরিশোধ'),
       source: 'manual',
       entered_by: currentUser.id,
       entered_by_name: `${currentUser.name} (Accountant)`,
@@ -1935,6 +1943,14 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
             </button>
 
             <button
+              onClick={() => openQuickLedgerModal(selectedCust.id, 'refund')}
+              className="flex items-center space-x-1.5 py-2 px-4 rounded-none bg-purple-700 hover:bg-purple-800 text-white font-normal text-xs shadow-sm cursor-pointer"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span className="font-light">{isBn ? '↺ কাস্টমার রিফান্ড' : '↺ Refund Money'}</span>
+            </button>
+
+            <button
               onClick={() => setShowInvoiceModal(true)}
               className="flex items-center space-x-1.5 py-2 px-3.5 rounded-none bg-[#00897B] hover:bg-[#00796B] text-white font-normal text-xs shadow-sm cursor-pointer"
             >
@@ -2040,15 +2056,25 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                         className={`px-2.5 py-0.5 rounded-none text-[10px] font-extrabold uppercase flex items-center space-x-1 w-fit ${
                           entry.type === 'charge'
                             ? 'bg-slate-100 text-slate-900 border border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
+                            : entry.type === 'refund'
+                            ? 'bg-purple-100 text-purple-900 border border-purple-300 dark:bg-purple-950/80 dark:text-purple-200 dark:border-purple-800'
                             : 'bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-200 dark:border-emerald-700'
                         }`}
                       >
                         {entry.type === 'charge' ? (
                           <ArrowUpRight className="w-3 h-3 text-slate-700 dark:text-slate-300" />
+                        ) : entry.type === 'refund' ? (
+                          <RotateCcw className="w-3 h-3 text-purple-700 dark:text-purple-300" />
                         ) : (
                           <ArrowDownLeft className="w-3 h-3 text-emerald-500" />
                         )}
-                        <span>{entry.type === 'charge' ? (isBn ? '+ বকেয়া' : 'CHARGE') : (isBn ? '- জমা' : 'PAYMENT')}</span>
+                        <span>
+                          {entry.type === 'charge'
+                            ? (isBn ? '+ বকেয়া' : 'CHARGE')
+                            : entry.type === 'refund'
+                            ? (isBn ? '↺ রিফান্ড' : 'REFUND')
+                            : (isBn ? '- জমা' : 'PAYMENT')}
+                        </span>
                       </span>
                     </td>
 
@@ -2075,6 +2101,8 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                     <td className="p-3 font-mono font-black whitespace-nowrap">
                       {entry.type === 'charge' ? (
                         <span className="text-slate-900 dark:text-slate-100 text-sm">৳{entry.amount.toLocaleString()}</span>
+                      ) : entry.type === 'refund' ? (
+                        <span className="text-purple-700 dark:text-purple-300 text-sm font-bold">↺ ৳{entry.amount.toLocaleString()}</span>
                       ) : (
                         <span className="text-slate-400">-</span>
                       )}
@@ -2176,12 +2204,12 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                   />
                 </div>
 
-                {/* 2. Entry Type Toggle (Charge vs Payment) */}
+                {/* 2. Entry Type Toggle (Charge vs Payment vs Refund) */}
                 <div>
                   <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
                     {isBn ? 'এন্ট্রি টাইপ (Type) *' : 'Entry Type *'}
                   </label>
-                  <div className="grid grid-cols-2 gap-2">
+                  <div className="grid grid-cols-3 gap-2">
                     <button
                       type="button"
                       onClick={() => setEntryType('charge')}
@@ -2193,7 +2221,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                           : 'bg-slate-100 text-slate-700 border border-slate-200'
                       }`}
                     >
-                      <span>➕ CHARGE (বকেয়া টাকা যোগ)</span>
+                      <span>➕ CHARGE (বকেয়া)</span>
                     </button>
 
                     <button
@@ -2207,7 +2235,21 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                           : 'bg-slate-100 text-slate-700 border border-slate-200'
                       }`}
                     >
-                      <span>💵 PAYMENT (জমা পরিশোধ)</span>
+                      <span>💵 PAYMENT (জমা)</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => setEntryType('refund')}
+                      className={`p-2.5 rounded-none font-bold text-xs transition-all flex items-center justify-center space-x-1 cursor-pointer ${
+                        entryType === 'refund'
+                          ? 'bg-purple-700 text-white shadow-sm ring-2 ring-purple-400'
+                          : isDark
+                          ? 'bg-[#0B1622] text-[#8FA3AD] border border-[#1E3247]'
+                          : 'bg-slate-100 text-slate-700 border border-slate-200'
+                      }`}
+                    >
+                      <span>↺ REFUND (রিফান্ড)</span>
                     </button>
                   </div>
                 </div>
@@ -2351,10 +2393,10 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                   </div>
                 </div>
 
-                {entryType === 'payment' && (
+                {(entryType === 'payment' || entryType === 'refund') && (
                   <div>
                     <label className={`block mb-1 font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-600'}`}>
-                      {isBn ? 'পেমেন্ট মেথড (Payment Method)' : 'Payment Method'}
+                      {isBn ? 'পেমেন্ট/রিফান্ড মেথড (Method)' : 'Payment / Refund Method'}
                     </label>
                     <select
                       value={entryPaymentMethod}
@@ -2363,7 +2405,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                         isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-white border-slate-300 text-slate-900'
                       }`}
                     >
-                      <option value="cash">💵 Cash Collection (নগদ ক্যাশ)</option>
+                      <option value="cash">💵 Cash (নগদ ক্যাশ)</option>
                       <option value="bkash">📱 bKash (বিকাশ)</option>
                       <option value="nagad">📱 Nagad (নগদ)</option>
                       <option value="bank_wire">🏦 Bank Wire Transfer (ব্যাংক ট্রান্সফার)</option>
