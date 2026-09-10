@@ -652,9 +652,9 @@ export const CrmManagementSystem: React.FC<CrmManagementSystemProps> = ({
                       isDark ? 'bg-[#1E293B] border-slate-600 text-white focus:border-teal-400 focus:ring-2 focus:ring-teal-500/30' : 'bg-slate-50 border-slate-300 text-black focus:border-[#00897B] focus:bg-white'
                     }`}
                   >
-                    <option value="followup" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-black'}>🔴 ফলো আপ কাস্টমার (Follow Up Table)</option>
-                    <option value="order_complete" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-black'}>🔵 নতুন কাস্টমার (New Customer Table)</option>
-                    <option value="important_regular" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-black'}>⚫ রেগুলার কাস্টমার (Regular Customer Table)</option>
+                    <option value="followup" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-black'}>🔴 Follow Up Customer Table</option>
+                    <option value="order_complete" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-black'}>🔵 New Customer Table</option>
+                    <option value="important_regular" className={isDark ? 'bg-[#1E293B] text-white' : 'bg-white text-black'}>⚫ Regular Customer Table</option>
                   </select>
                 </div>
               </div>
