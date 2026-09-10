@@ -885,7 +885,8 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
         {/* Company Official Letterhead */}
         <div className="border-b-2 border-slate-900 pb-4 mb-6 flex justify-between items-start">
           <div>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-3">
+              <img src="/logo.png" alt="Four Star Cargo Logo" className="w-10 h-10 object-contain" />
               <span className="text-2xl font-black tracking-wider text-slate-900">M/S FOUR STAR CARGO</span>
             </div>
             <p className="text-xs font-semibold text-slate-700 mt-0.5">মেসার্স ফোর স্টার কার্গো — আন্তর্জাতিক কার্গো ও এক্সপ্রেস শিপিং</p>

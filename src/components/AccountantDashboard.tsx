@@ -35,6 +35,7 @@ import { BudgetExpenseManager } from './BudgetExpenseManager';
 import { CargoSearchTracker } from './CargoSearchTracker';
 import { getHostingerDbData, saveHostingerDbData } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
+import { numberToWords } from '../utils/numberToWords';
 
 interface AccountantDashboardProps {
   ledgerEntries: LedgerEntry[];
@@ -592,8 +593,8 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
             }`}>
               {/* Modal Actions Header */}
               <div className="flex items-center justify-between border-b pb-4 border-slate-200 dark:border-slate-700 print:hidden">
-                <div className="flex items-center space-x-2">
-                  <Printer className="w-5 h-5 text-[#00897B]" />
+                <div className="flex items-center space-x-3">
+                  <img src="/logo.png" alt="Four Star Cargo Logo" className="w-8 h-8 object-contain" />
                   <h3 className="text-base font-extrabold">
                     {isBn ? '📄 কাস্টমার অফিসিয়াল ইনভয়েস ও লেজার স্টেটমেন্ট' : 'Official Customer Invoice & Statement'}
                   </h3>
@@ -605,7 +606,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                     className="px-4 py-2 bg-[#00897B] hover:bg-[#00796B] text-white font-extrabold text-xs rounded-lg shadow-md transition-all flex items-center space-x-1.5 cursor-pointer"
                   >
                     <Printer className="w-4 h-4" />
-                    <span>{isBn ? '🖨️ ইনভয়েস প্রিন্ট / পেপার প্রিন্ট করুন' : 'Print Invoice'}</span>
+                    <span>{isBn ? '🖨️ ইনভয়েস প্রিন্ট করুন' : 'Print Invoice'}</span>
                   </button>
                   <button
                     type="button"
@@ -618,118 +619,228 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
               </div>
 
               {/* Printable A4 Invoice Document Container */}
-              <div id="printable-customer-invoice" className="p-6 bg-white text-slate-900 rounded-lg space-y-6 font-sans border border-slate-200 shadow-xs printable-document">
-                {/* Header Branding */}
-                <div className="flex flex-col sm:flex-row sm:items-start justify-between border-b-2 border-[#00897B] pb-4 gap-4">
-                  <div>
-                    <h1 className="text-2xl font-black text-[#00897B] tracking-tight">M/S FOUR STAR CARGO</h1>
-                    <p className="text-xs text-slate-600 font-semibold mt-0.5">International Air Cargo Freight & Logistics Services</p>
-                    <p className="text-[11px] text-slate-500 font-mono mt-1">
-                      Dhaka Central Freight Hub, Bangladesh • Hotline: +880 1700-000000
-                    </p>
+              <div id="printable-customer-invoice" className="p-6 bg-white text-slate-900 rounded-none space-y-4 font-sans border border-slate-300 shadow-xs printable-document">
+                {/* 1. Header Branding with Official Logo & Company Address Box */}
+                <div className="flex flex-col sm:flex-row items-center sm:items-stretch justify-between gap-4 border-b-2 border-slate-900 pb-3">
+                  {/* Left: Official Logo + Name */}
+                  <div className="flex items-center space-x-3">
+                    <img src="/logo.png" alt="Four Star Cargo Logo" className="w-16 h-16 sm:w-20 sm:h-20 object-contain shrink-0 filter drop-shadow-md" />
+                    <div>
+                      <h1 className="text-xl sm:text-2xl font-black text-[#00897B] tracking-tight">M/S FOUR STAR CARGO</h1>
+                      <p className="text-[11px] text-slate-600 font-bold tracking-wide">Air Cargo & Freight Logistics Services</p>
+                      <p className="text-[10px] text-slate-500 font-mono">Guangzhou China • Dhaka Bangladesh</p>
+                    </div>
                   </div>
-                  <div className="text-right sm:text-right border-l-0 sm:border-l sm:pl-4 border-slate-200">
-                    <span className="text-xs uppercase font-extrabold px-3 py-1 bg-[#00897B]/10 text-[#00897B] rounded-md border border-[#00897B]/30 inline-block">
-                      FREIGHT INVOICE
-                    </span>
-                    <p className="text-xs font-mono text-slate-500 mt-2">
-                      Invoice No: <span className="font-bold text-slate-800">#INV-{selectedCust.customer_code}-{Date.now().toString().slice(-4)}</span>
-                    </p>
-                    <p className="text-xs font-mono text-slate-500 mt-0.5">
-                      Date: <span className="font-bold text-slate-800">{new Date().toLocaleDateString(isBn ? 'bn-BD' : 'en-US', { day: '2-digit', month: 'short', year: 'numeric' })}</span>
-                    </p>
+
+                  {/* Right: Company Official Header Box matching paper invoice */}
+                  <div className="bg-[#E0F2FE] border border-[#0284C7] p-2.5 rounded-lg text-right text-[10px] space-y-0.5 max-w-md w-full sm:w-auto">
+                    <h2 className="text-sm font-black text-[#0369A1] tracking-wide">M/S FOUR STAR CARGO</h2>
+                    <p className="font-semibold text-slate-800"><span className="font-bold text-[#0369A1]">Head Office:</span> House No-19(2nd Floor), Road No-4A, Sector-05, Uttara Dhaka</p>
+                    <p className="font-semibold text-slate-800"><span className="font-bold text-[#0369A1]">Warehouse:</span> House No-16(Ground Floor), Road No-9C, Sector-05, Uttara Dhaka</p>
+                    <p className="font-bold text-slate-900"><span className="text-[#0369A1]">Email:</span> info.fourstarcargo@gmail.com | <span className="text-[#0369A1]">Phone No:</span> 01790-243232</p>
                   </div>
                 </div>
 
-                {/* Billed To Customer Info */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-slate-50 p-4 rounded-xl border border-slate-200 text-xs">
+                {/* 2. Invoice Meta Line (Invoice No & Date) */}
+                <div className="flex justify-between items-center text-xs font-mono font-bold text-slate-800 pt-1 px-1">
                   <div>
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">BILLED TO (কাস্টমার তথ্য):</span>
-                    <h3 className="text-sm font-extrabold text-slate-900 mt-0.5">{selectedCust.name}</h3>
-                    <p className="font-mono text-slate-700 font-semibold mt-0.5">Phone: {selectedCust.phone}</p>
-                    <p className="text-slate-600 mt-0.5">{selectedCust.address}</p>
+                    INVOICE NO: <span className="text-[#00897B] font-black">#INV-{selectedCust.customer_code}-{Date.now().toString().slice(-4)}</span>
                   </div>
-                  <div className="sm:text-right">
-                    <span className="text-[10px] uppercase font-bold text-slate-400 block tracking-wider">CARGO SHIPPING MARK:</span>
-                    <span className="inline-block mt-1 font-mono text-sm font-black px-3 py-1 bg-blue-100 text-blue-950 rounded-lg border border-blue-300">
-                      MARK: {selectedCust.shipping_mark || selectedCust.customer_code}
-                    </span>
-                    <p className="text-[11px] text-slate-500 font-mono mt-1">Customer Code: {selectedCust.customer_code}</p>
+                  <div>
+                    DATE: <span className="font-black">{new Date().toLocaleDateString('en-GB')}</span>
                   </div>
                 </div>
 
-                {/* Balance Summary */}
+                {/* 3. Customer Name Highlighted Box */}
+                <div className="bg-[#FEF3C7] border border-amber-300 py-2 px-4 rounded-md text-center">
+                  <h3 className="text-base font-black tracking-wider text-amber-950 uppercase">
+                    {selectedCust.name}
+                  </h3>
+                </div>
+
+                {/* 4. Upper Meta Grid (2 Tables Side-by-Side with Borders matching physical invoice) */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-[11px] font-sans">
+                  {/* Table 1: Left */}
+                  <table className="w-full border-collapse border border-slate-400">
+                    <tbody>
+                      <tr className="border-b border-slate-300">
+                        <td className="p-1.5 font-bold bg-slate-100 border-r border-slate-300 w-28 uppercase text-[10px]">SHPR</td>
+                        <td className="p-1.5 font-semibold font-mono text-slate-900">{selectedCust.shipping_mark || selectedCust.customer_code}</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="p-1.5 font-bold bg-slate-100 border-r border-slate-300 uppercase text-[10px]">POL</td>
+                        <td className="p-1.5 font-semibold text-slate-900">HK / CHINA</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="p-1.5 font-bold bg-slate-100 border-r border-slate-300 uppercase text-[10px]">POD</td>
+                        <td className="p-1.5 font-semibold text-slate-900">DHAKA, BANGLADESH</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="p-1.5 font-bold bg-slate-100 border-r border-slate-300 uppercase text-[10px]">CI NO</td>
+                        <td className="p-1.5 font-mono text-slate-800">#CI-{selectedCust.customer_code}</td>
+                      </tr>
+                      <tr>
+                        <td className="p-1.5 font-bold bg-slate-100 border-r border-slate-300 uppercase text-[10px]">HAWB NO</td>
+                        <td className="p-1.5 font-mono text-slate-800">HAWB-{selectedCust.customer_code}-2026</td>
+                      </tr>
+                    </tbody>
+                  </table>
+
+                  {/* Table 2: Right */}
+                  <table className="w-full border-collapse border border-slate-400">
+                    <tbody>
+                      <tr className="border-b border-slate-300">
+                        <td className="p-1.5 font-bold bg-slate-100 border-r border-slate-300 w-28 uppercase text-[10px]">CNEE</td>
+                        <td className="p-1.5 font-extrabold text-slate-900">{selectedCust.name}</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="p-1.5 font-bold bg-slate-100 border-r border-slate-300 uppercase text-[10px]">CMDTY</td>
+                        <td className="p-1.5 font-bold text-slate-900">{getCustomerLedger(selectedCust.customer_code).filter(e => e.type === 'charge').length} CTN / ITEMS</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="p-1.5 font-bold bg-slate-100 border-r border-slate-300 uppercase text-[10px]">QTY/CW</td>
+                        <td className="p-1.5 font-mono text-slate-800">-</td>
+                      </tr>
+                      <tr className="border-b border-slate-300">
+                        <td className="p-1.5 font-bold bg-slate-100 border-r border-slate-300 uppercase text-[10px]">AWB NO.</td>
+                        <td className="p-1.5 font-mono text-slate-800">AWB-FSC-{selectedCust.customer_code}</td>
+                      </tr>
+                      <tr>
+                        <td className="p-1.5 font-bold bg-slate-100 border-r border-slate-300 uppercase text-[10px]">MAWB.</td>
+                        <td className="p-1.5 font-mono text-slate-800">MAWB-FSC-9982</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* 5. Main Itemized Invoice Table with Crisp Black Borders matching paper invoice */}
                 {(() => {
                   const s = getCustomerStats(selectedCust.customer_code);
+                  const events = getCustomerLedger(selectedCust.customer_code);
+                  const totalCharges = s.totalCharges;
+                  const totalPaid = s.totalPayments;
+                  const grandTotalDue = s.currentDue;
+
                   return (
                     <>
-                      <div className="grid grid-cols-3 gap-3 text-center text-xs">
-                        <div className="p-3 bg-amber-50 rounded-xl border border-amber-200">
-                          <span className="text-[10px] font-bold text-amber-800 uppercase block">Total Billed Charges</span>
-                          <span className="text-base font-black font-mono text-amber-700">৳{s.totalCharges.toLocaleString()}</span>
-                        </div>
-                        <div className="p-3 bg-emerald-50 rounded-xl border border-emerald-200">
-                          <span className="text-[10px] font-bold text-emerald-800 uppercase block">Total Paid Collections</span>
-                          <span className="text-base font-black font-mono text-emerald-700">৳{s.totalPayments.toLocaleString()}</span>
-                        </div>
-                        <div className="p-3 bg-rose-50 rounded-xl border border-rose-200">
-                          <span className="text-[10px] font-bold text-rose-800 uppercase block">Net Balance Due</span>
-                          <span className="text-base font-black font-mono text-rose-700">৳{s.currentDue.toLocaleString()}</span>
-                        </div>
-                      </div>
-
-                      {/* Breakdown Table */}
-                      <div>
-                        <h4 className="text-xs font-extrabold text-slate-800 uppercase tracking-wider mb-2">Itemized Freight Charges & Payment Breakdown</h4>
-                        <table className="w-full text-left text-xs border-collapse border border-slate-300">
+                      <div className="overflow-x-auto">
+                        <table className="w-full text-xs text-left border-collapse border-2 border-slate-800 font-sans">
                           <thead>
-                            <tr className="bg-slate-100 text-slate-800 font-extrabold uppercase text-[10px] border-b border-slate-300">
-                              <th className="p-2 border-r border-slate-300">Date & Time</th>
-                              <th className="p-2 border-r border-slate-300">Type</th>
-                              <th className="p-2 border-r border-slate-300">Description & Details</th>
-                              <th className="p-2 border-r border-slate-300 text-right">Charge (৳)</th>
-                              <th className="p-2 border-r border-slate-300 text-right">Payment (৳)</th>
-                              <th className="p-2 text-right font-extrabold">Running Due (৳)</th>
+                            <tr className="bg-slate-200 text-slate-900 font-black uppercase text-[10px] border-b-2 border-slate-800">
+                              <th className="p-2 border-r border-slate-400 text-center w-12">SL.NO</th>
+                              <th className="p-2 border-r border-slate-400 text-center">CNT. NO.</th>
+                              <th className="p-2 border-r border-slate-400 text-center">SHIPPING MARK</th>
+                              <th className="p-2 border-r border-slate-400">DESCRIPTIONS</th>
+                              <th className="p-2 border-r border-slate-400 text-center w-14">CTN</th>
+                              <th className="p-2 border-r border-slate-400 text-right">UNIT/KG</th>
+                              <th className="p-2 border-r border-slate-400 text-right">CHARGE/RATE</th>
+                              <th className="p-2 text-right">PAYABLE AMOUNT</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-200 font-mono">
-                            {s.entries.map((entry) => (
-                              <tr key={entry.id} className="hover:bg-slate-50 text-[11px]">
-                                <td className="p-2 border-r border-slate-200 whitespace-nowrap">{formatDateTime(entry.created_at)}</td>
-                                <td className="p-2 border-r border-slate-200 whitespace-nowrap font-sans font-bold text-[10px]">
-                                  {entry.type === 'charge' ? 'CHARGE (+)' : 'PAYMENT (-)'}
-                                </td>
-                                <td className="p-2 border-r border-slate-200 font-sans">{entry.note} {entry.reference_no ? `(Ref: ${entry.reference_no})` : ''}</td>
-                                <td className="p-2 border-r border-slate-200 text-right font-bold text-amber-700">
+                          <tbody className="divide-y divide-slate-300 font-mono text-[11px]">
+                            {events.map((entry, idx) => (
+                              <tr key={entry.id} className="hover:bg-slate-50">
+                                <td className="p-2 border-r border-slate-300 text-center font-bold">{idx + 1}</td>
+                                <td className="p-2 border-r border-slate-300 text-center font-semibold">{entry.reference_no || `CTN-${idx + 101}`}</td>
+                                <td className="p-2 border-r border-slate-300 text-center font-bold text-slate-800">{selectedCust.shipping_mark || selectedCust.customer_code}</td>
+                                <td className="p-2 border-r border-slate-300 font-sans font-medium text-slate-900">{entry.note}</td>
+                                <td className="p-2 border-r border-slate-300 text-center font-bold">{entry.type === 'charge' ? '1' : '-'}</td>
+                                <td className="p-2 border-r border-slate-300 text-right">-</td>
+                                <td className="p-2 border-r border-slate-300 text-right">
                                   {entry.type === 'charge' ? `৳${entry.amount.toLocaleString()}` : '-'}
                                 </td>
-                                <td className="p-2 border-r border-slate-200 text-right font-bold text-emerald-700">
-                                  {entry.type === 'payment' ? `৳${entry.amount.toLocaleString()}` : '-'}
-                                </td>
                                 <td className="p-2 text-right font-black text-slate-900">
-                                  ৳{entry.runningBalance.toLocaleString()}
+                                  {entry.type === 'charge' ? `৳${entry.amount.toLocaleString()}` : `(৳${entry.amount.toLocaleString()})`}
                                 </td>
                               </tr>
                             ))}
+
+                            {/* Total Row */}
+                            <tr className="bg-slate-100 font-black text-xs border-t-2 border-slate-800">
+                              <td colSpan={4} className="p-2 text-right uppercase border-r border-slate-400">TOTAL</td>
+                              <td className="p-2 text-center border-r border-slate-400">{events.filter(e => e.type === 'charge').length}</td>
+                              <td className="p-2 text-right border-r border-slate-400">-</td>
+                              <td className="p-2 text-right border-r border-slate-400">-</td>
+                              <td className="p-2 text-right font-mono font-black text-slate-900">৳{totalCharges.toLocaleString()}</td>
+                            </tr>
                           </tbody>
                         </table>
+                      </div>
+
+                      {/* 6. Below-Table Summary & In-Words Section */}
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start pt-2">
+                        {/* Left Side: IN WORDS */}
+                        <div className="p-3 bg-slate-50 border border-slate-300 rounded-lg space-y-1">
+                          <span className="text-[10px] uppercase font-bold text-slate-500 block tracking-wider">IN WORDS:</span>
+                          <p className="text-xs font-black text-slate-900 italic">
+                            {numberToWords(grandTotalDue > 0 ? grandTotalDue : totalCharges)}
+                          </p>
+                        </div>
+
+                        {/* Right Side: Financial Summary Table */}
+                        <div className="border border-slate-400 rounded-lg overflow-hidden">
+                          <table className="w-full text-xs font-mono">
+                            <tbody>
+                              <tr className="border-b border-slate-300">
+                                <td className="p-2 font-bold text-slate-700 bg-slate-100 border-r border-slate-300 uppercase text-[10px]">TOTAL BILL</td>
+                                <td className="p-2 text-right font-black text-slate-900">৳{totalCharges.toLocaleString()}</td>
+                              </tr>
+                              <tr className="border-b border-slate-300">
+                                <td className="p-2 font-bold text-slate-700 bg-slate-100 border-r border-slate-300 uppercase text-[10px]">PAID AMOUNT</td>
+                                <td className="p-2 text-right font-extrabold text-emerald-700">৳{totalPaid.toLocaleString()}</td>
+                              </tr>
+                              <tr className="border-b border-slate-300">
+                                <td className="p-2 font-bold text-slate-700 bg-slate-100 border-r border-slate-300 uppercase text-[10px]">PREVIOUS DUE AMOUNT</td>
+                                <td className="p-2 text-right font-semibold text-slate-600">৳0.00</td>
+                              </tr>
+                              <tr className="border-b border-slate-300">
+                                <td className="p-2 font-bold text-slate-700 bg-slate-100 border-r border-slate-300 uppercase text-[10px]">DISCOUNT AMOUNT</td>
+                                <td className="p-2 text-right font-semibold text-slate-600">৳0.00</td>
+                              </tr>
+                              <tr className="bg-rose-50 text-rose-950 font-black">
+                                <td className="p-2.5 border-r border-slate-400 uppercase text-[10px] font-black">GRAND TOTAL (DUE AMOUNT)</td>
+                                <td className="p-2.5 text-right font-black text-sm text-rose-700">৳{grandTotalDue.toLocaleString()}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
                       </div>
                     </>
                   );
                 })()}
 
-                {/* Signatures & Footer */}
-                <div className="pt-6 border-t border-slate-200 flex flex-col sm:flex-row items-end justify-between gap-6 text-xs">
-                  <div className="text-[11px] text-slate-500 space-y-1">
+                {/* 7. Bank Account Details Boxes matching paper invoice */}
+                <div className="pt-2">
+                  <span className="text-[10px] uppercase font-bold text-slate-500 block mb-1.5 tracking-wider">OFFICIAL BANK ACCOUNT DETAILS FOR PAYMENT SETTLEMENT:</span>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    {/* City Bank Box */}
+                    <div className="bg-[#FEFCE8] border-2 border-amber-400 p-3 rounded-lg space-y-0.5">
+                      <p className="font-black text-amber-900 uppercase">BANK NAME: CITY BANK</p>
+                      <p className="font-extrabold text-slate-900">Acc name: M/S FOUR STAR CARGO</p>
+                      <p className="font-mono font-black text-slate-900 text-sm">Acc number: 1265028793001</p>
+                    </div>
+
+                    {/* BRAC Bank Box */}
+                    <div className="bg-[#F0F9FF] border-2 border-sky-400 p-3 rounded-lg space-y-0.5">
+                      <p className="font-black text-sky-900 uppercase">BANK NAME: BRAC BANK</p>
+                      <p className="font-extrabold text-slate-900">Account name: M/S FOUR STAR CARGO</p>
+                      <p className="font-mono font-black text-slate-900 text-sm">Account number: 2080981860001</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 8. Signatures & Terms */}
+                <div className="pt-4 border-t border-slate-300 flex flex-col sm:flex-row items-end justify-between gap-4 text-xs">
+                  <div className="text-[10px] text-slate-500 space-y-0.5">
                     <p className="font-bold text-slate-700">Terms & Conditions:</p>
                     <p>• Goods will be released upon full payment settlement.</p>
-                    <p>• Computer-generated official freight statement & bill.</p>
+                    <p>• Computer-generated official freight statement & invoice bill.</p>
                   </div>
-                  <div className="text-center sm:text-right space-y-8">
-                    <div className="w-48 border-b-2 border-slate-400 pb-1">
-                      <span className="text-[10px] font-mono text-slate-400 font-bold">Authorized Accountant Signature</span>
+                  <div className="text-center sm:text-right space-y-6">
+                    <div className="w-48 border-b-2 border-slate-500 pb-1">
+                      <span className="text-[10px] font-mono text-slate-500 font-bold">Authorized Accountant Signature</span>
                     </div>
-                    <p className="text-xs font-extrabold text-slate-800">M/S FOUR STAR CARGO</p>
+                    <p className="text-xs font-black text-slate-900">M/S FOUR STAR CARGO</p>
                   </div>
                 </div>
               </div>
@@ -764,9 +875,12 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
               {/* Printable Single Receipt */}
               <div id="printable-single-receipt" className="p-5 bg-white text-slate-900 rounded-lg border border-slate-300 space-y-4 font-sans shadow-xs printable-document">
                 <div className="flex justify-between items-start border-b-2 border-[#00897B] pb-3">
-                  <div>
-                    <h2 className="text-lg font-black text-[#00897B]">M/S FOUR STAR CARGO</h2>
-                    <p className="text-[10px] text-slate-500 font-semibold">Air Cargo & Freight Logistics Services</p>
+                  <div className="flex items-center space-x-2.5">
+                    <img src="/logo.png" alt="Four Star Cargo Logo" className="w-10 h-10 object-contain shrink-0" />
+                    <div>
+                      <h2 className="text-lg font-black text-[#00897B]">M/S FOUR STAR CARGO</h2>
+                      <p className="text-[10px] text-slate-500 font-semibold">Air Cargo & Freight Logistics Services</p>
+                    </div>
                   </div>
                   <div className="text-right">
                     <span className={`text-[10px] uppercase font-black px-2.5 py-0.5 rounded border ${
@@ -807,6 +921,21 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                   <span className="text-xl font-black font-mono text-[#00897B]">
                     ৳{selectedSingleEntryForReceipt.amount.toLocaleString()}
                   </span>
+                </div>
+
+                <div className="p-2 bg-slate-50 border border-slate-200 rounded text-[11px]">
+                  <span className="text-[9px] uppercase font-bold text-slate-400 block">Amount in Words:</span>
+                  <p className="font-bold text-slate-800 italic">{numberToWords(selectedSingleEntryForReceipt.amount)}</p>
+                </div>
+
+                {/* Bank Info */}
+                <div className="grid grid-cols-2 gap-2 text-[10px]">
+                  <div className="bg-amber-50/50 border border-amber-200 p-1.5 rounded">
+                    <p className="font-bold text-amber-900">CITY BANK: 1265028793001</p>
+                  </div>
+                  <div className="bg-sky-50/50 border border-sky-200 p-1.5 rounded">
+                    <p className="font-bold text-sky-900">BRAC BANK: 2080981860001</p>
+                  </div>
                 </div>
 
                 <div className="pt-4 border-t border-slate-200 flex justify-between items-end text-[10px] text-slate-500">

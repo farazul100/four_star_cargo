@@ -333,7 +333,10 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
         </head>
         <body>
           <div class="badge">
-            <div class="header">M/S FOUR STAR CARGO BD</div>
+            <div class="header">
+              <img src="/logo.png" style="width:36px;height:36px;vertical-align:middle;margin-right:8px;display:inline-block;" />
+              M/S FOUR STAR CARGO BD
+            </div>
             <div class="row"><span class="bold">Carton No:</span> <span>${carton.ctn_no}</span></div>
             <div class="row"><span class="bold">Shipping Mark:</span> <span>${carton.shipping_mark}</span></div>
             <div class="row"><span class="bold">Tracking No:</span> <span>${carton.tracking_number}</span></div>
