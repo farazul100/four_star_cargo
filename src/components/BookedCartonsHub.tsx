@@ -1818,7 +1818,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                     />
                   </th>
                   <th className={`p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>SL</th>
-                  <th className={`p-3 border-r border-slate-200/60 dark:border-slate-700/50 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>CTN NO</th>
+                  <th className={`p-3 border-r border-slate-200/60 dark:border-slate-700/50 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>WAREHOUSE CARTON NUMBER</th>
                   <th className={`p-3 border-r border-slate-200/60 dark:border-slate-700/50 font-extrabold ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>SHIPMENT CTN NO.</th>
                   <th className={`p-3 border-r border-slate-200/60 dark:border-slate-700/50 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>MARK</th>
                   <th className={`p-3 border-r border-slate-200/60 dark:border-slate-700/50 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>TRACKING NO</th>
@@ -2392,7 +2392,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       />
                     </th>
                     <th className={`p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 text-center w-12 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>SL</th>
-                    <th className={`p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 w-32 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>CTN NO</th>
+                    <th className={`p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 w-32 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>WAREHOUSE CARTON NUMBER</th>
                     <th className={`p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-extrabold ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>SHIPMENT CTN NO.</th>
                     <th className={`p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>SHIPPING MARK</th>
                     <th className={`p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>TRACKING NO</th>

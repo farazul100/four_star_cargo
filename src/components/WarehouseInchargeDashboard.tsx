@@ -500,7 +500,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
                 <thead className={`uppercase text-[10px] border-b border-slate-200 dark:border-slate-700 font-semibold ${isDark ? 'bg-[#1E293B] text-white' : 'bg-slate-100 text-slate-900'}`}>
                   <tr>
                     <th className={`p-3 w-10 text-center font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Select</th>
-                    <th className={`p-3 font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>CTN NO</th>
+                    <th className={`p-3 font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>WAREHOUSE CARTON NUMBER</th>
                     <th className="p-3 font-semibold text-emerald-500 dark:text-emerald-400">SHIPMENT CTN NO.</th>
                     <th className={`p-3 font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>TRACKING ID</th>
                     <th className={`p-3 font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>SHIPPING MARK</th>

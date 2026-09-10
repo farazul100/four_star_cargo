@@ -806,7 +806,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
               <tr>
                 <th className="p-3 text-center border-r border-gray-200 dark:border-[#2C2C2E]/60 w-12">SL/NO</th>
                 <th className="p-3 border-r border-gray-200 dark:border-[#2C2C2E]/60 whitespace-nowrap">ENTRY DATE</th>
-                <th className="p-3 border-r border-gray-200 dark:border-[#2C2C2E]/60 whitespace-nowrap text-[#00897B]">CTN NO</th>
+                <th className="p-3 border-r border-gray-200 dark:border-[#2C2C2E]/60 whitespace-nowrap text-[#00897B]">WAREHOUSE CARTON NUMBER</th>
                 <th className="p-3 border-r border-gray-200 dark:border-[#2C2C2E]/60 whitespace-nowrap text-emerald-500 font-bold">SHIPMENT CTN NO.</th>
                 <th className="p-3 border-r border-gray-200 dark:border-[#2C2C2E]/60 whitespace-nowrap text-amber-500">SHIPPING MARK</th>
                 <th className="p-3 border-r border-gray-200 dark:border-[#2C2C2E]/60">PRODUCT NAME (EN / CN)</th>
@@ -1017,7 +1017,7 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
               <table className="w-full text-left text-xs border-collapse font-mono">
                 <thead className={`uppercase text-[10px] border-b ${isDark ? 'bg-[#1E293B] text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-700 border-slate-200'}`}>
                   <tr>
-                    <th className="p-2.5">CTN NO</th>
+                    <th className="p-2.5">WAREHOUSE CARTON NUMBER</th>
                     <th className="p-2.5">SHIPPING MARK</th>
                     <th className="p-2.5">PRODUCT NAME</th>
                     <th className="p-2.5 text-right">G.WT (KG)</th>

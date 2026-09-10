@@ -490,7 +490,7 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
               }`}
             >
               <tr>
-                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'কার্টুন নম্বর (CTN NO)' : 'Carton No (CTN NO)'}</th>
+                <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'ওয়্যারহাউজ কার্টুন নম্বর (WAREHOUSE CARTON NUMBER)' : 'Warehouse Carton Number (WAREHOUSE CARTON NUMBER)'}</th>
                 <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'শিপিং মার্ক / ট্র্যাকিং নং' : 'Shipping Mark / Tracking No'}</th>
                 <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'প্রোডাক্ট নাম & পিস' : 'Product Name & Pcs'}</th>
                 <th className={`p-3.5 border-r border-slate-200 dark:border-slate-700 font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'উৎস ➔ গন্তব্য হাব' : 'Origin ➔ Destination Hub'}</th>

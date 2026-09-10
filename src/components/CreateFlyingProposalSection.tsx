@@ -409,7 +409,7 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                       className="rounded border-slate-300 cursor-pointer accent-blue-600 w-4 h-4"
                     />
                   </th>
-                  <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">CTN NO</th>
+                  <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">WAREHOUSE CARTON NUMBER</th>
                   <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap text-emerald-700 dark:text-emerald-300">SHIPMENT CTN NO.</th>
                   <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">SHIPPING MARK</th>
                   <th className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-semibold whitespace-nowrap">CUSTOMER NAME</th>
