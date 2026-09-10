@@ -58,14 +58,14 @@ const DEFAULT_GENERAL_SETTINGS: GeneralSettingsData = {
   companyLogoUrl: '',
   faviconUrl: '',
   logoBgColor: '#ffffff',
-  companyNameEn: 'VENCON',
-  companyNameBn: 'ভেনকন',
-  taglineEn: 'Operation Management',
-  taglineBn: 'অপারেশন ম্যানেজমেন্ট',
-  footerTextEn: '© 2026 Vencon',
-  footerTextBn: '© २०२६ ভেনকন',
-  primaryColor: '#1D4ED8',
-  fontFamily: 'Atkinson Hyperlegible',
+  companyNameEn: '',
+  companyNameBn: '',
+  taglineEn: '',
+  taglineBn: '',
+  footerTextEn: '',
+  footerTextBn: '',
+  primaryColor: '#00897B',
+  fontFamily: 'Inter',
 };
 
 const DEFAULT_BUDGET_SETTINGS: BudgetSettingsData = {
@@ -97,7 +97,14 @@ export const SystemSettingsManager: React.FC<SystemSettingsManagerProps> = ({
     const saved = localStorage.getItem('fsc_vps_general_settings');
     if (saved) {
       try {
-        return { ...DEFAULT_GENERAL_SETTINGS, ...JSON.parse(saved) };
+        const parsed = JSON.parse(saved);
+        if (parsed.companyNameEn === 'VENCON') parsed.companyNameEn = '';
+        if (parsed.companyNameBn === 'ভেনকন') parsed.companyNameBn = '';
+        if (parsed.taglineEn === 'Operation Management') parsed.taglineEn = '';
+        if (parsed.taglineBn === 'অপারেশন ম্যানেজমেন্ট') parsed.taglineBn = '';
+        if (parsed.footerTextEn === '© 2026 Vencon') parsed.footerTextEn = '';
+        if (parsed.footerTextBn === '© २०२६ ভেনকন' || parsed.footerTextBn === '© 2026 ভেনকন') parsed.footerTextBn = '';
+        return { ...DEFAULT_GENERAL_SETTINGS, ...parsed };
       } catch (e) {}
     }
     return DEFAULT_GENERAL_SETTINGS;
