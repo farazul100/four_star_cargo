@@ -195,7 +195,7 @@ export const SearchableCustomerSelect: React.FC<SearchableCustomerSelectProps> =
                       <span className="text-[9px] uppercase text-slate-400 font-bold block">বর্তমান বকেয়া</span>
                       <span
                         className={`font-mono text-xs font-black ${
-                          due > 0 ? 'text-amber-600 dark:text-amber-400' : 'text-emerald-600 dark:text-emerald-400'
+                          due > 0 ? (isDark ? 'text-amber-400' : 'text-amber-950') : (isDark ? 'text-emerald-400' : 'text-emerald-800')
                         }`}
                       >
                         ৳{due.toLocaleString()}

@@ -1977,7 +1977,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
           <div className={`border-t sm:border-t-0 sm:border-l pt-4 sm:pt-0 sm:pl-6 space-y-1 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
             <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'মোট চার্জ (Total Charges Billed)' : 'Total Billed Charges'}</span>
-            <div className="text-lg font-bold text-amber-600 dark:text-amber-400 font-mono">৳{stats.totalCharges.toLocaleString()}</div>
+            <div className="text-lg font-black text-amber-950 dark:text-amber-400 font-mono">৳{stats.totalCharges.toLocaleString()}</div>
             <span className={`text-[11px] block font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'মোট পরিশোধ (Total Paid)' : 'Total Paid Collections'}: ৳{stats.totalPayments.toLocaleString()}</span>
           </div>
 
@@ -2035,14 +2035,14 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                     {/* 2. Type Badge */}
                     <td className="p-3 whitespace-nowrap">
                       <span
-                        className={`px-2.5 py-0.5 rounded-none text-[10px] font-normal uppercase flex items-center space-x-1 w-fit ${
+                        className={`px-2.5 py-0.5 rounded-none text-[10px] font-extrabold uppercase flex items-center space-x-1 w-fit ${
                           entry.type === 'charge'
-                            ? 'bg-amber-500/20 text-amber-600 dark:text-amber-300 border border-amber-500/30'
+                            ? (isDark ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-amber-100 text-amber-950 border border-amber-300')
                             : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30'
                         }`}
                       >
                         {entry.type === 'charge' ? (
-                          <ArrowUpRight className="w-3 h-3 text-amber-500" />
+                          <ArrowUpRight className="w-3 h-3 text-amber-950 dark:text-amber-400" />
                         ) : (
                           <ArrowDownLeft className="w-3 h-3 text-emerald-500" />
                         )}
@@ -2070,9 +2070,9 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                     </td>
 
                     {/* 4. Debit Charge Amount */}
-                    <td className="p-3 font-mono font-bold whitespace-nowrap">
+                    <td className="p-3 font-mono font-black whitespace-nowrap">
                       {entry.type === 'charge' ? (
-                        <span className="text-amber-600 dark:text-amber-400 text-sm">৳{entry.amount.toLocaleString()}</span>
+                        <span className="text-amber-950 dark:text-amber-400 text-sm">৳{entry.amount.toLocaleString()}</span>
                       ) : (
                         <span className="text-slate-400">-</span>
                       )}
@@ -2520,7 +2520,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                     <td className="p-3.5 font-bold font-mono text-[#00897B]">{cust.customer_code}</td>
                     <td className={`p-3.5 font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{cust.name}</td>
                     <td className={`p-3.5 font-mono ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{cust.phone}</td>
-                    <td className="p-3.5 text-amber-600 dark:text-amber-400 font-mono">৳{stats.totalCharges.toLocaleString()}</td>
+                    <td className="p-3.5 text-amber-950 dark:text-amber-400 font-mono font-black">৳{stats.totalCharges.toLocaleString()}</td>
                     <td className="p-3.5 text-emerald-600 dark:text-emerald-400 font-mono">৳{stats.totalPayments.toLocaleString()}</td>
                     <td className={`p-3.5 font-bold text-sm font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       ৳{stats.currentDue.toLocaleString()}
