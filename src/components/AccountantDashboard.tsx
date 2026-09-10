@@ -654,8 +654,8 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                 </div>
 
                 {/* 3. Customer Name Highlighted Box */}
-                <div className="bg-[#FEF3C7] border border-amber-300 py-2 px-4 rounded-md text-center">
-                  <h3 className="text-base font-black tracking-wider text-amber-950 uppercase">
+                <div className="bg-[#F1F5F9] border border-slate-300 py-2 px-4 rounded-md text-center">
+                  <h3 className="text-base font-black tracking-wider text-slate-900 uppercase">
                     {selectedCust.name}
                   </h3>
                 </div>
@@ -816,8 +816,8 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                   <span className="text-[10px] uppercase font-bold text-slate-500 block mb-1.5 tracking-wider">OFFICIAL BANK ACCOUNT DETAILS FOR PAYMENT SETTLEMENT:</span>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
                     {/* City Bank Box */}
-                    <div className="bg-[#FEFCE8] border-2 border-amber-400 p-3 rounded-lg space-y-0.5">
-                      <p className="font-black text-amber-900 uppercase">BANK NAME: CITY BANK</p>
+                    <div className="bg-[#F8FAFC] border-2 border-slate-300 p-3 rounded-lg space-y-0.5">
+                      <p className="font-black text-slate-900 uppercase">BANK NAME: CITY BANK</p>
                       <p className="font-extrabold text-slate-900">Acc name: M/S FOUR STAR CARGO</p>
                       <p className="font-mono font-black text-slate-900 text-sm">Acc number: 1265028793001</p>
                     </div>
@@ -886,7 +886,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                   </div>
                   <div className="text-right">
                     <span className={`text-[10px] uppercase font-black px-2.5 py-0.5 rounded border ${
-                      selectedSingleEntryForReceipt.type === 'payment' ? 'bg-emerald-100 text-emerald-900 border-emerald-300' : 'bg-amber-100 text-amber-900 border-amber-300'
+                      selectedSingleEntryForReceipt.type === 'payment' ? 'bg-emerald-100 text-emerald-900 border-emerald-300' : 'bg-slate-100 text-slate-900 border-slate-300'
                     }`}>
                       {selectedSingleEntryForReceipt.type === 'payment' ? 'MONEY RECEIPT' : 'CHARGE VOUCHER'}
                     </span>
@@ -932,8 +932,8 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
                 {/* Bank Info */}
                 <div className="grid grid-cols-2 gap-2 text-[10px]">
-                  <div className="bg-amber-50/50 border border-amber-200 p-1.5 rounded">
-                    <p className="font-bold text-amber-900">CITY BANK: 1265028793001</p>
+                  <div className="bg-slate-100 border border-slate-200 p-1.5 rounded">
+                    <p className="font-bold text-slate-900">CITY BANK: 1265028793001</p>
                   </div>
                   <div className="bg-sky-50/50 border border-sky-200 p-1.5 rounded">
                     <p className="font-bold text-sky-900">BRAC BANK: 2080981860001</p>
@@ -1091,9 +1091,9 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
           }`}>
             <div className="flex items-center justify-between">
               <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'কোম্পানি খরচ (Super Admin Sync)' : 'Operational Expenses'}</span>
-              <Wallet className="w-4 h-4 text-amber-500" />
+              <Wallet className="w-4 h-4 text-[#00897B]" />
             </div>
-            <div className={`text-2xl font-bold font-poppins ${isDark ? 'text-amber-400' : 'text-amber-700'}`}>৳{totalExpenseAmount.toLocaleString()}</div>
+            <div className={`text-2xl font-bold font-poppins ${isDark ? 'text-white' : 'text-slate-900'}`}>৳{totalExpenseAmount.toLocaleString()}</div>
             <div className={`flex items-center justify-between text-[11px] font-light pt-1 border-t ${isDark ? 'text-[#8FA3AD] border-[#1E3247]' : 'text-slate-500 border-slate-100'}`}>
               <span>{(expenses || []).length} {isBn ? 'টি ভাউচার এন্ট্রি' : 'Vouchers Recorded'}</span>
               <button
@@ -1920,7 +1920,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
           <div className="flex items-center space-x-2">
             <button
               onClick={() => openQuickLedgerModal(selectedCust.id, 'charge')}
-              className="flex items-center space-x-1.5 py-2 px-4 rounded-none bg-amber-600 hover:bg-amber-700 text-white font-normal text-xs shadow-sm cursor-pointer"
+              className="flex items-center space-x-1.5 py-2 px-4 rounded-none bg-slate-800 hover:bg-slate-900 text-white font-normal text-xs shadow-sm cursor-pointer"
             >
               <Plus className="w-4 h-4" />
               <span className="font-light">{isBn ? '➕ বকেয়া টাকা যোগ করুন' : '+ Add Due Charge'}</span>
@@ -1977,7 +1977,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
 
           <div className={`border-t sm:border-t-0 sm:border-l pt-4 sm:pt-0 sm:pl-6 space-y-1 ${isDark ? 'border-[#1E3247]' : 'border-slate-200'}`}>
             <span className={`text-xs font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'মোট চার্জ (Total Charges Billed)' : 'Total Billed Charges'}</span>
-            <div className="text-lg font-black text-amber-950 dark:text-amber-400 font-mono">৳{stats.totalCharges.toLocaleString()}</div>
+            <div className="text-lg font-black text-slate-900 dark:text-white font-mono">৳{stats.totalCharges.toLocaleString()}</div>
             <span className={`text-[11px] block font-light ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{isBn ? 'মোট পরিশোধ (Total Paid)' : 'Total Paid Collections'}: ৳{stats.totalPayments.toLocaleString()}</span>
           </div>
 
@@ -2037,12 +2037,12 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                       <span
                         className={`px-2.5 py-0.5 rounded-none text-[10px] font-extrabold uppercase flex items-center space-x-1 w-fit ${
                           entry.type === 'charge'
-                            ? (isDark ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' : 'bg-amber-100 text-amber-950 border border-amber-300')
+                            ? 'bg-slate-100 text-slate-900 border border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
                             : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30'
                         }`}
                       >
                         {entry.type === 'charge' ? (
-                          <ArrowUpRight className="w-3 h-3 text-amber-950 dark:text-amber-400" />
+                          <ArrowUpRight className="w-3 h-3 text-slate-700 dark:text-slate-300" />
                         ) : (
                           <ArrowDownLeft className="w-3 h-3 text-emerald-500" />
                         )}
@@ -2072,7 +2072,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                     {/* 4. Debit Charge Amount */}
                     <td className="p-3 font-mono font-black whitespace-nowrap">
                       {entry.type === 'charge' ? (
-                        <span className="text-amber-950 dark:text-amber-400 text-sm">৳{entry.amount.toLocaleString()}</span>
+                        <span className="text-slate-900 dark:text-slate-100 text-sm">৳{entry.amount.toLocaleString()}</span>
                       ) : (
                         <span className="text-slate-400">-</span>
                       )}
@@ -2185,7 +2185,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                       onClick={() => setEntryType('charge')}
                       className={`p-2.5 rounded-none font-bold text-xs transition-all flex items-center justify-center space-x-1 cursor-pointer ${
                         entryType === 'charge'
-                          ? 'bg-amber-600 text-white shadow-sm ring-2 ring-amber-400'
+                          ? 'bg-slate-800 text-white shadow-sm ring-2 ring-slate-600'
                           : isDark
                           ? 'bg-[#0B1622] text-[#8FA3AD] border border-[#1E3247]'
                           : 'bg-slate-100 text-slate-700 border border-slate-200'
@@ -2384,7 +2384,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                 <button
                   type="submit"
                   className={`px-5 py-2 rounded-none text-white font-normal text-xs cursor-pointer shadow-sm ${
-                    entryType === 'charge' ? 'bg-amber-600 hover:bg-amber-700' : 'bg-emerald-600 hover:bg-emerald-700'
+                    entryType === 'charge' ? 'bg-slate-800 hover:bg-slate-900' : 'bg-emerald-600 hover:bg-emerald-700'
                   }`}
                 >
                   <span className="font-light">
@@ -2520,7 +2520,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                     <td className="p-3.5 font-bold font-mono text-[#00897B]">{cust.customer_code}</td>
                     <td className={`p-3.5 font-medium ${isDark ? 'text-white' : 'text-slate-900'}`}>{cust.name}</td>
                     <td className={`p-3.5 font-mono ${isDark ? 'text-[#8FA3AD]' : 'text-slate-500'}`}>{cust.phone}</td>
-                    <td className="p-3.5 text-amber-950 dark:text-amber-400 font-mono font-black">৳{stats.totalCharges.toLocaleString()}</td>
+                    <td className="p-3.5 text-slate-900 dark:text-slate-100 font-mono font-black">৳{stats.totalCharges.toLocaleString()}</td>
                     <td className="p-3.5 text-emerald-600 dark:text-emerald-400 font-mono">৳{stats.totalPayments.toLocaleString()}</td>
                     <td className={`p-3.5 font-bold text-sm font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>
                       ৳{stats.currentDue.toLocaleString()}
