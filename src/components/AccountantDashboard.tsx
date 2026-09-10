@@ -696,7 +696,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                       </tr>
                       <tr className="border-b border-slate-300">
                         <td className="p-1.5 font-bold bg-slate-100 border-r border-slate-300 uppercase text-[10px]">CMDTY</td>
-                        <td className="p-1.5 font-bold text-slate-900">{getCustomerLedger(selectedCust.customer_code).filter(e => e.type === 'charge').length} CTN / ITEMS</td>
+                        <td className="p-1.5 font-bold text-slate-900">{getCustomerStats(selectedCust.customer_code).entries.filter(e => e.type === 'charge').length} CTN / ITEMS</td>
                       </tr>
                       <tr className="border-b border-slate-300">
                         <td className="p-1.5 font-bold bg-slate-100 border-r border-slate-300 uppercase text-[10px]">QTY/CW</td>
@@ -717,7 +717,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                 {/* 5. Main Itemized Invoice Table with Crisp Black Borders matching paper invoice */}
                 {(() => {
                   const s = getCustomerStats(selectedCust.customer_code);
-                  const events = getCustomerLedger(selectedCust.customer_code);
+                  const events = s.entries;
                   const totalCharges = s.totalCharges;
                   const totalPaid = s.totalPayments;
                   const grandTotalDue = s.currentDue;
