@@ -531,7 +531,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                               ? 'bg-emerald-50 text-emerald-800 border-emerald-200/60 dark:bg-emerald-950/40 dark:text-emerald-300'
                               : ctn.status === 'in_transit'
                               ? 'bg-blue-50 text-blue-800 border-blue-200/60 dark:bg-blue-950/40 dark:text-blue-300'
-                              : 'bg-amber-50 text-amber-800 border-amber-200/60 dark:bg-amber-950/40 dark:text-amber-300'
+                              : 'bg-slate-100 text-slate-900 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
                           }`}>
                             {ctn.status === 'delivered' ? '🟢 Delivered' : ctn.status === 'in_transit' ? '✈️ In Transit' : '📦 At Origin Hub'}
                           </span>
@@ -594,7 +594,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                           <span className={`px-2 py-0.5 rounded-none-none text-[10px] font-normal border ${
                             entry.type === 'payment'
                               ? 'bg-emerald-50 text-emerald-800 border-emerald-200/60 dark:bg-emerald-950/40 dark:text-emerald-300'
-                              : 'bg-amber-50 text-amber-800 border-amber-200/60 dark:bg-amber-950/40 dark:text-amber-300'
+                              : 'bg-slate-100 text-slate-900 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
                           }`}>
                             {entry.type === 'payment' ? '🟢 পেমেন্ট জমা' : '🧾 ফ্রেইট বিল'}
                           </span>
@@ -609,7 +609,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                             <span className="text-slate-400">System Auto</span>
                           )}
                         </td>
-                        <td className="p-3.5 text-right font-mono font-medium text-amber-800 dark:text-amber-400">
+                        <td className="p-3.5 text-right font-mono font-medium text-slate-900 dark:text-slate-100">
                           {entry.type === 'charge' ? `৳${entry.amount.toLocaleString()}` : '-'}
                         </td>
                         <td className="p-3.5 text-right font-mono font-medium text-emerald-700 dark:text-emerald-400">
@@ -686,13 +686,13 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
 
           {/* Total Billed */}
           <div className={`p-4 rounded-none-none border space-y-1.5 ${
-            isDark ? 'bg-[#1E293B] border-slate-700/80' : 'bg-amber-50/40 border-amber-100/80'
+            isDark ? 'bg-[#1E293B] border-slate-700/80' : 'bg-slate-50 border-slate-200'
           }`}>
             <span className="text-[11px] font-normal text-slate-500 flex items-center justify-between">
               <span>{isBn ? 'মোট ফ্রেইট চার্জ বিল' : 'Total Freight Billed'}</span>
-              <Receipt className="w-3.5 h-3.5 text-amber-600" />
+              <Receipt className="w-3.5 h-3.5 text-slate-700" />
             </span>
-            <p className="text-lg font-semibold text-amber-800 dark:text-amber-300 font-mono">৳{totalBilledAll.toLocaleString()}</p>
+            <p className="text-lg font-semibold text-slate-900 dark:text-white font-mono">৳{totalBilledAll.toLocaleString()}</p>
           </div>
 
           {/* Total Paid */}

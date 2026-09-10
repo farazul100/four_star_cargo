@@ -1166,7 +1166,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                   id: 'warehouse_rent',
                   label: isBn ? 'তেজগাঁও হাবে মাসিক ভাড়া ও ইউটিলিটি (Warehouse Lease & Rent)' : 'Warehouse Lease & Rent',
                   icon: '🏢',
-                  color: 'bg-amber-600',
+                  color: 'bg-slate-700',
                   total: getCatTotal('warehouse_rent'),
                 },
                 {
@@ -1250,7 +1250,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                     isDark ? 'bg-[#0B1622]/50 border-[#1E3247] text-[#8FA3AD]' : 'bg-slate-50 border-slate-200 text-slate-600'
                   }`}>
                     <span>{isBn ? 'বকেয়া যুক্ত কাস্টমার' : 'Clients with Dues'}:</span>
-                    <span className="text-amber-600 dark:text-amber-400 font-bold font-mono">
+                    <span className="text-slate-900 dark:text-slate-100 font-bold font-mono">
                       {customers.filter((c) => getCustomerStats(c.customer_code).currentDue > 0).length}
                     </span>
                   </div>
@@ -1304,7 +1304,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                       <span
                         className={`px-2.5 py-0.5 rounded-none text-[10px] font-normal uppercase ${
                           re.type === 'charge'
-                            ? 'bg-amber-500/20 text-amber-600 dark:text-amber-300'
+                            ? 'bg-slate-100 text-slate-900 border border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
                             : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300'
                         }`}
                       >
@@ -1333,7 +1333,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
               {/* Header Bar */}
               <div className="flex items-start justify-between border-b pb-4 border-slate-200 dark:border-[#1E3247]">
                 <div className="flex items-center space-x-3">
-                  <div className="w-11 h-11 rounded-xl bg-amber-500/10 dark:bg-amber-500/20 flex items-center justify-center text-amber-600 dark:text-amber-400 font-bold shadow-xs">
+                  <div className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-900 dark:text-slate-100 font-bold shadow-xs">
                     <Wallet className="w-6 h-6" />
                   </div>
                   <div>
@@ -1775,10 +1775,10 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
           <div className={`border rounded-none p-4 space-y-1 ${
             isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900 shadow-xs'
           }`}>
-            <span className={`text-[11px] font-medium uppercase tracking-wider ${isDark ? 'text-amber-400' : 'text-amber-700'}`}>
+            <span className={`text-[11px] font-medium uppercase tracking-wider ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>
               {filterLabel} {isBn ? 'বকেয়া চার্জ বিলিং' : 'Billed Charges'}
             </span>
-            <div className="text-2xl font-bold font-mono text-amber-600 dark:text-amber-400">
+            <div className="text-2xl font-bold font-mono text-slate-900 dark:text-slate-100">
               ৳{periodTotalBilled.toLocaleString()}
             </div>
             <span className={`text-[10px] block ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
@@ -1866,7 +1866,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                       <span
                         className={`font-extrabold text-xs uppercase ${
                           re.type === 'charge'
-                            ? 'text-amber-700 dark:text-amber-400'
+                            ? 'text-slate-900 dark:text-slate-100'
                             : 'text-emerald-700 dark:text-emerald-400'
                         }`}
                       >
@@ -2248,7 +2248,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                         <button
                           type="button"
                           onClick={() => setEntryNote('✈️ চায়না ফ্রেইট ও শিপিং চার্জ')}
-                          className="px-2 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-300 border border-amber-500/30 text-[11px] rounded-none hover:bg-amber-500/20 cursor-pointer"
+                          className="px-2 py-1 bg-slate-100 text-slate-900 border border-slate-300 text-[11px] rounded-none hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 cursor-pointer"
                         >
                           ✈️ চায়না ফ্রেইট চার্জ
                         </button>
