@@ -1986,8 +1986,10 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
             <div className={`text-2xl font-bold font-mono ${stats.currentDue > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-emerald-600 dark:text-emerald-400'}`}>
               ৳{stats.currentDue.toLocaleString()}
             </div>
-            <span className={`text-[10px] font-normal px-2 py-0.5 rounded-none inline-block ${
-              stats.currentDue > 0 ? 'bg-rose-500/10 text-rose-600 dark:text-rose-300' : 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-300'
+            <span className={`text-xs font-extrabold px-3 py-1 rounded-none inline-flex items-center space-x-1.5 border shadow-2xs ${
+              stats.currentDue > 0 
+                ? (isDark ? 'bg-rose-950/80 text-rose-200 border-rose-800' : 'bg-rose-100 text-rose-900 border-rose-300') 
+                : (isDark ? 'bg-emerald-950/80 text-emerald-200 border-emerald-800' : 'bg-emerald-100 text-emerald-900 border-emerald-300')
             }`}>
               {stats.currentDue > 0 ? (isBn ? '🔴 বকেয়া টাকা পরিশোধ করতে হবে' : '🔴 Dues Outstanding') : (isBn ? '🟢 সর্বমোট পরিশোধিত (No Dues)' : '🟢 Fully Paid')}
             </span>
@@ -2038,7 +2040,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                         className={`px-2.5 py-0.5 rounded-none text-[10px] font-extrabold uppercase flex items-center space-x-1 w-fit ${
                           entry.type === 'charge'
                             ? 'bg-slate-100 text-slate-900 border border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
-                            : 'bg-emerald-500/20 text-emerald-600 dark:text-emerald-300 border border-emerald-500/30'
+                            : 'bg-emerald-100 text-emerald-900 border border-emerald-300 dark:bg-emerald-950/80 dark:text-emerald-200 dark:border-emerald-700'
                         }`}
                       >
                         {entry.type === 'charge' ? (
