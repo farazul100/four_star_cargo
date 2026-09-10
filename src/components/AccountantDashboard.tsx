@@ -36,6 +36,7 @@ import { CargoSearchTracker } from './CargoSearchTracker';
 import { getHostingerDbData, saveHostingerDbData } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { numberToWords } from '../utils/numberToWords';
+import { printElement } from '../utils/printHelper';
 
 interface AccountantDashboardProps {
   ledgerEntries: LedgerEntry[];
@@ -602,7 +603,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                 <div className="flex items-center space-x-3">
                   <button
                     type="button"
-                    onClick={() => window.print()}
+                    onClick={() => printElement('printable-customer-invoice', 'Four Star Cargo Customer Invoice')}
                     className="px-4 py-2 bg-[#00897B] hover:bg-[#00796B] text-white font-extrabold text-xs rounded-lg shadow-md transition-all flex items-center space-x-1.5 cursor-pointer"
                   >
                     <Printer className="w-4 h-4" />
@@ -956,7 +957,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                 </button>
                 <button
                   type="button"
-                  onClick={() => window.print()}
+                  onClick={() => printElement('printable-single-receipt', 'Four Star Cargo Money Receipt')}
                   className="px-4 py-2 rounded-lg text-xs font-extrabold bg-[#00897B] hover:bg-[#00796B] text-white shadow-md cursor-pointer flex items-center space-x-1.5"
                 >
                   <Printer className="w-4 h-4" />
