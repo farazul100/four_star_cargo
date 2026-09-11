@@ -1078,9 +1078,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                           return (
                             <tr
                               key={c.id}
-                              className={`hover:bg-slate-50 dark:hover:bg-slate-800/40 transition-colors ${
-                                isCartonReceived ? 'bg-emerald-500/10' : ''
-                              }`}
+                              className="bg-white dark:bg-[#1E293B] hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
                             >
                               <td className="p-2.5">
                                 {!isCartonReceived && (
@@ -1132,30 +1130,26 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                                         handleUpdateCartonWeight(c.id, parsed);
                                       }
                                     }}
-                                    className={`w-20 px-2 py-1 text-xs font-extrabold text-center rounded-lg border-2 transition-all ${
-                                      isCartonReceived
-                                        ? 'bg-emerald-100 border-emerald-500 text-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-200'
-                                        : 'bg-white border-blue-500 text-slate-900 dark:bg-[#0F172A] dark:text-white focus:ring-2 focus:ring-blue-500 shadow-2xs'
-                                    }`}
+                                    className="w-20 px-2 py-1 text-xs font-mono font-extrabold text-center rounded-lg border-2 border-slate-300 bg-white text-slate-900 dark:bg-[#0F172A] dark:text-white dark:border-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-2xs"
                                     title="বাংলাদেশে মেপে পাওয়া ওজন টিউন/এডিট করুন"
                                   />
-                                  <span className={`text-[10px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>KG</span>
+                                  <span className={`text-[10px] font-bold ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>KG</span>
                                 </div>
                               </td>
                               <td className="p-2.5">
                                 {isCartonReceived ? (
-                                  <span className="px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold border border-emerald-500/30">
+                                  <span className="px-2.5 py-1 rounded-md bg-emerald-800 text-white text-[10px] font-black border border-emerald-900 shadow-2xs">
                                     BD রিসিভড
                                   </span>
                                 ) : (
-                                  <span className="px-2 py-0.5 rounded-lg bg-amber-500/20 text-amber-300 text-[10px] font-extrabold border border-amber-500/30">
+                                  <span className="px-2.5 py-1 rounded-md bg-slate-900 text-white text-[10px] font-black border border-slate-900 shadow-2xs">
                                     ইন-ট্রানজিট
                                   </span>
                                 )}
                               </td>
                               <td className="p-2.5 text-right">
                                 {isCartonReceived ? (
-                                  <span className="text-[10px] text-emerald-300 font-extrabold px-2 py-0.5 rounded-lg bg-emerald-500/20 border border-emerald-500/30">
+                                  <span className="text-[10px] text-white font-black px-2.5 py-1 rounded-md bg-emerald-800 border border-emerald-900 shadow-2xs">
                                     ইনভেন্টরিতে যুক্ত
                                   </span>
                                 ) : isBdWarehouseStaff ? (
@@ -1163,13 +1157,13 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                                     type="button"
                                     onMouseDown={(e) => e.preventDefault()}
                                     onClick={() => handleReceiveSingleCarton(c)}
-                                    className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs transition-all inline-flex items-center space-x-1 cursor-pointer border border-emerald-500 shadow-md"
+                                    className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs transition-all inline-flex items-center space-x-1 cursor-pointer border border-emerald-700 shadow-md"
                                   >
-                                    <CheckCircle2 className="w-3 h-3" />
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
                                     <span>বুঝে পেয়েছি (রিসিভড)</span>
                                   </button>
                                 ) : (
-                                  <span className="text-[10px] text-sky-300 font-extrabold px-2 py-0.5 rounded-lg bg-blue-500/20 border border-blue-500/30">
+                                  <span className="text-[10px] text-white font-black px-2.5 py-1 rounded-md bg-blue-700 border border-blue-800 shadow-2xs">
                                     অপারেশনস ফ্লাইট রিসিভিং
                                   </span>
                                 )}
