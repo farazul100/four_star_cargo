@@ -222,131 +222,152 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
   // Print Manifest & Physical Receiving Sheet with Blank Live Weight Column for Pen Handwriting
   const handlePrintReceivingManifest = (flight: any, flightCartons: Carton[]) => {
-    const printWindow = window.open('', '_blank', 'width=1000,height=800');
-    if (!printWindow) return;
+    try {
+      const totalWeight = flightCartons.reduce((sum, c) => sum + (c.bd_calibrated_weight !== undefined ? Number(c.bd_calibrated_weight) : (Number(c.gross_weight) || 0)), 0);
+      const totalCbm = flightCartons.reduce((sum, c) => sum + (Number(c.cbm) || 0), 0);
 
-    const totalWeight = flightCartons.reduce((sum, c) => sum + (c.bd_calibrated_weight !== undefined ? c.bd_calibrated_weight : (c.gross_weight || 0)), 0);
-    const totalCbm = flightCartons.reduce((sum, c) => sum + (c.cbm || 0), 0);
+      const rowsHtml = flightCartons
+        .map((c, idx) => `
+          <tr>
+            <td style="text-align: center; font-weight: bold; border: 1px solid #000; padding: 6px;">${idx + 1}</td>
+            <td style="font-family: monospace; font-weight: bold; border: 1px solid #000; padding: 6px;">${c.ctn_no}</td>
+            <td style="font-family: monospace; font-weight: bold; color: #047857; border: 1px solid #000; padding: 6px;">${c.packaging_number || '-'}</td>
+            <td style="font-family: monospace; font-weight: bold; color: #1d4ed8; border: 1px solid #000; padding: 6px;">${c.shipping_mark}</td>
+            <td style="font-family: monospace; border: 1px solid #000; padding: 6px;">${c.tracking_number}</td>
+            <td style="border: 1px solid #000; padding: 6px;">
+              <div style="font-weight: bold;">${c.product_name_en}</div>
+              ${c.product_name_cn ? `<div style="font-size: 10px; color: #555;">${c.product_name_cn}</div>` : ''}
+            </td>
+            <td style="text-align: center; font-family: monospace; border: 1px solid #000; padding: 6px;">
+              <div><b>${c.quantity || 1} Pcs</b></div>
+              <div style="font-size: 10px; color: #666;">${c.cbm || 0.15} CBM</div>
+            </td>
+            <td style="text-align: center; font-family: monospace; font-weight: bold; font-size: 13px; border: 1px solid #000; padding: 6px;">
+              ${c.bd_calibrated_weight !== undefined ? c.bd_calibrated_weight : (c.gross_weight || '0')} KG
+            </td>
+            <!-- NEW BLANK LIVE WEIGHT COLUMN FOR PEN HANDWRITING -->
+            <td style="text-align: center; border: 1px solid #000; padding: 6px; background-color: #fafafa;">
+              <div style="border: 2px solid #000; height: 32px; width: 85px; margin: 0 auto; background: #ffffff; border-radius: 4px;"></div>
+            </td>
+            <td style="text-align: center; font-size: 11px; font-weight: bold; border: 1px solid #000; padding: 6px;">
+              ${c.status === 'received' || c.current_warehouse_id === 'wh-bd' ? 'RECEIVED' : 'IN-TRANSIT'}
+            </td>
+          </tr>
+        `)
+        .join('');
 
-    const rowsHtml = flightCartons
-      .map((c, idx) => `
-        <tr>
-          <td style="text-align: center; font-weight: bold; border: 1px solid #333; padding: 6px;">${idx + 1}</td>
-          <td style="font-family: monospace; font-weight: bold; border: 1px solid #333; padding: 6px;">${c.ctn_no}</td>
-          <td style="font-family: monospace; font-weight: bold; color: #047857; border: 1px solid #333; padding: 6px;">${c.packaging_number || '-'}</td>
-          <td style="font-family: monospace; font-weight: bold; color: #1d4ed8; border: 1px solid #333; padding: 6px;">${c.shipping_mark}</td>
-          <td style="font-family: monospace; border: 1px solid #333; padding: 6px;">${c.tracking_number}</td>
-          <td style="border: 1px solid #333; padding: 6px;">
-            <div style="font-weight: bold;">${c.product_name_en}</div>
-            ${c.product_name_cn ? `<div style="font-size: 10px; color: #555;">${c.product_name_cn}</div>` : ''}
-          </td>
-          <td style="text-align: center; font-family: monospace; border: 1px solid #333; padding: 6px;">
-            <div><b>${c.quantity || 1} Pcs</b></div>
-            <div style="font-size: 10px; color: #666;">${c.cbm || 0.15} CBM</div>
-          </td>
-          <td style="text-align: center; font-family: monospace; font-weight: bold; font-size: 13px; border: 1px solid #333; padding: 6px;">
-            ${c.bd_calibrated_weight !== undefined ? c.bd_calibrated_weight : (c.gross_weight || '0')} KG
-          </td>
-          <!-- NEW BLANK LIVE WEIGHT COLUMN FOR PEN HANDWRITING -->
-          <td style="text-align: center; border: 1px solid #333; padding: 6px; background-color: #fafafa;">
-            <div style="border: 2px solid #111; height: 32px; width: 85px; margin: 0 auto; background: #ffffff; border-radius: 4px;"></div>
-          </td>
-          <td style="text-align: center; font-size: 11px; font-weight: bold; border: 1px solid #333; padding: 6px;">
-            ${c.status === 'received' || c.current_warehouse_id === 'wh-bd' ? 'RECEIVED' : 'IN-TRANSIT'}
-          </td>
-        </tr>
-      `)
-      .join('');
+      const htmlContent = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Flight Receiving Manifest - ${flight.flying_name || flight.flight_number}</title>
+            <style>
+              @page { size: A4 portrait; margin: 8mm; }
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 10px; color: #000; background: #fff; font-size: 11px; }
+              .header-table { width: 100%; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px; }
+              .company-title { font-size: 22px; font-weight: 900; letter-spacing: 1px; color: #000; text-transform: uppercase; }
+              .subtitle { font-size: 12px; font-weight: 700; color: #333; margin-top: 2px; }
+              .info-grid { display: flex; justify-content: space-between; background: #f8fafc; border: 1.5px solid #000; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 11px; }
+              .info-col { width: 48%; }
+              .info-row { margin-bottom: 4px; }
+              .info-label { font-weight: bold; color: #111; }
+              .manifest-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; }
+              .manifest-table th { background: #1e293b; color: #ffffff; font-weight: bold; padding: 8px 6px; border: 1px solid #000; text-transform: uppercase; font-size: 10px; }
+              .live-weight-header { background: #047857 !important; color: #ffffff !important; font-size: 11px !important; }
+              .footer-signatures { margin-top: 40px; display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; }
+              .sig-box { text-align: center; width: 220px; border-top: 1.5px solid #000; padding-top: 6px; }
+            </style>
+          </head>
+          <body>
+            <div class="header-table">
+              <table style="width: 100%;">
+                <tr>
+                  <td style="width: 60px; vertical-align: middle;">
+                    <img src="/logo.png" style="width: 50px; height: 50px; object-fit: contain;" onerror="this.style.display='none'" />
+                  </td>
+                  <td style="vertical-align: middle;">
+                    <div class="company-title">M/S FOUR STAR CARGO</div>
+                    <div class="subtitle">AIR CARGO FLIGHT RECEIVING & PHYSICAL INSPECTION MANIFEST</div>
+                  </td>
+                  <td style="text-align: right; vertical-align: middle; font-size: 10px; font-weight: bold; color: #444;">
+                    Print Date: ${new Date().toLocaleString('en-US', { hour12: true })}
+                  </td>
+                </tr>
+              </table>
+            </div>
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>Flight Receiving Manifest - ${flight.flying_name || flight.flight_number}</title>
-          <style>
-            @page { size: A4 portrait; margin: 10mm; }
-            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 10px; color: #000; background: #fff; font-size: 11px; }
-            .header-table { width: 100%; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 12px; }
-            .company-title { font-size: 22px; font-weight: 900; letter-spacing: 1px; color: #000; text-transform: uppercase; }
-            .subtitle { font-size: 12px; font-weight: 700; color: #333; margin-top: 2px; }
-            .info-grid { display: flex; justify-content: space-between; background: #f8fafc; border: 1.5px solid #000; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 11px; }
-            .info-col { width: 48%; }
-            .info-row { margin-bottom: 4px; }
-            .info-label { font-weight: bold; color: #111; }
-            .manifest-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; }
-            .manifest-table th { background: #1e293b; color: #ffffff; font-weight: bold; padding: 8px 6px; border: 1px solid #000; text-transform: uppercase; font-size: 10px; }
-            .live-weight-header { background: #047857 !important; color: #ffffff !important; font-size: 11px !important; }
-            .footer-signatures { margin-top: 40px; display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; }
-            .sig-box { text-align: center; width: 220px; border-top: 1.5px solid #000; padding-top: 6px; }
-          </style>
-        </head>
-        <body>
-          <div class="header-table">
-            <table style="width: 100%;">
-              <tr>
-                <td style="width: 60px; vertical-align: middle;">
-                  <img src="/logo.png" style="width: 50px; height: 50px; object-fit: contain;" onerror="this.style.display='none'" />
-                </td>
-                <td style="vertical-align: middle;">
-                  <div class="company-title">M/S FOUR STAR CARGO</div>
-                  <div class="subtitle">AIR CARGO FLIGHT RECEIVING & PHYSICAL INSPECTION MANIFEST</div>
-                </td>
-                <td style="text-align: right; vertical-align: middle; font-size: 10px; font-weight: bold; color: #444;">
-                  Print Date: ${new Date().toLocaleString('en-US', { hour12: true })}
-                </td>
-              </tr>
+            <div class="info-grid">
+              <div class="info-col">
+                <div class="info-row"><span class="info-label">Flight Batch Name:</span> <b>${flight.flying_name || flight.flight_number}</b></div>
+                <div class="info-row"><span class="info-label">Flight / AWB No:</span> <b>${flight.flight_number || 'N/A'} (AWB: ${flight.awb_number || 'N/A'})</b></div>
+                <div class="info-row"><span class="info-label">Route:</span> <b>${flight.warehouse_name || 'Guangzhou Hub'} ➔ Dhaka Central Hub</b></div>
+              </div>
+              <div class="info-col" style="text-align: right;">
+                <div class="info-row"><span class="info-label">Total Cartons Payload:</span> <b>${flightCartons.length} Cartons</b></div>
+                <div class="info-row"><span class="info-label">Total Booked Weight:</span> <b>${totalWeight.toFixed(1)} KG</b></div>
+                <div class="info-row"><span class="info-label">Total Volume:</span> <b>${totalCbm.toFixed(2)} CBM</b></div>
+              </div>
+            </div>
+
+            <table class="manifest-table">
+              <thead>
+                <tr>
+                  <th style="width: 30px;">#</th>
+                  <th style="width: 75px;">CTN NO</th>
+                  <th style="width: 95px;">SHIPMENT CTN NO.</th>
+                  <th style="width: 90px;">SHIPPING MARK</th>
+                  <th style="width: 110px;">TRACKING NO</th>
+                  <th>PRODUCT NAME</th>
+                  <th style="width: 75px;">QTY / CBM</th>
+                  <th style="width: 90px;">BOOKED WEIGHT</th>
+                  <th class="live-weight-header" style="width: 105px;">✍️ LIVE WEIGHT (লাইভ ওয়েট)</th>
+                  <th style="width: 80px;">STATUS</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${rowsHtml}
+              </tbody>
             </table>
-          </div>
 
-          <div class="info-grid">
-            <div class="info-col">
-              <div class="info-row"><span class="info-label">Flight Batch Name:</span> <b>${flight.flying_name || flight.flight_number}</b></div>
-              <div class="info-row"><span class="info-label">Flight / AWB No:</span> <b>${flight.flight_number || 'N/A'} (AWB: ${flight.awb_number || 'N/A'})</b></div>
-              <div class="info-row"><span class="info-label">Route:</span> <b>${flight.warehouse_name || 'Guangzhou Hub'} ➔ Dhaka Central Hub</b></div>
+            <div class="footer-signatures">
+              <div class="sig-box">Warehouse Receiver Signature</div>
+              <div class="sig-box">Physical Scale Inspector</div>
+              <div class="sig-box">Operation Director Approval</div>
             </div>
-            <div class="info-col" style="text-align: right;">
-              <div class="info-row"><span class="info-label">Total Cartons Payload:</span> <b>${flightCartons.length} Cartons</b></div>
-              <div class="info-row"><span class="info-label">Total Booked Weight:</span> <b>${totalWeight.toFixed(1)} KG</b></div>
-              <div class="info-row"><span class="info-label">Total Volume:</span> <b>${totalCbm.toFixed(2)} CBM</b></div>
-            </div>
-          </div>
+          </body>
+        </html>
+      `;
 
-          <table class="manifest-table">
-            <thead>
-              <tr>
-                <th style="width: 30px;">#</th>
-                <th style="width: 75px;">CTN NO</th>
-                <th style="width: 95px;">SHIPMENT CTN NO.</th>
-                <th style="width: 90px;">SHIPPING MARK</th>
-                <th style="width: 110px;">TRACKING NO</th>
-                <th>PRODUCT NAME</th>
-                <th style="width: 75px;">QTY / CBM</th>
-                <th style="width: 90px;">BOOKED WEIGHT</th>
-                <th class="live-weight-header" style="width: 105px;">✍️ LIVE WEIGHT (লাইভ ওয়েট)</th>
-                <th style="width: 80px;">STATUS</th>
-              </tr>
-            </thead>
-            <tbody>
-              ${rowsHtml}
-            </tbody>
-          </table>
+      // Use hidden iframe method - 100% immune to popup blockers!
+      const iframe = document.createElement('iframe');
+      iframe.style.position = 'fixed';
+      iframe.style.right = '0';
+      iframe.style.bottom = '0';
+      iframe.style.width = '0';
+      iframe.style.height = '0';
+      iframe.style.border = '0';
 
-          <div class="footer-signatures">
-            <div class="sig-box">Warehouse Receiver Signature</div>
-            <div class="sig-box">Physical Scale Inspector</div>
-            <div class="sig-box">Operation Director Approval</div>
-          </div>
+      document.body.appendChild(iframe);
+      const frameDoc = iframe.contentWindow?.document;
+      if (frameDoc) {
+        frameDoc.open();
+        frameDoc.write(htmlContent);
+        frameDoc.close();
 
-          <script>
-            window.onload = function() {
-              window.print();
-              window.close();
-            };
-          </script>
-        </body>
-      </html>
-    `);
-    printWindow.document.close();
+        setTimeout(() => {
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+          setTimeout(() => {
+            if (document.body.contains(iframe)) {
+              document.body.removeChild(iframe);
+            }
+          }, 2000);
+        }, 250);
+      }
+    } catch (err) {
+      console.error('Print failed', err);
+      window.print();
+    }
   };
 
   // Handler: Realtime BD Weight Calibration per Carton
