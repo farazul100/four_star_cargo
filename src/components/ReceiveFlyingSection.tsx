@@ -9,6 +9,7 @@ import {
   Calendar,
   AlertCircle,
   ArrowRight,
+  Printer,
 } from 'lucide-react';
 import { FlyingProposal, Carton, Warehouse, User, Language } from '../types';
 import { ToastContainer, ToastMessage } from './Toast';
@@ -218,6 +219,135 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
   // Flight Carton Scan & Receive Modal state
   const [selectedFlightForCartonReceive, setSelectedFlightForCartonReceive] = useState<any | null>(null);
   const [selectedCartonIdsInModal, setSelectedCartonIdsInModal] = useState<string[]>([]);
+
+  // Print Manifest & Physical Receiving Sheet with Blank Live Weight Column for Pen Handwriting
+  const handlePrintReceivingManifest = (flight: any, flightCartons: Carton[]) => {
+    const printWindow = window.open('', '_blank', 'width=1000,height=800');
+    if (!printWindow) return;
+
+    const totalWeight = flightCartons.reduce((sum, c) => sum + (c.bd_calibrated_weight !== undefined ? c.bd_calibrated_weight : (c.gross_weight || 0)), 0);
+    const totalCbm = flightCartons.reduce((sum, c) => sum + (c.cbm || 0), 0);
+
+    const rowsHtml = flightCartons
+      .map((c, idx) => `
+        <tr>
+          <td style="text-align: center; font-weight: bold; border: 1px solid #333; padding: 6px;">${idx + 1}</td>
+          <td style="font-family: monospace; font-weight: bold; border: 1px solid #333; padding: 6px;">${c.ctn_no}</td>
+          <td style="font-family: monospace; font-weight: bold; color: #047857; border: 1px solid #333; padding: 6px;">${c.packaging_number || '-'}</td>
+          <td style="font-family: monospace; font-weight: bold; color: #1d4ed8; border: 1px solid #333; padding: 6px;">${c.shipping_mark}</td>
+          <td style="font-family: monospace; border: 1px solid #333; padding: 6px;">${c.tracking_number}</td>
+          <td style="border: 1px solid #333; padding: 6px;">
+            <div style="font-weight: bold;">${c.product_name_en}</div>
+            ${c.product_name_cn ? `<div style="font-size: 10px; color: #555;">${c.product_name_cn}</div>` : ''}
+          </td>
+          <td style="text-align: center; font-family: monospace; border: 1px solid #333; padding: 6px;">
+            <div><b>${c.quantity || 1} Pcs</b></div>
+            <div style="font-size: 10px; color: #666;">${c.cbm || 0.15} CBM</div>
+          </td>
+          <td style="text-align: center; font-family: monospace; font-weight: bold; font-size: 13px; border: 1px solid #333; padding: 6px;">
+            ${c.bd_calibrated_weight !== undefined ? c.bd_calibrated_weight : (c.gross_weight || '0')} KG
+          </td>
+          <!-- NEW BLANK LIVE WEIGHT COLUMN FOR PEN HANDWRITING -->
+          <td style="text-align: center; border: 1px solid #333; padding: 6px; background-color: #fafafa;">
+            <div style="border: 2px solid #111; height: 32px; width: 85px; margin: 0 auto; background: #ffffff; border-radius: 4px;"></div>
+          </td>
+          <td style="text-align: center; font-size: 11px; font-weight: bold; border: 1px solid #333; padding: 6px;">
+            ${c.status === 'received' || c.current_warehouse_id === 'wh-bd' ? 'RECEIVED' : 'IN-TRANSIT'}
+          </td>
+        </tr>
+      `)
+      .join('');
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>Flight Receiving Manifest - ${flight.flying_name || flight.flight_number}</title>
+          <style>
+            @page { size: A4 portrait; margin: 10mm; }
+            body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 10px; color: #000; background: #fff; font-size: 11px; }
+            .header-table { width: 100%; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 12px; }
+            .company-title { font-size: 22px; font-weight: 900; letter-spacing: 1px; color: #000; text-transform: uppercase; }
+            .subtitle { font-size: 12px; font-weight: 700; color: #333; margin-top: 2px; }
+            .info-grid { display: flex; justify-content: space-between; background: #f8fafc; border: 1.5px solid #000; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 11px; }
+            .info-col { width: 48%; }
+            .info-row { margin-bottom: 4px; }
+            .info-label { font-weight: bold; color: #111; }
+            .manifest-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; }
+            .manifest-table th { background: #1e293b; color: #ffffff; font-weight: bold; padding: 8px 6px; border: 1px solid #000; text-transform: uppercase; font-size: 10px; }
+            .live-weight-header { background: #047857 !important; color: #ffffff !important; font-size: 11px !important; }
+            .footer-signatures { margin-top: 40px; display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; }
+            .sig-box { text-align: center; width: 220px; border-top: 1.5px solid #000; padding-top: 6px; }
+          </style>
+        </head>
+        <body>
+          <div class="header-table">
+            <table style="width: 100%;">
+              <tr>
+                <td style="width: 60px; vertical-align: middle;">
+                  <img src="/logo.png" style="width: 50px; height: 50px; object-fit: contain;" onerror="this.style.display='none'" />
+                </td>
+                <td style="vertical-align: middle;">
+                  <div class="company-title">M/S FOUR STAR CARGO</div>
+                  <div class="subtitle">AIR CARGO FLIGHT RECEIVING & PHYSICAL INSPECTION MANIFEST</div>
+                </td>
+                <td style="text-align: right; vertical-align: middle; font-size: 10px; font-weight: bold; color: #444;">
+                  Print Date: ${new Date().toLocaleString('en-US', { hour12: true })}
+                </td>
+              </tr>
+            </table>
+          </div>
+
+          <div class="info-grid">
+            <div class="info-col">
+              <div class="info-row"><span class="info-label">Flight Batch Name:</span> <b>${flight.flying_name || flight.flight_number}</b></div>
+              <div class="info-row"><span class="info-label">Flight / AWB No:</span> <b>${flight.flight_number || 'N/A'} (AWB: ${flight.awb_number || 'N/A'})</b></div>
+              <div class="info-row"><span class="info-label">Route:</span> <b>${flight.warehouse_name || 'Guangzhou Hub'} ➔ Dhaka Central Hub</b></div>
+            </div>
+            <div class="info-col" style="text-align: right;">
+              <div class="info-row"><span class="info-label">Total Cartons Payload:</span> <b>${flightCartons.length} Cartons</b></div>
+              <div class="info-row"><span class="info-label">Total Booked Weight:</span> <b>${totalWeight.toFixed(1)} KG</b></div>
+              <div class="info-row"><span class="info-label">Total Volume:</span> <b>${totalCbm.toFixed(2)} CBM</b></div>
+            </div>
+          </div>
+
+          <table class="manifest-table">
+            <thead>
+              <tr>
+                <th style="width: 30px;">#</th>
+                <th style="width: 75px;">CTN NO</th>
+                <th style="width: 95px;">SHIPMENT CTN NO.</th>
+                <th style="width: 90px;">SHIPPING MARK</th>
+                <th style="width: 110px;">TRACKING NO</th>
+                <th>PRODUCT NAME</th>
+                <th style="width: 75px;">QTY / CBM</th>
+                <th style="width: 90px;">BOOKED WEIGHT</th>
+                <th class="live-weight-header" style="width: 105px;">✍️ LIVE WEIGHT (লাইভ ওয়েট)</th>
+                <th style="width: 80px;">STATUS</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${rowsHtml}
+            </tbody>
+          </table>
+
+          <div class="footer-signatures">
+            <div class="sig-box">Warehouse Receiver Signature</div>
+            <div class="sig-box">Physical Scale Inspector</div>
+            <div class="sig-box">Operation Director Approval</div>
+          </div>
+
+          <script>
+            window.onload = function() {
+              window.print();
+              window.close();
+            };
+          </script>
+        </body>
+      </html>
+    `);
+    printWindow.document.close();
+  };
 
   // Handler: Realtime BD Weight Calibration per Carton
   const handleUpdateCartonWeight = (cartonId: string, newWeight: number) => {
@@ -840,13 +970,28 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                   </p>
                 </div>
               </div>
-              <button
-                type="button"
-                onClick={() => setSelectedFlightForCartonReceive(null)}
-                className="p-1.5 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer text-sm font-bold"
-              >
-                ✕
-              </button>
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={() => handlePrintReceivingManifest(selectedFlightForCartonReceive, cartons.filter((c) =>
+                    (selectedFlightForCartonReceive.carton_ids && selectedFlightForCartonReceive.carton_ids.includes(c.id)) ||
+                    (selectedFlightForCartonReceive.flight_number && c.flight_number === selectedFlightForCartonReceive.flight_number) ||
+                    (selectedFlightForCartonReceive.flying_name && c.flight_number === selectedFlightForCartonReceive.flying_name)
+                  ))}
+                  className="px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-xs shadow-md transition-all cursor-pointer flex items-center space-x-1.5 border border-slate-700"
+                  title="লোগো, তথ্য ও লাইভ ওয়েটের খালি কলাম সহ প্রিন্ট করুন"
+                >
+                  <Printer className="w-4 h-4 text-emerald-400" />
+                  <span>{isBn ? 'প্রিন্ট করুন (Print Manifest)' : 'Print Manifest'}</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedFlightForCartonReceive(null)}
+                  className="p-1.5 rounded-lg text-slate-400 hover:text-white transition-colors cursor-pointer text-sm font-bold"
+                >
+                  ✕
+                </button>
+              </div>
             </div>
 
             {/* Quick Bulk Action Bar */}
@@ -914,14 +1059,15 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                       }`}>
                         <tr>
                           <th className="p-2.5 font-extrabold">#</th>
-                          <th className="p-2.5 font-extrabold">CTN No</th>
-                          <th className="p-2.5 font-extrabold">Shipping Mark</th>
-                          <th className="p-2.5 font-extrabold">Tracking No</th>
-                          <th className="p-2.5 font-extrabold">Product Name</th>
-                          <th className="p-2.5 font-extrabold">Qty / CBM</th>
-                          <th className="p-2.5 font-extrabold">BD Calibrated Weight (কেজি)</th>
-                          <th className="p-2.5 font-extrabold">Status</th>
-                          <th className="p-2.5 text-right font-extrabold">Action</th>
+                          <th className="p-2.5 font-extrabold">CTN NO</th>
+                          <th className="p-2.5 font-extrabold text-emerald-700 dark:text-emerald-300">SHIPMENT CTN NO.</th>
+                          <th className="p-2.5 font-extrabold text-blue-700 dark:text-sky-300">SHIPPING MARK</th>
+                          <th className="p-2.5 font-extrabold">TRACKING NO</th>
+                          <th className="p-2.5 font-extrabold">PRODUCT NAME</th>
+                          <th className="p-2.5 font-extrabold">QTY / CBM</th>
+                          <th className="p-2.5 font-extrabold">BD CALIBRATED WEIGHT (KG)</th>
+                          <th className="p-2.5 font-extrabold">STATUS</th>
+                          <th className="p-2.5 text-right font-extrabold">ACTION</th>
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
@@ -951,17 +1097,18 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                                 )}
                               </td>
                               <td className={`p-2.5 font-extrabold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.ctn_no}</td>
-                              <td className="p-2.5 text-sky-300 font-extrabold">{c.shipping_mark}</td>
-                              <td className={`p-2.5 font-mono font-semibold ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>{c.tracking_number}</td>
+                              <td className="p-2.5 font-mono font-extrabold text-emerald-700 dark:text-emerald-300">{c.packaging_number || '-'}</td>
+                              <td className="p-2.5 font-extrabold text-blue-700 dark:text-sky-300">{c.shipping_mark}</td>
+                              <td className={`p-2.5 font-mono font-bold ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>{c.tracking_number}</td>
                               <td className="p-2.5 font-normal">
-                                <div className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.product_name_en}</div>
+                                <div className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.product_name_en}</div>
                                 {c.product_name_cn && (
                                   <div className={`text-[10px] font-medium ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>{c.product_name_cn}</div>
                                 )}
                               </td>
-                              <td className="p-2.5 font-mono text-purple-300 font-extrabold">
+                              <td className="p-2.5 font-mono text-purple-700 dark:text-purple-300 font-extrabold">
                                 <div>{c.quantity || 1} Pcs</div>
-                                <div className="text-[10px] text-fuchsia-300">{c.cbm || 0.15} CBM</div>
+                                <div className="text-[10px] text-fuchsia-600 dark:text-fuchsia-300">{c.cbm || 0.15} CBM</div>
                               </td>
                               <td className="p-2.5">
                                 <div className="flex items-center space-x-1">
@@ -985,10 +1132,10 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                                         handleUpdateCartonWeight(c.id, parsed);
                                       }
                                     }}
-                                    className={`w-20 px-2 py-1 text-xs font-extrabold text-center rounded-lg border transition-all ${
+                                    className={`w-20 px-2 py-1 text-xs font-extrabold text-center rounded-lg border-2 transition-all ${
                                       isCartonReceived
-                                        ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-300 focus:ring-2 focus:ring-emerald-500'
-                                        : 'bg-[#0F172A] border-blue-500 text-white focus:outline-none focus:ring-2 focus:ring-blue-500'
+                                        ? 'bg-emerald-100 border-emerald-500 text-emerald-900 dark:bg-emerald-950/60 dark:text-emerald-200'
+                                        : 'bg-white border-blue-500 text-slate-900 dark:bg-[#0F172A] dark:text-white focus:ring-2 focus:ring-blue-500 shadow-2xs'
                                     }`}
                                     title="বাংলাদেশে মেপে পাওয়া ওজন টিউন/এডিট করুন"
                                   />
