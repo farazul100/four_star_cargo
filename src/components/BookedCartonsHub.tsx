@@ -241,7 +241,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
   // Customer Assignment / Mapping Modal States
   const [mapCustomerModalMark, setMapCustomerModalMark] = useState<string | null>(null);
-  const [mapShippingMarkInput, setMapShippingMarkInput] = useState<string>('');
+  const [mapShipmentCtnNoInput, setMapShipmentCtnNoInput] = useState<string>('');
   const [mapSelectedCustomerId, setMapSelectedCustomerId] = useState<string>('');
   const [mapRatePerKg, setMapRatePerKg] = useState<number>(750);
   const [isNewCustMapping, setIsNewCustMapping] = useState(false);
@@ -437,10 +437,10 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       }
     }
 
-    const initialMarkInput = targetCarton?.shipping_mark && targetCarton.shipping_mark !== 'UNASSIGNED'
-      ? targetCarton.shipping_mark
-      : (shippingMarkOrTracking !== 'UNASSIGNED' ? shippingMarkOrTracking : '');
-    setMapShippingMarkInput(initialMarkInput);
+    const initialBoxNo = targetCarton?.packaging_number && targetCarton.packaging_number !== 'UNASSIGNED'
+      ? targetCarton.packaging_number
+      : '';
+    setMapShipmentCtnNoInput(initialBoxNo);
 
     setMapSelectedCustomerId(selectedCustId);
     setMapRatePerKg(initialRate && initialRate > 0 ? initialRate : 750);
@@ -458,7 +458,6 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     let currentCusts = dbData.customers || [];
     let targetCust: Customer | undefined;
     const finalRatePerKg = Number(mapRatePerKg) > 0 ? Number(mapRatePerKg) : 750;
-    const finalShippingMark = mapShippingMarkInput.trim() || mapCustomerModalMark || 'UNASSIGNED';
 
     if (isNewCustMapping) {
       if (!newCustMappingName.trim()) return;
@@ -467,7 +466,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         customer_code: `CUST-${Math.floor(1000 + Math.random() * 9000)}`,
         name: newCustMappingName.trim(),
         phone: newCustMappingPhone.trim() || '01700000000',
-        shipping_mark: finalShippingMark,
+        shipping_mark: mapCustomerModalMark,
         address: 'Dhaka, Bangladesh',
         total_billed: 0,
         total_paid: 0,
@@ -484,7 +483,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
     const updatedCusts = currentCusts.map((c) =>
       c.id === targetCust!.id
-        ? { ...c, shipping_mark: finalShippingMark, rate_per_kg: finalRatePerKg }
+        ? { ...c, rate_per_kg: finalRatePerKg }
         : c
     );
     saveHostingerDbData('fsc_vps_customers', updatedCusts);
@@ -505,7 +504,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       ) {
         return {
           ...c,
-          shipping_mark: finalShippingMark,
+          packaging_number: mapShipmentCtnNoInput.trim() || c.packaging_number || 'UNASSIGNED',
           customer_id: targetCust!.id,
           customer_code: targetCust!.customer_code,
           customer_name: targetCust!.name,
@@ -2711,17 +2710,16 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             </div>
 
             <div className="space-y-3 text-xs">
-              {/* Shipping Mark Input Field for Operation Director */}
+              {/* Shipment Ctn NO. Input Field for Operation Director */}
               <div>
                 <label className={`block mb-1 font-extrabold ${isDark ? 'text-white' : 'text-slate-800'}`}>
-                  {isBn ? 'শিপিং মার্ক নির্ধারণ / আপডেট করুন (Shipping Mark) *' : 'Assign / Edit Shipping Mark *'}
+                  {isBn ? 'শিপমেন্ট কার্টুন নম্বর নির্ধারণ / আপডেট (Shipment Ctn NO.) *' : 'Assign / Edit Shipment Ctn NO. *'}
                 </label>
                 <input
                   type="text"
-                  required
-                  value={mapShippingMarkInput}
-                  onChange={(e) => setMapShippingMarkInput(e.target.value.toUpperCase())}
-                  placeholder="e.g. MAR-8801 / ASI-35"
+                  value={mapShipmentCtnNoInput}
+                  onChange={(e) => setMapShipmentCtnNoInput(e.target.value.toUpperCase())}
+                  placeholder="e.g. BOX-101 / FSC-501"
                   className={`w-full border rounded-xl p-2.5 font-mono font-extrabold outline-none text-xs ${
                     isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'
                   }`}

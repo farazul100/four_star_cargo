@@ -860,6 +860,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
     const invalidRow = previewRows.find(
       (r) =>
         !r.product_name_en.trim() ||
+        !r.shipping_mark.trim() ||
         !r.quantity || r.quantity <= 0 ||
         !r.gross_weight || r.gross_weight <= 0
     );
@@ -871,7 +872,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
     const totalBatchWeight = previewRows.reduce((acc, curr) => acc + (curr.gross_weight || 0), 0);
     const customer = processCustomerBooking(selectedCustomer, customerSearchInput, totalBatchWeight);
-    const finalMark = shippingMark.trim() || customer.shipping_mark || `${markPrefix.trim()}${markCode.trim()}` || 'UNASSIGNED';
+    const finalMark = shippingMark.trim() || customer.shipping_mark || `${markPrefix.trim()}${markCode.trim()}`;
 
     const newCartonObjects: Carton[] = previewRows.map((r, idx) => {
       const origId = r.origin_wh_id || myWhId;
@@ -882,8 +883,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       return {
         id: `fsc-carton-${Date.now()}-${idx + 1}`,
         ctn_no: r.ctn_no.trim() || `CTN-${idx + 1}`,
-        packaging_number: r.packaging_number.trim() || `BOX-${101 + idx}`,
-        shipping_mark: r.shipping_mark.trim() || finalMark,
+        packaging_number: r.packaging_number.trim() || (boxPrefix ? `${boxPrefix}${boxStartNum + idx}` : 'UNASSIGNED'),
+        shipping_mark: r.shipping_mark || finalMark,
         tracking_number: masterTrackingNumber.trim(),
         master_tracking_number: masterTrackingNumber.trim(),
         product_name_en: r.product_name_en,
@@ -1066,19 +1067,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
           {/* CUSTOMIZABLE SHIPPING MARK PREFIX & CODE */}
           <div>
-            <div className="p-3 rounded-xl border border-sky-300 bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-sky-200 text-xs font-semibold space-y-1 mb-2.5">
-              <div className="flex items-center space-x-1.5 font-extrabold text-sky-700 dark:text-sky-300">
-                <span>🔒</span>
-                <span>{isBn ? 'শিপিং মার্ক ও কাস্টমার ম্যাপিং' : 'Shipping Mark & Customer Mapping'}</span>
-              </div>
-              <p className="text-[11px] font-normal text-sky-800 dark:text-sky-300 leading-snug">
-                {isBn
-                  ? 'ওয়্যারহাউজে শিপিং মার্ক বসানোর প্রয়োজন নেই। বাংলাদেশ হাবে পৌঁছানোর পর অপারেশন ডাইরেক্টর কাস্টমার ম্যাপিং এর সময় শিপিং মার্ক এবং কাস্টমার ট্যাগ করবেন।'
-                  : 'Shipping Mark is handled by Operation Director during Customer Mapping.'}
-              </p>
-            </div>
-            <label className="block text-xs font-extrabold text-slate-700 dark:text-slate-300 mb-1.5 flex items-center">
-              {isBn ? 'শিপিং মার্ক (ঐচ্ছিক - অপারেশন ডাইরেক্টর সেট করবেন)' : 'Shipping Mark (Optional - Set by Op Director)'}
+            <label className="block text-sm font-extrabold text-slate-900 mb-2 flex items-center">
+              {isBn ? 'শিপিং মার্ক কাস্টমাইজেশন (প্রিফিক্স + কোড)' : 'Custom Shipping Mark (Prefix + Code)'} <span className="text-[#EE5D50] font-bold ml-1">*</span>
             </label>
             <div className="flex items-center space-x-2.5">
               <input
@@ -1087,7 +1077,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 onChange={(e) => setMarkPrefix(e.target.value)}
                 placeholder="e.g. SM-DHAKA-"
                 title={isBn ? 'নাম্বারের আগের লেখাটুকু (Prefix string)' : 'Prefix before number'}
-                className="w-2/3 px-4 py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm font-mono font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
+                className="w-2/3 px-4.5 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm md:text-base font-mono font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
               />
               <input
                 type="text"
@@ -1095,11 +1085,11 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                 onChange={(e) => setMarkCode(e.target.value)}
                 placeholder="e.g. 88"
                 title={isBn ? 'কোড নম্বর (Code number)' : 'Code number'}
-                className="w-1/3 px-4 py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
+                className="w-1/3 px-4.5 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm md:text-base font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
               />
             </div>
             <div className="text-xs font-mono text-slate-700 font-bold mt-2">
-              শিপিং মার্ক: <strong className="text-[#059669] font-black text-sm">{shippingMark || (markPrefix || markCode ? `${markPrefix}${markCode}` : 'UNASSIGNED')}</strong>
+              শিপিং মার্ক: <strong className="text-[#059669] font-black text-sm">{shippingMark || (markPrefix || markCode ? `${markPrefix}${markCode}` : 'N/A')}</strong>
             </div>
           </div>
 
@@ -1159,8 +1149,19 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
 
             {/* CUSTOMIZABLE SHIPMENT CTN NO. PREFIX & START NUMBER */}
             <div>
+              <div className="p-2.5 rounded-xl border border-sky-300 bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-sky-200 text-xs font-semibold space-y-1 mb-2">
+                <div className="flex items-center space-x-1 font-extrabold text-sky-700 dark:text-sky-300">
+                  <span>🔒</span>
+                  <span>{isBn ? 'শিপমেন্ট কার্টুন নম্বর' : 'Shipment Ctn NO.'}</span>
+                </div>
+                <p className="text-[11px] font-normal text-sky-800 dark:text-sky-300 leading-snug">
+                  {isBn
+                    ? 'শিপমেন্ট কার্টুন নম্বর কাস্টমার ম্যাপিং এর সময় অপারেশন ডাইরেক্টর দ্বারা অ্যাসাইন বা আপডেট করা হবে। ওয়্যারহাউজে ঐচ্ছিক।'
+                    : 'Shipment Ctn NO. is assigned by Operation Director during Customer Mapping.'}
+                </p>
+              </div>
               <label className="block text-xs md:text-sm font-extrabold text-[#059669] mb-1.5 flex items-center">
-                {isBn ? 'শিপমেন্ট কার্টুন নম্বর (প্রিফিক্স + শুরু)' : 'Shipment Ctn NO. (Prefix + Start)'}
+                {isBn ? 'শিপমেন্ট কার্টুন নম্বর (ঐচ্ছিক - কাস্টমার ম্যাপিং এ সেট হবে)' : 'Shipment Ctn NO. (Optional - Set in Mapping)'}
               </label>
               <div className="flex items-center space-x-2.5">
                 <input
@@ -1692,7 +1693,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                             type="text"
                             value={r.shipping_mark}
                             onChange={(e) => handleRowUpdate(r.id, 'shipping_mark', e.target.value)}
-                            placeholder="UNASSIGNED (Op Director sets)"
+                            placeholder="e.g. ASI/BELAL-9"
                             className="w-full bg-transparent border-0 outline-none text-xs font-mono text-blue-600 dark:text-blue-400 font-bold px-1 py-1 rounded focus:bg-blue-500/10 truncate"
                           />
                         </div>
