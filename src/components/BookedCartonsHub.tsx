@@ -899,6 +899,42 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     return true;
   };
 
+  // Helper: Robust Warehouse Match
+  const isWhMatch = React.useCallback(
+    (c: Carton, targetWhId: string) => {
+      if (!targetWhId || targetWhId === 'all') return true;
+
+      const targetWhObj = warehouses.find((w) => w.id === targetWhId);
+      const targetWhName = targetWhObj ? targetWhObj.name.toLowerCase().trim() : '';
+
+      const cCurId = (c.current_warehouse_id || '').toLowerCase().trim();
+      const cDestId = (c.destination_warehouse_id || '').toLowerCase().trim();
+      const cOrigId = ((c as any).origin_warehouse_id || (c as any).warehouse_id || '').toLowerCase().trim();
+
+      const cCurName = (c.current_warehouse_name || '').toLowerCase();
+      const cDestName = (c.destination_warehouse_name || '').toLowerCase();
+      const cOrigName = (c.warehouse_name || '').toLowerCase();
+
+      return (
+        cCurId === targetWhId.toLowerCase() ||
+        cDestId === targetWhId.toLowerCase() ||
+        cOrigId === targetWhId.toLowerCase() ||
+        (targetWhName && (cCurName.includes(targetWhName) || cDestName.includes(targetWhName) || cOrigName.includes(targetWhName))) ||
+        (targetWhId === 'wh-china' &&
+          (cCurId.includes('china') || cOrigId.includes('china') || cOrigName.includes('china') || cCurName.includes('china') || cCurName.includes('guangzhou') || cOrigName.includes('中国'))) ||
+        (targetWhId === 'wh-bd' &&
+          (cCurId.includes('bd') || cDestId.includes('bd') || cDestName.includes('dhaka') || cDestName.includes('bangladesh') || cCurName.includes('dhaka'))) ||
+        (targetWhId === 'wh-hk' &&
+          (cCurId.includes('hk') || cOrigId.includes('hk') || cOrigName.includes('hong kong') || cCurName.includes('hong kong') || cOrigName.includes('香港'))) ||
+        (targetWhId === 'wh-jp' &&
+          (cCurId.includes('jp') || cOrigId.includes('jp') || cOrigName.includes('japan') || cCurName.includes('japan') || cOrigName.includes('日本'))) ||
+        (targetWhId === 'wh-kr' &&
+          (cCurId.includes('kr') || cOrigId.includes('kr') || cOrigName.includes('korea') || cCurName.includes('korea') || cOrigName.includes('한국')))
+      );
+    },
+    [warehouses]
+  );
+
   // -------------------------------------------------------------
   // FILTERING LOGIC
   // -------------------------------------------------------------
@@ -914,12 +950,14 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
     const effectiveWhFilter = isWarehouseIncharge && myWhId ? myWhId : selectedDestWh;
 
-    const matchesWh =
-      effectiveWhFilter === 'all' ||
-      c.current_warehouse_id === effectiveWhFilter ||
-      c.destination_warehouse_id === effectiveWhFilter;
+    const matchesWh = isWhMatch(c, effectiveWhFilter);
 
-    const matchesStatus = selectedStatus === 'all' || c.status === selectedStatus;
+    const matchesStatus =
+      selectedStatus === 'all'
+        ? true
+        : selectedStatus === 'booked'
+        ? (c.status === 'booked' || c.status === 'received' || (c.status as any) === 'arrived_bd' || (c.status as any) === 'in_warehouse')
+        : c.status === selectedStatus;
 
     // Destination Country / Hub Filter Logic
     const destWhId = c.destination_warehouse_id || '';
@@ -999,10 +1037,8 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   // Cartons scoped by selected warehouse filter (before status filter)
   const whScopedCartons = React.useMemo(() => {
     if (effectiveWhFilter === 'all') return accessibleCartons;
-    return accessibleCartons.filter(
-      (c) => c.current_warehouse_id === effectiveWhFilter || c.destination_warehouse_id === effectiveWhFilter
-    );
-  }, [accessibleCartons, effectiveWhFilter]);
+    return accessibleCartons.filter((c) => isWhMatch(c, effectiveWhFilter));
+  }, [accessibleCartons, effectiveWhFilter, isWhMatch]);
 
   // Instant Current WH Stock Breakdown (Physical Stock in Selected Warehouse)
   const currentWhStockCartons = whScopedCartons.filter((c) => c.status === 'booked' || c.status === 'received');
@@ -1279,9 +1315,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 </option>
               )}
               {accessibleWarehouses.map((w) => {
-                const count = accessibleCartons.filter(
-                  (c) => c.destination_warehouse_id === w.id || c.current_warehouse_id === w.id
-                ).length;
+                const count = accessibleCartons.filter((c) => isWhMatch(c, w.id)).length;
                 return (
                   <option key={w.id} value={w.id}>
                     {w.name} ({count} {isBn ? 'টি কার্টুন' : 'Cartons'})
