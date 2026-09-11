@@ -229,27 +229,27 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       const rowsHtml = flightCartons
         .map((c, idx) => `
           <tr>
-            <td style="text-align: center; font-weight: bold; border: 1px solid #000; padding: 6px;">${idx + 1}</td>
-            <td style="font-family: monospace; font-weight: bold; border: 1px solid #000; padding: 6px;">${c.ctn_no}</td>
-            <td style="font-family: monospace; font-weight: bold; color: #047857; border: 1px solid #000; padding: 6px;">${c.packaging_number || '-'}</td>
-            <td style="font-family: monospace; font-weight: bold; color: #1d4ed8; border: 1px solid #000; padding: 6px;">${c.shipping_mark}</td>
-            <td style="font-family: monospace; border: 1px solid #000; padding: 6px;">${c.tracking_number}</td>
-            <td style="border: 1px solid #000; padding: 6px;">
-              <div style="font-weight: bold;">${c.product_name_en}</div>
-              ${c.product_name_cn ? `<div style="font-size: 10px; color: #555;">${c.product_name_cn}</div>` : ''}
+            <td style="text-align: center; font-weight: bold; color: #000; border: 1.5px solid #000; padding: 6px;">${idx + 1}</td>
+            <td style="font-family: monospace; font-weight: 900; color: #000; border: 1.5px solid #000; padding: 6px;">${c.ctn_no}</td>
+            <td style="font-family: monospace; font-weight: 900; color: #000; border: 1.5px solid #000; padding: 6px;">${c.packaging_number || '-'}</td>
+            <td style="font-family: monospace; font-weight: 900; color: #000; border: 1.5px solid #000; padding: 6px;">${c.shipping_mark}</td>
+            <td style="font-family: monospace; font-weight: bold; color: #000; border: 1.5px solid #000; padding: 6px;">${c.tracking_number}</td>
+            <td style="color: #000; border: 1.5px solid #000; padding: 6px;">
+              <div style="font-weight: 900; color: #000;">${c.product_name_en}</div>
+              ${c.product_name_cn ? `<div style="font-size: 10px; color: #222; font-weight: bold;">${c.product_name_cn}</div>` : ''}
             </td>
-            <td style="text-align: center; font-family: monospace; border: 1px solid #000; padding: 6px;">
-              <div><b>${c.quantity || 1} Pcs</b></div>
-              <div style="font-size: 10px; color: #666;">${c.cbm || 0.15} CBM</div>
+            <td style="text-align: center; font-family: monospace; color: #000; border: 1.5px solid #000; padding: 6px;">
+              <div><b style="color: #000;">${c.quantity || 1} Pcs</b></div>
+              <div style="font-size: 10px; color: #111; font-weight: bold;">${c.cbm || 0.15} CBM</div>
             </td>
-            <td style="text-align: center; font-family: monospace; font-weight: bold; font-size: 13px; border: 1px solid #000; padding: 6px;">
+            <td style="text-align: center; font-family: monospace; font-weight: 900; color: #000; font-size: 13px; border: 1.5px solid #000; padding: 6px;">
               ${c.bd_calibrated_weight !== undefined ? c.bd_calibrated_weight : (c.gross_weight || '0')} KG
             </td>
             <!-- NEW BLANK LIVE WEIGHT COLUMN FOR PEN HANDWRITING -->
-            <td style="text-align: center; border: 1px solid #000; padding: 6px; background-color: #fafafa;">
+            <td style="text-align: center; border: 1.5px solid #000; padding: 6px; background-color: #ffffff;">
               <div style="border: 2px solid #000; height: 32px; width: 85px; margin: 0 auto; background: #ffffff; border-radius: 4px;"></div>
             </td>
-            <td style="text-align: center; font-size: 11px; font-weight: bold; border: 1px solid #000; padding: 6px;">
+            <td style="text-align: center; font-size: 11px; font-weight: 900; color: #000; border: 1.5px solid #000; padding: 6px;">
               ${c.status === 'received' || c.current_warehouse_id === 'wh-bd' ? 'RECEIVED' : 'IN-TRANSIT'}
             </td>
           </tr>
@@ -263,19 +263,19 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
             <title>Flight Receiving Manifest - ${flight.flying_name || flight.flight_number}</title>
             <style>
               @page { size: A4 portrait; margin: 8mm; }
-              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 10px; color: #000; background: #fff; font-size: 11px; }
+              body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 10px; color: #000000; background: #fff; font-size: 11px; }
               .header-table { width: 100%; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px; }
-              .company-title { font-size: 22px; font-weight: 900; letter-spacing: 1px; color: #000; text-transform: uppercase; }
-              .subtitle { font-size: 12px; font-weight: 700; color: #333; margin-top: 2px; }
-              .info-grid { display: flex; justify-content: space-between; background: #f8fafc; border: 1.5px solid #000; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 11px; }
+              .company-title { font-size: 22px; font-weight: 900; letter-spacing: 1px; color: #000000; text-transform: uppercase; }
+              .subtitle { font-size: 12px; font-weight: 700; color: #000000; margin-top: 2px; }
+              .info-grid { display: flex; justify-content: space-between; background: #ffffff; border: 1.5px solid #000000; padding: 10px; border-radius: 6px; margin-bottom: 12px; font-size: 11px; color: #000000; }
               .info-col { width: 48%; }
-              .info-row { margin-bottom: 4px; }
-              .info-label { font-weight: bold; color: #111; }
+              .info-row { margin-bottom: 4px; color: #000000; }
+              .info-label { font-weight: 900; color: #000000; }
               .manifest-table { width: 100%; border-collapse: collapse; margin-top: 8px; font-size: 11px; }
-              .manifest-table th { background: #1e293b; color: #ffffff; font-weight: bold; padding: 8px 6px; border: 1px solid #000; text-transform: uppercase; font-size: 10px; }
-              .live-weight-header { background: #047857 !important; color: #ffffff !important; font-size: 11px !important; }
-              .footer-signatures { margin-top: 40px; display: flex; justify-content: space-between; font-size: 11px; font-weight: bold; }
-              .sig-box { text-align: center; width: 220px; border-top: 1.5px solid #000; padding-top: 6px; }
+              .manifest-table th { background: #ffffff !important; color: #000000 !important; font-weight: 900 !important; padding: 8px 5px; border: 1.5px solid #000000 !important; text-transform: uppercase; font-size: 11px !important; letter-spacing: 0.3px; text-align: center; }
+              .live-weight-header { background: #ffffff !important; color: #000000 !important; font-weight: 900 !important; font-size: 11px !important; }
+              .footer-signatures { margin-top: 40px; display: flex; justify-content: space-between; font-size: 11px; font-weight: 900; color: #000000; }
+              .sig-box { text-align: center; width: 220px; border-top: 1.5px solid #000000; padding-top: 6px; color: #000000; }
             </style>
           </head>
           <body>
