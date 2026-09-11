@@ -55,6 +55,54 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
   const [selectedCartonIds, setSelectedCartonIds] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>('');
 
+  // Shipment Ctn NO Batch Generator States for Operation Director
+  const [shipmentCtnPrefix, setShipmentCtnPrefix] = useState<string>('ABDUL-');
+  const [shipmentCtnStartNum, setShipmentCtnStartNum] = useState<number>(50);
+
+  const handleBatchAssignShipmentCtnNo = () => {
+    if (selectedCartonIds.length === 0) {
+      addToast(
+        'error',
+        isBn ? 'কোনো কার্টুন নির্বাচন করা হয়নি!' : 'No Cartons Selected!',
+        isBn ? 'SHIPMENT CTN NO. সেট করার জন্য অন্তত ১টি কার্টুন টিক দিন।' : 'Please select cartons to assign Shipment Ctn NO.'
+      );
+      return;
+    }
+
+    const prefix = shipmentCtnPrefix.trim();
+    const startNum = Number(shipmentCtnStartNum) || 1;
+
+    const updatedCartons = cartons.map((c) => {
+      if (!selectedCartonIds.includes(c.id)) return c;
+      const index = selectedCartonIds.indexOf(c.id);
+      const newPkgNo = `${prefix}${startNum + index}`;
+      return {
+        ...c,
+        packaging_number: newPkgNo,
+        updated_at: new Date().toISOString(),
+      };
+    });
+
+    saveHostingerDbMultiData({ fsc_vps_cartons: updatedCartons });
+    setCartons(updatedCartons);
+
+    addToast(
+      'success',
+      isBn ? 'শিপমেন্ট কার্টুন নম্বর সফলভাবে জেনারেট হয়েছে!' : 'Shipment Ctn NO. Generated!',
+      isBn
+        ? `সিলেক্ট করা ${selectedCartonIds.length}টি কার্টুনে ${prefix}${startNum} থেকে ${prefix}${startNum + selectedCartonIds.length - 1} সেট করা হয়েছে।`
+        : `Assigned ${prefix}${startNum} to ${selectedCartonIds.length} cartons.`
+    );
+  };
+
+  const handleUpdateSingleCartonShipmentNo = (cartonId: string, val: string) => {
+    const updatedCartons = cartons.map((c) =>
+      c.id === cartonId ? { ...c, packaging_number: val, updated_at: new Date().toISOString() } : c
+    );
+    saveHostingerDbMultiData({ fsc_vps_cartons: updatedCartons });
+    setCartons(updatedCartons);
+  };
+
   // Real-time DB subscription
   useEffect(() => {
     const syncDb = () => {
@@ -386,6 +434,48 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
             </div>
           </div>
 
+          {/* SHIPMENT CTN NO. BATCH GENERATOR CONTROL FOR OPERATION DIRECTOR */}
+          <div className="p-3.5 bg-emerald-50/90 dark:bg-emerald-950/40 border-b border-emerald-200 dark:border-emerald-800/70 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+            <div className="flex items-center space-x-2">
+              <span className="font-extrabold text-emerald-800 dark:text-emerald-300 flex items-center space-x-1">
+                <span>⚡</span>
+                <span>{isBn ? 'শিপমেন্ট কার্টুন নম্বর ব্যাচ তৈরি করুন (Shipment Ctn NO.):' : 'Batch Generate Shipment Ctn NO.:'}</span>
+              </span>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-2">
+              <input
+                type="text"
+                value={shipmentCtnPrefix}
+                onChange={(e) => setShipmentCtnPrefix(e.target.value)}
+                placeholder="e.g. ABDUL- or BOX-"
+                title={isBn ? 'প্রিফিক্স নাম' : 'Prefix name'}
+                className={`w-28 px-3 py-1.5 rounded-lg border font-mono font-extrabold text-xs outline-none focus:ring-2 focus:ring-emerald-500 ${
+                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'
+                }`}
+              />
+              <input
+                type="number"
+                min={1}
+                value={shipmentCtnStartNum}
+                onChange={(e) => setShipmentCtnStartNum(parseInt(e.target.value) || 1)}
+                placeholder="50"
+                title={isBn ? 'শুরু নম্বর' : 'Start number'}
+                className={`w-20 px-3 py-1.5 rounded-lg border font-mono font-extrabold text-xs text-center outline-none focus:ring-2 focus:ring-emerald-500 ${
+                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'
+                }`}
+              />
+              <button
+                type="button"
+                onClick={handleBatchAssignShipmentCtnNo}
+                className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-xs transition-all cursor-pointer flex items-center space-x-1"
+              >
+                <span>{isBn ? 'সিলেক্টেড কার্টুনে অ্যাসাইন করুন' : 'Apply to Selected'}</span>
+                <span className="bg-emerald-800 px-1.5 py-0.5 rounded text-[10px] ml-1">({selectedCartonIds.length})</span>
+              </button>
+            </div>
+          </div>
+
           {/* Cartons Table List with ALL Columns & SEPARATE Customer Name Column (No Icons!) */}
           <div className="overflow-x-auto max-h-[500px]">
             <table className="w-full text-left text-xs border-collapse min-w-[900px]">
@@ -459,8 +549,17 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                         <td className="p-2.5 font-medium border-r border-slate-200/60 dark:border-slate-700/50 text-slate-800 dark:text-slate-200 whitespace-nowrap">
                           {c.ctn_no}
                         </td>
-                        <td className="p-2.5 font-medium border-r border-slate-200/60 dark:border-slate-700/50 text-emerald-700 dark:text-emerald-400 whitespace-nowrap">
-                          {c.packaging_number || c.master_group_id || `CTN-${c.ctn_no}`}
+                        <td className="p-2 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
+                          <input
+                            type="text"
+                            value={c.packaging_number || ''}
+                            onChange={(e) => handleUpdateSingleCartonShipmentNo(c.id, e.target.value.toUpperCase())}
+                            placeholder="e.g. ABDUL-50"
+                            title="Click to edit Shipment Ctn NO."
+                            className={`w-32 px-2 py-1 rounded border border-emerald-400/80 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 font-mono font-extrabold text-xs outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs ${
+                              isDark ? 'text-emerald-300' : 'text-emerald-800'
+                            }`}
+                          />
                         </td>
                         <td className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-medium text-blue-700 dark:text-sky-300 whitespace-nowrap">
                           {c.shipping_mark}
