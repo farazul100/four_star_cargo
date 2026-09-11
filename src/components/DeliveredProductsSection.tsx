@@ -539,45 +539,57 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
                           <span className="font-extrabold text-emerald-400">🇧🇩 DAC</span>
                         </span>
                       </td>
-                      <td className="p-3.5 text-center font-mono text-sky-300 font-extrabold border-r border-b border-slate-200 dark:border-slate-700">
+                      <td className={`p-3.5 text-center font-mono font-extrabold border-r border-b border-slate-200 dark:border-slate-700 ${
+                        isDark ? 'text-sky-300' : 'text-blue-800'
+                      }`}>
                         {c.flight_number || 'US-03'}
                       </td>
-                      <td className="p-3.5 font-mono font-extrabold text-sm bg-emerald-500/10 text-emerald-300 border-r border-b border-slate-200 dark:border-slate-700">
+                      <td className={`p-3.5 font-mono font-extrabold text-sm border-r border-b border-slate-200 dark:border-slate-700 ${
+                        isDark ? 'bg-emerald-500/10 text-emerald-300' : 'bg-emerald-100/60 text-emerald-900'
+                      }`}>
                         <div className="flex items-center space-x-1 justify-center">
-                          <Scale className="w-3.5 h-3.5 text-emerald-400" />
+                          <Scale className={`w-3.5 h-3.5 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`} />
                           <span>{c.gross_weight} kg</span>
                         </div>
                       </td>
-                      <td className="p-3.5 text-center font-mono font-extrabold text-white border-r border-b border-slate-200 dark:border-slate-700">
+                      <td className={`p-3.5 text-center font-mono font-extrabold border-r border-b border-slate-200 dark:border-slate-700 ${
+                        isDark ? 'text-white' : 'text-slate-900'
+                      }`}>
                         {c.cbm || 0.15}
                       </td>
                       <td className="p-3.5 border-r border-b border-slate-200 dark:border-slate-700">
                         {c.delivery_status === 'sent_to_pathao' ? (
                           <div className="space-y-1">
-                            <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 text-[10px] font-extrabold border border-emerald-500/30">
-                              <Bike className="w-3.5 h-3.5 text-emerald-400" />
+                            <span className={`inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-black shadow-2xs border ${
+                              isDark ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700' : 'bg-emerald-800 text-white border-emerald-900'
+                            }`}>
+                              <Bike className="w-3.5 h-3.5 text-white" />
                               <span>পাঠাও কুরিয়ারে বুকড</span>
                             </span>
-                            <div className="text-[10px] font-mono text-emerald-300 font-extrabold">
+                            <div className={`text-[10px] font-mono font-extrabold ${isDark ? 'text-emerald-300' : 'text-emerald-800'}`}>
                               ID: {c.pathao_consignment_id}
                             </div>
-                            <div className={`text-[9px] font-mono font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>
+                            <div className={`text-[9px] font-mono font-bold ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>
                               {c.payment_status === 'unpaid' ? `COD: ৳${c.cod_amount || 0}` : 'পরিশোধিত (Paid)'}
                             </div>
                           </div>
                         ) : c.status === 'delivered' || c.delivery_status === 'delivered_manual' ? (
                           <div className="space-y-1">
-                            <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-blue-500/20 text-sky-300 text-[10px] font-extrabold border border-blue-500/30">
-                              <Truck className="w-3.5 h-3.5 text-sky-400" />
+                            <span className={`inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-black shadow-2xs border ${
+                              isDark ? 'bg-blue-950/80 text-blue-300 border-blue-700' : 'bg-blue-700 text-white border-blue-800'
+                            }`}>
+                              <Truck className="w-3.5 h-3.5 text-white" />
                               <span>ম্যানুয়ালি বিলিকৃত (Delivered)</span>
                             </span>
-                            <div className={`text-[9px] font-mono font-bold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>
+                            <div className={`text-[9px] font-mono font-bold ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>
                               {c.payment_status === 'unpaid' ? `আদায়কৃত: ৳${c.cod_amount || 0}` : 'পরিশোধিত (Paid)'}
                             </div>
                           </div>
                         ) : (
-                          <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-amber-500/20 text-amber-300 text-[10px] font-extrabold border border-amber-500/30">
-                            <CheckCircle2 className="w-3 h-3 text-amber-400" />
+                          <span className={`inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-black shadow-2xs border ${
+                            isDark ? 'bg-slate-800 text-slate-100 border-slate-700' : 'bg-slate-900 text-white border-slate-900'
+                          }`}>
+                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                             <span>{isBn ? 'ওয়্যারহাউজে স্টক প্রস্তুত' : 'Ready in Warehouse'}</span>
                           </span>
                         )}
