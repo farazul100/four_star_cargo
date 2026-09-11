@@ -165,11 +165,28 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
     [selectedCartons]
   );
 
-  // Toggle single carton selection
-  const handleToggleSelect = (id: string) => {
-    setSelectedCartonIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-    );
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
+
+  // Toggle single or range carton selection (e.g. click 1st item then 5th item selects 1 to 5)
+  const handleToggleSelect = (id: string, index: number, e?: React.MouseEvent | React.ChangeEvent) => {
+    if (e) e.stopPropagation();
+
+    if (lastSelectedIndex !== null && lastSelectedIndex !== index) {
+      const start = Math.min(lastSelectedIndex, index);
+      const end = Math.max(lastSelectedIndex, index);
+      const rangeIds = filteredCartons.slice(start, end + 1).map((c) => c.id);
+
+      setSelectedCartonIds((prev) => {
+        const nextSet = new Set([...prev, ...rangeIds]);
+        return Array.from(nextSet);
+      });
+    } else {
+      setSelectedCartonIds((prev) =>
+        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+      );
+    }
+
+    setLastSelectedIndex(index);
   };
 
   // Toggle select all cartons
@@ -434,12 +451,17 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
             </div>
           </div>
 
-          {/* SHIPMENT CTN NO. BATCH GENERATOR CONTROL FOR OPERATION DIRECTOR */}
-          <div className="p-3.5 bg-white dark:bg-[#0F172A] border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
-            <div className="flex items-center space-x-2">
-              <span className="font-extrabold text-slate-900 dark:text-white text-xs md:text-sm flex items-center space-x-1.5">
-                <span className="text-emerald-600 dark:text-emerald-400">⚡</span>
+          {/* SHIPMENT CTN NO. BATCH GENERATOR CONTROL FOR OPERATION DIRECTOR (PURE WHITE BG) */}
+          <div className="p-3.5 bg-white text-slate-900 border-b border-slate-200 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+            <div className="flex flex-col space-y-1">
+              <span className="font-extrabold text-slate-900 text-xs md:text-sm flex items-center space-x-1.5">
+                <span className="text-emerald-600">⚡</span>
                 <span>{isBn ? 'শিপমেন্ট কার্টুন নম্বর ব্যাচ তৈরি করুন (Shipment Ctn NO.):' : 'Batch Generate Shipment Ctn NO.:'}</span>
+              </span>
+              <span className="text-[11px] font-normal text-slate-600">
+                {isBn
+                  ? '💡 ১মে একটি কার্টুনে ক্লিক করার পর ৫ম কার্টুনে ক্লিক করলে ১ থেকে ৫ পর্যন্ত সবগুলো একসাথে অটো-সিলেক্ট হয়ে যাবে।'
+                  : '💡 Click item #1, then click item #5 to auto-select all 1 to 5 cartons.'}
               </span>
             </div>
 
@@ -450,9 +472,7 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                 onChange={(e) => setShipmentCtnPrefix(e.target.value)}
                 placeholder="e.g. ABDUL- or BOX-"
                 title={isBn ? 'প্রিফিক্স নাম' : 'Prefix name'}
-                className={`w-28 px-3 py-1.5 rounded-lg border font-mono font-extrabold text-xs outline-none focus:ring-2 focus:ring-emerald-500 ${
-                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'
-                }`}
+                className="w-28 px-3 py-1.5 rounded-lg border-2 border-slate-300 bg-white text-slate-900 font-mono font-extrabold text-xs outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20"
               />
               <input
                 type="number"
@@ -461,9 +481,7 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                 onChange={(e) => setShipmentCtnStartNum(parseInt(e.target.value) || 1)}
                 placeholder="50"
                 title={isBn ? 'শুরু নম্বর' : 'Start number'}
-                className={`w-20 px-3 py-1.5 rounded-lg border font-mono font-extrabold text-xs text-center outline-none focus:ring-2 focus:ring-emerald-500 ${
-                  isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'
-                }`}
+                className="w-20 px-3 py-1.5 rounded-lg border-2 border-slate-300 bg-white text-slate-900 font-mono font-extrabold text-xs text-center outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20"
               />
               <button
                 type="button"
@@ -514,7 +532,7 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
               </thead>
               <tbody className="divide-y divide-slate-200/60 dark:divide-slate-800/60 text-xs font-normal">
                 {filteredCartons.length > 0 ? (
-                  filteredCartons.map((c) => {
+                  filteredCartons.map((c, index) => {
                     const isSelected = selectedCartonIds.includes(c.id);
                     const custNameClean = c.customer_name && !c.customer_name.includes('Unassigned')
                       ? c.customer_name
@@ -523,7 +541,7 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                     return (
                       <tr
                         key={c.id}
-                        onClick={() => handleToggleSelect(c.id)}
+                        onClick={(e) => handleToggleSelect(c.id, index, e)}
                         className={`transition-colors duration-150 cursor-pointer ${
                           isSelected
                             ? isDark
@@ -538,10 +556,7 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                           <input
                             type="checkbox"
                             checked={isSelected}
-                            onChange={(e) => {
-                              e.stopPropagation();
-                              handleToggleSelect(c.id);
-                            }}
+                            onChange={(e) => handleToggleSelect(c.id, index, e)}
                             onClick={(e) => e.stopPropagation()}
                             className="rounded border-slate-300 cursor-pointer accent-blue-600 w-4 h-4"
                           />
