@@ -1189,10 +1189,10 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     />
                   </div>
 
-                  {/* Product CN */}
+                  {/* Product Native / Local Language */}
                   <div className="lg:col-span-3">
                     <label className="block text-sm font-extrabold text-slate-900 mb-2">
-                      {isBn ? 'চাইনিজ নাম (中文品名)' : 'Chinese Product Name'}
+                      {isBn ? 'পণ্য (আপনার ভাষা)' : 'Product (Your Language)'}
                     </label>
                     <input
                       type="text"
