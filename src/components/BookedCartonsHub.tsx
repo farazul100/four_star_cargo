@@ -34,6 +34,7 @@ import { useTheme } from '../context/ThemeContext';
 import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction, subscribeToDbUpdates } from '../lib/db';
 import { recalculateCustomerLedgerAndBilling } from '../lib/ledgerHelper';
 import { CartonInvoicesModal } from './CartonInvoicesModal';
+import { SearchableCustomerSelect } from './SearchableCustomerSelect';
 
 interface BookedCartonsHubProps {
   cartons: Carton[];
@@ -2796,19 +2797,22 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               </div>
 
               {!isNewCustMapping ? (
-                <select
-                  value={mapSelectedCustomerId}
-                  onChange={(e) => setMapSelectedCustomerId(e.target.value)}
-                  className={`w-full border rounded-xl p-2.5 outline-none font-extrabold text-xs cursor-pointer ${
-                    isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'
-                  }`}
-                >
-                  {allDbCustomersList.map((cust) => (
-                    <option key={cust.id} value={cust.id}>
-                      {cust.name} ({cust.customer_code}) — {cust.phone}
-                    </option>
-                  ))}
-                </select>
+                <SearchableCustomerSelect
+                  customers={allDbCustomersList}
+                  selectedCustomerId={mapSelectedCustomerId}
+                  onSelectCustomer={(id) => setMapSelectedCustomerId(id)}
+                  getCustomerStats={(custCode) => {
+                    const dbData = getHostingerDbData();
+                    const ledgers = dbData.ledgers || [];
+                    const custLedger = ledgers.find(
+                      (l: any) => l.customer_code === custCode || l.shipping_mark === custCode
+                    );
+                    return { currentDue: custLedger ? custLedger.due_amount || custLedger.total_due || 0 : 0 };
+                  }}
+                  isDark={isDark}
+                  isBn={isBn}
+                  placeholder={isBn ? 'নাম, কোড, মার বা ফোন দিয়ে টাইপ করে খুঁজুন...' : 'Search by name, code, mark, or phone...'}
+                />
               ) : (
                 <div className={`grid grid-cols-1 gap-3 p-3 rounded-xl border ${
                   isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-slate-100 border-slate-200'
