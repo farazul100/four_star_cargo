@@ -241,6 +241,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
   // Customer Assignment / Mapping Modal States
   const [mapCustomerModalMark, setMapCustomerModalMark] = useState<string | null>(null);
+  const [mapShippingMarkInput, setMapShippingMarkInput] = useState<string>('');
   const [mapSelectedCustomerId, setMapSelectedCustomerId] = useState<string>('');
   const [mapRatePerKg, setMapRatePerKg] = useState<number>(750);
   const [isNewCustMapping, setIsNewCustMapping] = useState(false);
@@ -436,6 +437,11 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       }
     }
 
+    const initialMarkInput = targetCarton?.shipping_mark && targetCarton.shipping_mark !== 'UNASSIGNED'
+      ? targetCarton.shipping_mark
+      : (shippingMarkOrTracking !== 'UNASSIGNED' ? shippingMarkOrTracking : '');
+    setMapShippingMarkInput(initialMarkInput);
+
     setMapSelectedCustomerId(selectedCustId);
     setMapRatePerKg(initialRate && initialRate > 0 ? initialRate : 750);
   };
@@ -452,6 +458,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     let currentCusts = dbData.customers || [];
     let targetCust: Customer | undefined;
     const finalRatePerKg = Number(mapRatePerKg) > 0 ? Number(mapRatePerKg) : 750;
+    const finalShippingMark = mapShippingMarkInput.trim() || mapCustomerModalMark || 'UNASSIGNED';
 
     if (isNewCustMapping) {
       if (!newCustMappingName.trim()) return;
@@ -460,7 +467,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         customer_code: `CUST-${Math.floor(1000 + Math.random() * 9000)}`,
         name: newCustMappingName.trim(),
         phone: newCustMappingPhone.trim() || '01700000000',
-        shipping_mark: mapCustomerModalMark,
+        shipping_mark: finalShippingMark,
         address: 'Dhaka, Bangladesh',
         total_billed: 0,
         total_paid: 0,
@@ -477,7 +484,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
     const updatedCusts = currentCusts.map((c) =>
       c.id === targetCust!.id
-        ? { ...c, shipping_mark: mapCustomerModalMark, rate_per_kg: finalRatePerKg }
+        ? { ...c, shipping_mark: finalShippingMark, rate_per_kg: finalRatePerKg }
         : c
     );
     saveHostingerDbData('fsc_vps_customers', updatedCusts);
@@ -498,6 +505,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       ) {
         return {
           ...c,
+          shipping_mark: finalShippingMark,
           customer_id: targetCust!.id,
           customer_code: targetCust!.customer_code,
           customer_name: targetCust!.name,
@@ -2703,6 +2711,23 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             </div>
 
             <div className="space-y-3 text-xs">
+              {/* Shipping Mark Input Field for Operation Director */}
+              <div>
+                <label className={`block mb-1 font-extrabold ${isDark ? 'text-white' : 'text-slate-800'}`}>
+                  {isBn ? 'শিপিং মার্ক নির্ধারণ / আপডেট করুন (Shipping Mark) *' : 'Assign / Edit Shipping Mark *'}
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={mapShippingMarkInput}
+                  onChange={(e) => setMapShippingMarkInput(e.target.value.toUpperCase())}
+                  placeholder="e.g. MAR-8801 / ASI-35"
+                  className={`w-full border rounded-xl p-2.5 font-mono font-extrabold outline-none text-xs ${
+                    isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'
+                  }`}
+                />
+              </div>
+
               <div className="flex items-center justify-between">
                 <label className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-800'}`}>
                   {isBn ? 'প্রকৃত কাস্টমার নির্বাচন করুন *' : 'Select Customer *'}
