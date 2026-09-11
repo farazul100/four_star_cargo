@@ -435,10 +435,10 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
           </div>
 
           {/* SHIPMENT CTN NO. BATCH GENERATOR CONTROL FOR OPERATION DIRECTOR */}
-          <div className="p-3.5 bg-emerald-50/90 dark:bg-emerald-950/40 border-b border-emerald-200 dark:border-emerald-800/70 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
+          <div className="p-3.5 bg-white dark:bg-[#0F172A] border-b border-slate-200 dark:border-slate-700 flex flex-col md:flex-row md:items-center justify-between gap-3 text-xs">
             <div className="flex items-center space-x-2">
-              <span className="font-extrabold text-emerald-800 dark:text-emerald-300 flex items-center space-x-1">
-                <span>⚡</span>
+              <span className="font-extrabold text-slate-900 dark:text-white text-xs md:text-sm flex items-center space-x-1.5">
+                <span className="text-emerald-600 dark:text-emerald-400">⚡</span>
                 <span>{isBn ? 'শিপমেন্ট কার্টুন নম্বর ব্যাচ তৈরি করুন (Shipment Ctn NO.):' : 'Batch Generate Shipment Ctn NO.:'}</span>
               </span>
             </div>
