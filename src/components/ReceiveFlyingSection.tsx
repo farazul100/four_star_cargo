@@ -432,8 +432,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
         (c.id && cartonId && norm(c.id) === norm(cartonId)) ||
         (c.ctn_no && cartonId && norm(c.ctn_no) === norm(cartonId)) ||
         (ctnNo && c.ctn_no && norm(c.ctn_no) === norm(ctnNo)) ||
-        (ctnNo && c.id && norm(c.id) === norm(ctnNo)) ||
-        (shippingMark && c.shipping_mark && norm(c.shipping_mark) === norm(shippingMark));
+        (ctnNo && c.id && norm(c.id) === norm(ctnNo));
 
       if (matches) {
         targetMatched = true;
