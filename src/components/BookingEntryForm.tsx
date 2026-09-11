@@ -1119,14 +1119,14 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
             </div>
           </div>
 
-          {/* CUSTOMIZABLE CARTON & SHIPMENT PREFIX CONFIG (Global for batch) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 p-4 bg-slate-50/90 rounded-2xl border-2 border-slate-200">
+          {/* CUSTOMIZABLE CARTON PREFIX CONFIG (Global for batch) */}
+          <div className="p-4 bg-slate-50/90 rounded-2xl border-2 border-slate-200">
             {/* CUSTOMIZABLE CARTON PREFIX & START NUMBER */}
             <div>
               <label className="block text-xs md:text-sm font-extrabold text-slate-900 mb-1.5 flex items-center">
                 {isBn ? 'ওয়্যারহাউজ কার্টুন নম্বর (প্রিফিক্স + শুরু)' : 'WAREHOUSE CARTON NUMBER (Prefix + Start)'}
               </label>
-              <div className="flex items-center space-x-2.5">
+              <div className="flex items-center space-x-2.5 max-w-md">
                 <input
                   type="text"
                   value={cartonPrefix}
@@ -1143,43 +1143,6 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   placeholder="1"
                   title={isBn ? 'ওয়্যারহাউজ কার্টুন শুরু নম্বর' : 'Warehouse Carton Number start'}
                   className="w-2/5 px-4 py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
-                />
-              </div>
-            </div>
-
-            {/* CUSTOMIZABLE SHIPMENT CTN NO. PREFIX & START NUMBER */}
-            <div>
-              <div className="p-2.5 rounded-xl border border-sky-300 bg-sky-50 dark:bg-sky-950/40 text-sky-900 dark:text-sky-200 text-xs font-semibold space-y-1 mb-2">
-                <div className="flex items-center space-x-1 font-extrabold text-sky-700 dark:text-sky-300">
-                  <span>🔒</span>
-                  <span>{isBn ? 'শিপমেন্ট কার্টুন নম্বর' : 'Shipment Ctn NO.'}</span>
-                </div>
-                <p className="text-[11px] font-normal text-sky-800 dark:text-sky-300 leading-snug">
-                  {isBn
-                    ? 'শিপমেন্ট কার্টুন নম্বর কাস্টমার ম্যাপিং এর সময় অপারেশন ডাইরেক্টর দ্বারা অ্যাসাইন বা আপডেট করা হবে। ওয়্যারহাউজে ঐচ্ছিক।'
-                    : 'Shipment Ctn NO. is assigned by Operation Director during Customer Mapping.'}
-                </p>
-              </div>
-              <label className="block text-xs md:text-sm font-extrabold text-[#059669] mb-1.5 flex items-center">
-                {isBn ? 'শিপমেন্ট কার্টুন নম্বর (ঐচ্ছিক - কাস্টমার ম্যাপিং এ সেট হবে)' : 'Shipment Ctn NO. (Optional - Set in Mapping)'}
-              </label>
-              <div className="flex items-center space-x-2.5">
-                <input
-                  type="text"
-                  value={boxPrefix}
-                  onChange={(e) => setBoxPrefix(e.target.value)}
-                  placeholder="BOX-"
-                  title={isBn ? 'শিপমেন্ট কার্টুন প্রেফিক্স' : 'Shipment Ctn NO. prefix'}
-                  className="w-3/5 px-4 py-3 rounded-xl border-2 border-slate-300 bg-white text-[#059669] text-sm font-mono font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
-                />
-                <input
-                  type="number"
-                  min={1}
-                  value={boxStartNum}
-                  onChange={(e) => setBoxStartNum(e.target.value === '' ? '' : parseInt(e.target.value) || 101)}
-                  placeholder="101"
-                  title={isBn ? 'শিপমেন্ট কার্টুন শুরু নম্বর' : 'Start number'}
-                  className="w-2/5 px-4 py-3 rounded-xl border-2 border-slate-300 bg-white text-[#059669] text-sm font-mono font-bold text-center placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                 />
               </div>
             </div>
@@ -1546,8 +1509,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
               <colgroup>
                 <col style={{ width: '60px' }} />
                 <col style={{ width: '105px' }} />
-                <col style={{ width: '120px' }} />
-                <col style={{ width: '130px' }} />
+                <col style={{ width: '140px' }} />
                 <col style={{ width: '140px' }} />
                 <col style={{ width: '220px' }} />
                 <col style={{ width: '160px' }} />
@@ -1574,7 +1536,6 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   </th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">ENTRY DATE</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">WAREHOUSE CARTON NUMBER</th>
-                  <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium text-emerald-600 dark:text-emerald-400">SHIPMENT CTN NO.</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium text-blue-600 dark:text-blue-400">SHIPPING MARK</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium">PRODUCT NAME (EN & CN)</th>
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 font-medium text-purple-600 dark:text-purple-400 text-center">{isBn ? 'রুট (অরিজিন ➔ গন্তব্য)' : 'ROUTE / DESTINATION'}</th>
@@ -1667,21 +1628,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                         </td>
                       )}
 
-                      {/* Packaging Slip Code (RowSpanned if Merged) */}
-                      {spanInfo.isFirst && (
-                        <td
-                          rowSpan={spanInfo.rowSpan}
-                          className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden align-middle"
-                        >
-                          <input
-                            type="text"
-                            value={r.packaging_number || ''}
-                            onChange={(e) => handleRowUpdate(r.id, 'packaging_number', e.target.value)}
-                            placeholder="e.g. BOX-A101"
-                            className="w-full bg-transparent border-0 outline-none text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold px-1 py-1 rounded focus:bg-emerald-500/10 truncate"
-                          />
-                        </td>
-                      )}
+
 
                       {/* Customer Shipping Mark (Individual per merged sub-item) */}
                       <td className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden align-middle">
