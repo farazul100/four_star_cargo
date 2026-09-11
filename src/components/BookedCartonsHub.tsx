@@ -544,6 +544,20 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     setMapCustomerModalMark(null);
   };
 
+  const handleInlineUpdatePackagingNumber = (cartonId: string, val: string) => {
+    const dbData = getHostingerDbData();
+    const cartonsList = dbData.cartons || [];
+    const updated = cartonsList.map((c) =>
+      c.id === cartonId ? { ...c, packaging_number: val, updated_at: new Date().toISOString() } : c
+    );
+    saveHostingerDbData('fsc_vps_cartons', updated);
+    setLiveRealtimeCartons(updated);
+    if (onUpdateCarton) {
+      const match = updated.find((c) => c.id === cartonId);
+      if (match) onUpdateCarton(match);
+    }
+  };
+
   React.useEffect(() => {
     setLiveRealtimeCartons(cartons);
   }, [cartons]);
@@ -2485,15 +2499,22 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           </td>
                         )}
 
-                        {/* Packaging Slip Code (RowSpanned if Merged) */}
+                        {/* Packaging Slip Code / Shipment Ctn NO. (RowSpanned if Merged) */}
                         {spanInfo.isFirst && (
                           <td
                             rowSpan={spanInfo.rowSpan}
                             className="p-2.5 font-mono font-bold align-middle border-r border-slate-200/60 dark:border-slate-700/50"
                           >
-                            <span className={`font-mono font-extrabold text-xs tracking-wide ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
-                              {c.packaging_number || '-'}
-                            </span>
+                            <input
+                              type="text"
+                              value={c.packaging_number || ''}
+                              onChange={(e) => handleInlineUpdatePackagingNumber(c.id, e.target.value.toUpperCase())}
+                              placeholder="Shipment CTN NO."
+                              title="Click to edit Shipment Ctn NO."
+                              className={`w-28 px-2 py-1 rounded border border-emerald-400/80 dark:border-emerald-600/80 bg-emerald-50 dark:bg-emerald-950/50 font-mono font-extrabold text-xs outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs ${
+                                isDark ? 'text-emerald-300' : 'text-emerald-800'
+                              }`}
+                            />
                           </td>
                         )}
 
