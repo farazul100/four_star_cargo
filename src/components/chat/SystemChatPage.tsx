@@ -12,6 +12,7 @@ import {
   X,
   Image as ImageIcon,
   ArrowLeft,
+  Trash2,
 } from 'lucide-react';
 import { User, ChatConversation, ChatMessage, CallSession, Language, Theme } from '../../types';
 import { DB_KEYS, getHostingerDbData, saveHostingerDbData, logSystemAuditAction, publishSystemNotification } from '../../lib/db';
@@ -741,11 +742,9 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                   const unreadCount = getUnreadCount(convo.id);
 
                   return (
-                    <button
+                    <div
                       key={convo.id}
-                      type="button"
-                      onClick={() => setActiveConvoId(convo.id)}
-                      className={`w-full p-2.5 rounded-none text-left transition-all flex items-center space-x-3 cursor-pointer border-l-4 ${
+                      className={`w-full group relative transition-all flex items-center justify-between border-l-4 ${
                         isActive
                           ? 'bg-[#00897B]/15 border-[#00897B] text-[#00897B] font-bold'
                           : isDark
@@ -753,26 +752,44 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                             : 'hover:bg-slate-200/60 text-slate-900 border-transparent'
                       }`}
                     >
-                      <div className="w-8 h-8 rounded-full shrink-0 font-bold text-xs flex items-center justify-center bg-[#00897B]/20 text-[#1FB6A8] border border-[#00897B]/40">
-                        💬
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setActiveConvoId(convo.id)}
+                        className="flex-1 p-2.5 text-left flex items-center space-x-3 cursor-pointer min-w-0"
+                      >
+                        <div className="w-8 h-8 rounded-full shrink-0 font-bold text-xs flex items-center justify-center bg-[#00897B]/20 text-[#1FB6A8] border border-[#00897B]/40">
+                          💬
+                        </div>
 
-                      <div className="flex-1 min-w-0">
-                        <div className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                          {convo.name || 'Public Customer'}
+                        <div className="flex-1 min-w-0">
+                          <div className={`text-xs font-bold truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                            {convo.name || 'Public Customer'}
+                          </div>
+                          <div className={`text-[10px] truncate ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+                            {convo.last_message || 'New customer inquiry'}
+                          </div>
                         </div>
-                        <div className={`text-[10px] truncate ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-                          {convo.last_message || 'New customer inquiry'}
-                        </div>
-                      </div>
 
-                      {/* UNREAD MESSAGE COUNT BADGE */}
-                      {unreadCount > 0 && (
-                        <div className="px-2 py-0.5 rounded-full bg-red-600 text-white font-bold text-[10px] animate-pulse shrink-0">
-                          {unreadCount}
-                        </div>
+                        {/* UNREAD MESSAGE COUNT BADGE */}
+                        {unreadCount > 0 && (
+                          <div className="px-2 py-0.5 rounded-full bg-red-600 text-white font-bold text-[10px] animate-pulse shrink-0">
+                            {unreadCount}
+                          </div>
+                        )}
+                      </button>
+
+                      {/* SUPER ADMIN DELETE CONVERSATION BUTTON */}
+                      {currentUser.role === 'super_admin' && (
+                        <button
+                          type="button"
+                          onClick={(e) => handleDeleteConversation(convo.id, e)}
+                          className="pr-3 pl-1 py-2 text-slate-400 hover:text-red-500 transition-colors cursor-pointer shrink-0"
+                          title={isBn ? 'কাস্টমার চ্যাট সম্পূর্ণ ডিলেট করুন' : 'Delete Customer Chat'}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       )}
-                    </button>
+                    </div>
                   );
                 })}
 
@@ -862,6 +879,18 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                   <Phone className="w-3.5 h-3.5" />
                   <span>{isBn ? 'ভয়েস কল' : 'Voice Call'}</span>
                 </button>
+
+                {currentUser.role === 'super_admin' && (
+                  <button
+                    type="button"
+                    onClick={() => handleDeleteConversation(activeConvo.id)}
+                    className="px-3 py-1.5 rounded-none bg-red-600 hover:bg-red-700 text-white text-xs font-bold flex items-center space-x-1.5 transition-all cursor-pointer shadow-xs"
+                    title={isBn ? 'কাস্টমার চ্যাট সম্পূর্ণ ডিলেট করুন' : 'Delete Customer Chat'}
+                  >
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>{isBn ? 'ডিলেট চ্যাট' : 'Delete Chat'}</span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -953,16 +982,29 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                       )}
 
                       {hasTextContent && (
-                        <div
-                          className={`p-3 rounded-none text-xs leading-relaxed ${
-                            isMe
-                              ? 'bg-[#00897B] text-white font-medium shadow-xs'
-                              : isDark
-                                ? 'bg-slate-800 text-slate-100 border border-slate-700 shadow-xs'
-                                : 'bg-white text-slate-900 border border-slate-300 shadow-xs'
-                          }`}
-                        >
-                          {msg.content}
+                        <div className="flex items-center space-x-1.5 group">
+                          <div
+                            className={`p-3 rounded-none text-xs leading-relaxed ${
+                              isMe
+                                ? 'bg-[#00897B] text-white font-medium shadow-xs'
+                                : isDark
+                                  ? 'bg-slate-800 text-slate-100 border border-slate-700 shadow-xs'
+                                  : 'bg-white text-slate-900 border border-slate-300 shadow-xs'
+                            }`}
+                          >
+                            {msg.content}
+                          </div>
+
+                          {currentUser.role === 'super_admin' && (
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteMessage(msg.id)}
+                              className="opacity-0 group-hover:opacity-100 transition-opacity p-1 text-slate-400 hover:text-red-500 cursor-pointer shrink-0"
+                              title={isBn ? 'মেসেজ ডিলেট করুন' : 'Delete message'}
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
                         </div>
                       )}
                     </div>
