@@ -31,7 +31,7 @@ import {
 } from 'lucide-react';
 import { Carton, Warehouse, User as UserType, Language, Customer } from '../types';
 import { useTheme } from '../context/ThemeContext';
-import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction, subscribeToDbUpdates } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction, subscribeToDbUpdates, resolveCanonicalWarehouseId } from '../lib/db';
 import { recalculateCustomerLedgerAndBilling } from '../lib/ledgerHelper';
 import { CartonInvoicesModal } from './CartonInvoicesModal';
 import { SearchableCustomerSelect } from './SearchableCustomerSelect';
@@ -800,25 +800,12 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   // Base cartons accessible by current user (Restricted for Warehouse Incharge to CURRENT physical warehouse stock)
   const accessibleCartons = React.useMemo(() => {
     if (isWarehouseIncharge) {
-      const whId = (myWhId || currentUser?.warehouse_id || 'wh-china').toLowerCase();
-      const whName = (currentUser?.warehouse_name || '').toLowerCase();
-
+      const canonicalMyWhId = resolveCanonicalWarehouseId(currentUser?.warehouse_id || myWhId, currentUser?.warehouse_name);
       return liveRealtimeCartons.filter((c) => {
-        const cCurId = (c.current_warehouse_id || '').toLowerCase();
-        const cDestId = (c.destination_warehouse_id || '').toLowerCase();
-        const cOrigId = ((c as any).origin_warehouse_id || (c as any).warehouse_id || '').toLowerCase();
-
-        const cCurName = (c.current_warehouse_name || '').toLowerCase();
-        const cOrigName = (c.warehouse_name || '').toLowerCase();
-
-        return (
-          cCurId === whId ||
-          cDestId === whId ||
-          cOrigId === whId ||
-          (whName && (cCurName.includes(whName) || cOrigName.includes(whName))) ||
-          (whId === 'wh-china' && (cCurId.includes('china') || cOrigId.includes('china') || cOrigName.includes('china') || cOrigName.includes('guangzhou') || cOrigName.includes('中国'))) ||
-          (whId === 'wh-bd' && (cCurId.includes('bd') || cDestId.includes('bd') || cCurName.includes('dhaka') || cCurName.includes('bangladesh')))
-        );
+        const cCur = resolveCanonicalWarehouseId(c.current_warehouse_id, c.current_warehouse_name);
+        const cOrig = resolveCanonicalWarehouseId((c as any).origin_warehouse_id || (c as any).warehouse_id, c.warehouse_name);
+        const cDest = resolveCanonicalWarehouseId(c.destination_warehouse_id, c.destination_warehouse_name);
+        return cCur === canonicalMyWhId || cOrig === canonicalMyWhId || cDest === canonicalMyWhId;
       });
     }
     return liveRealtimeCartons;

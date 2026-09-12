@@ -42,6 +42,47 @@ export const formatWarehouseNameEn = (name?: string): string => {
   return cleaned || 'Air Cargo Hub';
 };
 
+export const resolveCanonicalWarehouseId = (whIdOrName?: string, nameOrCode?: string): string => {
+  if (!whIdOrName && !nameOrCode) return 'wh-china';
+  const str = `${whIdOrName || ''} ${nameOrCode || ''}`.toLowerCase().trim();
+
+  if (
+    str.includes('china') ||
+    str.includes('guangzhou') ||
+    str.includes('中国') ||
+    str.includes('can') ||
+    str.includes('cn') ||
+    str.includes('wh-china')
+  ) {
+    return 'wh-china';
+  }
+
+  if (
+    str.includes('bangladesh') ||
+    str.includes('dhaka') ||
+    str.includes('ঢাকা') ||
+    str.includes('destination') ||
+    str.includes('bd') ||
+    str.includes('wh-bd')
+  ) {
+    return 'wh-bd';
+  }
+
+  if (str.includes('hong kong') || str.includes('hkg') || str.includes('hk') || str.includes('wh-hk')) {
+    return 'wh-hk';
+  }
+
+  if (str.includes('japan') || str.includes('jp') || str.includes('wh-jp')) {
+    return 'wh-jp';
+  }
+
+  if (str.includes('korea') || str.includes('kr') || str.includes('wh-kr')) {
+    return 'wh-kr';
+  }
+
+  return (whIdOrName || 'wh-china').trim();
+};
+
 // Reset DB helper for live testing - Clears all demo cartons & proposals completely
 export const resetHostingerDbToDefault = () => {
   localStorage.setItem(DB_KEYS.USERS, JSON.stringify(INITIAL_USERS));

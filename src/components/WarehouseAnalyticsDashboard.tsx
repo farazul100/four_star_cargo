@@ -20,7 +20,7 @@ import {
 } from 'lucide-react';
 import { Carton, Warehouse, User, Language } from '../types';
 import { useTheme } from '../context/ThemeContext';
-import { formatWarehouseNameEn } from '../lib/db';
+import { formatWarehouseNameEn, resolveCanonicalWarehouseId } from '../lib/db';
 
 interface WarehouseAnalyticsDashboardProps {
   cartons: Carton[];
@@ -41,7 +41,8 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
   const isDark = theme === 'dark';
   const isBn = language === 'bn';
 
-  const myWhId = currentUser.warehouse_id || 'wh-china';
+  const userWhId = currentUser.warehouse_id || 'wh-china';
+  const canonicalMyWhId = resolveCanonicalWarehouseId(userWhId, currentUser.warehouse_name);
   
   // Real DB state subscription for real-time live sync
   const [dbState, setDbState] = React.useState(() => {
@@ -69,20 +70,22 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
   const allDbProposals: any[] = dbState.proposals || [];
   const allDbWarehouses: Warehouse[] = dbState.warehouses || warehouses || [];
 
-  const myWh = allDbWarehouses.find((w) => w.id === myWhId) || {
-    id: myWhId,
+  const myWh = allDbWarehouses.find((w) => resolveCanonicalWarehouseId(w.id, w.name) === canonicalMyWhId) || {
+    id: canonicalMyWhId,
     name: isBn ? 'গুয়াংজু এয়ার হাব (চীন)' : 'Guangzhou Air Hub (China)',
     code: 'CAN-01',
     address: 'Guangzhou Baiyun Air Freight Zone, China',
   };
 
   // Configured Warehouse Storage Capacity (CBM)
-  const maxCapacityCbm = (myWh as any).capacity_cbm || (myWhId === 'wh-bd' ? 1200 : myWhId === 'wh-china' ? 1000 : 800);
+  const maxCapacityCbm = (myWh as any).capacity_cbm || (canonicalMyWhId === 'wh-bd' ? 1200 : canonicalMyWhId === 'wh-china' ? 1000 : 800);
 
-  // Filter cartons for current warehouse
-  const myCartons = allDbCartons.filter(
-    (c) => c.current_warehouse_id === myWhId || (c as any).origin_warehouse_id === myWhId
-  );
+  // Filter cartons for current warehouse (Using canonical warehouse resolution)
+  const myCartons = allDbCartons.filter((c) => {
+    const cCur = resolveCanonicalWarehouseId(c.current_warehouse_id, c.current_warehouse_name);
+    const cOrig = resolveCanonicalWarehouseId((c as any).origin_warehouse_id || (c as any).warehouse_id, c.warehouse_name);
+    return cCur === canonicalMyWhId || cOrig === canonicalMyWhId;
+  });
 
   const totalStockCartons = myCartons.length;
   const totalGrossWeight = Math.round(myCartons.reduce((acc, curr) => acc + (curr.gross_weight || 0), 0) * 10) / 10;
@@ -92,9 +95,11 @@ export const WarehouseAnalyticsDashboard: React.FC<WarehouseAnalyticsDashboardPr
   const remainingCbm = Math.max(0, Math.round((maxCapacityCbm - totalCbm) * 100) / 100);
 
   // Real Flying Batches
-  const myProposals = allDbProposals.filter(
-    (p) => p.warehouse_id === myWhId || p.destination_warehouse_id === myWhId
-  );
+  const myProposals = allDbProposals.filter((p) => {
+    const pWh = resolveCanonicalWarehouseId(p.warehouse_id, p.warehouse_name);
+    const pDest = resolveCanonicalWarehouseId(p.destination_warehouse_id, p.destination_warehouse_name);
+    return pWh === canonicalMyWhId || pDest === canonicalMyWhId;
+  });
   const activeFlyingCount = myProposals.filter(
     (p) => p.status === 'in_transit' || p.status === 'pending' || p.status === 'approved' || p.status === 'arrived_bd'
   ).length;

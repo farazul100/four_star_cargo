@@ -20,7 +20,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { Carton, Warehouse, User, Language, Customer, LedgerEntry } from '../types';
-import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction, publishSystemNotification } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction, publishSystemNotification, resolveCanonicalWarehouseId } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { BookedCartonsHub } from './BookedCartonsHub';
 import { CartonInvoicesModal } from './CartonInvoicesModal';
@@ -78,8 +78,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
   const { theme } = useTheme();
   const isDark = theme === 'dark';
   const isBn = language === 'bn';
-  const myWhId = currentUser.warehouse_id || 'wh-china';
-  const myWh = warehouses.find((w) => w.id === myWhId);
+  const myWhId = resolveCanonicalWarehouseId(currentUser.warehouse_id || 'wh-china', currentUser.warehouse_name);
+  const myWh = warehouses.find((w) => resolveCanonicalWarehouseId(w.id, w.name) === myWhId) || warehouses.find((w) => w.id === myWhId);
 
   const todayStr = new Date().toISOString().split('T')[0];
 
@@ -875,8 +875,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
     const finalMark = shippingMark.trim() || customer.shipping_mark || `${markPrefix.trim()}${markCode.trim()}`;
 
     const newCartonObjects: Carton[] = previewRows.map((r, idx) => {
-      const origId = r.origin_wh_id || myWhId;
-      const destId = r.destination_wh_id || destWhId;
+      const origId = resolveCanonicalWarehouseId(r.origin_wh_id || myWhId);
+      const destId = resolveCanonicalWarehouseId(r.destination_wh_id || destWhId);
       const origWhObj = warehouses.find((w) => w.id === origId);
       const destWhObj = warehouses.find((w) => w.id === destId);
 

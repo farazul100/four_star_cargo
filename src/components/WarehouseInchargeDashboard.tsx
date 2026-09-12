@@ -33,7 +33,7 @@ import { DeliveredProductsSection } from './DeliveredProductsSection';
 import { WarehouseAnalyticsDashboard } from './WarehouseAnalyticsDashboard';
 import { BookedCartonsHub } from './BookedCartonsHub';
 import { ToastContainer, ToastMessage } from './Toast';
-import { saveHostingerDbData, saveHostingerDbMultiData, getHostingerDbData, logSystemAuditAction, subscribeToDbUpdates, formatWarehouseNameEn } from '../lib/db';
+import { saveHostingerDbData, saveHostingerDbMultiData, getHostingerDbData, logSystemAuditAction, subscribeToDbUpdates, formatWarehouseNameEn, resolveCanonicalWarehouseId } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { PublicTracking } from './PublicTracking';
 import { CargoSearchTracker } from './CargoSearchTracker';
@@ -62,8 +62,10 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
   const isBn = language === 'bn';
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const myWhId = currentUser.warehouse_id || 'wh-china';
-  const myWh = warehouses.find((w) => w.id === myWhId);
+  const userWhId = currentUser.warehouse_id || 'wh-china';
+  const canonicalMyWhId = resolveCanonicalWarehouseId(userWhId, currentUser.warehouse_name);
+  const myWhId = canonicalMyWhId;
+  const myWh = warehouses.find((w) => resolveCanonicalWarehouseId(w.id, w.name) === canonicalMyWhId) || warehouses.find((w) => w.id === myWhId);
   const isFinalDestination = myWh?.is_final_destination || false;
 
   // Toast feedback
@@ -678,24 +680,10 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
     if (c.status === 'in_transit' || c.status === 'delivered') return false;
     if (!currentUser?.warehouse_id && currentUser?.role === 'super_admin') return true;
 
-    const whId = (myWhId || currentUser?.warehouse_id || 'wh-china').toLowerCase();
-    const whName = (currentUser?.warehouse_name || myWh?.name || '').toLowerCase();
+    const cCurCanonical = resolveCanonicalWarehouseId(c.current_warehouse_id, c.current_warehouse_name);
+    const cOrigCanonical = resolveCanonicalWarehouseId((c as any).origin_warehouse_id || (c as any).warehouse_id, c.warehouse_name);
 
-    const cCurId = (c.current_warehouse_id || '').toLowerCase();
-    const cDestId = (c.destination_warehouse_id || '').toLowerCase();
-    const cOrigId = ((c as any).origin_warehouse_id || (c as any).warehouse_id || '').toLowerCase();
-
-    const cCurName = (c.current_warehouse_name || '').toLowerCase();
-    const cOrigName = (c.warehouse_name || '').toLowerCase();
-
-    return (
-      cCurId === whId ||
-      cDestId === whId ||
-      cOrigId === whId ||
-      (whName && (cCurName.includes(whName) || cOrigName.includes(whName))) ||
-      (whId === 'wh-china' && (cCurId.includes('china') || cOrigId.includes('china') || cOrigName.includes('china') || cOrigName.includes('guangzhou') || cOrigName.includes('中国'))) ||
-      (whId === 'wh-bd' && (cCurId.includes('bd') || cDestId.includes('bd') || cCurName.includes('dhaka') || cCurName.includes('bangladesh')))
-    );
+    return cCurCanonical === canonicalMyWhId || cOrigCanonical === canonicalMyWhId;
   });
 
   const filteredCartons = myCartons.filter((c) => {
