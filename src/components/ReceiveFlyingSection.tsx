@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { FlyingProposal, Carton, Warehouse, User, Language } from '../types';
 import { ToastContainer, ToastMessage } from './Toast';
-import { getHostingerDbData, saveHostingerDbData, saveHostingerDbMultiData, logSystemAuditAction, formatWarehouseNameEn } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, saveHostingerDbMultiData, logSystemAuditAction, formatWarehouseNameEn, resolveCanonicalWarehouseId } from '../lib/db';
 import { recalculateCustomerLedgerAndBilling } from '../lib/ledgerHelper';
 import { useTheme } from '../context/ThemeContext';
 
@@ -114,40 +114,27 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
   // Filtered proposals list
   const userWhId = currentUser?.warehouse_id || 'wh-bd';
+  const canonicalUserWhId = resolveCanonicalWarehouseId(userWhId, currentUser?.warehouse_name);
   const isSuperAdmin = currentUser?.role === 'super_admin';
   const isWarehouseStaff = currentUser?.role === 'warehouse_incharge';
   const isBdWarehouseStaff = isWarehouseStaff;
 
-  const filteredProposals = proposals.filter((p) => {
-    const search = searchTerm.toLowerCase();
-    const matchesSearch =
-      (p.flying_name || '').toLowerCase().includes(search) ||
-      (p.flight_number || '').toLowerCase().includes(search) ||
-      (p.awb_number || '').toLowerCase().includes(search) ||
-      (p.warehouse_name || '').toLowerCase().includes(search);
+  const accessibleProposals = React.useMemo(() => {
+    return proposals.filter((p) => {
+      // STRICT DESTINATION SCOPING: A warehouse ONLY receives incoming flights destined for ITSELF!
+      if (!isSuperAdmin) {
+        const pDest = resolveCanonicalWarehouseId(p.destination_warehouse_id, p.destination_warehouse_name);
+        if (pDest !== canonicalUserWhId) return false;
+      }
 
-    // STRICT DESTINATION SCOPING: A warehouse ONLY receives incoming flights destined for ITSELF!
-    if (!isSuperAdmin) {
-      const isDestinationMatch =
-        p.destination_warehouse_id === userWhId ||
-        (p as any).destination_warehouse_name?.toLowerCase().includes((currentUser.warehouse_name || '').toLowerCase());
-      if (!isDestinationMatch) return false;
-    }
+      // Hide pending/approved proposals for warehouse staff
+      if (isWarehouseStaff && (p.status === 'approved' || p.status === 'pending')) {
+        return false;
+      }
 
-    // CRITICAL REQUIREMENT: If user is Warehouse Incharge, ONLY show flights that have been dispatched/in_transit or received (hide pending/approved proposals)
-    if (isWarehouseStaff && (p.status === 'approved' || p.status === 'pending')) {
-      return false;
-    }
-
-    const matchesStatus =
-      statusFilter === 'all'
-        ? true
-        : statusFilter === 'received'
-        ? (p.status === 'received' || p.status === ('arrived_bd' as any))
-        : (p.status === 'in_transit' || p.status === 'dispatched');
-
-    return matchesSearch && matchesStatus;
-  });
+      return true;
+    });
+  }, [proposals, currentUser, isSuperAdmin, isWarehouseStaff, canonicalUserWhId]);
 
   // Group filtered proposals into unified Flight Batch rows
   interface GroupedFlightProposal {
@@ -167,54 +154,86 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
     sampleProposal: FlyingProposal;
   }
 
-  const groupedFlightsMap = new Map<string, GroupedFlightProposal>();
+  const allGroupedBatches = React.useMemo(() => {
+    const map = new Map<string, GroupedFlightProposal>();
 
-  filteredProposals.forEach((p) => {
-    const key = (p.flight_number || p.flying_name || p.id).toLowerCase().trim();
+    accessibleProposals.forEach((p) => {
+      const key = (p.flight_number || p.flying_name || p.id).toLowerCase().trim();
 
-    if (!groupedFlightsMap.has(key)) {
-      groupedFlightsMap.set(key, {
-        groupKey: key,
-        flying_name: p.flying_name || p.flight_number || 'Flight Batch',
-        flight_number: p.flight_number || p.flying_name || 'BS-206',
-        awb_number: p.awb_number || '157-884120',
-        date: p.date,
-        warehouse_name: formatWarehouseNameEn(p.warehouse_name) || 'Guangzhou Air Cargo Hub',
-        destination_warehouse_name: formatWarehouseNameEn(p.destination_warehouse_name) || 'Dhaka Central Freight Hub',
-        status: p.status,
-        proposal_ids: [p.id],
-        carton_ids: p.carton_ids ? [...p.carton_ids] : [],
-        total_cartons: p.items_count || (p.carton_ids ? p.carton_ids.length : 0),
-        total_weight: p.total_weight || 0,
-        total_cbm: p.total_cbm || 0,
-        sampleProposal: p,
-      });
-    } else {
-      const existing = groupedFlightsMap.get(key)!;
-      if (!existing.proposal_ids.includes(p.id)) {
-        existing.proposal_ids.push(p.id);
-      }
-
-      const newCartonIds = p.carton_ids || [];
-      newCartonIds.forEach((id) => {
-        if (!existing.carton_ids.includes(id)) {
-          existing.carton_ids.push(id);
+      if (!map.has(key)) {
+        map.set(key, {
+          groupKey: key,
+          flying_name: p.flying_name || p.flight_number || 'Flight Batch',
+          flight_number: p.flight_number || p.flying_name || 'BS-206',
+          awb_number: p.awb_number || '157-884120',
+          date: p.date,
+          warehouse_name: formatWarehouseNameEn(p.warehouse_name) || 'Guangzhou Air Cargo Hub',
+          destination_warehouse_name: formatWarehouseNameEn(p.destination_warehouse_name) || 'Dhaka Central Freight Hub',
+          status: p.status,
+          proposal_ids: [p.id],
+          carton_ids: p.carton_ids ? [...p.carton_ids] : [],
+          total_cartons: p.items_count || (p.carton_ids ? p.carton_ids.length : 0),
+          total_weight: p.total_weight || 0,
+          total_cbm: p.total_cbm || 0,
+          sampleProposal: p,
+        });
+      } else {
+        const existing = map.get(key)!;
+        if (!existing.proposal_ids.includes(p.id)) {
+          existing.proposal_ids.push(p.id);
         }
-      });
 
-      existing.total_cartons += (p.items_count || (p.carton_ids ? p.carton_ids.length : 0));
-      existing.total_weight += (p.total_weight || 0);
-      existing.total_cbm += (p.total_cbm || 0);
+        const newCartonIds = p.carton_ids || [];
+        newCartonIds.forEach((id) => {
+          if (!existing.carton_ids.includes(id)) {
+            existing.carton_ids.push(id);
+          }
+        });
 
-      if (p.status === ('arrived_bd' as any) && existing.status !== 'received') {
-        existing.status = 'arrived_bd' as any;
-      } else if (p.status === 'received') {
-        existing.status = 'received';
+        existing.total_cartons += (p.items_count || (p.carton_ids ? p.carton_ids.length : 0));
+        existing.total_weight += (p.total_weight || 0);
+        existing.total_cbm += (p.total_cbm || 0);
+
+        if (p.status === ('arrived_bd' as any) && existing.status !== 'received') {
+          existing.status = 'arrived_bd' as any;
+        } else if (p.status === 'received') {
+          existing.status = 'received';
+        }
       }
-    }
-  });
+    });
 
-  const groupedFlightList = Array.from(groupedFlightsMap.values());
+    return Array.from(map.values());
+  }, [accessibleProposals]);
+
+  // Tab counts based on grouped flight batches
+  const totalAllBatchesCount = allGroupedBatches.length;
+  const totalInTransitBatchesCount = allGroupedBatches.filter(
+    (b) => b.status === 'in_transit' || b.status === 'dispatched'
+  ).length;
+  const totalReceivedBatchesCount = allGroupedBatches.filter(
+    (b) => b.status === 'received' || b.status === ('arrived_bd' as any)
+  ).length;
+
+  const groupedFlightList = React.useMemo(() => {
+    const search = searchTerm.toLowerCase().trim();
+    return allGroupedBatches.filter((b) => {
+      const matchesSearch =
+        !search ||
+        (b.flying_name || '').toLowerCase().includes(search) ||
+        (b.flight_number || '').toLowerCase().includes(search) ||
+        (b.awb_number || '').toLowerCase().includes(search) ||
+        (b.warehouse_name || '').toLowerCase().includes(search);
+
+      const matchesStatus =
+        statusFilter === 'all'
+          ? true
+          : statusFilter === 'received'
+          ? (b.status === 'received' || b.status === ('arrived_bd' as any))
+          : (b.status === 'in_transit' || b.status === 'dispatched');
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [allGroupedBatches, searchTerm, statusFilter]);
 
   // Flight Carton Scan & Receive Modal state
   const [selectedFlightForCartonReceive, setSelectedFlightForCartonReceive] = useState<any | null>(null);
@@ -670,7 +689,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                 : 'text-slate-800 hover:text-slate-900'
             }`}
           >
-            {isBn ? 'সকল ফ্লাইট' : 'All Flights'} ({proposals.length})
+            {isBn ? 'সকল ফ্লাইট' : 'All Flights'} ({totalAllBatchesCount})
           </button>
           <button
             type="button"
@@ -683,7 +702,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                 : 'text-slate-800 hover:text-slate-900'
             }`}
           >
-            ✈️ {isBn ? 'মিড-এিয়ার ফ্লাইটে চলমান' : 'Cruising Mid-Air'}
+            ✈️ {isBn ? 'মিড-এিয়ার ফ্লাইটে চলমান' : 'Cruising Mid-Air'} ({totalInTransitBatchesCount})
           </button>
           <button
             type="button"
@@ -696,7 +715,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                 : 'text-slate-800 hover:text-slate-900'
             }`}
           >
-            🛬 {isBn ? 'বাংলাদেশ এয়ারপোর্টে প্রাপ্ত' : 'Received at BD'}
+            🛬 {isBn ? 'বাংলাদেশ এয়ারপোর্টে প্রাপ্ত' : 'Received at BD'} ({totalReceivedBatchesCount})
           </button>
         </div>
       </div>
