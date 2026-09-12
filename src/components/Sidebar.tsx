@@ -24,6 +24,7 @@ import {
   MessageSquare,
 } from 'lucide-react';
 import { User, Language, Theme } from '../types';
+import { getHostingerDbData, subscribeToDbUpdates } from '../lib/db';
 
 interface SidebarProps {
   currentUser: User | null;
@@ -50,6 +51,31 @@ export const Sidebar: React.FC<SidebarProps> = ({
   if (!currentUser) return null;
 
   const role = currentUser.role;
+
+  const [unreadNotifsCount, setUnreadNotifsCount] = React.useState<number>(0);
+
+  React.useEffect(() => {
+    const updateCount = () => {
+      const db = getHostingerDbData();
+      const notifs: any[] = db.notifications || [];
+      const userRole = currentUser?.role || 'super_admin';
+      const whId = currentUser?.warehouse_id;
+
+      const userNotifs = notifs.filter((n) => {
+        if (!n || n.isRead) return false;
+        if (n.target_user_id) return n.target_user_id === currentUser?.id || userRole === 'super_admin';
+        if (n.target_role && (n.target_role === 'all' || n.target_role === userRole || userRole === 'super_admin')) {
+          if (n.target_warehouse_id) return !whId || whId === n.target_warehouse_id || userRole === 'super_admin';
+          return true;
+        }
+        return false;
+      });
+      setUnreadNotifsCount(userNotifs.length);
+    };
+
+    updateCount();
+    return subscribeToDbUpdates(updateCount);
+  }, [currentUser]);
 
   const getRolePanelTitle = (role: string) => {
     switch (role) {
@@ -294,7 +320,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                           : 'text-gray-500'
                       }`}
                     />
-                    <span className="truncate">{item.label}</span>
+                    <span className="truncate flex-1 text-left">{item.label}</span>
+                    {item.id === 'notifications' && unreadNotifsCount > 0 && (
+                      <span className="px-2 py-0.5 text-[10px] font-extrabold bg-red-600 text-white rounded-full leading-none shadow-xs">
+                        {unreadNotifsCount > 99 ? '99+' : unreadNotifsCount}
+                      </span>
+                    )}
                   </button>
                 );
               })}

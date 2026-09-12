@@ -225,8 +225,8 @@ export const Header: React.FC<HeaderProps> = ({
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
               <span
-                style={{ backgroundColor: '#DC2626', color: '#FFFFFF' }}
-                className="absolute -top-1.5 -right-2 min-w-[20px] h-[20px] px-1 text-[11px] font-black leading-none flex items-center justify-center rounded-full border-2 border-white dark:border-[#1E293B] shadow-lg z-20 pointer-events-none select-none"
+                style={{ backgroundColor: '#DC2626', color: '#FFFFFF', opacity: 1 }}
+                className="absolute -top-1.5 -right-2 min-w-[20px] h-[20px] px-1 text-[11px] font-black text-white bg-red-600 leading-none flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 shadow-lg z-30 pointer-events-none select-none"
               >
                 {unreadCount > 99 ? '99+' : unreadCount}
               </span>
@@ -251,7 +251,7 @@ export const Header: React.FC<HeaderProps> = ({
                     {isBn ? 'নোটিফিকেশন' : 'Notifications'}
                   </span>
                   {unreadCount > 0 && (
-                    <span className="px-2 py-0.5 text-[10px] font-semibold bg-[#EA580C]/20 text-[#EA580C] rounded-full">
+                    <span className="px-2 py-0.5 text-[10px] font-extrabold bg-red-600 text-white rounded-full shadow-xs">
                       {unreadCount} {isBn ? 'নতুন' : 'new'}
                     </span>
                   )}
