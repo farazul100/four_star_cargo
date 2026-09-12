@@ -173,7 +173,8 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
 
     const isShiftPressed = Boolean(
       (e as any)?.shiftKey ||
-      (e as any)?.nativeEvent?.shiftKey
+      (e as any)?.nativeEvent?.shiftKey ||
+      (window.event as any)?.shiftKey
     );
 
     if (isShiftPressed && lastSelectedIndex !== null && lastSelectedIndex !== index) {
@@ -557,12 +558,15 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                             : 'bg-white hover:bg-slate-50 text-slate-800'
                         }`}
                       >
-                        <td className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50" onClick={(e) => e.stopPropagation()}>
+                        <td
+                          className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50"
+                          onClick={(e) => handleToggleSelect(c.id, index, e)}
+                        >
                           <input
                             type="checkbox"
                             checked={isSelected}
-                            onChange={(e) => handleToggleSelect(c.id, index, e)}
-                            onClick={(e) => e.stopPropagation()}
+                            onClick={(e) => handleToggleSelect(c.id, index, e)}
+                            onChange={() => {}}
                             className="rounded border-slate-300 cursor-pointer accent-blue-600 w-4 h-4"
                           />
                         </td>

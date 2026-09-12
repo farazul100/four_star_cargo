@@ -699,7 +699,11 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     index?: number,
     event?: React.MouseEvent<any> | React.ChangeEvent<any>
   ) => {
-    const isShiftKey = event && 'shiftKey' in event && (event as React.MouseEvent).shiftKey;
+    const isShiftKey = Boolean(
+      (event as any)?.shiftKey ||
+      (event as any)?.nativeEvent?.shiftKey ||
+      (window.event as any)?.shiftKey
+    );
 
     if (isShiftKey && lastSelectedCartonIndex !== null && index !== undefined && sortedFilteredCartons) {
       const start = Math.min(lastSelectedCartonIndex, index);
