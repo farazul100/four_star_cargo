@@ -167,11 +167,16 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
 
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
 
-  // Toggle single or range carton selection (e.g. click 1st item then 5th item selects 1 to 5)
+  // Toggle single or range carton selection (range selection occurs ONLY when Shift key is pressed)
   const handleToggleSelect = (id: string, index: number, e?: React.MouseEvent | React.ChangeEvent) => {
     if (e) e.stopPropagation();
 
-    if (lastSelectedIndex !== null && lastSelectedIndex !== index) {
+    const isShiftPressed = Boolean(
+      (e as any)?.shiftKey ||
+      (e as any)?.nativeEvent?.shiftKey
+    );
+
+    if (isShiftPressed && lastSelectedIndex !== null && lastSelectedIndex !== index) {
       const start = Math.min(lastSelectedIndex, index);
       const end = Math.max(lastSelectedIndex, index);
       const rangeIds = filteredCartons.slice(start, end + 1).map((c) => c.id);
@@ -460,8 +465,8 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
               </span>
               <span className="text-[11px] font-normal text-slate-600">
                 {isBn
-                  ? '💡 ১মে একটি কার্টুনে ক্লিক করার পর ৫ম কার্টুনে ক্লিক করলে ১ থেকে ৫ পর্যন্ত সবগুলো একসাথে অটো-সিলেক্ট হয়ে যাবে।'
-                  : '💡 Click item #1, then click item #5 to auto-select all 1 to 5 cartons.'}
+                  ? '💡 প্রথমে ১টি কার্টুন সিলেক্ট করার পর Shift Key চেপে ধরে ৪র্থ কার্টুনে ক্লিক করলে ১ থেকে ৪ পর্যন্ত সবগুলো একসাথে অটো-সিলেক্ট হবে।'
+                  : '💡 Click item #1, then hold Shift key & click item #4 to auto-select all 1 to 4 cartons.'}
               </span>
             </div>
 
