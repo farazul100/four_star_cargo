@@ -193,11 +193,11 @@ export const initHostingerDb = () => {
   // Sync from server disk file (/api/db) for multi-browser support
   fetchServerDbAndSync();
 
-  // Start automatic 3-second background polling for 100% real-time multi-browser sync
+  // Start automatic 800ms background polling for 100% real-time multi-browser & multi-device sync
   if (typeof window !== 'undefined' && !(window as any).__FSC_SYNC_INTERVAL__) {
     (window as any).__FSC_SYNC_INTERVAL__ = setInterval(() => {
       fetchServerDbAndSync();
-    }, 3000);
+    }, 800);
   }
 };
 
@@ -752,8 +752,8 @@ let isFetchingSync = false;
 // Helper to fetch latest server disk DB (/api/db.php) and sync to LocalStorage across different browsers
 export const fetchServerDbAndSync = async () => {
   if (typeof window === 'undefined' || isFetchingSync) return;
-  // MUTATION GUARD: Do not overwrite local state if a local save/delete action occurred within 6000ms or push is in progress
-  if (isPushing || (Date.now() - lastLocalMutationTime < 6000)) return;
+  // Only guard while HTTP POST push is actively executing to avoid race conditions
+  if (isPushing || (Date.now() - lastLocalMutationTime < 300)) return;
 
   isFetchingSync = true;
   try {
@@ -912,26 +912,17 @@ export const fetchServerDbAndSync = async () => {
                 const serverCartons: Carton[] = Array.isArray(serverData) ? serverData : [];
                 const cartonMap = new Map<string, Carton>();
 
+                // Server cartons are authoritative for status, weight & location updates across browsers & devices
                 serverCartons.forEach((sc) => {
                   if (sc && sc.id) {
                     cartonMap.set(sc.id, sc);
                   }
                 });
 
+                // Only preserve local cartons if they do NOT exist on server yet (newly added draft/offline items)
                 localCartons.forEach((lc) => {
-                  if (lc && lc.id) {
-                    const existing = cartonMap.get(lc.id);
-                    if (!existing) {
-                      cartonMap.set(lc.id, lc);
-                    } else {
-                      cartonMap.set(lc.id, {
-                        ...existing,
-                        ...lc,
-                        customer_id: lc.customer_id || existing.customer_id,
-                        customer_code: lc.customer_code || existing.customer_code,
-                        customer_name: lc.customer_name || existing.customer_name,
-                      });
-                    }
+                  if (lc && lc.id && !cartonMap.has(lc.id)) {
+                    cartonMap.set(lc.id, lc);
                   }
                 });
 
@@ -945,6 +936,33 @@ export const fetchServerDbAndSync = async () => {
                   }
                   hasChanges = true;
                 }
+              } else if (key === DB_KEYS.PROPOSALS || key === 'fsc_vps_proposals') {
+                const localProps: FlyingProposal[] = localRaw ? JSON.parse(localRaw) : [];
+                const serverProps: FlyingProposal[] = Array.isArray(serverData) ? serverData : [];
+                const propMap = new Map<string, FlyingProposal>();
+
+                serverProps.forEach((sp) => {
+                  if (sp && sp.id) {
+                    propMap.set(sp.id, sp);
+                  }
+                });
+
+                localProps.forEach((lp) => {
+                  if (lp && lp.id && !propMap.has(lp.id)) {
+                    propMap.set(lp.id, lp);
+                  }
+                });
+
+                const mergedProps = Array.from(propMap.values());
+                const mergedStr = JSON.stringify(mergedProps);
+                if (localRaw !== mergedStr) {
+                  localStorage.setItem(DB_KEYS.PROPOSALS, mergedStr);
+                  localStorage.setItem('fsc_vps_proposals', mergedStr);
+                  if (typeof window !== 'undefined') {
+                    window.__FSC_GLOBAL_PROPOSALS__ = mergedProps;
+                  }
+                  hasChanges = true;
+                }
               } else if (key === DB_KEYS.CUSTOMERS || key === 'fsc_vps_customers') {
                 const localCusts: Customer[] = localRaw ? JSON.parse(localRaw) : [];
                 const serverCusts: Customer[] = Array.isArray(serverData) ? serverData : [];
@@ -955,13 +973,8 @@ export const fetchServerDbAndSync = async () => {
                 });
 
                 localCusts.forEach((lc) => {
-                  if (lc && lc.id) {
-                    const existing = custMap.get(lc.id);
-                    if (!existing) {
-                      custMap.set(lc.id, lc);
-                    } else {
-                      custMap.set(lc.id, { ...existing, ...lc });
-                    }
+                  if (lc && lc.id && !custMap.has(lc.id)) {
+                    custMap.set(lc.id, lc);
                   }
                 });
 
@@ -1015,6 +1028,7 @@ export const fetchServerDbAndSync = async () => {
 
           if (hasChanges) {
             window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key: 'server_sync' } }));
+            dbBroadcastChannel?.postMessage({ key: 'server_sync', timestamp: Date.now() });
           }
         }
       }
@@ -1048,12 +1062,12 @@ export const subscribeHostingerDbChanges = (callback: () => void) => {
   // Sync with server DB immediately on subscribe
   fetchServerDbAndSync().then(() => callback());
 
-  // Poll server DB every 4s when tab is active for instant multi-browser cross-sync
+  // Poll server DB every 800ms when tab is active for instant multi-browser cross-sync
   const pollInterval = setInterval(async () => {
     if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
       await fetchServerDbAndSync();
     }
-  }, 4000);
+  }, 800);
 
   return () => {
     clearInterval(pollInterval);

@@ -13,7 +13,7 @@ import {
 } from 'lucide-react';
 import { FlyingProposal, Carton, Warehouse, User, Language } from '../types';
 import { ToastContainer, ToastMessage } from './Toast';
-import { getHostingerDbData, saveHostingerDbData, saveHostingerDbMultiData, logSystemAuditAction, formatWarehouseNameEn, resolveCanonicalWarehouseId } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, saveHostingerDbMultiData, logSystemAuditAction, subscribeToDbUpdates, formatWarehouseNameEn, resolveCanonicalWarehouseId } from '../lib/db';
 import { recalculateCustomerLedgerAndBilling } from '../lib/ledgerHelper';
 import { useTheme } from '../context/ThemeContext';
 
@@ -45,6 +45,19 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
 
   const proposals = initialProposals && initialProposals.length > 0 ? initialProposals : localProposals;
   const updateProposals = parentSetProposals || setLocalProposals;
+
+  React.useEffect(() => {
+    return subscribeToDbUpdates(() => {
+      const freshData = getHostingerDbData();
+      if (freshData.proposals) {
+        setLocalProposals(freshData.proposals);
+        if (parentSetProposals) parentSetProposals(freshData.proposals);
+      }
+      if (freshData.cartons) {
+        setCartons(freshData.cartons);
+      }
+    });
+  }, []);
 
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [searchTerm, setSearchTerm] = useState('');

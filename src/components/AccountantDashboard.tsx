@@ -34,7 +34,7 @@ import { Customer, LedgerEntry, User, Language, ExpenseItem } from '../types';
 import { ToastContainer, ToastMessage } from './Toast';
 import { BudgetExpenseManager } from './BudgetExpenseManager';
 import { CargoSearchTracker } from './CargoSearchTracker';
-import { getHostingerDbData, saveHostingerDbData } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { numberToWords } from '../utils/numberToWords';
 import { printElement } from '../utils/printHelper';
@@ -87,6 +87,15 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
     else if (activeTab === 'cargo_search' || activeTab === 'public_track') setViewMode('cargo_search');
     else if (activeTab === 'dashboard') setViewMode('overview');
   }, [activeTab]);
+
+  useEffect(() => {
+    return subscribeToDbUpdates(() => {
+      const freshData = getHostingerDbData();
+      if (freshData.ledgerEntries) setLedgerEntries(freshData.ledgerEntries);
+      if (freshData.customers) setCustomers(freshData.customers);
+      if (freshData.expenses) setExpenses(freshData.expenses);
+    });
+  }, []);
 
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
 
