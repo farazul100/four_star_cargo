@@ -35,7 +35,7 @@ import {
 import { Carton, Warehouse, FlyingProposal, LedgerEntry, Language, Theme } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { LiveCargoTrackingMap } from './LiveCargoTrackingMap';
-import { getHostingerDbData } from '../lib/db';
+import { getHostingerDbData, subscribeToDbUpdates } from '../lib/db';
 
 interface ShipmentDataTrackerProps {
   cartons?: Carton[];
@@ -80,11 +80,23 @@ export const ShipmentDataTracker: React.FC<ShipmentDataTrackerProps> = ({
   const [selectedProposalModal, setSelectedProposalModal] = useState<FlyingProposal | null>(null);
   const [printManifestProposal, setPrintManifestProposal] = useState<FlyingProposal | null>(null);
 
-  // Always fallback to live DB proposals if prop is empty
+  // Always fallback to live DB proposals if prop is empty with Realtime DB Subscription
+  const [liveDbCartons, setLiveDbCartons] = useState<Carton[]>(() => safeCartons.length > 0 ? safeCartons : getHostingerDbData().cartons || []);
+  const [liveDbProposals, setLiveDbProposals] = useState<FlyingProposal[]>(() => safeProposals.length > 0 ? safeProposals : getHostingerDbData().proposals || []);
+
+  React.useEffect(() => {
+    return subscribeToDbUpdates(() => {
+      const fresh = getHostingerDbData();
+      if (fresh.cartons) setLiveDbCartons(fresh.cartons);
+      if (fresh.proposals) setLiveDbProposals(fresh.proposals);
+    });
+  }, []);
+
   const safeProposals = React.useMemo(() => {
+    if (liveDbProposals && liveDbProposals.length > 0) return liveDbProposals;
     if (Array.isArray(proposals) && proposals.length > 0) return proposals;
     return getHostingerDbData().proposals;
-  }, [proposals]);
+  }, [proposals, liveDbProposals]);
 
   // Operation Director Approved / Finalized Flying Batches ONLY
   const approvedProposals = React.useMemo(() => {

@@ -20,7 +20,7 @@ import {
   ShieldCheck,
 } from 'lucide-react';
 import { Carton, Warehouse, User, Language, Customer, LedgerEntry } from '../types';
-import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction, publishSystemNotification, resolveCanonicalWarehouseId } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction, publishSystemNotification, resolveCanonicalWarehouseId, subscribeToDbUpdates } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { BookedCartonsHub } from './BookedCartonsHub';
 import { CartonInvoicesModal } from './CartonInvoicesModal';
@@ -204,11 +204,13 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
   // All Saved Cartons State for Live Central Hub View
   const [allSavedCartons, setAllSavedCartons] = useState<Carton[]>([]);
 
-  // Load Customers & Saved Cartons on Mount
+  // Load Customers & Saved Cartons on Mount with Realtime DB Subscription
   useEffect(() => {
-    const data = getHostingerDbData();
-    setExistingCustomers(data.customers || []);
-    setAllSavedCartons(data.cartons || []);
+    return subscribeToDbUpdates(() => {
+      const data = getHostingerDbData();
+      if (data.customers) setExistingCustomers(data.customers);
+      if (data.cartons) setAllSavedCartons(data.cartons);
+    });
   }, []);
 
   // Sync Shipping Mark whenever prefix or code changes
