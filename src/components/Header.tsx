@@ -225,8 +225,7 @@ export const Header: React.FC<HeaderProps> = ({
             <Bell className="w-5 h-5" />
             {unreadCount > 0 && (
               <span
-                style={{ backgroundColor: '#DC2626', color: '#FFFFFF', opacity: 1 }}
-                className="absolute -top-1.5 -right-2 min-w-[20px] h-[20px] px-1 text-[11px] font-black text-white bg-red-600 leading-none flex items-center justify-center rounded-full border-2 border-white dark:border-slate-900 shadow-lg z-30 pointer-events-none select-none"
+                className="notif-badge-fixed absolute -top-1.5 -right-2 min-w-[20px] h-[20px] px-1 text-[11px] font-black leading-none flex items-center justify-center rounded-full shadow-lg z-30 pointer-events-none select-none"
               >
                 {unreadCount > 99 ? '99+' : unreadCount}
               </span>

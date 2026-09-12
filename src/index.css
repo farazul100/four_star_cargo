@@ -634,6 +634,22 @@ a:hover span {
   }
 }
 
+/* Universal High-Visibility Notification Badge Override */
+.notif-badge-fixed,
+html.light .notif-badge-fixed,
+html.dark .notif-badge-fixed {
+  background-color: #DC2626 !important;
+  color: #FFFFFF !important;
+  border: 2px solid #FFFFFF !important;
+  opacity: 1 !important;
+  box-shadow: 0 4px 10px rgba(220, 38, 38, 0.4) !important;
+}
+
+html.dark .notif-badge-fixed {
+  border-color: #0F172A !important;
+}
+
+
 
 
 
