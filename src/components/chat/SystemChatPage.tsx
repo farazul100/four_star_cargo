@@ -13,6 +13,7 @@ import {
   Image as ImageIcon,
   ArrowLeft,
   Trash2,
+  AlertTriangle,
 } from 'lucide-react';
 import { User, ChatConversation, ChatMessage, CallSession, Language, Theme } from '../../types';
 import { DB_KEYS, getHostingerDbData, saveHostingerDbData, logSystemAuditAction, publishSystemNotification } from '../../lib/db';
@@ -362,6 +363,59 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
 
     setActiveConvoId(existing.id);
     loadChatData();
+  };
+
+  // Delete Warning Confirmation Modal State
+  const [convoToDelete, setConvoToDelete] = useState<{ id: string; name: string } | null>(null);
+
+  // Handle Request Delete Conversation (Triggers Warning Modal Popup)
+  const requestDeleteConversation = (convoId: string, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+
+    if (currentUser.role !== 'super_admin') {
+      addToast(isBn ? 'শুধুমাত্র সুপার এডমিন কাস্টমার চ্যাট ডিলেট করতে পারবেন' : 'Only Super Admin can delete customer chats', 'error');
+      return;
+    }
+
+    const targetConvo = conversations.find((c) => c.id === convoId);
+    const targetName = targetConvo ? targetConvo.name || getConvoTitle(targetConvo) : 'Customer Chat';
+
+    setConvoToDelete({ id: convoId, name: targetName });
+  };
+
+  // Handle Confirmed Delete Conversation (Executes after user clicks OK in modal)
+  const confirmDeleteConversation = () => {
+    if (!convoToDelete) return;
+    const { id: convoId, name: targetName } = convoToDelete;
+
+    // Filter out conversation from Hostinger DB & State
+    const db = getHostingerDbData();
+    const currentConvos: ChatConversation[] = db.conversations || conversations;
+    const currentMsgs: ChatMessage[] = db.messages || messages;
+
+    const updatedConvos = currentConvos.filter((c) => c.id !== convoId);
+    const updatedMsgs = currentMsgs.filter((m) => m.conversation_id !== convoId);
+
+    setConversations(updatedConvos);
+    setMessages(updatedMsgs);
+
+    saveHostingerDbData('fsc_vps_conversations', updatedConvos);
+    saveHostingerDbData('fsc_vps_messages', updatedMsgs);
+
+    if (activeConvoId === convoId) {
+      setActiveConvoId(null);
+    }
+
+    logSystemAuditAction(
+      currentUser,
+      'DELETE_CUSTOMER_CHAT',
+      'chat',
+      convoId,
+      `সুপার এডমিন কাস্টমার চ্যাট "${targetName}" সফলভাবে পারমানেন্টলি ডিলেট করেছেন`
+    );
+
+    addToast(isBn ? `✅ কাস্টমার চ্যাট "${targetName}" সফলভাবে ডিলেট করা হয়েছে` : `✅ Customer chat "${targetName}" permanently deleted`, 'success');
+    setConvoToDelete(null);
   };
 
   // Create Group Chat (RESTRICTED STRICTLY TO SUPER ADMIN)
@@ -782,7 +836,7 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                       {currentUser.role === 'super_admin' && (
                         <button
                           type="button"
-                          onClick={(e) => handleDeleteConversation(convo.id, e)}
+                          onClick={(e) => requestDeleteConversation(convo.id, e)}
                           className="pr-3 pl-1 py-2 text-slate-400 hover:text-red-500 transition-colors cursor-pointer shrink-0"
                           title={isBn ? 'কাস্টমার চ্যাট সম্পূর্ণ ডিলেট করুন' : 'Delete Customer Chat'}
                         >
@@ -883,7 +937,7 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                 {currentUser.role === 'super_admin' && (
                   <button
                     type="button"
-                    onClick={() => handleDeleteConversation(activeConvo.id)}
+                    onClick={() => requestDeleteConversation(activeConvo.id)}
                     className="px-3 py-1.5 rounded-none bg-red-600 hover:bg-red-700 text-white text-xs font-bold flex items-center space-x-1.5 transition-all cursor-pointer shadow-xs"
                     title={isBn ? 'কাস্টমার চ্যাট সম্পূর্ণ ডিলেট করুন' : 'Delete Customer Chat'}
                   >
@@ -1199,6 +1253,79 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+      {/* ------------------------------------------------------------- */}
+      {/* CUSTOM WARNING POPUP MODAL FOR DELETING CUSTOMER CHAT        */}
+      {/* ------------------------------------------------------------- */}
+      {convoToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fadeIn">
+          <div className={`w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border p-6 space-y-5 transform transition-all scale-100 ${
+            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
+          }`}>
+            {/* Header with Danger Warning Icon */}
+            <div className="flex items-start space-x-4">
+              <div className="w-12 h-12 rounded-2xl bg-red-500/15 border border-red-500/30 flex items-center justify-center shrink-0">
+                <AlertTriangle className="w-6 h-6 text-red-500 animate-bounce" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-extrabold text-red-500 flex items-center gap-1.5">
+                  <span>⚠️</span>
+                  <span>{isBn ? 'কাস্টমার চ্যাট ডিলেট সতর্ক বার্তা' : 'Customer Chat Delete Warning'}</span>
+                </h3>
+                <p className={`text-xs mt-1 leading-relaxed ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
+                  {isBn
+                    ? 'আপনি কি নিশ্চিত যে এই কাস্টমার চ্যাটটি সম্পূর্ণ মুছে ফেলতে চান? এটি একটি স্থায়ী কাজ।'
+                    : 'Are you sure you want to permanently delete this customer chat conversation?'}
+                </p>
+              </div>
+            </div>
+
+            {/* Target Conversation Card */}
+            <div className={`p-3.5 rounded-xl border flex items-center space-x-3 ${
+              isDark ? 'bg-slate-900/90 border-red-500/30' : 'bg-red-50/80 border-red-200'
+            }`}>
+              <div className="w-9 h-9 rounded-full bg-red-500/20 text-red-500 flex items-center justify-center font-bold text-sm shrink-0">
+                💬
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-bold truncate text-red-400 dark:text-red-300">
+                  {convoToDelete.name}
+                </div>
+                <div className="text-[10px] text-slate-400 dark:text-slate-400">
+                  {isBn ? 'স্থায়ীভাবে ডাটাবেজ থেকে ক্লিয়ার হবে' : 'Will be permanently removed from Hostinger DB'}
+                </div>
+              </div>
+            </div>
+
+            <p className="text-[11px] font-medium text-amber-500 bg-amber-500/10 p-2.5 rounded-lg border border-amber-500/20">
+              ⚠️ {isBn ? 'একবার "হ্যাঁ, ডিলেট করুন" চাপলে মেসেজের সমস্ত হিস্ট্রি চিরতরে মুছে যাবে এবং তা আর কখনো রিকভার করা যাবে না।' : 'Once deleted, all message history will be lost forever and cannot be recovered.'}
+            </p>
+
+            {/* Modal Actions */}
+            <div className="flex items-center justify-end space-x-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setConvoToDelete(null)}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer border ${
+                  isDark
+                    ? 'bg-slate-800 hover:bg-slate-700 text-slate-200 border-slate-600'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
+                }`}
+              >
+                {isBn ? 'বাতিল করুন' : 'Cancel'}
+              </button>
+
+              <button
+                type="button"
+                onClick={confirmDeleteConversation}
+                className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-bold flex items-center space-x-1.5 transition-all shadow-md cursor-pointer"
+              >
+                <Trash2 className="w-4 h-4" />
+                <span>{isBn ? 'হ্যাঁ, ডিলেট করুন' : 'Yes, Delete Chat'}</span>
+              </button>
+            </div>
           </div>
         </div>
       )}
