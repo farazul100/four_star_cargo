@@ -384,27 +384,35 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
   };
 
   // Handle Confirmed Delete Conversation (Executes after user clicks OK in modal)
-  const confirmDeleteConversation = () => {
+  const confirmDeleteConversation = (e?: React.MouseEvent) => {
+    if (e) {
+      e.stopPropagation();
+      e.preventDefault();
+    }
+
     if (!convoToDelete) return;
     const { id: convoId, name: targetName } = convoToDelete;
+
+    // Immediately close modal popup state right away!
+    setConvoToDelete(null);
 
     // Filter out conversation from Hostinger DB & State
     const db = getHostingerDbData();
     const currentConvos: ChatConversation[] = db.conversations || conversations;
     const currentMsgs: ChatMessage[] = db.messages || messages;
 
-    const updatedConvos = currentConvos.filter((c) => c.id !== convoId);
-    const updatedMsgs = currentMsgs.filter((m) => m.conversation_id !== convoId);
+    const updatedConvos = currentConvos.filter((c) => c && c.id !== convoId);
+    const updatedMsgs = currentMsgs.filter((m) => m && m.conversation_id !== convoId);
 
     setConversations(updatedConvos);
     setMessages(updatedMsgs);
 
-    saveHostingerDbData('fsc_vps_conversations', updatedConvos);
-    saveHostingerDbData('fsc_vps_messages', updatedMsgs);
-
     if (activeConvoId === convoId) {
       setActiveConvoId(null);
     }
+
+    saveHostingerDbData('fsc_vps_conversations', updatedConvos);
+    saveHostingerDbData('fsc_vps_messages', updatedMsgs);
 
     logSystemAuditAction(
       currentUser,
@@ -415,7 +423,6 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
     );
 
     addToast(isBn ? `✅ কাস্টমার চ্যাট "${targetName}" সফলভাবে ডিলেট করা হয়েছে` : `✅ Customer chat "${targetName}" permanently deleted`, 'success');
-    setConvoToDelete(null);
   };
 
   // Create Group Chat (RESTRICTED STRICTLY TO SUPER ADMIN)
@@ -1260,10 +1267,16 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
       {/* CUSTOM WARNING POPUP MODAL FOR DELETING CUSTOMER CHAT        */}
       {/* ------------------------------------------------------------- */}
       {convoToDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-fadeIn">
-          <div className={`w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border-2 p-6 space-y-5 transform transition-all scale-100 ${
-            isDark ? 'bg-[#18181B] border-slate-700 text-white' : 'bg-white border-slate-300 text-slate-900'
-          }`}>
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-xs animate-fadeIn"
+          onClick={() => setConvoToDelete(null)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className={`w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border-2 p-6 space-y-5 transform transition-all scale-100 ${
+              isDark ? 'bg-[#18181B] border-slate-700 text-white' : 'bg-white border-slate-300 text-slate-900'
+            }`}
+          >
             {/* Header with Danger Warning Icon */}
             <div className="flex items-start space-x-4">
               <div className="w-12 h-12 rounded-2xl bg-red-600/15 border-2 border-red-500 flex items-center justify-center shrink-0">
@@ -1315,7 +1328,11 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
             <div className="flex items-center justify-end space-x-3 pt-2">
               <button
                 type="button"
-                onClick={() => setConvoToDelete(null)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  setConvoToDelete(null);
+                }}
                 className={`px-5 py-2.5 rounded-xl text-xs font-bold transition-all cursor-pointer border-2 ${
                   isDark
                     ? 'bg-slate-800 hover:bg-slate-700 text-slate-100 border-slate-600'
@@ -1327,7 +1344,7 @@ export const SystemChatPage: React.FC<SystemChatPageProps> = ({ currentUser, lan
 
               <button
                 type="button"
-                onClick={confirmDeleteConversation}
+                onClick={(e) => confirmDeleteConversation(e)}
                 className="px-5 py-2.5 rounded-xl bg-red-600 hover:bg-red-700 text-white text-xs font-extrabold flex items-center space-x-2 transition-all shadow-md cursor-pointer border border-red-700"
               >
                 <Trash2 className="w-4 h-4" />
