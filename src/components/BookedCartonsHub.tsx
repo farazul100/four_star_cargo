@@ -800,12 +800,26 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   // Base cartons accessible by current user (Restricted for Warehouse Incharge to CURRENT physical warehouse stock)
   const accessibleCartons = React.useMemo(() => {
     if (isWarehouseIncharge) {
-      return liveRealtimeCartons.filter(
-        (c) =>
-          c.current_warehouse_id === myWhId ||
-          c.current_warehouse_id === currentUser?.warehouse_id ||
-          c.booked_by === currentUser?.id
-      );
+      const whId = (myWhId || currentUser?.warehouse_id || 'wh-china').toLowerCase();
+      const whName = (currentUser?.warehouse_name || '').toLowerCase();
+
+      return liveRealtimeCartons.filter((c) => {
+        const cCurId = (c.current_warehouse_id || '').toLowerCase();
+        const cDestId = (c.destination_warehouse_id || '').toLowerCase();
+        const cOrigId = ((c as any).origin_warehouse_id || (c as any).warehouse_id || '').toLowerCase();
+
+        const cCurName = (c.current_warehouse_name || '').toLowerCase();
+        const cOrigName = (c.warehouse_name || '').toLowerCase();
+
+        return (
+          cCurId === whId ||
+          cDestId === whId ||
+          cOrigId === whId ||
+          (whName && (cCurName.includes(whName) || cOrigName.includes(whName))) ||
+          (whId === 'wh-china' && (cCurId.includes('china') || cOrigId.includes('china') || cOrigName.includes('china') || cOrigName.includes('guangzhou') || cOrigName.includes('中国'))) ||
+          (whId === 'wh-bd' && (cCurId.includes('bd') || cDestId.includes('bd') || cCurName.includes('dhaka') || cCurName.includes('bangladesh')))
+        );
+      });
     }
     return liveRealtimeCartons;
   }, [liveRealtimeCartons, isWarehouseIncharge, myWhId, currentUser]);

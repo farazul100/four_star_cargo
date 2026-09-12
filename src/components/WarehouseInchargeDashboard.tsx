@@ -677,11 +677,24 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
     // Deduct stock automatically: cartons in flight (in_transit) or delivered are minused from origin physical stock
     if (c.status === 'in_transit' || c.status === 'delivered') return false;
     if (!currentUser?.warehouse_id && currentUser?.role === 'super_admin') return true;
+
+    const whId = (myWhId || currentUser?.warehouse_id || 'wh-china').toLowerCase();
+    const whName = (currentUser?.warehouse_name || myWh?.name || '').toLowerCase();
+
+    const cCurId = (c.current_warehouse_id || '').toLowerCase();
+    const cDestId = (c.destination_warehouse_id || '').toLowerCase();
+    const cOrigId = ((c as any).origin_warehouse_id || (c as any).warehouse_id || '').toLowerCase();
+
+    const cCurName = (c.current_warehouse_name || '').toLowerCase();
+    const cOrigName = (c.warehouse_name || '').toLowerCase();
+
     return (
-      c.current_warehouse_id === myWhId ||
-      c.current_warehouse_id === currentUser?.warehouse_id ||
-      c.booked_by === currentUser?.id ||
-      (myWh && c.current_warehouse_name === myWh.name)
+      cCurId === whId ||
+      cDestId === whId ||
+      cOrigId === whId ||
+      (whName && (cCurName.includes(whName) || cOrigName.includes(whName))) ||
+      (whId === 'wh-china' && (cCurId.includes('china') || cOrigId.includes('china') || cOrigName.includes('china') || cOrigName.includes('guangzhou') || cOrigName.includes('中国'))) ||
+      (whId === 'wh-bd' && (cCurId.includes('bd') || cDestId.includes('bd') || cCurName.includes('dhaka') || cCurName.includes('bangladesh')))
     );
   });
 
