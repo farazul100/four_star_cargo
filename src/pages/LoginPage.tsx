@@ -153,7 +153,7 @@ export const LoginPage: React.FC<LoginPageProps> = ({ expectedRole, targetDashbo
     const storedPassword = (foundUser.password || '').trim();
     const enteredPassword = password.trim();
 
-    if (storedPassword && enteredPassword !== storedPassword && enteredPassword !== 'Cargo@2026') {
+    if (storedPassword && enteredPassword !== storedPassword) {
       logSystemAuditAction(
         foundUser,
         'LOGIN_FAILED',

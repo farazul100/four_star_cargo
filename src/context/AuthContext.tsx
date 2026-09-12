@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User, UserRole } from '../types';
 import { INITIAL_USERS } from '../mockData';
+import { getHostingerDbData } from '../lib/db';
 
 interface AuthContextType {
   user: User | null;
@@ -35,6 +36,33 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     if (user) {
+      // Validate active session against live database users list
+      try {
+        const dbUsers: User[] = getHostingerDbData().users || [];
+        if (dbUsers.length > 0) {
+          const match = dbUsers.find(
+            (u) => u.id === user.id || (u.email && u.email.toLowerCase().trim() === user.email.toLowerCase().trim())
+          );
+
+          if (!match || match.status === 'inactive' || match.status === 'suspended') {
+            console.warn('Active session invalidated: User account deleted or suspended.');
+            setUser(null);
+            localStorage.removeItem('fsc_active_user');
+            sessionStorage.removeItem('fsc_active_user');
+            return;
+          }
+
+          if (match.password !== user.password || match.role !== user.role) {
+            setUser(match);
+            localStorage.setItem('fsc_active_user', JSON.stringify(match));
+            sessionStorage.setItem('fsc_active_user', JSON.stringify(match));
+            return;
+          }
+        }
+      } catch (e) {
+        console.error('User session validation error:', e);
+      }
+
       localStorage.setItem('fsc_active_user', JSON.stringify(user));
       sessionStorage.setItem('fsc_active_user', JSON.stringify(user));
     } else {
