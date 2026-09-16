@@ -15,6 +15,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
+// 0. Ultra-fast short-circuit timestamp check for polling (~30-byte payload)
+// Executes immediately before database connection, disk reads, or table setup
+if (isset($_GET['mode']) && in_array(strtolower(trim($_GET['mode'])), ['ts', 'timestamp_check', 'timestamp'])) {
+    header('Content-Type: application/json');
+    header('Cache-Control: no-cache, no-store, must-revalidate');
+    header('Pragma: no-cache');
+    
+    $tsFile = __DIR__ . '/db_ts.txt';
+    $ts = 0;
+    if (file_exists($tsFile)) {
+        $tsStr = @file_get_contents($tsFile);
+        $ts = (float)trim((string)$tsStr);
+    }
+    if ($ts <= 0 && file_exists(__DIR__ . '/db.json')) {
+        $stat = @stat(__DIR__ . '/db.json');
+        if ($stat && !empty($stat['mtime'])) {
+            $ts = (float)($stat['mtime'] * 1000);
+        }
+    }
+    if ($ts <= 0) {
+        $ts = round(microtime(true) * 1000);
+    }
+    
+    echo json_encode(['_updated_at' => $ts]);
+    exit();
+}
+
 // Optional config file include
 if (file_exists(__DIR__ . '/config.php')) {
     @include_once __DIR__ . '/config.php';
@@ -215,25 +242,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 }
 
-// 2. GET Mode: Fast Timestamp Check for sub-second polling (20-byte payload)
-if (isset($_GET['mode']) && ($_GET['mode'] === 'ts' || $_GET['mode'] === 'timestamp_check')) {
-    header('Content-Type: application/json');
-    header('Cache-Control: no-cache, no-store, must-revalidate');
-    header('Pragma: no-cache');
-    $tsFile = __DIR__ . '/db_ts.txt';
-    if (file_exists($tsFile)) {
-        $tsStr = @file_get_contents($tsFile);
-        $ts = (float)trim($tsStr);
-        if ($ts > 0) {
-            echo json_encode(['_updated_at' => $ts]);
-            exit();
-        }
-    }
-    $currentDb = readCurrentServerDb($pdo, $filePaths);
-    $ts = isset($currentDb['_updated_at']) ? (float)$currentDb['_updated_at'] : 0;
-    echo json_encode(['_updated_at' => $ts]);
-    exit();
-}
 
 // 4. Standard GET Request: Read full latest database state
 header('Content-Type: application/json');
