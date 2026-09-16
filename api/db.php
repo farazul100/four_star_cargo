@@ -219,6 +219,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if (isset($_GET['mode']) && ($_GET['mode'] === 'ts' || $_GET['mode'] === 'timestamp_check')) {
     header('Content-Type: application/json');
     header('Cache-Control: no-cache, no-store, must-revalidate');
+    header('Pragma: no-cache');
     $tsFile = __DIR__ . '/db_ts.txt';
     if (file_exists($tsFile)) {
         $tsStr = @file_get_contents($tsFile);
@@ -231,35 +232,6 @@ if (isset($_GET['mode']) && ($_GET['mode'] === 'ts' || $_GET['mode'] === 'timest
     $currentDb = readCurrentServerDb($pdo, $filePaths);
     $ts = isset($currentDb['_updated_at']) ? (float)$currentDb['_updated_at'] : 0;
     echo json_encode(['_updated_at' => $ts]);
-    exit();
-}
-
-// 3. GET Mode: Server-Sent Events (SSE) Stream for instant zero-delay broadcast
-if (isset($_GET['stream']) || (isset($_GET['mode']) && $_GET['mode'] === 'sse')) {
-    header('Content-Type: text/event-stream');
-    header('Cache-Control: no-cache');
-    header('Connection: keep-alive');
-    header('X-Accel-Buffering: no');
-
-    $clientLastTs = isset($_GET['last_ts']) ? (float)$_GET['last_ts'] : 0;
-    $startTime = time();
-
-    while (time() - $startTime < 25) {
-        $currentDb = readCurrentServerDb($pdo, $filePaths);
-        $serverTs = isset($currentDb['_updated_at']) ? (float)$currentDb['_updated_at'] : 0;
-
-        if ($serverTs > $clientLastTs) {
-            echo "data: " . json_encode($currentDb, JSON_UNESCAPED_UNICODE) . "\n\n";
-            @ob_flush();
-            @flush();
-            exit();
-        }
-        usleep(150000); // 150ms sleep loop for ultra-low latency detection
-    }
-
-    echo "data: {\"status\":\"ping\",\"_updated_at\":{$clientLastTs}}\n\n";
-    @ob_flush();
-    @flush();
     exit();
 }
 

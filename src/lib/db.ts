@@ -785,7 +785,6 @@ export const saveHostingerDbMultiData = (entries: Record<string, any>) => {
 
 let isFetchingSync = false;
 let lastKnownServerTs = 0;
-let sseEventSource: EventSource | null = null;
 
 export const processServerDbUpdate = (serverDb: any) => {
   if (!serverDb || typeof serverDb !== 'object') return;
@@ -882,36 +881,6 @@ export const processServerDbUpdate = (serverDb: any) => {
   }
 };
 
-// Start Real-Time Server-Sent Events (SSE) Stream for sub-second zero-delay cross-device push
-export const initRealtimeSseStream = () => {
-  if (typeof window === 'undefined' || !window.EventSource) return;
-  if (sseEventSource) return;
-
-  try {
-    const endpoint = `${getPrimaryServerEndpoint()}?stream=1&last_ts=${lastKnownServerTs}`;
-    sseEventSource = new EventSource(endpoint);
-
-    sseEventSource.onmessage = (event) => {
-      try {
-        if (!event.data) return;
-        const payload = JSON.parse(event.data);
-        if (payload && payload.status === 'ping') return;
-        if (payload && typeof payload === 'object') {
-          processServerDbUpdate(payload);
-        }
-      } catch (e) {}
-    };
-
-    sseEventSource.onerror = () => {
-      if (sseEventSource) {
-        sseEventSource.close();
-        sseEventSource = null;
-      }
-      setTimeout(() => initRealtimeSseStream(), 1000);
-    };
-  } catch (e) {}
-};
-
 // Helper to fetch latest server disk DB (/api/db.php) and sync to LocalStorage across different browsers
 export const fetchServerDbAndSync = async () => {
   if (typeof window === 'undefined' || isFetchingSync) return;
@@ -942,12 +911,18 @@ export const fetchServerDbAndSync = async () => {
   }
 };
 
-// Ultra-fast 250ms lightweight timestamp check (only fetches 20 bytes JSON payload)
+// Lightweight timestamp check (only fetches ~20 bytes JSON payload with cache busting)
 const checkFastTimestamp = async () => {
   if (typeof window === 'undefined' || isFetchingSync || isPushing) return;
   try {
-    const endpoint = `${getPrimaryServerEndpoint()}?mode=ts&t=${Date.now()}`;
-    const res = await fetch(endpoint, { cache: 'no-store' });
+    const endpoint = `${getPrimaryServerEndpoint()}?mode=ts&_=${Date.now()}`;
+    const res = await fetch(endpoint, {
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+      },
+      cache: 'no-store',
+    });
     if (res && res.ok) {
       const data = await res.json();
       const serverTs = Number(data._updated_at || 0);
@@ -977,18 +952,15 @@ export const subscribeHostingerDbChanges = (callback: () => void) => {
     dbBroadcastChannel.addEventListener('message', handleEvent);
   }
 
-  // Initialize SSE zero-delay push connection
-  initRealtimeSseStream();
-
   // Sync with server DB immediately on subscribe
   fetchServerDbAndSync().then(() => callback());
 
-  // Ultra-fast 150ms polling loop when tab is visible for sub-second zero-delay cross-device sync
+  // 1-second cross-device polling loop when tab is visible
   const pollInterval = setInterval(async () => {
     if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
       await checkFastTimestamp();
     }
-  }, 150);
+  }, 1000);
 
   return () => {
     clearInterval(pollInterval);
