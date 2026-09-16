@@ -808,238 +808,54 @@ export const processServerDbUpdate = (serverDb: any) => {
     const serverData = serverDb[key];
     if (!serverData) return;
 
-    if (Array.isArray(serverData)) {
-      const localRaw = localStorage.getItem(key);
+    const serverStr = typeof serverData === 'string' ? serverData : JSON.stringify(serverData);
+    const localRaw = localStorage.getItem(key);
 
-      if (key === DB_KEYS.CALLS) {
-        const localCalls: any[] = localRaw ? JSON.parse(localRaw) : [];
-        const serverCalls: any[] = serverData;
-        const callMap = new Map<string, any>();
+    if (localRaw !== serverStr) {
+      localStorage.setItem(key, serverStr);
 
-        const getPriority = (st: string) => {
-          if (st === 'ended' || st === 'rejected') return 3;
-          if (st === 'active') return 2;
-          return 1;
-        };
-
-        const allCalls = [...serverCalls, ...localCalls];
-        allCalls.forEach((call) => {
-          if (call && call.id) {
-            const existing = callMap.get(call.id);
-            if (!existing) {
-              callMap.set(call.id, call);
-            } else {
-              const existingPrio = getPriority(existing.status);
-              const callPrio = getPriority(call.status);
-
-              if (callPrio > existingPrio) {
-                callMap.set(call.id, { ...existing, ...call });
-              } else if (callPrio === existingPrio) {
-                const mergedCallerCand = Array.from(new Set([...(existing.caller_candidates || []), ...(call.caller_candidates || [])]));
-                const mergedCalleeCand = Array.from(new Set([...(existing.callee_candidates || []), ...(call.callee_candidates || [])]));
-                callMap.set(call.id, {
-                  ...existing,
-                  ...call,
-                  sdp_offer: call.sdp_offer || existing.sdp_offer,
-                  sdp_answer: call.sdp_answer || existing.sdp_answer,
-                  caller_candidates: mergedCallerCand,
-                  callee_candidates: mergedCalleeCand,
-                });
-              }
-            }
-          }
-        });
-
-        const mergedStr = JSON.stringify(Array.from(callMap.values()));
-        if (localRaw !== mergedStr) {
-          localStorage.setItem(key, mergedStr);
-          hasChanges = true;
-        }
-      } else if (key === DB_KEYS.MESSAGES || key === DB_KEYS.CONVERSATIONS || key === 'notifications' || key === 'fsc_vps_notifications') {
-        const localItems: any[] = localRaw ? JSON.parse(localRaw) : [];
-        const serverItems: any[] = serverData;
-        const itemMap = new Map<string, any>();
-
-        serverItems.forEach((item) => {
-          if (item && item.id && !item.id.startsWith('notif-base-')) {
-            itemMap.set(item.id, item);
-          }
-        });
-
-        localItems.forEach((item) => {
-          if (item && item.id && !item.id.startsWith('notif-base-')) {
-            const existing = itemMap.get(item.id);
-            if (!existing) {
-              itemMap.set(item.id, item);
-            } else {
-              if (item.isRead) {
-                itemMap.set(item.id, { ...existing, isRead: true });
-              }
-            }
-          }
-        });
-
-        const mergedList = Array.from(itemMap.values()).sort(
-          (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
-        );
-
-        const mergedStr = JSON.stringify(mergedList);
-        if (localRaw !== mergedStr) {
-          localStorage.setItem(key, mergedStr);
-          localStorage.setItem('fsc_vps_notifications', mergedStr);
-          hasChanges = true;
-        }
-      } else if (key === DB_KEYS.USERS || key === 'users') {
-        const localUsers: User[] = localRaw ? JSON.parse(localRaw) : [];
-        const serverUsers: User[] = serverData;
-        const userMap = new Map<string, User>();
-
-        serverUsers.forEach((u) => {
-          if (u && (u.id || u.email)) {
-            const uKey = u.id || (u.email || '').toLowerCase().trim();
-            userMap.set(uKey, u);
-          }
-        });
-
-        localUsers.forEach((u) => {
-          if (u && (u.id || u.email)) {
-            const uKey = u.id || (u.email || '').toLowerCase().trim();
-            if (!userMap.has(uKey)) {
-              userMap.set(uKey, u);
-            }
-          }
-        });
-
-        const mergedUsers = Array.from(userMap.values());
-        const mergedStr = JSON.stringify(mergedUsers);
-        if (localRaw !== mergedStr) {
-          localStorage.setItem(DB_KEYS.USERS, mergedStr);
-          localStorage.setItem('users', mergedStr);
-          hasChanges = true;
-        }
-      } else if (key === DB_KEYS.WAREHOUSES || key === 'warehouses' || key === 'fsc_vps_warehouses') {
-        const serverWhs: Warehouse[] = Array.isArray(serverData) ? serverData : [];
-        const cleanWhs = serverWhs.map((w) => ({
-          ...w,
-          name: formatWarehouseNameEn(w?.name),
-        }));
-        const cleanStr = JSON.stringify(cleanWhs);
-        if (localRaw !== cleanStr) {
-          localStorage.setItem(DB_KEYS.WAREHOUSES, cleanStr);
-          localStorage.setItem('warehouses', cleanStr);
-          localStorage.setItem('fsc_vps_warehouses', cleanStr);
-          hasChanges = true;
-        }
-      } else if (key === DB_KEYS.CARTONS || key === 'fsc_vps_cartons') {
-        const localCartons: Carton[] = localRaw ? JSON.parse(localRaw) : [];
-        const serverCartons: Carton[] = Array.isArray(serverData) ? serverData : [];
-        const cartonMap = new Map<string, Carton>();
-
-        serverCartons.forEach((sc) => {
-          if (sc && sc.id) {
-            cartonMap.set(sc.id, sc);
-          }
-        });
-
-        localCartons.forEach((lc) => {
-          if (lc && lc.id) {
-            const sc = cartonMap.get(lc.id);
-            if (!sc) {
-              cartonMap.set(lc.id, lc);
-            } else {
-              const lcTime = lc.updated_at ? new Date(lc.updated_at).getTime() : 0;
-              const scTime = sc.updated_at ? new Date(sc.updated_at).getTime() : 0;
-              if (lcTime > scTime || (lc.customer_id && !sc.customer_id)) {
-                cartonMap.set(lc.id, { ...sc, ...lc });
-              }
-            }
-          }
-        });
-
-        const mergedCartons = Array.from(cartonMap.values());
-        const mergedStr = JSON.stringify(mergedCartons);
-        if (localRaw !== mergedStr) {
-          localStorage.setItem(DB_KEYS.CARTONS, mergedStr);
-          localStorage.setItem('fsc_vps_cartons', mergedStr);
-          localStorage.setItem('cartons', mergedStr);
-          if (typeof window !== 'undefined') {
-            window.__FSC_GLOBAL_CARTONS__ = mergedCartons;
-          }
-          hasChanges = true;
-        }
-      } else if (key === DB_KEYS.PROPOSALS || key === 'fsc_vps_proposals') {
-        const localProps: FlyingProposal[] = localRaw ? JSON.parse(localRaw) : [];
-        const serverProps: FlyingProposal[] = Array.isArray(serverData) ? serverData : [];
-        const propMap = new Map<string, FlyingProposal>();
-
-        serverProps.forEach((sp) => {
-          if (sp && sp.id) {
-            propMap.set(sp.id, sp);
-          }
-        });
-
-        localProps.forEach((lp) => {
-          if (lp && lp.id && !propMap.has(lp.id)) {
-            propMap.set(lp.id, lp);
-          }
-        });
-
-        const mergedProps = Array.from(propMap.values());
-        const mergedStr = JSON.stringify(mergedProps);
-        if (localRaw !== mergedStr) {
-          localStorage.setItem(DB_KEYS.PROPOSALS, mergedStr);
-          localStorage.setItem('fsc_vps_proposals', mergedStr);
-          if (typeof window !== 'undefined') {
-            window.__FSC_GLOBAL_PROPOSALS__ = mergedProps;
-          }
-          hasChanges = true;
-        }
-      } else if (key === DB_KEYS.CUSTOMERS || key === 'fsc_vps_customers') {
-        const localCusts: Customer[] = localRaw ? JSON.parse(localRaw) : [];
-        const serverCusts: Customer[] = Array.isArray(serverData) ? serverData : [];
-        const custMap = new Map<string, Customer>();
-
-        serverCusts.forEach((sc) => {
-          if (sc && sc.id) custMap.set(sc.id, sc);
-        });
-
-        localCusts.forEach((lc) => {
-          if (lc && lc.id) {
-            const sc = custMap.get(lc.id);
-            if (!sc) {
-              custMap.set(lc.id, lc);
-            } else {
-              const lcTime = lc.created_at ? new Date(lc.created_at).getTime() : 0;
-              const scTime = sc.created_at ? new Date(sc.created_at).getTime() : 0;
-              if (lcTime > scTime || (lc.shipping_mark && !sc.shipping_mark)) {
-                custMap.set(lc.id, { ...sc, ...lc });
-              }
-            }
-          }
-        });
-
-        const mergedCusts = Array.from(custMap.values());
-        const mergedStr = JSON.stringify(mergedCusts);
-        if (localRaw !== mergedStr) {
-          localStorage.setItem(DB_KEYS.CUSTOMERS, mergedStr);
-          localStorage.setItem('fsc_vps_customers', mergedStr);
-          localStorage.setItem('customers', mergedStr);
-          hasChanges = true;
-        }
-      } else {
-        const serverStr = JSON.stringify(serverData);
-        if (localRaw !== serverStr) {
-          localStorage.setItem(key, serverStr);
-          hasChanges = true;
+      if (key === DB_KEYS.USERS || key === 'users' || key === 'fsc_vps_users') {
+        localStorage.setItem(DB_KEYS.USERS, serverStr);
+        localStorage.setItem('users', serverStr);
+        localStorage.setItem('fsc_vps_users', serverStr);
+      }
+      if (key === DB_KEYS.WAREHOUSES || key === 'warehouses' || key === 'fsc_vps_warehouses') {
+        localStorage.setItem(DB_KEYS.WAREHOUSES, serverStr);
+        localStorage.setItem('warehouses', serverStr);
+        localStorage.setItem('fsc_vps_warehouses', serverStr);
+      }
+      if (key === DB_KEYS.CARTONS || key === 'fsc_vps_cartons' || key === 'cartons') {
+        localStorage.setItem(DB_KEYS.CARTONS, serverStr);
+        localStorage.setItem('fsc_vps_cartons', serverStr);
+        localStorage.setItem('cartons', serverStr);
+        if (typeof window !== 'undefined') {
+          window.__FSC_GLOBAL_CARTONS__ = Array.isArray(serverData) ? serverData : JSON.parse(serverStr);
         }
       }
-    } else {
-      const serverStr = typeof serverData === 'string' ? serverData : JSON.stringify(serverData);
-      const localRaw = localStorage.getItem(key);
-      if (localRaw !== serverStr) {
-        localStorage.setItem(key, serverStr);
-        hasChanges = true;
+      if (key === DB_KEYS.PROPOSALS || key === 'fsc_vps_proposals' || key === 'proposals') {
+        localStorage.setItem(DB_KEYS.PROPOSALS, serverStr);
+        localStorage.setItem('fsc_vps_proposals', serverStr);
+        localStorage.setItem('proposals', serverStr);
+        if (typeof window !== 'undefined') {
+          window.__FSC_GLOBAL_PROPOSALS__ = Array.isArray(serverData) ? serverData : JSON.parse(serverStr);
+        }
       }
+      if (key === DB_KEYS.CUSTOMERS || key === 'fsc_vps_customers' || key === 'customers') {
+        localStorage.setItem(DB_KEYS.CUSTOMERS, serverStr);
+        localStorage.setItem('fsc_vps_customers', serverStr);
+        localStorage.setItem('customers', serverStr);
+      }
+      if (key === DB_KEYS.LEDGER || key === 'fsc_vps_ledger' || key === 'fsc_vps_ledger_entries') {
+        localStorage.setItem('fsc_vps_ledger', serverStr);
+        localStorage.setItem('fsc_vps_ledger_entries', serverStr);
+      }
+      if (key === DB_KEYS.EXPENSES || key === 'fsc_vps_expenses' || key === 'expenses') {
+        localStorage.setItem(DB_KEYS.EXPENSES, serverStr);
+        localStorage.setItem('fsc_vps_expenses', serverStr);
+        localStorage.setItem('expenses', serverStr);
+      }
+
+      hasChanges = true;
     }
   });
 

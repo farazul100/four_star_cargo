@@ -241,21 +241,20 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   const [liveRealtimeCartons, setLiveRealtimeCartons] = useState<Carton[]>(cartons);
 
   React.useEffect(() => {
-    return subscribeToDbUpdates(() => {
+    const syncLatestCartons = () => {
       const freshData = getHostingerDbData();
-      if (freshData.cartons) {
+      if (freshData.cartons && freshData.cartons.length > 0) {
         setLiveRealtimeCartons(freshData.cartons);
+      } else if (cartons && cartons.length > 0) {
+        setLiveRealtimeCartons(cartons);
       }
       if (freshData.customers) {
         setAllDbCustomersList(freshData.customers);
       }
-    });
-  }, []);
+    };
 
-  React.useEffect(() => {
-    if (cartons && cartons.length > 0) {
-      setLiveRealtimeCartons(cartons);
-    }
+    syncLatestCartons();
+    return subscribeToDbUpdates(syncLatestCartons);
   }, [cartons]);
 
   // Customer Assignment / Mapping Modal States
