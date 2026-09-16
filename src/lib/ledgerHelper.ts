@@ -21,9 +21,11 @@ export const recalculateCustomerLedgerAndBilling = (targetCustomerId?: string) =
   const updatedCustomersMap = new Map<string, Customer>();
   customers.forEach((c) => updatedCustomersMap.set(c.id, { ...c }));
 
+  const cleanMark = (str?: string) => (str || '').toLowerCase().replace(/^mark:\s*/i, '').trim();
+
   targetCustomers.forEach((cust) => {
     const custId = cust.id;
-    const custMark = (cust.shipping_mark || '').toLowerCase().trim();
+    const custMark = cleanMark(cust.shipping_mark);
     const custCode = (cust.customer_code || '').toLowerCase().trim();
 
     const custRate = cust.rate_per_kg && cust.rate_per_kg > 0 ? cust.rate_per_kg : 750;
@@ -31,9 +33,16 @@ export const recalculateCustomerLedgerAndBilling = (targetCustomerId?: string) =
     // Find all cartons belonging to this customer
     const custCartons = Array.from(updatedCartonsMap.values()).filter((c) => {
       if (c.customer_id && c.customer_id === custId) return true;
-      const cMark = (c.shipping_mark || '').toLowerCase().trim();
+      const cMark = cleanMark(c.shipping_mark);
       const cCode = (c.customer_code || '').toLowerCase().trim();
-      return (custMark && cMark.includes(custMark)) || (custCode && cCode.includes(custCode));
+      const cTrk = cleanMark(c.tracking_number);
+      const cMaster = cleanMark(c.master_tracking_number);
+      const cGroup = cleanMark(c.master_group_id);
+
+      return (
+        (custMark && (cMark === custMark || cMark.includes(custMark) || custMark.includes(cMark) || cTrk === custMark || cMaster === custMark || cGroup === custMark)) ||
+        (custCode && cCode.includes(custCode))
+      );
     });
 
     let customerTotalCartonCharges = 0;

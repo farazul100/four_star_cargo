@@ -466,110 +466,119 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     setMapRatePerKg(initialRate && initialRate > 0 ? initialRate : 750);
   };
 
-  const handleSaveCustomerMapping = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSaveCustomerMapping = (e: React.FormEvent | React.MouseEvent) => {
+    if (e && typeof e.preventDefault === 'function') {
+      e.preventDefault();
+    }
     if (!mapCustomerModalMark) return;
 
-    const rawKey = (mapCustomerModalMark || '').trim();
-    const targetKey = cleanKey(rawKey);
+    try {
+      const rawKey = (mapCustomerModalMark || '').trim();
+      const targetKey = cleanKey(rawKey);
 
-    const dbData = getHostingerDbData();
-    let currentCusts = dbData.customers || [];
-    let targetCust: Customer | undefined;
-    const finalRatePerKg = Number(mapRatePerKg) > 0 ? Number(mapRatePerKg) : 750;
+      const dbData = getHostingerDbData();
+      let currentCusts = dbData.customers || [];
+      let targetCust: Customer | undefined;
+      const finalRatePerKg = Number(mapRatePerKg) > 0 ? Number(mapRatePerKg) : 750;
 
-    if (isNewCustMapping) {
-      if (!newCustMappingName.trim()) {
-        alert(isBn ? 'দয়া করে কাস্টমারের নাম লিখুন।' : 'Please enter customer name.');
+      if (isNewCustMapping) {
+        if (!newCustMappingName.trim()) {
+          alert(isBn ? 'দয়া করে কাস্টমারের নাম লিখুন।' : 'Please enter customer name.');
+          return;
+        }
+        targetCust = {
+          id: `cust-${Date.now()}`,
+          customer_code: `CUST-${Math.floor(1000 + Math.random() * 9000)}`,
+          name: newCustMappingName.trim(),
+          phone: newCustMappingPhone.trim() || '01700000000',
+          shipping_mark: rawKey.replace(/^mark:\s*/i, '').trim(),
+          address: 'Dhaka, Bangladesh',
+          total_billed: 0,
+          total_paid: 0,
+          total_due: 0,
+          rate_per_kg: finalRatePerKg,
+          created_at: new Date().toISOString(),
+        };
+        currentCusts = [targetCust, ...currentCusts];
+      } else {
+        targetCust = currentCusts.find((c) => c.id === mapSelectedCustomerId);
+      }
+
+      if (!targetCust) {
+        alert(isBn ? 'দয়া করে একজন কাস্টমার নির্বাচন করুন।' : 'Please select a customer.');
         return;
       }
-      targetCust = {
-        id: `cust-${Date.now()}`,
-        customer_code: `CUST-${Math.floor(1000 + Math.random() * 9000)}`,
-        name: newCustMappingName.trim(),
-        phone: newCustMappingPhone.trim() || '01700000000',
-        shipping_mark: rawKey.replace(/^mark:\s*/i, '').trim(),
-        address: 'Dhaka, Bangladesh',
-        total_billed: 0,
-        total_paid: 0,
-        total_due: 0,
-        rate_per_kg: finalRatePerKg,
-        created_at: new Date().toISOString(),
-      };
-      currentCusts = [targetCust, ...currentCusts];
-    } else {
-      targetCust = currentCusts.find((c) => c.id === mapSelectedCustomerId);
-    }
 
-    if (!targetCust) {
-      alert(isBn ? 'দয়া করে একজন কাস্টমার নির্বাচন করুন।' : 'Please select a customer.');
-      return;
-    }
+      const updatedCusts = currentCusts.map((c) =>
+        c.id === targetCust!.id
+          ? { ...c, rate_per_kg: finalRatePerKg }
+          : c
+      );
+      saveHostingerDbData('fsc_vps_customers', updatedCusts);
 
-    const updatedCusts = currentCusts.map((c) =>
-      c.id === targetCust!.id
-        ? { ...c, rate_per_kg: finalRatePerKg }
-        : c
-    );
-    saveHostingerDbData('fsc_vps_customers', updatedCusts);
-
-    const currentCartons = dbData.cartons || [];
-    const updatedCartons = currentCartons.map((c) => {
-      const matchMark = cleanKey(c.shipping_mark);
-      const matchTrk = cleanKey(c.tracking_number);
-      const matchMasterTrk = cleanKey(c.master_tracking_number);
-      const matchGroup = cleanKey(c.master_group_id);
-      const matchCtnNo = cleanKey(c.ctn_no);
-
-      if (
-        matchMark === targetKey ||
-        matchTrk === targetKey ||
-        matchMasterTrk === targetKey ||
-        matchGroup === targetKey ||
-        matchCtnNo === targetKey ||
-        (c.shipping_mark && cleanKey(c.shipping_mark) === targetKey)
-      ) {
-        return {
-          ...c,
-          packaging_number: mapShipmentCtnNoInput.trim() || c.packaging_number || 'UNASSIGNED',
-          customer_id: targetCust!.id,
-          customer_code: targetCust!.customer_code,
-          customer_name: targetCust!.name,
-          rate_per_kg: finalRatePerKg,
-          updated_at: new Date().toISOString(),
-        };
-      }
-      return c;
-    });
-
-    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
-
-    // Auto recalculate Customer Billing & Ledger entries using BD Warehouse final weight & rate_per_kg
-    const recalculated = recalculateCustomerLedgerAndBilling(targetCust.id);
-    setLiveRealtimeCartons(recalculated.cartons);
-    setSearchCartons(recalculated.cartons);
-
-    if (onUpdateCarton) {
-      recalculated.cartons.forEach((c) => {
+      const currentCartons = dbData.cartons || [];
+      const updatedCartons = currentCartons.map((c) => {
         const matchMark = cleanKey(c.shipping_mark);
         const matchTrk = cleanKey(c.tracking_number);
         const matchMasterTrk = cleanKey(c.master_tracking_number);
         const matchGroup = cleanKey(c.master_group_id);
-        if (matchMark === targetKey || matchTrk === targetKey || matchMasterTrk === targetKey || matchGroup === targetKey) {
-          onUpdateCarton(c);
+        const matchCtnNo = cleanKey(c.ctn_no);
+
+        if (
+          matchMark === targetKey ||
+          matchTrk === targetKey ||
+          matchMasterTrk === targetKey ||
+          matchGroup === targetKey ||
+          matchCtnNo === targetKey ||
+          (c.shipping_mark && cleanKey(c.shipping_mark) === targetKey)
+        ) {
+          return {
+            ...c,
+            packaging_number: mapShipmentCtnNoInput.trim() || c.packaging_number || 'UNASSIGNED',
+            customer_id: targetCust!.id,
+            customer_code: targetCust!.customer_code,
+            customer_name: targetCust!.name,
+            rate_per_kg: finalRatePerKg,
+            updated_at: new Date().toISOString(),
+          };
         }
+        return c;
       });
+
+      saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+
+      // Auto recalculate Customer Billing & Ledger entries using BD Warehouse final weight & rate_per_kg
+      const recalculated = recalculateCustomerLedgerAndBilling(targetCust.id);
+      const finalCartonsToSet = recalculated.cartons && recalculated.cartons.length > 0 ? recalculated.cartons : updatedCartons;
+      setLiveRealtimeCartons(finalCartonsToSet);
+      setSearchCartons(finalCartonsToSet);
+
+      if (onUpdateCarton) {
+        finalCartonsToSet.forEach((c) => {
+          const matchMark = cleanKey(c.shipping_mark);
+          const matchTrk = cleanKey(c.tracking_number);
+          const matchMasterTrk = cleanKey(c.master_tracking_number);
+          const matchGroup = cleanKey(c.master_group_id);
+          if (matchMark === targetKey || matchTrk === targetKey || matchMasterTrk === targetKey || matchGroup === targetKey) {
+            onUpdateCarton(c);
+          }
+        });
+      }
+
+      logSystemAuditAction(
+        currentUser,
+        'MAP_CUSTOMER_TO_MARK',
+        'carton',
+        rawKey,
+        `অপারেশন টিম শিপিং মার্ক ${rawKey} এর সাথে কাস্টমার "${targetCust.name}" (পার কেজি রেট ৳${finalRatePerKg}) ট্যাগ এবং কাস্টমার লেজার আপডেট করেছেন`
+      );
+
+      alert(isBn ? `কাস্টমার "${targetCust.name}" সফলভাবে ট্যাগ করা হয়েছে!` : `Customer "${targetCust.name}" mapped successfully!`);
+      setMapCustomerModalMark(null);
+    } catch (err: any) {
+      console.error("Error saving customer mapping:", err);
+      alert(isBn ? `কাস্টমার ট্যাগিং সেভ করতে সমস্যা হয়েছে: ${err?.message || 'অজানা ত্রুটি'}` : `Error saving customer mapping: ${err?.message || 'Unknown error'}`);
     }
-
-    logSystemAuditAction(
-      currentUser,
-      'MAP_CUSTOMER_TO_MARK',
-      'carton',
-      rawKey,
-      `অপারেশন টিম শিপিং মার্ক ${rawKey} এর সাথে কাস্টমার "${targetCust.name}" (পার কেজি রেট ৳${finalRatePerKg}) ট্যাগ এবং কাস্টমার লেজার আপডেট করেছেন`
-    );
-
-    setMapCustomerModalMark(null);
   };
 
   const handleInlineUpdatePackagingNumber = (cartonId: string, val: string) => {
@@ -2917,6 +2926,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               </button>
               <button
                 type="submit"
+                onClick={handleSaveCustomerMapping}
                 className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs transition-all border border-emerald-500 cursor-pointer shadow-md"
               >
                 {isBn ? 'কাস্টমার ট্যাগিং কনফার্ম করুন' : 'Confirm Customer Mapping'}
