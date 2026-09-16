@@ -551,7 +551,6 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       const recalculated = recalculateCustomerLedgerAndBilling(targetCust.id);
       const finalCartonsToSet = recalculated.cartons && recalculated.cartons.length > 0 ? recalculated.cartons : updatedCartons;
       setLiveRealtimeCartons(finalCartonsToSet);
-      setSearchCartons(finalCartonsToSet);
 
       if (onUpdateCarton) {
         finalCartonsToSet.forEach((c) => {
