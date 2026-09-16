@@ -686,10 +686,21 @@ export const saveHostingerDbData = (key: string, data: any) => {
       localStorage.setItem(DB_KEYS.WAREHOUSES, JSON.stringify(data));
       localStorage.setItem('warehouses', JSON.stringify(data));
     }
+    if (key === DB_KEYS.CARTONS || key === 'cartons' || key === 'fsc_vps_cartons') {
+      localStorage.setItem(DB_KEYS.CARTONS, JSON.stringify(data));
+      localStorage.setItem('fsc_vps_cartons', JSON.stringify(data));
+      localStorage.setItem('cartons', JSON.stringify(data));
+    }
+    if (key === DB_KEYS.CUSTOMERS || key === 'customers' || key === 'fsc_vps_customers') {
+      localStorage.setItem(DB_KEYS.CUSTOMERS, JSON.stringify(data));
+      localStorage.setItem('fsc_vps_customers', JSON.stringify(data));
+      localStorage.setItem('customers', JSON.stringify(data));
+    }
     // If saving ledger, update both key variants for 100% backward and forward compatibility
-    if (key === DB_KEYS.LEDGER || key === 'fsc_vps_ledger_entries') {
+    if (key === DB_KEYS.LEDGER || key === 'fsc_vps_ledger_entries' || key === 'fsc_vps_ledger' || key === 'ledger') {
       localStorage.setItem('fsc_vps_ledger', JSON.stringify(data));
       localStorage.setItem('fsc_vps_ledger_entries', JSON.stringify(data));
+      localStorage.setItem('ledger', JSON.stringify(data));
     }
     // If saving CRM customers, trigger immediate sync to main customers database
     if (key === DB_KEYS.CRM_CUSTOMERS) {
@@ -912,17 +923,26 @@ export const fetchServerDbAndSync = async () => {
                 const serverCartons: Carton[] = Array.isArray(serverData) ? serverData : [];
                 const cartonMap = new Map<string, Carton>();
 
-                // Server cartons are authoritative for status, weight & location updates across browsers & devices
+                // Server cartons are base data
                 serverCartons.forEach((sc) => {
                   if (sc && sc.id) {
                     cartonMap.set(sc.id, sc);
                   }
                 });
 
-                // Only preserve local cartons if they do NOT exist on server yet (newly added draft/offline items)
+                // Merge local cartons, preserving local customer mapping & newer updates
                 localCartons.forEach((lc) => {
-                  if (lc && lc.id && !cartonMap.has(lc.id)) {
-                    cartonMap.set(lc.id, lc);
+                  if (lc && lc.id) {
+                    const sc = cartonMap.get(lc.id);
+                    if (!sc) {
+                      cartonMap.set(lc.id, lc);
+                    } else {
+                      const lcTime = lc.updated_at ? new Date(lc.updated_at).getTime() : 0;
+                      const scTime = sc.updated_at ? new Date(sc.updated_at).getTime() : 0;
+                      if (lcTime > scTime || (lc.customer_id && !sc.customer_id)) {
+                        cartonMap.set(lc.id, { ...sc, ...lc });
+                      }
+                    }
                   }
                 });
 
@@ -931,6 +951,7 @@ export const fetchServerDbAndSync = async () => {
                 if (localRaw !== mergedStr) {
                   localStorage.setItem(DB_KEYS.CARTONS, mergedStr);
                   localStorage.setItem('fsc_vps_cartons', mergedStr);
+                  localStorage.setItem('cartons', mergedStr);
                   if (typeof window !== 'undefined') {
                     window.__FSC_GLOBAL_CARTONS__ = mergedCartons;
                   }
@@ -973,8 +994,17 @@ export const fetchServerDbAndSync = async () => {
                 });
 
                 localCusts.forEach((lc) => {
-                  if (lc && lc.id && !custMap.has(lc.id)) {
-                    custMap.set(lc.id, lc);
+                  if (lc && lc.id) {
+                    const sc = custMap.get(lc.id);
+                    if (!sc) {
+                      custMap.set(lc.id, lc);
+                    } else {
+                      const lcTime = lc.created_at ? new Date(lc.created_at).getTime() : 0;
+                      const scTime = sc.created_at ? new Date(sc.created_at).getTime() : 0;
+                      if (lcTime > scTime || (lc.shipping_mark && !sc.shipping_mark)) {
+                        custMap.set(lc.id, { ...sc, ...lc });
+                      }
+                    }
                   }
                 });
 
@@ -983,6 +1013,7 @@ export const fetchServerDbAndSync = async () => {
                 if (localRaw !== mergedStr) {
                   localStorage.setItem(DB_KEYS.CUSTOMERS, mergedStr);
                   localStorage.setItem('fsc_vps_customers', mergedStr);
+                  localStorage.setItem('customers', mergedStr);
                   hasChanges = true;
                 }
               } else {
