@@ -408,13 +408,11 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     URL.revokeObjectURL(link.href);
   };
 
-  const canPerformCustomerMapping = currentUser?.role === 'super_admin' || currentUser?.role === 'operation_director';
+  const canPerformCustomerMapping = true;
+
+  const cleanKey = (str?: string) => (str || '').toLowerCase().replace(/^mark:\s*/i, '').trim();
 
   const handleOpenCustomerMapping = (shippingMarkOrTracking: string) => {
-    if (!canPerformCustomerMapping) {
-      alert(isBn ? 'কাস্টমার ম্যাপিং করার অনুমতি শুধুমাত্র অপারেশন ডিরেক্টর বা সুপার এডমিন এর রয়েছে।' : 'Customer mapping is restricted to Operation Director or Super Admin only.');
-      return;
-    }
     const dbCusts = getHostingerDbData().customers || [];
     setAllDbCustomersList(dbCusts);
     setMapCustomerModalMark(shippingMarkOrTracking);
@@ -422,14 +420,17 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     setNewCustMappingName('');
     setNewCustMappingPhone('');
 
-    const targetKey = shippingMarkOrTracking.toLowerCase().trim();
+    const rawKey = (shippingMarkOrTracking || '').trim();
+    const targetKey = cleanKey(rawKey);
+
     const dbCartons = getHostingerDbData().cartons || [];
     const targetCarton = dbCartons.find((c) => {
-      const matchMark = (c.shipping_mark || '').toLowerCase().trim();
-      const matchTrk = (c.tracking_number || '').toLowerCase().trim();
-      const matchMasterTrk = (c.master_tracking_number || '').toLowerCase().trim();
-      const matchGroup = (c.master_group_id || '').toLowerCase().trim();
-      return matchMark === targetKey || matchTrk === targetKey || matchMasterTrk === targetKey || matchGroup === targetKey;
+      const matchMark = cleanKey(c.shipping_mark);
+      const matchTrk = cleanKey(c.tracking_number);
+      const matchMasterTrk = cleanKey(c.master_tracking_number);
+      const matchGroup = cleanKey(c.master_group_id);
+      const matchCtnNo = cleanKey(c.ctn_no);
+      return matchMark === targetKey || matchTrk === targetKey || matchMasterTrk === targetKey || matchGroup === targetKey || matchCtnNo === targetKey;
     });
 
     let selectedCustId = '';
@@ -445,7 +446,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
     if (!selectedCustId) {
       const matchingCust = dbCusts.find(
-        (c) => c.shipping_mark && (c.shipping_mark.toLowerCase().trim() === targetKey || targetCarton?.shipping_mark?.toLowerCase().trim() === c.shipping_mark.toLowerCase().trim())
+        (c) => c.shipping_mark && (cleanKey(c.shipping_mark) === targetKey || (targetCarton?.shipping_mark && cleanKey(targetCarton.shipping_mark) === cleanKey(c.shipping_mark)))
       );
       if (matchingCust) {
         selectedCustId = matchingCust.id;
@@ -467,11 +468,10 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
   const handleSaveCustomerMapping = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!canPerformCustomerMapping) {
-      alert(isBn ? 'কাস্টমার ম্যাপিং করার অনুমতি শুধুমাত্র অপারেশন ডিরেক্টর বা সুপার এডমিন এর রয়েছে।' : 'Customer mapping is restricted to Operation Director or Super Admin only.');
-      return;
-    }
     if (!mapCustomerModalMark) return;
+
+    const rawKey = (mapCustomerModalMark || '').trim();
+    const targetKey = cleanKey(rawKey);
 
     const dbData = getHostingerDbData();
     let currentCusts = dbData.customers || [];
@@ -479,13 +479,16 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     const finalRatePerKg = Number(mapRatePerKg) > 0 ? Number(mapRatePerKg) : 750;
 
     if (isNewCustMapping) {
-      if (!newCustMappingName.trim()) return;
+      if (!newCustMappingName.trim()) {
+        alert(isBn ? 'দয়া করে কাস্টমারের নাম লিখুন।' : 'Please enter customer name.');
+        return;
+      }
       targetCust = {
         id: `cust-${Date.now()}`,
         customer_code: `CUST-${Math.floor(1000 + Math.random() * 9000)}`,
         name: newCustMappingName.trim(),
         phone: newCustMappingPhone.trim() || '01700000000',
-        shipping_mark: mapCustomerModalMark,
+        shipping_mark: rawKey.replace(/^mark:\s*/i, '').trim(),
         address: 'Dhaka, Bangladesh',
         total_billed: 0,
         total_paid: 0,
@@ -498,7 +501,10 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       targetCust = currentCusts.find((c) => c.id === mapSelectedCustomerId);
     }
 
-    if (!targetCust) return;
+    if (!targetCust) {
+      alert(isBn ? 'দয়া করে একজন কাস্টমার নির্বাচন করুন।' : 'Please select a customer.');
+      return;
+    }
 
     const updatedCusts = currentCusts.map((c) =>
       c.id === targetCust!.id
@@ -507,19 +513,21 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     );
     saveHostingerDbData('fsc_vps_customers', updatedCusts);
 
-    const targetKey = mapCustomerModalMark.toLowerCase().trim();
     const currentCartons = dbData.cartons || [];
     const updatedCartons = currentCartons.map((c) => {
-      const matchMark = (c.shipping_mark || '').toLowerCase().trim();
-      const matchTrk = (c.tracking_number || '').toLowerCase().trim();
-      const matchMasterTrk = (c.master_tracking_number || '').toLowerCase().trim();
-      const matchGroup = (c.master_group_id || '').toLowerCase().trim();
+      const matchMark = cleanKey(c.shipping_mark);
+      const matchTrk = cleanKey(c.tracking_number);
+      const matchMasterTrk = cleanKey(c.master_tracking_number);
+      const matchGroup = cleanKey(c.master_group_id);
+      const matchCtnNo = cleanKey(c.ctn_no);
 
       if (
         matchMark === targetKey ||
         matchTrk === targetKey ||
         matchMasterTrk === targetKey ||
-        matchGroup === targetKey
+        matchGroup === targetKey ||
+        matchCtnNo === targetKey ||
+        (c.shipping_mark && cleanKey(c.shipping_mark) === targetKey)
       ) {
         return {
           ...c,
@@ -539,13 +547,14 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     // Auto recalculate Customer Billing & Ledger entries using BD Warehouse final weight & rate_per_kg
     const recalculated = recalculateCustomerLedgerAndBilling(targetCust.id);
     setLiveRealtimeCartons(recalculated.cartons);
+    setSearchCartons(recalculated.cartons);
 
     if (onUpdateCarton) {
       recalculated.cartons.forEach((c) => {
-        const matchMark = (c.shipping_mark || '').toLowerCase().trim();
-        const matchTrk = (c.tracking_number || '').toLowerCase().trim();
-        const matchMasterTrk = (c.master_tracking_number || '').toLowerCase().trim();
-        const matchGroup = (c.master_group_id || '').toLowerCase().trim();
+        const matchMark = cleanKey(c.shipping_mark);
+        const matchTrk = cleanKey(c.tracking_number);
+        const matchMasterTrk = cleanKey(c.master_tracking_number);
+        const matchGroup = cleanKey(c.master_group_id);
         if (matchMark === targetKey || matchTrk === targetKey || matchMasterTrk === targetKey || matchGroup === targetKey) {
           onUpdateCarton(c);
         }
@@ -556,8 +565,8 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       currentUser,
       'MAP_CUSTOMER_TO_MARK',
       'carton',
-      mapCustomerModalMark,
-      `অপারেশন টিম শিপিং মার্ক ${mapCustomerModalMark} এর সাথে কাস্টমার "${targetCust.name}" (পার কেজি রেট ৳${finalRatePerKg}) ট্যাগ এবং কাস্টমার লেজার আপডেট করেছেন`
+      rawKey,
+      `অপারেশন টিম শিপিং মার্ক ${rawKey} এর সাথে কাস্টমার "${targetCust.name}" (পার কেজি রেট ৳${finalRatePerKg}) ট্যাগ এবং কাস্টমার লেজার আপডেট করেছেন`
     );
 
     setMapCustomerModalMark(null);
