@@ -78,6 +78,24 @@ export function printElement(elementId: string, documentTitle: string = 'Four St
             color: #0f172a !important;
             border: none !important;
             box-shadow: none !important;
+            overflow: visible !important;
+          }
+          table {
+            page-break-inside: auto !important;
+            break-inside: auto !important;
+            border-collapse: collapse !important;
+            width: 100% !important;
+            overflow: visible !important;
+          }
+          tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+          thead {
+            display: table-header-group !important;
+          }
+          .overflow-x-auto {
+            overflow: visible !important;
           }
         </style>
       </head>

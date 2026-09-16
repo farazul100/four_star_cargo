@@ -629,8 +629,23 @@ a:hover span {
     overflow: visible !important;
   }
 
-  table, tr, td, th {
+  table {
+    page-break-inside: auto !important;
+    break-inside: auto !important;
+    overflow: visible !important;
+  }
+
+  tr {
     page-break-inside: avoid;
+    break-inside: avoid;
+  }
+
+  thead {
+    display: table-header-group !important;
+  }
+
+  .overflow-x-auto {
+    overflow: visible !important;
   }
 }
 
