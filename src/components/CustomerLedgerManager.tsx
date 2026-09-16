@@ -30,7 +30,7 @@ import {
 } from 'lucide-react';
 import { Customer, LedgerEntry, Carton, Language, Theme } from '../types';
 import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSystemAuditAction, publishSystemNotification } from '../lib/db';
-import { recalculateCustomerLedgerAndBilling } from '../lib/ledgerHelper';
+import { recalculateCustomerLedgerAndBilling, formatInvoiceNoteToEnglish } from '../lib/ledgerHelper';
 import { INITIAL_CUSTOMERS, INITIAL_LEDGER } from '../mockData';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
@@ -600,7 +600,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                           </span>
                         </td>
                         <td className="p-3.5 text-xs text-slate-700 dark:text-slate-200">
-                          {entry.note}
+                          {formatInvoiceNoteToEnglish(entry.note)}
                         </td>
                         <td className="p-3.5 font-mono text-[11px]">
                           {entry.payment_method ? (

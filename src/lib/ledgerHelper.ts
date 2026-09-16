@@ -1,6 +1,27 @@
 import { getHostingerDbData, saveHostingerDbData, saveHostingerDbMultiData } from './db';
 import { Customer, Carton, LedgerEntry } from '../types';
 
+export const formatInvoiceNoteToEnglish = (note?: string): string => {
+  if (!note) return '';
+  return note
+    .replace(/কার্গো চার্জ \(বিলিং\)/g, 'Cargo Charge (Billing)')
+    .replace(/কার্গো চার্জ \(রিসিভ\)/g, 'Cargo Charge (Received)')
+    .replace(/কার্গো চার্জ/g, 'Cargo Charge')
+    .replace(/বাংলাদেশ ওয়্যারহাউজ শেষ কেজি/g, 'BD Warehouse Final Weight')
+    .replace(/প্রাথমিক কেজি/g, 'Initial Weight')
+    .replace(/প্রাথমিক ওয়েট/g, 'Initial Weight')
+    .replace(/সিস্টেম বিলিং অটোরিজালভ/g, 'System Billing Auto-resolve')
+    .replace(/ওয়্যারহাউজ ট্র্যাকিং/g, 'Warehouse Tracking')
+    .replace(/বুকিং ফিলিং/g, 'Booking Entry')
+    .replace(/পেমেন্ট জমা নেওয়া হয়েছে/g, 'Payment Received')
+    .replace(/পেমেন্ট জমা/g, 'Payment Received')
+    .replace(/কাস্টমার রিফান্ড এন্ট্রি/g, 'Customer Refund Entry')
+    .replace(/কার্গো শিপিং ও হ্যান্ডলিং চার্জ/g, 'Cargo Shipping & Handling Charge')
+    .replace(/ক্যাশ\/ব্যাংক পেমেন্ট পরিশোধ/g, 'Cash/Bank Payment Received')
+    .replace(/ক্যাশ রিসিভ/g, 'Cash Received')
+    .replace(/ম্যাপ করা হয়নি/g, 'Unassigned');
+};
+
 /**
  * Recalculates customer billing charges and ledger entries based on final Bangladesh Warehouse weight
  * (bd_calibrated_weight || gross_weight) and rate_per_kg set during customer mapping.
@@ -79,9 +100,10 @@ export const recalculateCustomerLedgerAndBilling = (targetCustomerId?: string) =
         );
 
         const isBdReceived = ctn.current_warehouse_id === 'wh-bd' || ctn.status === 'received' || ctn.status === 'delivered';
-        const weightLabel = isBdReceived ? 'বাংলাদেশ ওয়্যারহাউজ শেষ কেজি' : 'প্রাথমিক কেজি';
+        const weightLabel = isBdReceived ? 'BD Warehouse Final Weight' : 'Initial Weight';
 
-        const noteText = `কার্গো চার্জ (বিলিং): ${ctn.ctn_no} | Mark: ${ctn.shipping_mark} - ${weightLabel}: ${finalWeight} KG @ ৳${ratePerKg}/KG = ৳${totalCharge.toFixed(2)}`;
+        const rawNote = `Cargo Charge (Billing): ${ctn.ctn_no} | Mark: ${ctn.shipping_mark} - ${weightLabel}: ${finalWeight} KG @ ৳${ratePerKg}/KG = ৳${totalCharge.toFixed(2)}`;
+        const noteText = formatInvoiceNoteToEnglish(rawNote);
 
         if (existingEntryIdx >= 0) {
           ledgerEntries[existingEntryIdx] = {
@@ -105,7 +127,7 @@ export const recalculateCustomerLedgerAndBilling = (targetCustomerId?: string) =
             note: noteText,
             source: 'auto_cash_collection',
             entered_by: 'system',
-            entered_by_name: 'সিস্টেম বিলিং অটোরিজালভ',
+            entered_by_name: 'System Billing Auto-resolve',
             created_at: ctn.created_at || new Date().toISOString(),
           };
           ledgerEntries.push(newLedgerEntry);

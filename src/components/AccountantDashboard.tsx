@@ -38,6 +38,7 @@ import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates } from '.
 import { useTheme } from '../context/ThemeContext';
 import { numberToWords } from '../utils/numberToWords';
 import { printElement } from '../utils/printHelper';
+import { formatInvoiceNoteToEnglish } from '../lib/ledgerHelper';
 import { SearchableCustomerSelect } from './SearchableCustomerSelect';
 
 interface AccountantDashboardProps {
@@ -762,7 +763,7 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                                 <td className="p-2 border-r border-slate-300 text-center font-bold">{idx + 1}</td>
                                 <td className="p-2 border-r border-slate-300 text-center font-semibold">{entry.reference_no || `CTN-${idx + 101}`}</td>
                                 <td className="p-2 border-r border-slate-300 text-center font-bold text-slate-800">{selectedCust.shipping_mark || selectedCust.customer_code}</td>
-                                <td className="p-2 border-r border-slate-300 font-sans font-medium text-slate-900">{entry.note}</td>
+                                <td className="p-2 border-r border-slate-300 font-sans font-medium text-slate-900">{formatInvoiceNoteToEnglish(entry.note)}</td>
                                 <td className="p-2 border-r border-slate-300 text-center font-bold">{entry.type === 'charge' ? '1' : '-'}</td>
                                 <td className="p-2 border-r border-slate-300 text-right">-</td>
                                 <td className="p-2 border-r border-slate-300 text-right">
