@@ -911,6 +911,17 @@ export const fetchServerDbAndSync = async () => {
   }
 };
 
+const activeSubscribers = new Set<() => void>();
+let globalPollInterval: ReturnType<typeof setInterval> | null = null;
+
+const notifyAllSubscribers = () => {
+  activeSubscribers.forEach((cb) => {
+    try {
+      cb();
+    } catch {}
+  });
+};
+
 // Lightweight timestamp check (only fetches ~20 bytes JSON payload with cache busting)
 const checkFastTimestamp = async () => {
   if (typeof window === 'undefined' || isFetchingSync || isPushing) return;
@@ -928,6 +939,7 @@ const checkFastTimestamp = async () => {
       const serverTs = Number(data._updated_at || 0);
       if (serverTs > 0 && serverTs > lastKnownServerTs) {
         await fetchServerDbAndSync();
+        notifyAllSubscribers();
       }
     }
   } catch (e) {}
@@ -935,6 +947,8 @@ const checkFastTimestamp = async () => {
 
 export const subscribeHostingerDbChanges = (callback: () => void) => {
   if (typeof window === 'undefined') return () => {};
+
+  activeSubscribers.add(callback);
 
   const handleEvent = () => {
     try {
@@ -952,18 +966,27 @@ export const subscribeHostingerDbChanges = (callback: () => void) => {
     dbBroadcastChannel.addEventListener('message', handleEvent);
   }
 
+  // Start the SINGLE global polling loop when the first subscriber connects
+  if (activeSubscribers.size === 1 && !globalPollInterval) {
+    globalPollInterval = setInterval(async () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
+        await checkFastTimestamp();
+      }
+    }, 1000);
+  }
+
   // Perform lightweight timestamp check on subscribe to see if full DB fetch is needed
   checkFastTimestamp().then(() => callback());
 
-  // 1-second cross-device polling loop when tab is visible
-  const pollInterval = setInterval(async () => {
-    if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
-      await checkFastTimestamp();
-    }
-  }, 1000);
-
   return () => {
-    clearInterval(pollInterval);
+    activeSubscribers.delete(callback);
+
+    // Stop the SINGLE global polling loop when all subscribers unmount
+    if (activeSubscribers.size === 0 && globalPollInterval) {
+      clearInterval(globalPollInterval);
+      globalPollInterval = null;
+    }
+
     window.removeEventListener('fsc_db_updated', handleEvent);
     window.removeEventListener('storage', handleEvent);
     window.removeEventListener('focus', handleEvent);
