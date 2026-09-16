@@ -952,8 +952,8 @@ export const subscribeHostingerDbChanges = (callback: () => void) => {
     dbBroadcastChannel.addEventListener('message', handleEvent);
   }
 
-  // Sync with server DB immediately on subscribe
-  fetchServerDbAndSync().then(() => callback());
+  // Perform lightweight timestamp check on subscribe to see if full DB fetch is needed
+  checkFastTimestamp().then(() => callback());
 
   // 1-second cross-device polling loop when tab is visible
   const pollInterval = setInterval(async () => {
