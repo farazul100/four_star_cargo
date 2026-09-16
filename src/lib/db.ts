@@ -653,17 +653,13 @@ const pushFullDbToServer = (immediate: boolean = false) => {
       }
 
       const payloadStr = JSON.stringify(fullDb);
-      const endpoints = ['/api/db.php', 'https://four.kee2mart.com/api/db.php'];
+      const primaryEndpoint = getPrimaryServerEndpoint();
 
-      await Promise.allSettled(
-        endpoints.map((ep) =>
-          fetch(ep, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: payloadStr,
-          })
-        )
-      );
+      await fetch(primaryEndpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: payloadStr,
+      });
     } catch (err) {
       console.warn('Error pushing DB snapshot to server:', err);
     } finally {
@@ -987,12 +983,12 @@ export const subscribeHostingerDbChanges = (callback: () => void) => {
   // Sync with server DB immediately on subscribe
   fetchServerDbAndSync().then(() => callback());
 
-  // Ultra-fast 250ms polling loop when tab is visible for sub-second fallback
+  // Ultra-fast 150ms polling loop when tab is visible for sub-second zero-delay cross-device sync
   const pollInterval = setInterval(async () => {
     if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
       await checkFastTimestamp();
     }
-  }, 250);
+  }, 150);
 
   return () => {
     clearInterval(pollInterval);

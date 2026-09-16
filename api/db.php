@@ -90,6 +90,8 @@ function writeServerDb($pdo, $filePaths, $data) {
     if (empty($data['_updated_at'])) {
         $data['_updated_at'] = round(microtime(true) * 1000);
     }
+    $ts = (float)$data['_updated_at'];
+    @file_put_contents(__DIR__ . '/db_ts.txt', (string)$ts);
 
     // Write to MySQL first
     if ($pdo) {
@@ -106,14 +108,14 @@ function writeServerDb($pdo, $filePaths, $data) {
         } catch (Throwable $t) {}
     }
 
-    // Write to file disk backup
-    $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+    // Write compact JSON to file disk backup for max speed
+    $json = json_encode($data, JSON_UNESCAPED_UNICODE);
     foreach ($filePaths as $path) {
         $dir = dirname($path);
         if (!file_exists($dir)) {
             @mkdir($dir, 0777, true);
         }
-        @file_put_contents($path, $json);
+        @file_put_contents($path, $json, LOCK_EX);
     }
 }
 
@@ -217,6 +219,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 if (isset($_GET['mode']) && ($_GET['mode'] === 'ts' || $_GET['mode'] === 'timestamp_check')) {
     header('Content-Type: application/json');
     header('Cache-Control: no-cache, no-store, must-revalidate');
+    $tsFile = __DIR__ . '/db_ts.txt';
+    if (file_exists($tsFile)) {
+        $tsStr = @file_get_contents($tsFile);
+        $ts = (float)trim($tsStr);
+        if ($ts > 0) {
+            echo json_encode(['_updated_at' => $ts]);
+            exit();
+        }
+    }
     $currentDb = readCurrentServerDb($pdo, $filePaths);
     $ts = isset($currentDb['_updated_at']) ? (float)$currentDb['_updated_at'] : 0;
     echo json_encode(['_updated_at' => $ts]);
