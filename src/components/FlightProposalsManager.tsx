@@ -1370,8 +1370,9 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
         // Available unassigned cartons in origin warehouse
         const unassignedCartonsInWh = cartons.filter(
           (c) => c.current_warehouse_id === activeModalProposal.warehouse_id &&
-                 (c.status === 'booked' || c.status === 'received') &&
-                 !(activeModalProposal.carton_ids || []).includes(c.id)
+                 (c.status === 'booked' || c.status === 'received' || !c.status || c.status === 'in_warehouse') &&
+                 !(activeModalProposal.carton_ids || []).includes(c.id) &&
+                 c.flight_number !== (activeModalProposal.flying_name || activeModalProposal.flight_number)
         );
 
         const filteredUnassignedCartons = unassignedCartonsInWh.filter((c) => {
