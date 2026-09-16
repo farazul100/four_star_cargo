@@ -1,7 +1,7 @@
 <?php
 /**
  * M/S FOUR STAR CARGO — HOSTINGER LIVE MYSQL & DISK DATA PERSISTENCE SERVICE
- * Provides 100% real-time data persistence across all browsers and devices using Hostinger MySQL & disk backup
+ * Provides ultra-low latency real-time data persistence & SSE instant broadcast across all devices
  */
 @ini_set('display_errors', '0');
 error_reporting(0);
@@ -9,7 +9,6 @@ error_reporting(0);
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
-header('Content-Type: application/json');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -87,6 +86,11 @@ function readCurrentServerDb($pdo, $filePaths) {
 }
 
 function writeServerDb($pdo, $filePaths, $data) {
+    // Ensure _updated_at timestamp is recorded in ms precision
+    if (empty($data['_updated_at'])) {
+        $data['_updated_at'] = round(microtime(true) * 1000);
+    }
+
     // Write to MySQL first
     if ($pdo) {
         try {
@@ -115,6 +119,7 @@ function writeServerDb($pdo, $filePaths, $data) {
 
 // Seed initial system structure if database is completely fresh
 $seedDatabase = [
+    '_updated_at' => round(microtime(true) * 1000),
     'fsc_vps_users' => [
         [
             'id' => 'usr-admin-master',
@@ -163,28 +168,24 @@ $seedDatabase = [
 
 // 1. POST Request: Save updated database state to Hostinger MySQL & disk
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    header('Content-Type: application/json');
     $input = file_get_contents('php://input');
     if (!empty($input)) {
         $decoded = json_decode($input, true);
         if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-            // Check if Factory System Reset is requested
             $isReset = !empty($decoded['is_factory_reset']);
             
             if ($isReset) {
-                // Completely purge MySQL table if connected
                 if ($pdo) {
                     try {
                         @$pdo->exec("TRUNCATE TABLE `fsc_system_store`");
                     } catch (Throwable $t) {}
                 }
-                
-                // Clear disk files
                 foreach ($filePaths as $path) {
                     if (file_exists($path)) {
                         @unlink($path);
                     }
                 }
-                
                 $finalDb = $seedDatabase;
                 foreach ($decoded as $key => $val) {
                     if ($key !== 'is_factory_reset') {
@@ -203,14 +204,57 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 }
             }
 
+            $finalDb['_updated_at'] = round(microtime(true) * 1000);
             writeServerDb($pdo, $filePaths, $finalDb);
-            echo json_encode(['status' => 'success', 'message' => 'Hostinger DB synchronized', 'is_factory_reset' => $isReset]);
+
+            echo json_encode(['status' => 'success', 'message' => 'Hostinger DB synchronized', '_updated_at' => $finalDb['_updated_at']]);
             exit();
         }
     }
 }
 
-// 2. GET Request: Read latest database state from Hostinger MySQL / disk
+// 2. GET Mode: Fast Timestamp Check for sub-second polling (20-byte payload)
+if (isset($_GET['mode']) && ($_GET['mode'] === 'ts' || $_GET['mode'] === 'timestamp_check')) {
+    header('Content-Type: application/json');
+    header('Cache-Control: no-cache, no-store, must-revalidate');
+    $currentDb = readCurrentServerDb($pdo, $filePaths);
+    $ts = isset($currentDb['_updated_at']) ? (float)$currentDb['_updated_at'] : 0;
+    echo json_encode(['_updated_at' => $ts]);
+    exit();
+}
+
+// 3. GET Mode: Server-Sent Events (SSE) Stream for instant zero-delay broadcast
+if (isset($_GET['stream']) || (isset($_GET['mode']) && $_GET['mode'] === 'sse')) {
+    header('Content-Type: text/event-stream');
+    header('Cache-Control: no-cache');
+    header('Connection: keep-alive');
+    header('X-Accel-Buffering: no');
+
+    $clientLastTs = isset($_GET['last_ts']) ? (float)$_GET['last_ts'] : 0;
+    $startTime = time();
+
+    while (time() - $startTime < 25) {
+        $currentDb = readCurrentServerDb($pdo, $filePaths);
+        $serverTs = isset($currentDb['_updated_at']) ? (float)$currentDb['_updated_at'] : 0;
+
+        if ($serverTs > $clientLastTs) {
+            echo "data: " . json_encode($currentDb, JSON_UNESCAPED_UNICODE) . "\n\n";
+            @ob_flush();
+            @flush();
+            exit();
+        }
+        usleep(150000); // 150ms sleep loop for ultra-low latency detection
+    }
+
+    echo "data: {\"status\":\"ping\",\"_updated_at\":{$clientLastTs}}\n\n";
+    @ob_flush();
+    @flush();
+    exit();
+}
+
+// 4. Standard GET Request: Read full latest database state
+header('Content-Type: application/json');
+header('Cache-Control: no-cache, no-store, must-revalidate');
 $currentDb = readCurrentServerDb($pdo, $filePaths);
 if (!$currentDb || !is_array($currentDb)) {
     writeServerDb($pdo, $filePaths, $seedDatabase);
