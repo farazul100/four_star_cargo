@@ -407,7 +407,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     URL.revokeObjectURL(link.href);
   };
 
-  const canPerformCustomerMapping = true;
+  const canPerformCustomerMapping = currentUser?.role !== 'warehouse_incharge';
 
   const cleanKey = (str?: string) => (str || '').toLowerCase().replace(/^mark:\s*/i, '').trim();
 
@@ -1258,12 +1258,12 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
           {/* CARD 3: In Transit / Flying */}
           <div className={`p-4 rounded-xl border transition-all shadow-sm ${
-            isDark ? 'bg-[#0F172A] border-amber-500/50 text-white' : 'bg-[#FFFBEB] border-amber-200/90 text-slate-900'
+            isDark ? 'bg-[#0F172A] border-sky-500/50 text-white' : 'bg-[#F0F9FF] border-sky-200/90 text-slate-900'
           }`}>
-            <div className="text-[11px] text-amber-600 dark:text-amber-400 font-mono uppercase font-black tracking-wider flex items-center space-x-1.5">
+            <div className="text-[11px] text-sky-700 dark:text-sky-400 font-mono uppercase font-black tracking-wider flex items-center space-x-1.5">
               <span>✈️ {isBn ? 'ফ্লাইং / ট্রানজিটে আছে' : 'IN TRANSIT / FLYING'}</span>
             </div>
-            <div className="text-xl md:text-2xl font-black text-amber-600 dark:text-amber-400 mt-1 font-mono">
+            <div className="text-xl md:text-2xl font-black text-sky-700 dark:text-sky-400 mt-1 font-mono">
               {inTransitCount} {isBn ? 'টি কার্টুন' : 'Cartons'}
             </div>
             <div className="text-[10px] font-bold text-slate-600 dark:text-slate-400 mt-1">
@@ -1609,18 +1609,20 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           <div className="text-xs font-mono text-blue-600 dark:text-blue-400 font-extrabold flex items-center space-x-1.5">
                             <span>MARK: {mark}</span>
                           </div>
-                          <div className="mt-1 flex items-center space-x-1">
-                            {firstCarton?.customer_name && !firstCarton.customer_name.includes('Unassigned') ? (
-                              <span className="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center space-x-1 shadow-2xs">
-                                <UserCheck className="w-3 h-3" />
-                                <span>{firstCarton.customer_name}</span>
-                              </span>
-                            ) : (
-                              <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 dark:bg-amber-950/80 text-[#78350F] dark:text-amber-200 border border-amber-300 dark:border-amber-700/80 flex items-center space-x-1 shadow-xs">
-                                <span>{canPerformCustomerMapping ? '⚠️ Unassigned (Map Customer)' : '⚠️ Unassigned'}</span>
-                              </span>
-                            )}
-                          </div>
+                          {canPerformCustomerMapping && (
+                            <div className="mt-1 flex items-center space-x-1">
+                              {firstCarton?.customer_name && !firstCarton.customer_name.includes('Unassigned') ? (
+                                <span className="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center space-x-1 shadow-2xs">
+                                  <UserCheck className="w-3 h-3" />
+                                  <span>{firstCarton.customer_name}</span>
+                                </span>
+                              ) : (
+                                <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 dark:bg-amber-950/80 text-[#78350F] dark:text-amber-200 border border-amber-300 dark:border-amber-700/80 flex items-center space-x-1 shadow-xs">
+                                  <span>⚠️ Unassigned (Map Customer)</span>
+                                </span>
+                              )}
+                            </div>
+                          )}
                           <h3 className={`text-xs font-medium mt-1 text-slate-500 dark:text-slate-400 truncate max-w-[200px]`}>
                             {firstCarton?.product_name_en || 'Cargo Shipment'}
                           </h3>
@@ -1646,17 +1648,19 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
                       {/* Customer Card Details Grid */}
                       <div className="grid grid-cols-2 gap-3 pt-3 text-xs">
-                        <div className={`col-span-2 p-2.5 rounded-xl border flex items-center justify-between transition-colors ${
-                          isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
-                        }`}>
-                          <span className={`text-[11px] font-bold ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{isBn ? 'কাস্টমার অ্যাকাউন্ট:' : 'Customer Account:'}</span>
-                          <strong className={`text-xs font-extrabold font-sans flex items-center space-x-1.5 ${
-                            isDark ? 'text-sky-300' : 'text-blue-700'
+                        {canPerformCustomerMapping && (
+                          <div className={`col-span-2 p-2.5 rounded-xl border flex items-center justify-between transition-colors ${
+                            isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
                           }`}>
-                            <User className="w-3.5 h-3.5 text-blue-500" />
-                            <span>{firstCarton?.customer_name || (isBn ? 'ম্যাপ করা হয়নি' : 'Unassigned')}</span>
-                          </strong>
-                        </div>
+                            <span className={`text-[11px] font-bold ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>{isBn ? 'কাস্টমার অ্যাকাউন্ট:' : 'Customer Account:'}</span>
+                            <strong className={`text-xs font-extrabold font-sans flex items-center space-x-1.5 ${
+                              isDark ? 'text-sky-300' : 'text-blue-700'
+                            }`}>
+                              <User className="w-3.5 h-3.5 text-blue-500" />
+                              <span>{firstCarton?.customer_name || (isBn ? 'ম্যাপ করা হয়নি' : 'Unassigned')}</span>
+                            </strong>
+                          </div>
+                        )}
                         <div>
                           <span className="text-[10px] text-slate-500 block">{isBn ? 'মোট গ্রস ওজন' : 'Total Gross Weight'}</span>
                           <strong className="text-emerald-600 dark:text-emerald-400 font-mono font-bold">{custGrossWt.toFixed(1)} KG</strong>
