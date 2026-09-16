@@ -838,6 +838,8 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                       <p className="font-black text-slate-900 uppercase">BANK NAME: CITY BANK</p>
                       <p className="font-extrabold text-slate-900">Acc name: M/S FOUR STAR CARGO</p>
                       <p className="font-mono font-black text-slate-900 text-sm">Acc number: 1265028793001</p>
+                      <p className="font-mono font-bold text-slate-900">Routing no: 225260241</p>
+                      <p className="font-bold text-slate-800 uppercase">SONARGAON JANAPATH BRANCH</p>
                     </div>
 
                     {/* BRAC Bank Box */}
@@ -845,6 +847,8 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                       <p className="font-black text-sky-900 uppercase">BANK NAME: BRAC BANK</p>
                       <p className="font-extrabold text-slate-900">Account name: M/S FOUR STAR CARGO</p>
                       <p className="font-mono font-black text-slate-900 text-sm">Account number: 2080981860001</p>
+                      <p className="font-mono font-bold text-slate-900">Routing no: 060260385</p>
+                      <p className="font-bold text-slate-800">Jasimuddin uttara Dhaka</p>
                     </div>
                   </div>
                 </div>
@@ -856,11 +860,11 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                     <p>• Goods will be released upon full payment settlement.</p>
                     <p>• Computer-generated official freight statement & invoice bill.</p>
                   </div>
-                  <div className="text-center sm:text-right space-y-6">
-                    <div className="w-48 border-b-2 border-slate-500 pb-1">
-                      <span className="text-[10px] font-mono text-slate-500 font-bold">Authorized Accountant Signature</span>
+                  <div className="text-center sm:text-right space-y-1">
+                    <div className="w-56 border-b-2 border-slate-500 pb-1 mb-1">
+                      <span className="text-[11px] font-mono text-slate-900 font-extrabold uppercase">AUTHORIZED SIGNATURE</span>
                     </div>
-                    <p className="text-xs font-black text-slate-900">M/S FOUR STAR CARGO</p>
+                    <p className="text-[11px] font-black text-slate-900 italic">PLEASE PAY IN FAVOR OF FOUR STAR CARGO</p>
                   </div>
                 </div>
               </div>
@@ -951,10 +955,10 @@ export const AccountantDashboard: React.FC<AccountantDashboardProps> = ({
                 {/* Bank Info */}
                 <div className="grid grid-cols-2 gap-2 text-[10px]">
                   <div className="bg-slate-100 border border-slate-200 p-1.5 rounded">
-                    <p className="font-bold text-slate-900">CITY BANK: 1265028793001</p>
+                    <p className="font-bold text-slate-900">CITY BANK: 1265028793001 (Routing: 225260241)</p>
                   </div>
                   <div className="bg-sky-50/50 border border-sky-200 p-1.5 rounded">
-                    <p className="font-bold text-sky-900">BRAC BANK: 2080981860001</p>
+                    <p className="font-bold text-sky-900">BRAC BANK: 2080981860001 (Routing: 060260385)</p>
                   </div>
                 </div>
 
