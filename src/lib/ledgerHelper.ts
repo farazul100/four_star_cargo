@@ -1,4 +1,4 @@
-import { getHostingerDbData, saveHostingerDbData } from './db';
+import { getHostingerDbData, saveHostingerDbData, saveHostingerDbMultiData } from './db';
 import { Customer, Carton, LedgerEntry } from '../types';
 
 /**
@@ -133,9 +133,11 @@ export const recalculateCustomerLedgerAndBilling = (targetCustomerId?: string) =
   const finalCustomers = Array.from(updatedCustomersMap.values());
   const finalCartons = Array.from(updatedCartonsMap.values());
 
-  saveHostingerDbData('fsc_vps_customers', finalCustomers);
-  saveHostingerDbData('fsc_vps_cartons', finalCartons);
-  saveHostingerDbData('fsc_vps_ledger', ledgerEntries);
+  saveHostingerDbMultiData({
+    fsc_vps_customers: finalCustomers,
+    fsc_vps_cartons: finalCartons,
+    fsc_vps_ledger: ledgerEntries,
+  });
 
   return {
     customers: finalCustomers,

@@ -580,6 +580,7 @@ const getPrimaryServerEndpoint = () => {
 };
 
 let isPushing = false;
+let pendingPushRequested = false;
 let lastLocalMutationTime = 0;
 
 const pushFullDbToServer = (immediate: boolean = false) => {
@@ -587,8 +588,13 @@ const pushFullDbToServer = (immediate: boolean = false) => {
   if (pushTimeout) clearTimeout(pushTimeout);
 
   const doPush = async () => {
-    if (isPushing) return;
+    if (isPushing) {
+      pendingPushRequested = true;
+      return;
+    }
     isPushing = true;
+    pendingPushRequested = false;
+
     try {
       const localApiKey = 
         localStorage.getItem('fsc_gemini_api_key') || 
@@ -606,6 +612,10 @@ const pushFullDbToServer = (immediate: boolean = false) => {
 
       const userPayload = JSON.parse(localStorage.getItem(DB_KEYS.USERS) || localStorage.getItem('users') || '[]');
       const whPayload = JSON.parse(localStorage.getItem(DB_KEYS.WAREHOUSES) || localStorage.getItem('warehouses') || '[]');
+      const cartonsPayload = JSON.parse(localStorage.getItem(DB_KEYS.CARTONS) || localStorage.getItem('fsc_vps_cartons') || localStorage.getItem('cartons') || '[]');
+      const proposalsPayload = JSON.parse(localStorage.getItem(DB_KEYS.PROPOSALS) || localStorage.getItem('fsc_vps_proposals') || localStorage.getItem('proposals') || '[]');
+      const customersPayload = JSON.parse(localStorage.getItem(DB_KEYS.CUSTOMERS) || localStorage.getItem('fsc_vps_customers') || localStorage.getItem('customers') || '[]');
+      const ledgerPayload = JSON.parse(localStorage.getItem(DB_KEYS.LEDGER) || localStorage.getItem('fsc_vps_ledger') || localStorage.getItem('fsc_vps_ledger_entries') || localStorage.getItem('ledger') || '[]');
 
       const fullDb: any = {
         _updated_at: nowTs,
@@ -613,10 +623,19 @@ const pushFullDbToServer = (immediate: boolean = false) => {
         fsc_vps_users: userPayload,
         warehouses: whPayload,
         fsc_vps_warehouses: whPayload,
-        [DB_KEYS.CARTONS]: JSON.parse(localStorage.getItem(DB_KEYS.CARTONS) || '[]'),
-        [DB_KEYS.PROPOSALS]: JSON.parse(localStorage.getItem(DB_KEYS.PROPOSALS) || '[]'),
-        [DB_KEYS.CUSTOMERS]: JSON.parse(localStorage.getItem(DB_KEYS.CUSTOMERS) || '[]'),
-        [DB_KEYS.LEDGER]: JSON.parse(localStorage.getItem(DB_KEYS.LEDGER) || '[]'),
+        [DB_KEYS.CARTONS]: cartonsPayload,
+        cartons: cartonsPayload,
+        fsc_vps_cartons: cartonsPayload,
+        [DB_KEYS.PROPOSALS]: proposalsPayload,
+        proposals: proposalsPayload,
+        fsc_vps_proposals: proposalsPayload,
+        [DB_KEYS.CUSTOMERS]: customersPayload,
+        customers: customersPayload,
+        fsc_vps_customers: customersPayload,
+        [DB_KEYS.LEDGER]: ledgerPayload,
+        ledger: ledgerPayload,
+        fsc_vps_ledger: ledgerPayload,
+        fsc_vps_ledger_entries: ledgerPayload,
         [DB_KEYS.AUDIT]: JSON.parse(localStorage.getItem(DB_KEYS.AUDIT) || '[]'),
         [DB_KEYS.EXPENSES]: JSON.parse(localStorage.getItem(DB_KEYS.EXPENSES) || '[]'),
         [DB_KEYS.CRM_CUSTOMERS]: JSON.parse(localStorage.getItem(DB_KEYS.CRM_CUSTOMERS) || '[]'),
@@ -634,15 +653,25 @@ const pushFullDbToServer = (immediate: boolean = false) => {
       }
 
       const payloadStr = JSON.stringify(fullDb);
-      const endpoint = getPrimaryServerEndpoint();
+      const endpoints = ['/api/db.php', 'https://four.kee2mart.com/api/db.php'];
 
-      await fetch(endpoint, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: payloadStr,
-      });
-    } catch {} finally {
+      await Promise.allSettled(
+        endpoints.map((ep) =>
+          fetch(ep, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: payloadStr,
+          })
+        )
+      );
+    } catch (err) {
+      console.warn('Error pushing DB snapshot to server:', err);
+    } finally {
       isPushing = false;
+      if (pendingPushRequested) {
+        pendingPushRequested = false;
+        pushFullDbToServer(true);
+      }
     }
   };
 
