@@ -195,12 +195,18 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
     setLastSelectedIndex(index);
   };
 
-  // Toggle select all cartons
+  // Toggle select all cartons (additive multi-search selection)
   const handleToggleSelectAll = () => {
-    if (selectedCartonIds.length === filteredCartons.length) {
-      setSelectedCartonIds([]);
+    const filteredIds = filteredCartons.map((c) => c.id);
+    const allFilteredSelected =
+      filteredIds.length > 0 && filteredIds.every((id) => selectedCartonIds.includes(id));
+
+    if (allFilteredSelected) {
+      // Unselect only the currently filtered cartons, preserving selections from other searches
+      setSelectedCartonIds((prev) => prev.filter((id) => !filteredIds.includes(id)));
     } else {
-      setSelectedCartonIds(filteredCartons.map((c) => c.id));
+      // Merge currently filtered cartons into selectedCartonIds without losing existing selections
+      setSelectedCartonIds((prev) => Array.from(new Set([...prev, ...filteredIds])));
     }
   };
 
@@ -513,7 +519,8 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                     <input
                       type="checkbox"
                       checked={
-                        filteredCartons.length > 0 && selectedCartonIds.length === filteredCartons.length
+                        filteredCartons.length > 0 &&
+                        filteredCartons.every((c) => selectedCartonIds.includes(c.id))
                       }
                       onChange={(e) => {
                         e.stopPropagation();

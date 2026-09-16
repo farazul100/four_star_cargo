@@ -792,12 +792,15 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
     );
   };
 
-  // Toggle select all
+  // Toggle select all (additive multi-search selection)
   const handleToggleSelectAll = () => {
-    if (selectedRowIds.length === previewRows.length) {
-      setSelectedRowIds([]);
+    const previewIds = previewRows.map((r) => r.id);
+    const allSelected = previewIds.length > 0 && previewIds.every((id) => selectedRowIds.includes(id));
+
+    if (allSelected) {
+      setSelectedRowIds((prev) => prev.filter((id) => !previewIds.includes(id)));
     } else {
-      setSelectedRowIds(previewRows.map((r) => r.id));
+      setSelectedRowIds((prev) => Array.from(new Set([...prev, ...previewIds])));
     }
   };
 
@@ -1530,7 +1533,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   <th className="p-2.5 border border-slate-200 dark:border-slate-700 text-center font-medium">
                     <input
                       type="checkbox"
-                      checked={previewRows.length > 0 && selectedRowIds.length === previewRows.length}
+                      checked={previewRows.length > 0 && previewRows.every((r) => selectedRowIds.includes(r.id))}
                       onChange={handleToggleSelectAll}
                       className="rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
                       title={isBn ? 'সব সিলেক্ট করুন' : 'Select All'}
