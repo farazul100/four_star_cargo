@@ -967,7 +967,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                 </label>
                 <input
                   type="number"
-                  step="0.1"
+                  step="any"
                   value={calibratedWeightInput}
                   onChange={(e) => setCalibratedWeightInput(Number(e.target.value))}
                   className={`w-full px-4 py-2.5 rounded-xl text-sm font-mono font-extrabold border focus:outline-none focus:ring-2 focus:ring-blue-500/20 ${

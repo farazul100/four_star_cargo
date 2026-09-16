@@ -1307,8 +1307,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     </label>
                     <input
                       type="number"
-                      step="0.1"
-                      min={0.1}
+                      step="any"
+                      min={0.01}
                       value={prod.gross_weight}
                       onChange={(e) => handleProductLineChange(prod.id, 'gross_weight', e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
                       placeholder="e.g. 12.5"
@@ -1323,8 +1323,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     </label>
                     <input
                       type="number"
-                      step="0.1"
-                      min={0.1}
+                      step="any"
+                      min={0.01}
                       value={prod.net_weight}
                       onChange={(e) => handleProductLineChange(prod.id, 'net_weight', e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
                       placeholder="e.g. 11.2"
@@ -1339,8 +1339,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                     </label>
                     <input
                       type="number"
-                      step="0.01"
-                      min={0.01}
+                      step="any"
+                      min={0.001}
                       value={prod.cbm}
                       onChange={(e) => handleProductLineChange(prod.id, 'cbm', e.target.value === '' ? '' : parseFloat(e.target.value) || '')}
                       placeholder="e.g. 0.15"
@@ -1696,8 +1696,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden align-middle">
                         <input
                           type="number"
-                          step="0.1"
-                          min={0.1}
+                          step="any"
+                          min={0.01}
                           value={r.net_weight}
                           onChange={(e) => handleRowUpdate(r.id, 'net_weight', parseFloat(e.target.value) || 0)}
                           className={`w-full bg-transparent border-0 outline-none text-xs font-mono text-center px-1 py-1 rounded focus:bg-blue-500/10 ${
@@ -1710,8 +1710,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden align-middle">
                         <input
                           type="number"
-                          step="0.1"
-                          min={0.1}
+                          step="any"
+                          min={0.01}
                           value={r.gross_weight}
                           onChange={(e) => {
                             const newGross = parseFloat(e.target.value) || 0;
@@ -1727,8 +1727,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       <td className="p-1.5 border border-slate-200 dark:border-slate-700 text-center overflow-hidden align-middle">
                         <input
                           type="number"
-                          step="0.01"
-                          min={0.01}
+                          step="any"
+                          min={0.001}
                           value={r.cbm}
                           onChange={(e) => handleRowUpdate(r.id, 'cbm', parseFloat(e.target.value) || 0)}
                           className="w-full bg-transparent border-0 outline-none text-xs font-mono text-center text-purple-600 dark:text-purple-400 px-1 py-1 rounded focus:bg-blue-500/10"

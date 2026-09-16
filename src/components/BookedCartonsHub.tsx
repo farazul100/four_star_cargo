@@ -2710,7 +2710,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 <label className="block text-slate-500 mb-1">Gross Weight (KG)</label>
                 <input
                   type="number"
-                  step="0.1"
+                  step="any"
                   value={editingCarton.gross_weight}
                   onChange={(e) => setEditingCarton({ ...editingCarton, gross_weight: parseFloat(e.target.value) || 0 })}
                   className={`w-full px-3 py-2 rounded-none-none border ${isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300'}`}
@@ -2721,7 +2721,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 <label className="block text-slate-500 mb-1">CBM</label>
                 <input
                   type="number"
-                  step="0.01"
+                  step="any"
                   value={editingCarton.cbm}
                   onChange={(e) => setEditingCarton({ ...editingCarton, cbm: parseFloat(e.target.value) || 0 })}
                   className={`w-full px-3 py-2 rounded-none-none border ${isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-300'}`}
