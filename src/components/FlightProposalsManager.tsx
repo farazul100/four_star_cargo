@@ -24,7 +24,7 @@ import {
   Scale,
 } from 'lucide-react';
 import { FlyingProposal, Carton, Language, Theme, AuditLog } from '../types';
-import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSystemAuditAction, getProposalDisplayCode } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSystemAuditAction, getProposalDisplayCode, resolveCanonicalWarehouseId } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
 import { FlightManifestExportModal, exportProposalToExcel, exportProposalToCSV } from './FlightManifestExportModal';
@@ -363,18 +363,26 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
   // Helper: Get attached cartons for a proposal
   const getProposalCartons = (proposal: FlyingProposal): Carton[] => {
     if (proposal.carton_ids && proposal.carton_ids.length > 0) {
-      return cartons.filter((c) => proposal.carton_ids?.includes(c.id));
+      const attached = cartons.filter((c) => proposal.carton_ids?.includes(c.id));
+      if (attached.length > 0) return attached;
     }
-    return cartons.filter((c) => c.current_warehouse_id === proposal.warehouse_id).slice(0, proposal.items_count);
+    const propWhId = resolveCanonicalWarehouseId(proposal.warehouse_id, proposal.warehouse_name);
+    return cartons.filter((c) => {
+      const cWhId = resolveCanonicalWarehouseId(c.current_warehouse_id || (c as any).origin_warehouse_id, c.current_warehouse_name || c.warehouse_name);
+      return cWhId === propWhId || (c.flight_number && (c.flight_number === proposal.flying_name || c.flight_number === proposal.flight_number));
+    }).slice(0, proposal.items_count || 1);
   };
 
   // Unassigned cartons in proposal's origin warehouse
   const unassignedCartonsInWh = activeModalProposal
-    ? cartons.filter(
-        (c) =>
-          c.current_warehouse_id === activeModalProposal.warehouse_id &&
-          (!activeModalProposal.carton_ids || !activeModalProposal.carton_ids.includes(c.id))
-      )
+    ? cartons.filter((c) => {
+        const propWhId = resolveCanonicalWarehouseId(activeModalProposal.warehouse_id, activeModalProposal.warehouse_name);
+        const cWhId = resolveCanonicalWarehouseId(c.current_warehouse_id || (c as any).origin_warehouse_id, c.current_warehouse_name || c.warehouse_name);
+        const isSameWh = cWhId === propWhId;
+        const isNotAttached = !activeModalProposal.carton_ids || !activeModalProposal.carton_ids.includes(c.id);
+        const isNotDispatched = c.status !== 'in_transit' && c.status !== 'delivered' && c.status !== 'dispatched';
+        return isSameWh && isNotAttached && isNotDispatched;
+      })
     : [];
 
   return (
@@ -1363,17 +1371,22 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
       {/* ========================================================================= */}
       {showAddCartonModal && activeModalProposal && (() => {
         // Current attached cartons in this proposal
-        const currentAttachedCartons = cartons.filter(
-          (c) => (activeModalProposal.carton_ids || []).includes(c.id) || c.flight_number === (activeModalProposal.flying_name || activeModalProposal.flight_number)
-        );
+        const currentAttachedCartons = (activeModalProposal.carton_ids && activeModalProposal.carton_ids.length > 0)
+          ? cartons.filter((c) => activeModalProposal.carton_ids!.includes(c.id))
+          : cartons.filter((c) => c.flight_number === (activeModalProposal.flying_name || activeModalProposal.flight_number));
 
-        // Available unassigned cartons in origin warehouse
-        const unassignedCartonsInWh = cartons.filter(
-          (c) => c.current_warehouse_id === activeModalProposal.warehouse_id &&
-                 (c.status === 'booked' || c.status === 'received' || !c.status || c.status === 'in_warehouse') &&
-                 !(activeModalProposal.carton_ids || []).includes(c.id) &&
-                 c.flight_number !== (activeModalProposal.flying_name || activeModalProposal.flight_number)
-        );
+        const propCanonicalWh = resolveCanonicalWarehouseId(activeModalProposal.warehouse_id, activeModalProposal.warehouse_name);
+
+        // Available unassigned stock cartons in origin warehouse
+        const unassignedCartonsInWh = cartons.filter((c) => {
+          const cartonCanonicalWh = resolveCanonicalWarehouseId(c.current_warehouse_id || (c as any).origin_warehouse_id, c.current_warehouse_name || c.warehouse_name);
+          const isSameWh = cartonCanonicalWh === propCanonicalWh || (!c.current_warehouse_id && !activeModalProposal.warehouse_id);
+          const attachedIds = activeModalProposal.carton_ids || currentAttachedCartons.map(ac => ac.id);
+          const isNotAttachedToThisProp = !attachedIds.includes(c.id);
+          const isNotDispatched = c.status !== 'in_transit' && c.status !== 'delivered' && c.status !== 'dispatched';
+
+          return isSameWh && isNotAttachedToThisProp && isNotDispatched;
+        });
 
         const filteredUnassignedCartons = unassignedCartonsInWh.filter((c) => {
           if (!addCartonSearch.trim()) return true;
