@@ -576,15 +576,17 @@ a:hover span {
     display: none !important;
   }
 
-  body, html {
+  html, body, #root, .h-screen, main, div {
     background-color: #FFFFFF !important;
     color: #000000 !important;
     width: 100% !important;
     height: auto !important;
-    min-height: auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
     margin: 0 !important;
     padding: 0 !important;
     overflow: visible !important;
+    position: static !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
@@ -627,12 +629,14 @@ a:hover span {
     box-shadow: none !important;
     border: none !important;
     overflow: visible !important;
+    visibility: visible !important;
   }
 
   table {
     page-break-inside: auto !important;
     break-inside: auto !important;
     overflow: visible !important;
+    width: 100% !important;
   }
 
   tr {

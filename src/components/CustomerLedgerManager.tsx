@@ -444,13 +444,52 @@ export const CustomerLedgerManagerContent: React.FC<CustomerLedgerManagerProps> 
     const custAddressStr = String(selectedCustomer.address || '');
 
     const customerCartons = getCustomerCartons(selectedCustomer);
-    const customerLedger = (ledgerEntries || []).filter(
+
+    // Raw ledger entries matching customer ID, customer code, or shipping mark
+    const rawLedger = (ledgerEntries || []).filter(
       (ledg) =>
         ledg &&
         (String(ledg.customer_id || '') === String(selectedCustomer.id || '') ||
           (selectedCustomer.customer_code && String(ledg.customer_code || '') === String(selectedCustomer.customer_code)) ||
-          (selectedCustomer.shipping_mark && String(ledg.customer_code || '') === String(selectedCustomer.shipping_mark)))
+          (selectedCustomer.shipping_mark && String(ledg.customer_code || '') === String(selectedCustomer.shipping_mark)) ||
+          (selectedCustomer.shipping_mark && String(ledg.shipping_mark || '') === String(selectedCustomer.shipping_mark)))
     );
+
+    // Sort chronologically (oldest to newest) to compute accurate running balance
+    const sortedLedger = [...rawLedger].sort((a, b) => {
+      const dateA = new Date(a.date || a.created_at || 0).getTime();
+      const dateB = new Date(b.date || b.created_at || 0).getTime();
+      return dateA - dateB;
+    });
+
+    let runningBalance = 0;
+    const customerLedger = sortedLedger.map((ledg) => {
+      const debit =
+        ledg.debit !== undefined && ledg.debit !== null && ledg.debit > 0
+          ? Number(ledg.debit)
+          : ledg.type === 'charge'
+          ? Number(ledg.amount || 0)
+          : 0;
+
+      const credit =
+        ledg.credit !== undefined && ledg.credit !== null && ledg.credit > 0
+          ? Number(ledg.credit)
+          : ledg.type === 'payment' || ledg.type === 'credit'
+          ? Number(ledg.amount || 0)
+          : 0;
+
+      runningBalance = Number((runningBalance + debit - credit).toFixed(2));
+
+      return {
+        ...ledg,
+        date: ledg.date || (ledg.created_at ? ledg.created_at.split('T')[0] : new Date().toISOString().split('T')[0]),
+        description: formatInvoiceNoteToEnglish(ledg.description || ledg.note || (ledg.type === 'payment' ? 'Payment Received' : 'Cargo Shipping Charge')),
+        reference_no: ledg.reference_no || ledg.id,
+        debit,
+        credit,
+        balance: runningBalance,
+      };
+    });
 
     const totalWeightShipped = customerCartons.reduce((sum, c) => sum + (Number(c.gross_weight) || 0), 0);
     const totalCbmShipped = customerCartons.reduce((sum, c) => sum + (Number(c.cbm) || 0), 0);
