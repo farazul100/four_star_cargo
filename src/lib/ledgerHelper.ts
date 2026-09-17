@@ -26,10 +26,15 @@ export const formatInvoiceNoteToEnglish = (note?: string): string => {
  * Recalculates customer billing charges and ledger entries based on final Bangladesh Warehouse weight
  * (bd_calibrated_weight || gross_weight) and rate_per_kg set during customer mapping.
  */
-export const recalculateCustomerLedgerAndBilling = (targetCustomerId?: string, shouldSave: boolean = true) => {
+export const recalculateCustomerLedgerAndBilling = (
+  targetCustomerId?: string,
+  shouldSave: boolean = true,
+  cartonsOverride?: Carton[],
+  customersOverride?: Customer[]
+) => {
   const dbData = getHostingerDbData();
-  const customers: Customer[] = dbData.customers || [];
-  const cartons: Carton[] = dbData.cartons || [];
+  const customers: Customer[] = customersOverride && customersOverride.length > 0 ? customersOverride : (dbData.customers || []);
+  const cartons: Carton[] = cartonsOverride && cartonsOverride.length > 0 ? cartonsOverride : (dbData.cartons || []);
   let ledgerEntries: LedgerEntry[] = dbData.ledgerEntries || [];
 
   const updatedCartonsMap = new Map<string, Carton>();

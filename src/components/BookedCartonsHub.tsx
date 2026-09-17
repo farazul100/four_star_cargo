@@ -651,14 +651,15 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         fsc_vps_cartons: updatedCartons,
       });
 
-      // Auto recalculate Customer Billing & Ledger entries across all customer accounts
-      const recalculated = recalculateCustomerLedgerAndBilling();
+      // Auto recalculate Customer Billing & Ledger entries across all customer accounts using updated cartons & customers
+      const recalculated = recalculateCustomerLedgerAndBilling(targetCust.id, true, updatedCartons, updatedCusts);
       const finalCartonsToSet = recalculated.cartons && recalculated.cartons.length > 0 ? recalculated.cartons : updatedCartons;
       const finalCustomersToSet = recalculated.customers && recalculated.customers.length > 0 ? recalculated.customers : updatedCusts;
 
       saveHostingerDbMultiData({
         fsc_vps_customers: finalCustomersToSet,
         fsc_vps_cartons: finalCartonsToSet,
+        fsc_vps_ledger: recalculated.ledgerEntries,
       });
 
       setLiveRealtimeCartons(finalCartonsToSet);
