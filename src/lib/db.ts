@@ -206,15 +206,8 @@ export const initHostingerDb = () => {
     localStorage.setItem(DB_KEYS.EXPENSES, JSON.stringify([]));
   }
 
-  // Sync from server disk file (/api/db) for multi-browser support
+  // Sync from server disk file (/api/db) for multi-browser support on initial load
   fetchServerDbAndSync();
-
-  // Start automatic 800ms background polling for 100% real-time multi-browser & multi-device sync
-  if (typeof window !== 'undefined' && !(window as any).__FSC_SYNC_INTERVAL__) {
-    (window as any).__FSC_SYNC_INTERVAL__ = setInterval(() => {
-      fetchServerDbAndSync();
-    }, 800);
-  }
 };
 
 declare global {
@@ -957,7 +950,7 @@ const checkFastTimestamp = async () => {
     });
     if (res && res.ok) {
       const data = await res.json();
-      const serverTs = Number(data._updated_at || 0);
+      const serverTs = Number(data.timestamp || data._updated_at || 0);
       if (serverTs > 0 && serverTs > lastKnownServerTs) {
         await fetchServerDbAndSync();
         notifyAllSubscribers();
@@ -993,7 +986,7 @@ export const subscribeHostingerDbChanges = (callback: () => void) => {
       if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
         await checkFastTimestamp();
       }
-    }, 1000);
+    }, 4000);
   }
 
   // Perform lightweight timestamp check on subscribe to see if full DB fetch is needed

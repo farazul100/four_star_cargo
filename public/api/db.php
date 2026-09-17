@@ -24,8 +24,14 @@ if (!file_exists($dbDir) && !@mkdir($dbDir, 0777, true)) {
     if (!file_exists($dbDir)) {
         @mkdir($dbDir, 0777, true);
     }
-}
 $dataFile = $dbDir . '/db.json';
+
+// Instant lightweight timestamp check for zero-overhead live sync
+if (isset($_GET['mode']) && $_GET['mode'] === 'ts') {
+    $mtime = file_exists($dataFile) ? @filemtime($dataFile) : time();
+    echo json_encode(['timestamp' => $mtime, '_updated_at' => $mtime]);
+    exit();
+}
 
 // 1. POST Request: Save updated database state to Hostinger disk
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
