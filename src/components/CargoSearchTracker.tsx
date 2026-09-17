@@ -62,7 +62,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
   const [searched, setSearched] = useState(false);
   const [groupedShipments, setGroupedShipments] = useState<GroupedTrackingShipment[]>([]);
   const [printPassShipment, setPrintPassShipment] = useState<GroupedTrackingShipment | null>(null);
-  const [locationFilter, setLocationFilter] = useState<'all' | 'china' | 'transit' | 'airport' | 'bd_hub' | 'delivered'>('all');
+  const [locationFilter, setLocationFilter] = useState<'all' | 'china' | 'transit' | 'airport' | 'bd_hub' | 'delivered' | 'returned'>('all');
 
   // Read fresh DB items
   const dbData = getHostingerDbData();
@@ -246,14 +246,16 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
               const stage = getStatusStage(shipment.status);
 
               // Location Breakdown
-              const chinaStockCartons = shipment.cartons.filter((c) => c.status === 'booked' || c.status === 'proposed');
+              const chinaStockCartons = shipment.cartons.filter((c) => c.status === 'booked' || c.status === 'proposed' || c.status === 'returned');
+              const returnedCartons = shipment.cartons.filter((c) => c.status === 'returned');
               const inTransitCartons = shipment.cartons.filter((c) => c.status === 'in_transit');
               const bdHubCartons = shipment.cartons.filter((c) => c.status === 'received');
               const deliveredCartons = shipment.cartons.filter((c) => c.status === 'delivered');
 
               // Filtered cartons for itemized table
               const displayedCartons = shipment.cartons.filter((c) => {
-                if (locationFilter === 'china') return c.status === 'booked' || c.status === 'proposed';
+                if (locationFilter === 'china') return c.status === 'booked' || c.status === 'proposed' || c.status === 'returned';
+                if (locationFilter === 'returned') return c.status === 'returned';
                 if (locationFilter === 'transit') return c.status === 'in_transit';
                 if (locationFilter === 'bd_hub') return c.status === 'received';
                 if (locationFilter === 'delivered') return c.status === 'delivered';
@@ -459,6 +461,19 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                         >
                           🇨🇳 চায়না ({chinaStockCartons.length})
                         </button>
+                        {returnedCartons.length > 0 && (
+                          <button
+                            type="button"
+                            onClick={() => setLocationFilter('returned')}
+                            className={`px-2.5 py-1 text-[11px] font-mono border transition-all cursor-pointer ${
+                              locationFilter === 'returned'
+                                ? 'bg-amber-600 text-white border-amber-700 font-bold'
+                                : isDark ? 'bg-amber-500/20 text-amber-300 border-amber-500/40' : 'bg-amber-100 text-amber-900 border-amber-300'
+                            }`}
+                          >
+                            🔄 রিটার্নড ({returnedCartons.length})
+                          </button>
+                        )}
                         <button
                           type="button"
                           onClick={() => setLocationFilter('transit')}

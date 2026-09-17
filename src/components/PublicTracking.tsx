@@ -192,7 +192,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
 
                 {/* Shipment Location Breakdown Summary Box */}
                 {(() => {
-                  const bookedCount = matchedCartons.filter((c) => c.status === 'booked' || c.status === 'proposed').length;
+                  const bookedCount = matchedCartons.filter((c) => c.status === 'booked' || c.status === 'proposed' || c.status === 'returned').length;
                   const transitCount = matchedCartons.filter((c) => c.status === 'in_transit').length;
                   const receivedCount = matchedCartons.filter((c) => c.status === 'received').length;
                   const deliveredCount = matchedCartons.filter((c) => c.status === 'delivered').length;
