@@ -5,9 +5,12 @@ import {
   Package,
   Layers,
   Send,
+  GitFork,
+  Palette,
+  RotateCcw,
 } from 'lucide-react';
 import { Carton, Warehouse, User, Language, FlyingProposal } from '../types';
-import { getHostingerDbData, saveHostingerDbMultiData, logSystemAuditAction, publishSystemNotification, subscribeToDbUpdates } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, saveHostingerDbMultiData, logSystemAuditAction, publishSystemNotification, subscribeToDbUpdates } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
 
@@ -209,6 +212,137 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
       setSelectedCartonIds((prev) => Array.from(new Set([...prev, ...filteredIds])));
     }
   };
+
+  const ROW_COLOR_OPTIONS = [
+    { hex: '#FEF08A', name: 'Light Yellow', labelBn: 'হলুদ' },
+    { hex: '#BBF7D0', name: 'Mint Green', labelBn: 'সবুজ' },
+    { hex: '#BFDBFE', name: 'Sky Blue', labelBn: 'নীল' },
+    { hex: '#FECACA', name: 'Soft Red', labelBn: 'লাল' },
+    { hex: '#E9D5FF', name: 'Soft Purple', labelBn: 'বেগুনি' },
+    { hex: '#FED7AA', name: 'Soft Orange', labelBn: 'কমলা' },
+    { hex: '#A5F3FC', name: 'Light Cyan', labelBn: 'সাইয়ান' },
+    { hex: '#FBCFE8', name: 'Rose Pink', labelBn: 'গোলাপী' },
+    { hex: '#D9F99D', name: 'Lime Green', labelBn: 'লাইম' },
+    { hex: '#FDE047', name: 'Golden Yellow', labelBn: 'সোনালী' },
+    { hex: '#E2E8F0', name: 'Silver Gray', labelBn: 'ধূসর' },
+    { hex: '#E7E5E4', name: 'Warm Tan', labelBn: 'বাদামী' },
+  ];
+
+  const handleApplyRowColor = (cartonIds: string[], colorHex: string | null) => {
+    if (!cartonIds || cartonIds.length === 0) {
+      addToast('error', isBn ? 'অনুগ্রহ করে প্রথমে বামের টিক চিহ্ন দিয়ে অন্তত ১টি কার্টুন সিলেক্ট করুন।' : 'Please select at least 1 carton checkbox first.');
+      return;
+    }
+
+    const targetIds = new Set(cartonIds);
+    const updatedCartons = cartons.map((c) => {
+      if (targetIds.has(c.id)) {
+        return {
+          ...c,
+          row_color: colorHex ? colorHex : undefined,
+          updated_at: new Date().toISOString(),
+        };
+      }
+      return c;
+    });
+
+    setCartons(updatedCartons);
+    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+
+    logSystemAuditAction(
+      currentUser,
+      'UPDATE_CARTON_ROW_COLOR',
+      'carton',
+      cartonIds.join(','),
+      `ইউজার ${currentUser.name} (${currentUser.role}) ${cartonIds.length}টি কার্টুনের র কালার (${colorHex || 'সাদা/ডিফল্ট'}) সেট করেছেন`
+    );
+
+    addToast(
+      'success',
+      isBn ? `সফলভাবে ${cartonIds.length}টি কার্টুনের কালার আপডেট করা হয়েছে` : `Color updated for ${cartonIds.length} cartons`
+    );
+  };
+
+  const handleBulkMergeInProposal = () => {
+    if (selectedCartonIds.length < 2) {
+      addToast('error', isBn ? 'মার্জ করার জন্য অন্তত ২টি কার্টুন সিলেক্ট করুন!' : 'Select at least 2 cartons to merge!');
+      return;
+    }
+
+    const selectedCartonsList = cartons.filter((c) => selectedCartonIds.includes(c.id));
+    if (selectedCartonsList.length < 2) return;
+
+    const masterCarton = selectedCartonsList[0];
+    const groupId = masterCarton.master_group_id || `grp-prop-${masterCarton.ctn_no}-${Date.now()}`;
+    const targetCtnNo = masterCarton.ctn_no;
+    const targetPkgNo = masterCarton.packaging_number;
+
+    const updatedCartons = cartons.map((c) => {
+      if (selectedCartonIds.includes(c.id)) {
+        return {
+          ...c,
+          ctn_no: targetCtnNo,
+          packaging_number: targetPkgNo,
+          master_group_id: groupId,
+          is_merged: true,
+          updated_at: new Date().toISOString(),
+        };
+      }
+      return c;
+    });
+
+    setCartons(updatedCartons);
+    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+
+    logSystemAuditAction(
+      currentUser,
+      'BULK_MERGE_CARTONS',
+      'carton',
+      targetCtnNo,
+      `${selectedCartonsList.length}টি কার্টুনকে ${targetCtnNo} তে মার্জ করা হয়েছে`
+    );
+
+    addToast(
+      'success',
+      isBn ? `সফলভাবে ${selectedCartonsList.length}টি কার্টুন মার্জ করা হয়েছে!` : `${selectedCartonsList.length} cartons merged successfully!`
+    );
+  };
+
+  const handleBulkUnmergeInProposal = () => {
+    if (selectedCartonIds.length === 0) return;
+
+    let unmergeCounter = 1;
+    const updatedCartons = cartons.map((c) => {
+      if (selectedCartonIds.includes(c.id)) {
+        const newCtnNo = `CTN-${unmergeCounter < 10 ? '0' : ''}${unmergeCounter++}`;
+        return {
+          ...c,
+          ctn_no: newCtnNo,
+          master_group_id: undefined,
+          is_merged: false,
+          updated_at: new Date().toISOString(),
+        };
+      }
+      return c;
+    });
+
+    setCartons(updatedCartons);
+    saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+
+    logSystemAuditAction(
+      currentUser,
+      'BULK_UNMERGE_CARTONS',
+      'carton',
+      'UNMERGE',
+      `${selectedCartonIds.length}টি কার্টুন আনমার্জ করা হয়েছে`
+    );
+
+    addToast(
+      'info',
+      isBn ? `সফলভাবে ${selectedCartonIds.length}টি কার্টুন আনমার্জ করা হয়েছে!` : `${selectedCartonIds.length} cartons unmerged!`
+    );
+  };
+
 
   // Submit new Flying Proposal Batch
   const handleSubmitProposal = (e: React.FormEvent) => {
@@ -460,6 +594,83 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                 }`}
               />
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+            </div>
+          </div>
+
+          {/* ROW COLOR PALETTE & CARTON MERGE TOOLBAR FOR OPERATIONS DIRECTOR */}
+          <div className={`p-3 border-b flex flex-wrap items-center justify-between gap-3 text-xs ${
+            isDark ? 'bg-[#0F172A] border-slate-700 text-white' : 'bg-slate-100 border-slate-200 text-slate-800'
+          }`}>
+            {/* Left: Row Color Picker */}
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center space-x-1.5 font-bold text-slate-700 dark:text-slate-300">
+                <Palette className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                <span>{isBn ? 'রো কালার সেট করুন:' : 'Set Row Color:'}</span>
+              </div>
+              <div className="flex items-center space-x-1.5 flex-wrap">
+                {ROW_COLOR_OPTIONS.map((opt) => (
+                  <button
+                    key={opt.hex}
+                    type="button"
+                    onClick={() => handleApplyRowColor(selectedCartonIds, opt.hex)}
+                    className="w-5 h-5 rounded-full border border-slate-400 hover:scale-125 transition-transform cursor-pointer shadow-2xs"
+                    style={{ backgroundColor: opt.hex }}
+                    title={isBn ? `সিলেক্টকৃত ${selectedCartonIds.length}টি কার্টুনে ${opt.labelBn} কালার দিন` : `Apply ${opt.name} color to ${selectedCartonIds.length} cartons`}
+                  />
+                ))}
+
+                {/* Custom Color Input */}
+                <label
+                  className="relative w-5 h-5 rounded-full border border-slate-400 cursor-pointer overflow-hidden flex items-center justify-center bg-gradient-to-br from-red-400 via-green-400 to-blue-500 hover:scale-125 transition-transform shadow-2xs"
+                  title={isBn ? 'কাস্টম কালার বেছে নিন (Custom Color)' : 'Choose Custom Color'}
+                >
+                  <input
+                    type="color"
+                    onChange={(e) => handleApplyRowColor(selectedCartonIds, e.target.value)}
+                    className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                  />
+                </label>
+
+                {selectedCartonIds.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => handleApplyRowColor(selectedCartonIds, null)}
+                    className="px-2 py-0.5 rounded text-[10px] font-extrabold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-200 hover:bg-rose-500 hover:text-white transition-colors cursor-pointer"
+                    title={isBn ? 'কালার রিমুভ করুন' : 'Clear Color'}
+                  >
+                    {isBn ? 'রিসেট' : 'Clear'}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Right: Merge & Unmerge Action Buttons */}
+            <div className="flex items-center space-x-2">
+              <button
+                type="button"
+                onClick={handleBulkMergeInProposal}
+                disabled={selectedCartonIds.length < 2}
+                className={`px-3.5 py-1.5 text-xs font-extrabold rounded-lg flex items-center space-x-1.5 transition-all cursor-pointer ${
+                  selectedCartonIds.length >= 2
+                    ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-md'
+                    : isDark ? 'bg-slate-800 text-slate-500 border border-slate-700 cursor-not-allowed' : 'bg-slate-200 text-slate-400 border border-slate-300 cursor-not-allowed'
+                }`}
+                title={isBn ? 'সিলেক্টকৃত কার্টুন মার্জ করে ১টি মাস্টার কার্টুন বানান' : 'Merge selected rows into 1 master carton'}
+              >
+                <GitFork className="w-3.5 h-3.5" />
+                <span>{isBn ? '🔗 মার্জ করুন (Merge Selected)' : '🔗 Merge Selected'}</span>
+              </button>
+
+              {selectedCartonIds.length > 0 && (
+                <button
+                  type="button"
+                  onClick={handleBulkUnmergeInProposal}
+                  className="px-3 py-1.5 bg-amber-600 hover:bg-amber-500 text-white text-xs font-extrabold rounded-lg flex items-center space-x-1 shadow-md cursor-pointer"
+                  title={isBn ? 'সিলেক্টকৃত কার্টুন আলাদা/আনমার্জ করুন' : 'Unmerge selected cartons'}
+                >
+                  <span>{isBn ? '🔓 আলাদা করুন (Unmerge)' : '🔓 Unmerge'}</span>
+                </button>
+              )}
             </div>
           </div>
 
