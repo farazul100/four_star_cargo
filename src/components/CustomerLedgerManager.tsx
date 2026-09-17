@@ -98,7 +98,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
   // Load Data with Migration & Live Real-time Sync
   useEffect(() => {
     const loadDbData = () => {
-      const recalculated = recalculateCustomerLedgerAndBilling();
+      const recalculated = recalculateCustomerLedgerAndBilling(undefined, false);
       setCustomers(recalculated.customers);
       setLedgerEntries(recalculated.ledgerEntries);
       setCartons(recalculated.cartons);

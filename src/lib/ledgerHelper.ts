@@ -26,7 +26,7 @@ export const formatInvoiceNoteToEnglish = (note?: string): string => {
  * Recalculates customer billing charges and ledger entries based on final Bangladesh Warehouse weight
  * (bd_calibrated_weight || gross_weight) and rate_per_kg set during customer mapping.
  */
-export const recalculateCustomerLedgerAndBilling = (targetCustomerId?: string) => {
+export const recalculateCustomerLedgerAndBilling = (targetCustomerId?: string, shouldSave: boolean = true) => {
   const dbData = getHostingerDbData();
   const customers: Customer[] = dbData.customers || [];
   const cartons: Carton[] = dbData.cartons || [];
@@ -187,11 +187,23 @@ export const recalculateCustomerLedgerAndBilling = (targetCustomerId?: string) =
   const finalCustomers = Array.from(updatedCustomersMap.values());
   const finalCartons = Array.from(updatedCartonsMap.values());
 
-  saveHostingerDbMultiData({
-    fsc_vps_customers: finalCustomers,
-    fsc_vps_cartons: finalCartons,
-    fsc_vps_ledger: ledgerEntries,
-  });
+  if (shouldSave) {
+    const custStr = JSON.stringify(finalCustomers);
+    const cartStr = JSON.stringify(finalCartons);
+    const ledgStr = JSON.stringify(ledgerEntries);
+
+    const origCustStr = JSON.stringify(customers);
+    const origCartStr = JSON.stringify(cartons);
+    const origLedgStr = JSON.stringify(dbData.ledgerEntries || []);
+
+    if (custStr !== origCustStr || cartStr !== origCartStr || ledgStr !== origLedgStr) {
+      saveHostingerDbMultiData({
+        fsc_vps_customers: finalCustomers,
+        fsc_vps_cartons: finalCartons,
+        fsc_vps_ledger: ledgerEntries,
+      });
+    }
+  }
 
   return {
     customers: finalCustomers,
