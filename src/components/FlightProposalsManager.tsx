@@ -1260,13 +1260,22 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                     </tr>
                   ) : (
                     getProposalCartons(activeModalProposal).map((ctn, idx) => (
-                      <tr key={ctn.id} className={isDark ? 'hover:bg-[#1E293B]/60' : 'hover:bg-slate-50'}>
+                      <tr
+                        key={ctn.id}
+                        style={ctn.row_color ? { backgroundColor: isDark ? `${ctn.row_color}66` : ctn.row_color } : {}}
+                        className={isDark ? 'hover:bg-[#1E293B]/60' : 'hover:bg-slate-50'}
+                      >
                         <td className="p-2.5 text-center font-mono text-slate-500 text-[11px]">{idx + 1}</td>
                         <td className="p-2.5 font-mono whitespace-nowrap">
-                          <span className={`px-2 py-0.5 rounded-none font-mono text-[11px] font-medium border ${
+                          <span className={`px-2 py-0.5 rounded-none font-mono text-[11px] font-medium border inline-flex items-center space-x-1 ${
                             isDark ? 'bg-[#1E293B] text-teal-400 border-slate-700' : 'bg-slate-50 text-[#00897B] border-slate-300'
                           }`}>
-                            {ctn.ctn_no}
+                            <span>{ctn.ctn_no}</span>
+                            {ctn.is_merged && (
+                              <span className="px-1 py-0.2 text-[9px] font-bold bg-indigo-600 text-white rounded">
+                                🔗
+                              </span>
+                            )}
                           </span>
                         </td>
                         <td className="p-2.5 font-mono font-semibold text-slate-800 dark:text-slate-200 text-[11px] whitespace-nowrap">

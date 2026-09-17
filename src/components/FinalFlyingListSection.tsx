@@ -839,12 +839,21 @@ export const FinalFlyingListSection: React.FC<FinalFlyingListSectionProps> = ({
                       </tr>
                     ) : (
                       modalProposalCartons.map((c, idx) => (
-                        <tr key={c.id} className="hover:bg-slate-50/50 dark:hover:bg-[#1E293B] transition-colors">
+                        <tr
+                          key={c.id}
+                          style={c.row_color ? { backgroundColor: isDark ? `${c.row_color}66` : c.row_color } : {}}
+                          className="hover:bg-slate-50/50 dark:hover:bg-[#1E293B] transition-colors"
+                        >
                           <td className="p-2.5 font-mono text-slate-400 border border-slate-200 dark:border-slate-700 text-center">{idx + 1}</td>
                           <td className="p-2.5 font-mono text-slate-500 border border-slate-200 dark:border-slate-700">{c.created_at ? c.created_at.split('T')[0] : '2026-08-15'}</td>
                           <td className="p-2.5 font-mono text-slate-900 dark:text-white border border-slate-200 dark:border-slate-700">
-                            <span className="px-2 py-0.5 rounded-none bg-white dark:bg-[#1E293B] border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200">
-                              {c.ctn_no}
+                            <span className="px-2 py-0.5 rounded-none bg-white dark:bg-[#1E293B] border border-slate-300 dark:border-slate-700 text-slate-800 dark:text-slate-200 inline-flex items-center space-x-1">
+                              <span>{c.ctn_no}</span>
+                              {c.is_merged && (
+                                <span className="px-1 py-0.2 text-[9px] font-bold bg-indigo-600 text-white rounded">
+                                  🔗
+                                </span>
+                              )}
                             </span>
                           </td>
                           <td className="p-2.5 font-mono font-normal text-purple-600 dark:text-purple-400 border border-slate-200 dark:border-slate-700">{c.shipping_mark || 'N/A'}</td>

@@ -1130,6 +1130,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                           return (
                             <tr
                               key={c.id}
+                              style={c.row_color ? { backgroundColor: isDark ? `${c.row_color}66` : c.row_color } : {}}
                               className="bg-white dark:bg-[#1E293B] hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
                             >
                               <td className="p-2.5">
@@ -1146,7 +1147,14 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                                   />
                                 )}
                               </td>
-                              <td className={`p-2.5 font-extrabold font-mono ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.ctn_no}</td>
+                              <td className={`p-2.5 font-extrabold font-mono ${isDark ? 'text-white' : 'text-slate-900'} flex items-center space-x-1.5`}>
+                                <span>{c.ctn_no}</span>
+                                {c.is_merged && (
+                                  <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-700">
+                                    🔗 Merged
+                                  </span>
+                                )}
+                              </td>
                               <td className="p-2.5 font-mono font-extrabold text-emerald-700 dark:text-emerald-300">{c.packaging_number || '-'}</td>
                               <td className="p-2.5 font-extrabold text-blue-700 dark:text-sky-300">{c.shipping_mark}</td>
                               <td className={`p-2.5 font-mono font-bold ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>{c.tracking_number}</td>

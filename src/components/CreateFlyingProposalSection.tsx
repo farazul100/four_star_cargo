@@ -555,6 +555,7 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                       <tr
                         key={c.id}
                         onClick={(e) => handleToggleSelect(c.id, index, e)}
+                        style={!isSelected && c.row_color ? { backgroundColor: isDark ? `${c.row_color}66` : c.row_color } : {}}
                         className={`transition-colors duration-150 cursor-pointer ${
                           isSelected
                             ? isDark
@@ -577,8 +578,13 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                             className="rounded border-slate-300 cursor-pointer accent-blue-600 w-4 h-4"
                           />
                         </td>
-                        <td className="p-2.5 font-medium border-r border-slate-200/60 dark:border-slate-700/50 text-slate-800 dark:text-slate-200 whitespace-nowrap">
-                          {c.ctn_no}
+                        <td className="p-2.5 font-medium border-r border-slate-200/60 dark:border-slate-700/50 text-slate-800 dark:text-slate-200 whitespace-nowrap flex items-center space-x-1.5">
+                          <span>{c.ctn_no}</span>
+                          {c.is_merged && (
+                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-700">
+                              🔗 Merged
+                            </span>
+                          )}
                         </td>
                         <td className="p-2 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
                           <input
