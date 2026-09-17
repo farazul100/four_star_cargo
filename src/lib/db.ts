@@ -246,7 +246,17 @@ export const getHostingerDbData = () => {
 
         if (uniqueKey) {
           const existing = cartonMap.get(uniqueKey);
-          if (!existing || c.status === 'received' || c.status === 'delivered' || c.current_warehouse_id === 'wh-bd') {
+          const cTime = c.updated_at ? new Date(c.updated_at).getTime() : 0;
+          const eTime = existing?.updated_at ? new Date(existing.updated_at).getTime() : 0;
+          
+          if (
+            !existing ||
+            (c.customer_id && !existing.customer_id) ||
+            (cTime > 0 && cTime >= eTime) ||
+            c.status === 'received' ||
+            c.status === 'delivered' ||
+            c.current_warehouse_id === 'wh-bd'
+          ) {
             cartonMap.set(uniqueKey, c);
           }
         }

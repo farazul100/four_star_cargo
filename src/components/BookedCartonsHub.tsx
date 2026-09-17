@@ -549,14 +549,6 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         return;
       }
 
-      const confirmMsg = isBn
-        ? `আপনি কি শিপিং মার্ক "${rawKey}" এর সাথে কাস্টমার "${targetCust.name}" (পার কেজি রেট ৳${finalRatePerKg}) ট্যাগ করতে নিশ্চিত?`
-        : `Are you sure you want to map customer "${targetCust.name}" (Rate ৳${finalRatePerKg}/KG) to shipping mark "${rawKey}"?`;
-
-      if (typeof window !== 'undefined' && window.confirm && !window.confirm(confirmMsg)) {
-        return;
-      }
-
       const updatedCusts = currentCusts.map((c) => {
         if (c.id === targetCust!.id) {
           const cleanRaw = rawKey.replace(/^mark:\s*/i, '').trim();
