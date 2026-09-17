@@ -580,8 +580,8 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
       const currentCartons = Array.from(combinedCartonsMap.values());
 
-      // Identify target carton object to extract batch identifiers
-      const targetCartonObj = currentCartons.find((c) => {
+      // Collect ALL matching cartons in batch using targetKey
+      const matchingCartonsInBatch = currentCartons.filter((c) => {
         const matchMark = cleanKey(c.shipping_mark);
         const matchTrk = cleanKey(c.tracking_number);
         const matchMasterTrk = cleanKey(c.master_tracking_number);
@@ -593,15 +593,24 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
           matchMasterTrk === targetKey ||
           matchGroup === targetKey ||
           matchCtnNo === targetKey ||
-          (matchMark && targetKey && (matchMark.includes(targetKey) || targetKey.includes(matchMark))) ||
-          (matchTrk && targetKey && (matchTrk.includes(targetKey) || targetKey.includes(matchTrk)))
+          (targetKey.length > 2 && (
+            (matchMark && (matchMark.includes(targetKey) || targetKey.includes(matchMark))) ||
+            (matchTrk && (matchTrk.includes(targetKey) || targetKey.includes(matchTrk)))
+          ))
         );
       });
 
-      const batchMark = targetCartonObj?.shipping_mark ? cleanKey(targetCartonObj.shipping_mark) : targetKey;
-      const batchTrk = targetCartonObj?.tracking_number ? cleanKey(targetCartonObj.tracking_number) : targetKey;
-      const batchMasterTrk = targetCartonObj?.master_tracking_number ? cleanKey(targetCartonObj.master_tracking_number) : '';
-      const batchGroup = targetCartonObj?.master_group_id ? cleanKey(targetCartonObj.master_group_id) : '';
+      const batchTrks = new Set<string>();
+      const batchMarks = new Set<string>();
+      const batchMasterTrks = new Set<string>();
+      const batchGroups = new Set<string>();
+
+      matchingCartonsInBatch.forEach((c) => {
+        if (c.tracking_number) batchTrks.add(cleanKey(c.tracking_number));
+        if (c.shipping_mark) batchMarks.add(cleanKey(c.shipping_mark));
+        if (c.master_tracking_number) batchMasterTrks.add(cleanKey(c.master_tracking_number));
+        if (c.master_group_id) batchGroups.add(cleanKey(c.master_group_id));
+      });
 
       const updatedCartons = currentCartons.map((c) => {
         const matchMark = cleanKey(c.shipping_mark);
@@ -616,10 +625,10 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
           matchMasterTrk === targetKey ||
           matchGroup === targetKey ||
           matchCtnNo === targetKey ||
-          (batchMark && matchMark && (matchMark === batchMark || matchMark.includes(batchMark) || batchMark.includes(matchMark))) ||
-          (batchTrk && matchTrk && (matchTrk === batchTrk || matchTrk.includes(batchTrk) || batchTrk.includes(matchTrk))) ||
-          (batchMasterTrk && matchMasterTrk && matchMasterTrk === batchMasterTrk) ||
-          (batchGroup && matchGroup && matchGroup === batchGroup);
+          (matchTrk && batchTrks.has(matchTrk)) ||
+          (matchMark && batchMarks.has(matchMark)) ||
+          (matchMasterTrk && batchMasterTrks.has(matchMasterTrk)) ||
+          (matchGroup && batchGroups.has(matchGroup));
 
         if (isMatch) {
           return {
@@ -1145,10 +1154,10 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     return matchesSearch && matchesWh && matchesStatus && matchesDest && matchesProduct && matchesCustomer && matchesDate;
   });
 
-  // Group Cartons primarily by Shipping Mark so all warehouse entries under the mark form ONE card!
+  // Group Cartons strictly by Tracking ID / Master Group ID so all items in a shipment stay in ONE card!
   const customerGroupsMap = filteredCartons.reduce<Record<string, Carton[]>>((acc, carton) => {
-    const markKey = (carton.shipping_mark || '').replace(/^mark:\s*/i, '').trim();
-    const groupKey = markKey || (carton.master_group_id || '').trim() || (carton.tracking_number || '').trim() || 'UNASSIGNED';
+    const trkKey = (carton.tracking_number || carton.master_tracking_number || carton.master_group_id || '').trim();
+    const groupKey = trkKey || (carton.shipping_mark || '').replace(/^mark:\s*/i, '').trim() || 'UNASSIGNED';
 
     if (!acc[groupKey]) {
       acc[groupKey] = [];
@@ -1713,8 +1722,23 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       <div className="flex items-start justify-between border-b pb-3 border-slate-200 dark:border-slate-700">
                         <div>
                           <div className="text-xs font-mono text-blue-600 dark:text-blue-400 font-extrabold flex items-center space-x-1.5">
-                            <span>MARK: {mark}</span>
+                            <span>
+                              {firstCarton?.tracking_number && mark === firstCarton.tracking_number
+                                ? `TRACKING: ${mark}`
+                                : `MARK: ${mark}`}
+                            </span>
                           </div>
+                          {(() => {
+                            const marks = Array.from(new Set(groupCartons.map((c) => c.shipping_mark).filter(Boolean)));
+                            if (marks.length > 0 && mark !== marks[0]) {
+                              return (
+                                <div className="text-[11px] font-mono text-slate-500 dark:text-slate-400 font-bold mt-0.5 truncate max-w-[240px]">
+                                  Marks: {marks.join(', ')}
+                                </div>
+                              );
+                            }
+                            return null;
+                          })()}
                           {canPerformCustomerMapping && (
                             <div className="mt-1 flex items-center space-x-1">
                               {firstCarton?.customer_name && !firstCarton.customer_name.includes('Unassigned') ? (
