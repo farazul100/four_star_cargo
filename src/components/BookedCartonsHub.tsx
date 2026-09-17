@@ -625,7 +625,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
           return {
             ...c,
             shipping_mark: c.shipping_mark || rawKey.replace(/^mark:\s*/i, '').trim(),
-            packaging_number: mapShipmentCtnNoInput.trim() || c.packaging_number || 'UNASSIGNED',
+            packaging_number: c.packaging_number || 'UNASSIGNED',
             customer_id: targetCust!.id,
             customer_code: targetCust!.customer_code,
             customer_name: targetCust!.name,
@@ -1145,9 +1145,10 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     return matchesSearch && matchesWh && matchesStatus && matchesDest && matchesProduct && matchesCustomer && matchesDate;
   });
 
-  // Group Cartons strictly by Master Tracking Number
+  // Group Cartons primarily by Shipping Mark so all warehouse entries under the mark form ONE card!
   const customerGroupsMap = filteredCartons.reduce<Record<string, Carton[]>>((acc, carton) => {
-    const groupKey = carton.tracking_number || carton.shipping_mark || 'UNASSIGNED';
+    const markKey = (carton.shipping_mark || '').replace(/^mark:\s*/i, '').trim();
+    const groupKey = markKey || (carton.master_group_id || '').trim() || (carton.tracking_number || '').trim() || 'UNASSIGNED';
 
     if (!acc[groupKey]) {
       acc[groupKey] = [];
@@ -2946,22 +2947,6 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
             </div>
 
             <div className="space-y-3 text-xs">
-              {/* Shipment Ctn NO. Input Field for Operation Director */}
-              <div>
-                <label className={`block mb-1 font-extrabold ${isDark ? 'text-white' : 'text-slate-800'}`}>
-                  {isBn ? 'শিপমেন্ট কার্টুন নম্বর নির্ধারণ / আপডেট (Shipment Ctn NO.) *' : 'Assign / Edit Shipment Ctn NO. *'}
-                </label>
-                <input
-                  type="text"
-                  value={mapShipmentCtnNoInput}
-                  onChange={(e) => setMapShipmentCtnNoInput(e.target.value.toUpperCase())}
-                  placeholder="e.g. BOX-101 / FSC-501"
-                  className={`w-full border rounded-xl p-2.5 font-mono font-extrabold outline-none text-xs ${
-                    isDark ? 'bg-[#0F172A] border-slate-600 text-white' : 'bg-white border-slate-300 text-slate-800'
-                  }`}
-                />
-              </div>
-
               <div className="flex items-center justify-between">
                 <label className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-800'}`}>
                   {isBn ? 'প্রকৃত কাস্টমার নির্বাচন করুন *' : 'Select Customer *'}
