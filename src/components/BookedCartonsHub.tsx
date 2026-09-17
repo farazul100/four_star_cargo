@@ -549,6 +549,14 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         return;
       }
 
+      const confirmMsg = isBn
+        ? `আপনি কি শিপিং মার্ক "${rawKey}" এর সাথে কাস্টমার "${targetCust.name}" (পার কেজি রেট ৳${finalRatePerKg}) ট্যাগ করতে নিশ্চিত?`
+        : `Are you sure you want to map customer "${targetCust.name}" (Rate ৳${finalRatePerKg}/KG) to shipping mark "${rawKey}"?`;
+
+      if (typeof window !== 'undefined' && window.confirm && !window.confirm(confirmMsg)) {
+        return;
+      }
+
       const updatedCusts = currentCusts.map((c) => {
         if (c.id === targetCust!.id) {
           const cleanRaw = rawKey.replace(/^mark:\s*/i, '').trim();
@@ -662,6 +670,14 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       setNewCustMappingName('');
       setNewCustMappingPhone('');
       setIsNewCustMapping(false);
+
+      if (typeof window !== 'undefined' && window.alert) {
+        alert(
+          isBn
+            ? `✅ কাস্টমার "${targetCust.name}" সফলভাবে শিপিং মার্ক "${rawKey}" এর সাথে ম্যাপ করা হয়েছে!`
+            : `✅ Customer "${targetCust.name}" successfully mapped to shipping mark "${rawKey}"!`
+        );
+      }
     } catch (err: any) {
       console.error("Error saving customer mapping:", err);
       setMapCustomerModalMark(null);
@@ -3083,6 +3099,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               </button>
               <button
                 type="submit"
+                onClick={handleSaveCustomerMapping}
                 className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs transition-all border border-emerald-500 cursor-pointer shadow-md"
               >
                 {isBn ? 'কাস্টমার ট্যাগিং কনফার্ম করুন' : 'Confirm Customer Mapping'}
