@@ -1962,16 +1962,40 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           : 'bg-white hover:bg-slate-50 text-slate-900'
                       }`}
                     >
-                      {/* Checkbox Column */}
-                      <td style={rowBgStyle} className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50">
-                        <input
-                          type="checkbox"
-                          checked={isSelected}
-                          onClick={(e) => handleToggleSelectCarton(c.id, idx, e)}
-                          onChange={() => {}}
-                          className="rounded border-slate-400 cursor-pointer accent-blue-600 w-4 h-4"
-                        />
-                      </td>
+                      {/* Checkbox Column (RowSpanned if Merged) */}
+                      {spanInfo.isFirst && (() => {
+                        const groupKey = getCartonGroupKey(c);
+                        const groupCartonIds = groupKey
+                          ? sortedFilteredCartons.filter((item) => getCartonGroupKey(item) === groupKey).map((item) => item.id)
+                          : [c.id];
+                        const isGroupAllSelected = groupCartonIds.length > 0 && groupCartonIds.every((id) => selectedHubCartonIds.includes(id));
+
+                        const handleToggleSelectGroup = (e: React.MouseEvent) => {
+                          e.stopPropagation();
+                          if (isGroupAllSelected) {
+                            setSelectedHubCartonIds((prev) => prev.filter((id) => !groupCartonIds.includes(id)));
+                          } else {
+                            setSelectedHubCartonIds((prev) => Array.from(new Set([...prev, ...groupCartonIds])));
+                          }
+                        };
+
+                        return (
+                          <td
+                            rowSpan={spanInfo.rowSpan}
+                            style={rowBgStyle}
+                            className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50 align-middle"
+                            onClick={handleToggleSelectGroup}
+                          >
+                            <input
+                              type="checkbox"
+                              checked={isGroupAllSelected}
+                              onClick={handleToggleSelectGroup}
+                              onChange={() => {}}
+                              className="rounded border-slate-400 cursor-pointer accent-blue-600 w-4 h-4"
+                            />
+                          </td>
+                        );
+                      })()}
 
                       {/* SL (RowSpanned if Merged) */}
                       {spanInfo.isFirst && (

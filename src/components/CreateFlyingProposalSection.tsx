@@ -805,19 +805,40 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                             : 'bg-white hover:bg-slate-50 text-slate-800'
                         }`}
                       >
-                        <td
-                          style={rowBgStyle}
-                          className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50"
-                          onClick={(e) => handleToggleSelect(c.id, index, e)}
-                        >
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onClick={(e) => handleToggleSelect(c.id, index, e)}
-                            onChange={() => {}}
-                            className="rounded border-slate-300 cursor-pointer accent-blue-600 w-4 h-4"
-                          />
-                        </td>
+                        {/* Checkbox Column (RowSpanned if Merged) */}
+                        {spanInfo.isFirst && (() => {
+                          const groupKey = (c.master_group_id || (c.is_merged && c.ctn_no ? c.ctn_no.trim().toUpperCase() : null));
+                          const groupCartonIds = groupKey
+                            ? sortedDisplayCartons.filter((item) => (item.master_group_id || (item.is_merged && item.ctn_no ? item.ctn_no.trim().toUpperCase() : null)) === groupKey).map((item) => item.id)
+                            : [c.id];
+                          const isGroupAllSelected = groupCartonIds.length > 0 && groupCartonIds.every((id) => selectedCartonIds.includes(id));
+
+                          const handleToggleSelectGroup = (e: React.MouseEvent) => {
+                            e.stopPropagation();
+                            if (isGroupAllSelected) {
+                              setSelectedCartonIds((prev) => prev.filter((id) => !groupCartonIds.includes(id)));
+                            } else {
+                              setSelectedCartonIds((prev) => Array.from(new Set([...prev, ...groupCartonIds])));
+                            }
+                          };
+
+                          return (
+                            <td
+                              rowSpan={spanInfo.rowSpan}
+                              style={rowBgStyle}
+                              className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50 align-middle"
+                              onClick={handleToggleSelectGroup}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isGroupAllSelected}
+                                onClick={handleToggleSelectGroup}
+                                onChange={() => {}}
+                                className="rounded border-slate-300 cursor-pointer accent-blue-600 w-4 h-4"
+                              />
+                            </td>
+                          );
+                        })()}
 
                         {/* WAREHOUSE CARTON NUMBER (Merged Spanning Cell) */}
                         {spanInfo.isFirst && (
