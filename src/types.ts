@@ -125,6 +125,9 @@ export interface Carton {
   rate_per_kg?: number; // BDT per kg rate assigned during customer mapping
   row_color?: string; // Custom row highlight color (e.g. '#FEF08A', '#BBF7D0', etc.)
   billed_amount?: number; // Total billed charge (final_weight * rate_per_kg)
+  returned_at?: string; // Timestamp when parcel was returned to warehouse
+  returned_reason?: string; // Reason / Note given when returning parcel
+  returned_by?: string; // User who processed the return
 }
 
 export interface FlyingProposal {

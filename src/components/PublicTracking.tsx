@@ -102,7 +102,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
             onClick={toggleTheme}
             className={`p-2 rounded-full border transition-all cursor-pointer ${
               isDark
-                ? 'bg-[#1E293B] border-slate-700 text-amber-400 hover:border-amber-400'
+                ? 'bg-[#1E293B] border-slate-700 text-teal-400 hover:border-teal-400'
                 : 'bg-slate-100 border-slate-300 text-slate-700 hover:border-[#00897B]'
             }`}
             title="Toggle Theme"
@@ -186,7 +186,8 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
 
                 {/* Shipment Location Breakdown Summary Box */}
                 {(() => {
-                  const bookedCount = matchedCartons.filter((c) => c.status === 'booked' || c.status === 'proposed' || c.status === 'returned').length;
+                  const bookedCount = matchedCartons.filter((c) => (c.status === 'booked' || c.status === 'proposed') && c.status !== 'returned').length;
+                  const returnedCount = matchedCartons.filter((c) => c.status === 'returned' || !!c.returned_at).length;
                   const transitCount = matchedCartons.filter((c) => c.status === 'in_transit' && (c.status as any) !== 'arrived_bd' && !proposals.some(p => (p.carton_ids || []).includes(c.id) && p.status === ('arrived_bd' as any))).length;
                   const arrivedBdCount = matchedCartons.filter((c) => (c.status as any) === 'arrived_bd' || proposals.some(p => (p.carton_ids || []).includes(c.id) && p.status === ('arrived_bd' as any) && c.status !== 'received' && c.status !== 'delivered')).length;
                   const receivedCount = matchedCartons.filter((c) => c.status === 'received').length;
@@ -218,16 +219,16 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                         </div>
                       </div>
 
-                      {/* 5 Location Breakdown Badges */}
-                      <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
+                      {/* Location Breakdown Badges */}
+                      <div className={`grid grid-cols-2 ${returnedCount > 0 ? 'md:grid-cols-6' : 'md:grid-cols-5'} gap-3.5`}>
                         {/* 1. Guangzhou Hub (Booked) */}
                         <div className={`p-4 rounded-2xl border transition-all flex items-center space-x-3 ${
                           bookedCount > 0
-                            ? isDark ? 'bg-amber-500/10 border-amber-500/40 text-amber-300' : 'bg-amber-50 border-amber-300 text-amber-900'
+                            ? isDark ? 'bg-indigo-500/10 border-indigo-500/40 text-indigo-300' : 'bg-indigo-50 border-indigo-200 text-indigo-900'
                             : isDark ? 'bg-slate-800/40 border-slate-700 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
                         }`}>
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${
-                            bookedCount > 0 ? 'bg-amber-500 text-white shadow-md' : 'bg-slate-700/40 text-slate-400'
+                            bookedCount > 0 ? 'bg-indigo-600 text-white shadow-md' : 'bg-slate-700/40 text-slate-400'
                           }`}>
                             <Box className="w-5 h-5" />
                           </div>
@@ -240,6 +241,25 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                             </div>
                           </div>
                         </div>
+
+                        {/* 1.5 Returned Parcels (If any) */}
+                        {returnedCount > 0 && (
+                          <div className={`p-4 rounded-2xl border transition-all flex items-center space-x-3 ${
+                            isDark ? 'bg-rose-500/20 border-rose-500/40 text-rose-300' : 'bg-rose-50 border-rose-300 text-rose-900'
+                          }`}>
+                            <div className="w-10 h-10 rounded-xl bg-rose-600 text-white flex items-center justify-center font-bold shrink-0 shadow-md">
+                              <RotateCcw className="w-5 h-5" />
+                            </div>
+                            <div>
+                              <div className="text-[11px] font-bold uppercase tracking-wider opacity-80">
+                                {isBn ? 'ওয়্যারহাউজে রিটার্নড' : 'Returned Stock'}
+                              </div>
+                              <div className="text-lg font-black font-mono">
+                                {returnedCount} <span className="text-xs font-normal">{isBn ? 'টি' : 'CTNs'}</span>
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         {/* 2. In-Transit (Flying) */}
                         <div className={`p-4 rounded-2xl border transition-all flex items-center space-x-3 ${
@@ -265,11 +285,11 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                         {/* 3. BD Airport Received */}
                         <div className={`p-4 rounded-2xl border transition-all flex items-center space-x-3 ${
                           arrivedBdCount > 0
-                            ? isDark ? 'bg-amber-500/20 border-amber-500/50 text-amber-300' : 'bg-amber-100 border-amber-400 text-amber-950 font-bold'
+                            ? isDark ? 'bg-sky-500/20 border-sky-500/50 text-sky-300' : 'bg-sky-50 border-sky-300 text-sky-950 font-bold'
                             : isDark ? 'bg-slate-800/40 border-slate-700 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
                         }`}>
                           <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${
-                            arrivedBdCount > 0 ? 'bg-amber-500 text-slate-950 shadow-md font-extrabold' : 'bg-slate-700/40 text-slate-400'
+                            arrivedBdCount > 0 ? 'bg-sky-600 text-white shadow-md font-extrabold' : 'bg-slate-700/40 text-slate-400'
                           }`}>
                             <Plane className="w-5 h-5 rotate-45" />
                           </div>
@@ -350,7 +370,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                               <span className="text-xl sm:text-2xl font-black font-mono text-[#00897B]">
                                 {carton.ctn_no}
                               </span>
-                              <span className="px-3 py-1 bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/30 text-xs font-mono font-bold rounded-full">
+                              <span className="px-3 py-1 bg-[#00897B]/10 text-[#00897B] dark:text-[#26a69a] border border-[#00897B]/30 text-xs font-mono font-bold rounded-full">
                                 {carton.shipping_mark}
                               </span>
                             </div>
@@ -363,11 +383,11 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                           <div className="flex items-center space-x-2">
                             <span className={`px-4 py-1.5 rounded-full text-xs font-extrabold uppercase font-mono tracking-wider ${
                               carton.status === 'returned'
-                                ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40'
+                                ? 'bg-rose-500/20 text-rose-500 dark:text-rose-400 border border-rose-500/40 font-bold'
                                 : carton.status === 'booked'
-                                ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40'
+                                ? 'bg-indigo-500/20 text-indigo-600 dark:text-indigo-400 border border-indigo-500/40'
                                 : isArrivedBd
-                                ? 'bg-amber-500/30 text-amber-300 border border-amber-500/60 shadow-md font-bold'
+                                ? 'bg-sky-500/20 text-sky-600 dark:text-sky-300 border border-sky-500/40 shadow-md font-bold'
                                 : carton.status === 'in_transit'
                                 ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40'
                                 : carton.status === 'received'
@@ -385,16 +405,16 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
 
                         {/* Special Return Notice Banner */}
                         {(carton.status === 'returned' || carton.returned_at) && (
-                          <div className="p-4 rounded-2xl bg-amber-500/10 border-2 border-amber-500/40 text-amber-900 dark:text-amber-200 flex items-start space-x-3 shadow-md">
-                            <RotateCcw className="w-6 h-6 text-amber-500 shrink-0 mt-0.5 animate-spin-slow" />
+                          <div className="p-4 rounded-2xl bg-rose-500/10 border-2 border-rose-500/30 text-rose-900 dark:text-rose-200 flex items-start space-x-3 shadow-md">
+                            <RotateCcw className="w-6 h-6 text-rose-500 shrink-0 mt-0.5 animate-spin-slow" />
                             <div>
-                              <h4 className="text-sm font-extrabold text-amber-600 dark:text-amber-400">
+                              <h4 className="text-sm font-extrabold text-rose-600 dark:text-rose-400">
                                 {isBn ? '🔄 পার্সেল ওয়্যারহাউজে রিটার্ন করা হয়েছে (Parcel Returned Notice)' : '🔄 Parcel Returned to Origin Warehouse'}
                               </h4>
                               <p className="text-xs mt-1 text-slate-700 dark:text-slate-300 font-medium">
                                 {isBn
-                                  ? `পণ্যটি ফ্লাইট/ট্রানজিট থেকে ফেরত এনে ওয়্যারহাউজে পুনরায় স্টক করা হয়েছে। (তারিখ: ${carton.returned_at ? new Date(carton.returned_at).toLocaleString() : 'N/A'}${carton.returned_reason ? ` | কারণ: ${carton.returned_reason}` : ''})`
-                                  : `Parcel was returned from flight/transit back to origin warehouse stock on ${carton.returned_at ? new Date(carton.returned_at).toLocaleString() : 'N/A'}.${carton.returned_reason ? ` Reason: ${carton.returned_reason}` : ''}`}
+                                  ? `পণ্যটি ফ্লাইট/ট্রানজিট থেকে ফেরত এনে ওয়্যারহাউজে পুনরায় স্টক করা হয়েছে। (তারিখ: ${carton.returned_at ? new Date(carton.returned_at).toLocaleString() : 'N/A'}${carton.returned_reason ? ` | রিটার্ন নোট/কারণ: ${carton.returned_reason}` : ''})`
+                                  : `Parcel was returned from flight/transit back to origin warehouse stock on ${carton.returned_at ? new Date(carton.returned_at).toLocaleString() : 'N/A'}.${carton.returned_reason ? ` Return Note/Reason: ${carton.returned_reason}` : ''}`}
                               </p>
                             </div>
                           </div>
@@ -441,7 +461,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                               <div>
                                 <div className={`text-[11px] font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'ফ্লাইট ট্রানজিট' : 'In Transit'}</div>
                                 {carton.flying_date && (
-                                  <div className="text-[9px] text-amber-400 font-mono">Flight: {carton.flying_date}</div>
+                                  <div className="text-[9px] text-teal-600 dark:text-teal-400 font-mono">Flight: {carton.flying_date}</div>
                                 )}
                               </div>
                             </div>
@@ -451,15 +471,15 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                               <div
                                 className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
                                   stage >= 3
-                                    ? 'bg-amber-500 text-slate-950 font-extrabold shadow-lg shadow-amber-500/40 ring-4 ring-amber-500/20'
+                                    ? 'bg-sky-600 text-white font-extrabold shadow-lg shadow-sky-600/40 ring-4 ring-sky-600/20'
                                     : isDark ? 'bg-[#080E17] text-slate-500 border border-slate-700' : 'bg-slate-100 text-slate-400 border border-slate-300'
                                 }`}
                               >
                                 <Plane className="w-4 h-4 rotate-45" />
                               </div>
                               <div>
-                                <div className={`text-[11px] font-bold ${isDark ? 'text-amber-300' : 'text-amber-900'}`}>{isBn ? 'বিডি এয়ারপোর্ট' : 'BD Airport'}</div>
-                                <div className="text-[9px] text-amber-500 font-medium">Customs Landing</div>
+                                <div className={`text-[11px] font-bold ${isDark ? 'text-sky-300' : 'text-sky-900'}`}>{isBn ? 'বিডি এয়ারপোর্ট' : 'BD Airport'}</div>
+                                <div className="text-[9px] text-sky-600 dark:text-sky-400 font-medium">Customs Landing</div>
                               </div>
                             </div>
 

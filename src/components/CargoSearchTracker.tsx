@@ -341,10 +341,10 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                       <div
                         onClick={() => setLocationFilter('china')}
                         className={`p-3 border rounded-none cursor-pointer transition-all ${
-                          locationFilter === 'china' ? 'ring-2 ring-amber-500 font-bold' : ''
+                          locationFilter === 'china' ? 'ring-2 ring-indigo-500 font-bold' : ''
                         } ${
                           chinaStockCartons.length > 0
-                            ? isDark ? 'bg-amber-500/15 border-amber-500/40 text-amber-300' : 'bg-amber-50 border-amber-300 text-amber-900'
+                            ? isDark ? 'bg-indigo-500/15 border-indigo-500/40 text-indigo-300' : 'bg-indigo-50 border-indigo-200 text-indigo-900'
                             : isDark ? 'bg-[#1E293B] border-slate-700 text-slate-400 opacity-75' : 'bg-slate-50 border-slate-200 text-slate-400'
                         }`}
                       >
@@ -365,14 +365,14 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                         <div
                           onClick={() => setLocationFilter('returned')}
                           className={`p-3 border rounded-none cursor-pointer transition-all ${
-                            locationFilter === 'returned' ? 'ring-2 ring-amber-600 font-bold' : ''
+                            locationFilter === 'returned' ? 'ring-2 ring-rose-600 font-bold' : ''
                           } ${
-                            isDark ? 'bg-amber-500/20 border-amber-500/40 text-amber-300' : 'bg-amber-100 border-amber-400 text-amber-900'
+                            isDark ? 'bg-rose-500/20 border-rose-500/40 text-rose-300' : 'bg-rose-50 border-rose-300 text-rose-900'
                           }`}
                         >
                           <div className="flex items-center justify-between">
                             <span className="text-[11px] font-bold">🔄 রিটার্নড পার্সেল</span>
-                            <RotateCcw className="w-3.5 h-3.5 text-amber-600" />
+                            <RotateCcw className="w-3.5 h-3.5 text-rose-600" />
                           </div>
                           <div className="mt-2">
                             <span className="text-2xl font-bold font-mono">{returnedCartons.length}</span>
@@ -410,16 +410,16 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                       <div
                         onClick={() => setLocationFilter('bd_airport')}
                         className={`p-3 border rounded-xl cursor-pointer transition-all ${
-                          locationFilter === 'bd_airport' ? 'ring-2 ring-amber-500 font-bold' : ''
+                          locationFilter === 'bd_airport' ? 'ring-2 ring-sky-500 font-bold' : ''
                         } ${
                           bdAirportCartons.length > 0
-                            ? isDark ? 'bg-amber-500/20 border-amber-500/50 text-amber-300' : 'bg-amber-100 border-amber-400 text-amber-950 font-bold'
+                            ? isDark ? 'bg-sky-500/20 border-sky-500/50 text-sky-300' : 'bg-sky-50 border-sky-300 text-sky-950 font-bold'
                             : isDark ? 'bg-[#1E293B] border-slate-700 text-slate-400 opacity-75' : 'bg-slate-50 border-slate-200 text-slate-400'
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <span className="text-[11px] font-bold">🛬 বিডি এয়ারপোর্ট</span>
-                          <Plane className="w-3.5 h-3.5 text-amber-500 rotate-45" />
+                          <Plane className="w-3.5 h-3.5 text-sky-500 rotate-45" />
                         </div>
                         <div className="mt-2">
                           <span className="text-2xl font-bold font-mono">{bdAirportCartons.length}</span>
@@ -603,21 +603,26 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                               <td className="p-2.5 text-center">
                                 {ctn.status === 'returned' ? (
                                   <div className="inline-flex flex-col items-center">
-                                    <span className="px-2 py-0.5 rounded-none text-[10px] font-bold bg-amber-600 text-white border border-amber-700 uppercase flex items-center space-x-1 shadow-xs">
+                                    <span className="px-2 py-0.5 rounded-none text-[10px] font-bold bg-rose-600 text-white border border-rose-700 uppercase flex items-center space-x-1 shadow-xs">
                                       <RotateCcw className="w-3 h-3 inline mr-1" />
                                       <span>{isBn ? '🔄 ওয়্যারহাউজে রিটার্নড' : '🔄 Returned to Warehouse'}</span>
                                     </span>
-                                    <span className="text-[10px] text-amber-600 dark:text-amber-400 font-mono mt-0.5 font-bold">
+                                    <span className="text-[10px] text-rose-600 dark:text-rose-400 font-mono mt-0.5 font-bold">
                                       {ctn.returned_at ? new Date(ctn.returned_at).toLocaleDateString('en-GB') : 'Restocked'}
                                     </span>
+                                    {ctn.returned_reason && (
+                                      <span className="text-[10px] text-rose-600 dark:text-rose-400 font-extrabold mt-0.5 block max-w-[160px] truncate" title={ctn.returned_reason}>
+                                        নোট: {ctn.returned_reason}
+                                      </span>
+                                    )}
                                   </div>
                                 ) : (ctn.status as any) === 'arrived_bd' || (shipment.proposalObj?.status === ('arrived_bd' as any) && ctn.status !== 'received' && ctn.status !== 'delivered') ? (
                                   <div className="inline-flex flex-col items-center">
-                                    <span className="px-2 py-0.5 rounded-none text-[10px] font-bold bg-amber-500 text-slate-950 border border-amber-600 uppercase flex items-center space-x-1 shadow-xs">
+                                    <span className="px-2 py-0.5 rounded-none text-[10px] font-bold bg-sky-600 text-white border border-sky-700 uppercase flex items-center space-x-1 shadow-xs">
                                       <Plane className="w-3 h-3 inline mr-1 rotate-45" />
                                       <span>{isBn ? '🛬 বিডি এয়ারপোর্টে ল্যান্ড করেছে' : '🛬 Arrived BD Airport'}</span>
                                     </span>
-                                    <span className="text-[10px] text-amber-600 dark:text-amber-400 font-mono mt-0.5 font-bold">
+                                    <span className="text-[10px] text-sky-600 dark:text-sky-400 font-mono mt-0.5 font-bold">
                                       Flight: {ctn.flight_number || shipment.flightNumber}
                                     </span>
                                   </div>

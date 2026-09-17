@@ -2085,6 +2085,12 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                         {c.product_name_cn && (
                           <div className={`text-[10px] font-medium truncate mt-0.5 ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>{c.product_name_cn}</div>
                         )}
+                        {(c.status === 'returned' || c.returned_reason) && (
+                          <div className="text-[10px] text-rose-600 dark:text-rose-400 font-extrabold mt-1 inline-flex items-center space-x-1 bg-rose-50 dark:bg-rose-950/70 px-2 py-0.5 rounded border border-rose-200 dark:border-rose-800 shadow-xs max-w-[220px]" title={c.returned_reason}>
+                            <RotateCcw className="w-3 h-3 text-rose-500 shrink-0" />
+                            <span className="truncate">রিটার্ন নোট: {c.returned_reason || 'ওয়্যারহাউজে স্টকে ফেরত'}</span>
+                          </div>
+                        )}
                       </td>
 
                       <td style={rowBgStyle} className={`p-3 text-center font-mono border-r text-xs font-extrabold ${
@@ -2125,18 +2131,20 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
                       <td style={rowBgStyle} className="p-3 text-center border-r border-slate-200/60 dark:border-slate-700/50">
                         <span className={`inline-flex items-center gap-1.5 text-[11px] font-extrabold font-mono uppercase tracking-wider ${
-                          c.status === 'booked'
+                          c.status === 'returned'
+                            ? isDark ? 'text-rose-300' : 'text-rose-700'
+                            : c.status === 'booked'
                             ? isDark ? 'text-sky-300' : 'text-blue-700'
                             : c.status === 'in_transit'
-                            ? isDark ? 'text-amber-300' : 'text-amber-700'
+                            ? isDark ? 'text-blue-300' : 'text-blue-700'
                             : c.status === 'received'
                             ? isDark ? 'text-teal-300' : 'text-teal-700'
                             : isDark ? 'text-emerald-300' : 'text-emerald-700'
                         }`}>
                           <span className={`w-1.5 h-1.5 rounded-full ${
-                            c.status === 'booked' ? 'bg-sky-400 animate-pulse' : c.status === 'in_transit' ? 'bg-amber-400' : c.status === 'received' ? 'bg-teal-400' : 'bg-emerald-400'
+                            c.status === 'returned' ? 'bg-rose-500' : c.status === 'booked' ? 'bg-sky-400 animate-pulse' : c.status === 'in_transit' ? 'bg-blue-400' : c.status === 'received' ? 'bg-teal-400' : 'bg-emerald-400'
                           }`} />
-                          {c.status}
+                          {c.status === 'returned' ? (isBn ? '🔄  রিটার্নড' : '🔄 RETURNED') : c.status}
                         </span>
                       </td>
 
