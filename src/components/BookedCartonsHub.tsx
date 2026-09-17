@@ -529,17 +529,26 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         return;
       }
 
-      const updatedCusts = currentCusts.map((c) =>
-        c.id === targetCust!.id
-          ? { ...c, rate_per_kg: finalRatePerKg }
-          : c
-      );
+      const updatedCusts = currentCusts.map((c) => {
+        if (c.id === targetCust!.id) {
+          const cleanRaw = rawKey.replace(/^mark:\s*/i, '').trim();
+          const existingMark = c.shipping_mark || '';
+          let newMark = existingMark;
+          if (!existingMark) {
+            newMark = cleanRaw;
+          } else if (cleanRaw && !cleanKey(existingMark).includes(cleanKey(cleanRaw))) {
+            newMark = `${existingMark}, ${cleanRaw}`;
+          }
+          return { ...c, shipping_mark: newMark, rate_per_kg: finalRatePerKg };
+        }
+        return c;
+      });
 
       // Combine cartons from dbData, liveRealtimeCartons, and props so no carton is omitted
       const combinedCartonsMap = new Map<string, Carton>();
-      (cartons || []).forEach((c) => c && c.id && combinedCartonsMap.set(c.id, c));
-      (liveRealtimeCartons || []).forEach((c) => c && c.id && combinedCartonsMap.set(c.id, c));
-      ((dbData.cartons as Carton[]) || []).forEach((c) => c && c.id && combinedCartonsMap.set(c.id, c));
+      (cartons || []).forEach((c) => c && c.id && combinedCartonsMap.set(String(c.id), c));
+      (liveRealtimeCartons || []).forEach((c) => c && c.id && combinedCartonsMap.set(String(c.id), c));
+      ((dbData.cartons as Carton[]) || []).forEach((c) => c && c.id && combinedCartonsMap.set(String(c.id), c));
 
       const currentCartons = Array.from(combinedCartonsMap.values());
       const updatedCartons = currentCartons.map((c) => {
@@ -561,6 +570,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         if (isMatch) {
           return {
             ...c,
+            shipping_mark: c.shipping_mark || rawKey.replace(/^mark:\s*/i, '').trim(),
             packaging_number: mapShipmentCtnNoInput.trim() || c.packaging_number || 'UNASSIGNED',
             customer_id: targetCust!.id,
             customer_code: targetCust!.customer_code,

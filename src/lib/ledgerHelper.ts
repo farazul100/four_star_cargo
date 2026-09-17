@@ -50,7 +50,10 @@ export const recalculateCustomerLedgerAndBilling = (targetCustomerId?: string, s
 
     // Find all cartons belonging to this customer
     const custCartons = Array.from(updatedCartonsMap.values()).filter((c) => {
-      if (c.customer_id && c.customer_id === custId) return true;
+      // If carton has an assigned customer_id, ONLY match if it equals custId
+      if (c.customer_id) {
+        return c.customer_id === custId;
+      }
       const cMark = cleanMark(c.shipping_mark);
       const cCode = (c.customer_code || '').toLowerCase().trim();
       const cTrk = cleanMark(c.tracking_number);
