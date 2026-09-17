@@ -1937,9 +1937,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                   const slNum = getSlNumberForCartonRow(sortedFilteredCartons, idx);
                   const isSelected = selectedHubCartonIds.includes(c.id);
 
-                  const rowBgStyle = !isSelected && c.row_color ? {
-                    backgroundColor: isDark ? `${c.row_color}66` : c.row_color,
-                    color: isDark ? '#FFFFFF' : '#0F172A',
+                  const rowBgStyle = c.row_color ? {
+                    backgroundColor: c.row_color,
+                    color: '#0F172A',
                   } : undefined;
 
                   return (
@@ -1947,19 +1947,19 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       key={c.id}
                       style={rowBgStyle}
                       className={`transition-colors duration-150 ${
-                        isSelected
+                        c.row_color
+                          ? 'font-bold text-slate-900'
+                          : isSelected
                           ? isDark
                             ? 'bg-[#00897B]/70 text-white font-extrabold border-l-4 border-l-[#26A69A]'
                             : 'bg-[#00897B]/20 text-slate-900 font-extrabold border-l-4 border-l-[#00897B]'
-                          : spanInfo.isMerged && !c.row_color
+                          : spanInfo.isMerged
                           ? isDark
                             ? 'bg-[#1E1B4B]/80 hover:bg-[#2E2A72] text-white'
                             : 'bg-indigo-50/80 hover:bg-indigo-50 text-slate-900'
-                          : !c.row_color
-                          ? isDark
-                            ? 'bg-[#1E293B] hover:bg-[#283549] text-white'
-                            : 'bg-white hover:bg-slate-50 text-slate-900'
-                          : ''
+                          : isDark
+                          ? 'bg-[#1E293B] hover:bg-[#283549] text-white'
+                          : 'bg-white hover:bg-slate-50 text-slate-900'
                       }`}
                     >
                       {/* Checkbox Column */}

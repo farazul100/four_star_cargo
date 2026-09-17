@@ -13,6 +13,7 @@ import { Carton, Warehouse, User, Language, FlyingProposal } from '../types';
 import { getHostingerDbData, saveHostingerDbData, saveHostingerDbMultiData, logSystemAuditAction, publishSystemNotification, subscribeToDbUpdates } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
+import { sortCartonsForTableDisplay, getCartonRowSpanInfo } from './BookedCartonsHub';
 
 interface CreateFlyingProposalSectionProps {
   currentUser: User;
@@ -755,29 +756,57 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200/60 dark:divide-slate-800/60 text-xs font-normal">
-                {filteredCartons.length > 0 ? (
-                  filteredCartons.map((c, index) => {
+                {(() => {
+                  const sortedDisplayCartons = sortCartonsForTableDisplay(filteredCartons);
+                  if (sortedDisplayCartons.length === 0) {
+                    return (
+                      <tr>
+                        <td colSpan={12} className="p-8 text-center text-slate-400">
+                          <Package className="w-7 h-7 mx-auto opacity-40 mb-2" />
+                          <div className="font-normal">{isBn ? 'ওয়্যারহাউজে কোনো স্টক কার্টুন পাওয়া যায়নি' : 'No available stock cartons found in this warehouse.'}</div>
+                        </td>
+                      </tr>
+                    );
+                  }
+
+                  return sortedDisplayCartons.map((c, index) => {
+                    const spanInfo = getCartonRowSpanInfo(sortedDisplayCartons, index);
                     const isSelected = selectedCartonIds.includes(c.id);
                     const custNameClean = c.customer_name && !c.customer_name.includes('Unassigned')
                       ? c.customer_name
                       : 'Unassigned';
 
+                    const rowBgStyle = c.row_color ? {
+                      backgroundColor: c.row_color,
+                      color: '#0F172A',
+                    } : isSelected ? {
+                      backgroundColor: isDark ? '#1E3A8A' : '#EFF6FF',
+                      color: isDark ? '#FFFFFF' : '#0F172A',
+                    } : undefined;
+
                     return (
                       <tr
                         key={c.id}
                         onClick={(e) => handleToggleSelect(c.id, index, e)}
-                        style={!isSelected && c.row_color ? { backgroundColor: isDark ? `${c.row_color}66` : c.row_color } : {}}
+                        style={rowBgStyle}
                         className={`transition-colors duration-150 cursor-pointer ${
-                          isSelected
+                          c.row_color
+                            ? 'font-bold text-slate-900'
+                            : isSelected
                             ? isDark
-                              ? 'bg-blue-950/50 text-white border-l-4 border-l-blue-500'
-                              : 'bg-blue-50/80 text-slate-900 border-l-4 border-l-blue-600'
+                              ? 'text-white border-l-4 border-l-blue-500'
+                              : 'text-slate-900 border-l-4 border-l-blue-600'
+                            : spanInfo.isMerged
+                            ? isDark
+                              ? 'bg-[#1E1B4B]/80 hover:bg-[#2E2A72] text-white'
+                              : 'bg-indigo-50/80 hover:bg-indigo-50 text-slate-900'
                             : isDark
                             ? 'bg-[#1E293B] hover:bg-slate-800 text-white'
                             : 'bg-white hover:bg-slate-50 text-slate-800'
                         }`}
                       >
                         <td
+                          style={rowBgStyle}
                           className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50"
                           onClick={(e) => handleToggleSelect(c.id, index, e)}
                         >
@@ -789,30 +818,61 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                             className="rounded border-slate-300 cursor-pointer accent-blue-600 w-4 h-4"
                           />
                         </td>
-                        <td className="p-2.5 font-medium border-r border-slate-200/60 dark:border-slate-700/50 text-slate-800 dark:text-slate-200 whitespace-nowrap flex items-center space-x-1.5">
-                          <span>{c.ctn_no}</span>
-                          {c.is_merged && (
-                            <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-700">
-                              🔗 Merged
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-2 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap" onClick={(e) => e.stopPropagation()}>
-                          <input
-                            type="text"
-                            value={c.packaging_number || ''}
-                            onChange={(e) => handleUpdateSingleCartonShipmentNo(c.id, e.target.value.toUpperCase())}
-                            placeholder="e.g. ABDUL-50"
-                            title="Click to edit Shipment Ctn NO."
-                            className={`w-32 px-2 py-1 rounded border border-emerald-400/80 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 font-mono font-extrabold text-xs outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs ${
-                              isDark ? 'text-emerald-300' : 'text-emerald-800'
+
+                        {/* WAREHOUSE CARTON NUMBER (Merged Spanning Cell) */}
+                        {spanInfo.isFirst && (
+                          <td
+                            rowSpan={spanInfo.rowSpan}
+                            style={rowBgStyle}
+                            className={`p-2.5 font-medium align-middle border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap ${
+                              spanInfo.isMerged && !c.row_color
+                                ? isDark
+                                  ? 'bg-[#1E1B4B] text-indigo-200 border-r-2 border-r-indigo-400'
+                                  : 'bg-indigo-50/80 text-indigo-900 border-r-2 border-r-indigo-500'
+                                : ''
                             }`}
-                          />
+                          >
+                            <div className="flex items-center space-x-1.5 font-mono font-extrabold text-xs">
+                              <span>{c.ctn_no}</span>
+                              {spanInfo.isMerged && (
+                                <span className="px-1.5 py-0.5 rounded text-[10px] font-mono font-extrabold bg-indigo-600 text-white shadow-2xs">
+                                  🔗 MERGED ({spanInfo.rowSpan})
+                                </span>
+                              )}
+                            </div>
+                          </td>
+                        )}
+
+                        {/* SHIPMENT CTN NO (Merged Spanning Cell) */}
+                        {spanInfo.isFirst && (
+                          <td
+                            rowSpan={spanInfo.rowSpan}
+                            style={rowBgStyle}
+                            className="p-2 font-mono font-bold align-middle border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <input
+                              type="text"
+                              value={c.packaging_number || ''}
+                              onChange={(e) => handleUpdateSingleCartonShipmentNo(c.id, e.target.value.toUpperCase())}
+                              placeholder="e.g. ABDUL-50"
+                              title="Click to edit Shipment Ctn NO."
+                              className={`w-32 px-2 py-1 rounded border border-emerald-400/80 dark:border-emerald-600 bg-emerald-50 dark:bg-emerald-950/50 font-mono font-extrabold text-xs outline-none focus:ring-2 focus:ring-emerald-500 shadow-2xs ${
+                                isDark ? 'text-emerald-300' : 'text-emerald-800'
+                              }`}
+                            />
+                          </td>
+                        )}
+
+                        <td style={rowBgStyle} className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-medium text-blue-700 dark:text-sky-300 whitespace-nowrap">
+                          <div className="flex items-center space-x-1">
+                            {spanInfo.isMerged && !spanInfo.isFirst && (
+                              <span className="text-[10px] font-mono font-bold text-indigo-500">└</span>
+                            )}
+                            <span>{c.shipping_mark}</span>
+                          </div>
                         </td>
-                        <td className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 font-medium text-blue-700 dark:text-sky-300 whitespace-nowrap">
-                          {c.shipping_mark}
-                        </td>
-                        <td className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 text-slate-800 dark:text-slate-200 whitespace-nowrap">
+                        <td style={rowBgStyle} className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 text-slate-800 dark:text-slate-200 whitespace-nowrap">
                           {custNameClean !== 'Unassigned' ? (
                             <span className="text-emerald-700 dark:text-emerald-400 font-medium">
                               {custNameClean}
@@ -823,40 +883,33 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                             </span>
                           )}
                         </td>
-                        <td className="p-2.5 font-mono text-slate-600 dark:text-slate-300 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap">
+                        <td style={rowBgStyle} className="p-2.5 font-mono text-slate-600 dark:text-slate-300 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap">
                           {c.tracking_number}
                         </td>
-                        <td className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 max-w-[200px] truncate">
+                        <td style={rowBgStyle} className="p-2.5 border-r border-slate-200/60 dark:border-slate-700/50 max-w-[200px] truncate">
                           {c.product_name_en}
                         </td>
-                        <td className="p-2.5 text-center font-medium text-slate-800 dark:text-slate-200 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap">
+                        <td style={rowBgStyle} className="p-2.5 text-center font-medium text-slate-800 dark:text-slate-200 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap">
                           {c.quantity || 1}
                         </td>
-                        <td className="p-2.5 text-center font-medium text-slate-800 dark:text-slate-200 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap">
+                        <td style={rowBgStyle} className="p-2.5 text-center font-medium text-slate-800 dark:text-slate-200 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap">
                           {c.gross_weight} kg
                         </td>
-                        <td className="p-2.5 text-center font-medium text-slate-800 dark:text-slate-200 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap">
+                        <td style={rowBgStyle} className="p-2.5 text-center font-medium text-slate-800 dark:text-slate-200 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap">
                           {c.chargeable_weight || c.gross_weight} kg
                         </td>
-                        <td className="p-2.5 text-center font-medium text-slate-800 dark:text-slate-200 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap">
+                        <td style={rowBgStyle} className="p-2.5 text-center font-medium text-slate-800 dark:text-slate-200 border-r border-slate-200/60 dark:border-slate-700/50 whitespace-nowrap">
                           {c.cbm} CBM
                         </td>
-                        <td className="p-2.5 text-center whitespace-nowrap">
+                        <td style={rowBgStyle} className="p-2.5 text-center whitespace-nowrap">
                           <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase">
                             {c.status}
                           </span>
                         </td>
                       </tr>
                     );
-                  })
-                ) : (
-                  <tr>
-                    <td colSpan={11} className="p-8 text-center text-slate-400">
-                      <Package className="w-7 h-7 mx-auto opacity-40 mb-2" />
-                      <div className="font-normal">{isBn ? 'ওয়্যারহাউজে কোনো স্টক কার্টুন পাওয়া যায়নি' : 'No available stock cartons found in this warehouse.'}</div>
-                    </td>
-                  </tr>
-                )}
+                  });
+                })()}
               </tbody>
             </table>
           </div>
