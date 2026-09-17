@@ -16,7 +16,7 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { Carton, Warehouse, User, Language, FlyingProposal } from '../types';
-import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction, subscribeToDbUpdates } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, saveHostingerDbMultiData, logSystemAuditAction, subscribeToDbUpdates } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
 
@@ -546,9 +546,9 @@ export const ReturnParcelSection: React.FC<ReturnParcelSectionProps> = ({
                               setSelectedCartonIds([c.id]);
                               setShowConfirmModal(true);
                             }}
-                            className="px-2.5 py-1 rounded text-[10px] font-bold bg-amber-600 hover:bg-amber-500 text-white transition-all cursor-pointer shadow-2xs flex items-center justify-center space-x-1 mx-auto"
+                            className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#00897B] hover:bg-[#00796B] text-white transition-all cursor-pointer shadow-sm flex items-center justify-center space-x-1.5 mx-auto active:scale-95"
                           >
-                            <RotateCcw className="w-3 h-3" />
+                            <RotateCcw className="w-3.5 h-3.5" />
                             <span>{isBn ? 'রিটার্ন করুন' : 'Return'}</span>
                           </button>
                         )}
@@ -564,26 +564,26 @@ export const ReturnParcelSection: React.FC<ReturnParcelSectionProps> = ({
 
       {/* 4. Confirmation Modal */}
       {showConfirmModal && (
-        <div className="fixed inset-0 z-[3000] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
+        <div className="fixed inset-0 z-[3000] bg-slate-900/80 backdrop-blur-sm flex items-center justify-center p-4 animate-in fade-in">
           <div className={`w-full max-w-lg rounded-2xl border p-6 space-y-5 shadow-2xl ${
-            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
+            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-300 text-slate-900'
           }`}>
-            <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-500 border border-amber-500/40 flex items-center justify-center font-bold shrink-0">
+            <div className="flex items-center space-x-3 border-b border-slate-200 dark:border-slate-700 pb-4">
+              <div className="w-11 h-11 rounded-xl bg-[#00897B]/10 text-[#00897B] border border-[#00897B]/30 flex items-center justify-center font-bold shrink-0 shadow-xs">
                 <RotateCcw className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-extrabold">
+                <h3 className="text-base font-black text-slate-900 dark:text-white">
                   {isBn ? `সিলেক্টকৃত ${selectedCartonIds.length}টি পার্সেল রিটার্ন নিশ্চিতকরণ` : `Confirm Return for ${selectedCartonIds.length} Parcels`}
                 </h3>
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5 font-medium">
                   {isBn ? 'পার্সেলগুলো ফ্লাইট থেকে ফেরত এনে অরিজিন ওয়্যারহাউজ স্টকে সেভ করা হবে।' : 'Selected parcels will be removed from flight and returned to warehouse stock.'}
                 </p>
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-bold block text-slate-300">
+              <label className="text-xs font-bold block text-slate-800 dark:text-slate-200">
                 {isBn ? 'রিটার্ন করার কারণ (রিজন নোট):' : 'Return Reason / Note:'}
               </label>
               <textarea
@@ -591,18 +591,20 @@ export const ReturnParcelSection: React.FC<ReturnParcelSectionProps> = ({
                 value={returnReason}
                 onChange={(e) => setReturnReason(e.target.value)}
                 placeholder={isBn ? 'যেমন: ফ্লাইট ক্যানসেলড / এয়ারপোর্টে মাল ফেরত দেওয়া হয়েছে...' : 'e.g. Flight cancelled / Cargo returned from airport customs...'}
-                className={`w-full p-3 rounded-xl border text-xs outline-none font-sans ${
-                  isDark ? 'bg-[#0F172A] border-slate-700 text-white focus:ring-2 focus:ring-amber-500' : 'bg-slate-50 border-slate-300 text-slate-900 focus:ring-2 focus:ring-amber-500'
+                className={`w-full p-3 rounded-xl border text-xs outline-none font-sans font-medium transition-all ${
+                  isDark
+                    ? 'bg-[#0F172A] border-slate-700 text-white placeholder-slate-500 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
+                    : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:border-[#00897B] focus:ring-1 focus:ring-[#00897B]'
                 }`}
               />
             </div>
 
-            <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs font-medium space-y-1">
-              <div className="font-bold flex items-center space-x-1">
-                <AlertTriangle className="w-4 h-4 text-amber-500 shrink-0" />
+            <div className="p-3.5 rounded-xl bg-teal-500/10 border border-teal-500/30 text-teal-900 dark:text-teal-200 text-xs font-medium space-y-1">
+              <div className="font-bold flex items-center space-x-1.5 text-teal-800 dark:text-teal-300">
+                <ShieldAlert className="w-4 h-4 text-[#00897B] shrink-0" />
                 <span>{isBn ? 'কাস্টমার ট্র্যাকিং নোটিশ:' : 'Customer Tracking Notice:'}</span>
               </div>
-              <p className="text-[11px]">
+              <p className="text-[11px] text-slate-700 dark:text-slate-300 leading-relaxed">
                 {isBn
                   ? 'কাস্টমার তার ট্র্যাকিং নম্বরে সার্চ করলে "🔄 পার্সেল ওয়্যারহাউজে রিটার্ন করা হয়েছে" মেসেজটি দেখতে পাবেন।'
                   : 'Customers searching their tracking ID will see "🔄 Parcel Returned to Origin Warehouse".'}
@@ -613,14 +615,14 @@ export const ReturnParcelSection: React.FC<ReturnParcelSectionProps> = ({
               <button
                 type="button"
                 onClick={() => setShowConfirmModal(false)}
-                className="px-4 py-2 bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:text-white rounded-xl text-xs font-bold transition-colors cursor-pointer"
+                className="px-4 py-2.5 bg-slate-200 hover:bg-slate-300 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 rounded-xl text-xs font-bold transition-all cursor-pointer"
               >
                 {isBn ? 'ক্যান্সেল' : 'Cancel'}
               </button>
               <button
                 type="button"
                 onClick={handleConfirmReturnParcels}
-                className="px-5 py-2 bg-amber-600 hover:bg-amber-500 text-white text-xs font-extrabold rounded-xl shadow-lg transition-all cursor-pointer ring-2 ring-amber-500/40"
+                className="px-6 py-2.5 bg-[#00897B] hover:bg-[#00796B] text-white text-xs font-bold rounded-xl shadow-lg transition-all cursor-pointer active:scale-95"
               >
                 {isBn ? 'হ্যাঁ, রিটার্ন সম্পন্ন করুন' : 'Confirm Return'}
               </button>
