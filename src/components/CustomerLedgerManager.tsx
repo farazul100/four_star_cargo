@@ -291,28 +291,28 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
 
   // Helper to find cartons for a customer (by customer_id, customer_code, shipping_mark, or phone)
   const getCustomerCartons = (c: Customer) => {
-    if (!c || !cartons || cartons.length === 0) return [];
+    if (!c || !cartons || !Array.isArray(cartons) || cartons.length === 0) return [];
 
-    const custId = c.id;
-    const custCode = (c.customer_code || '').toLowerCase().trim();
-    const custName = (c.name || '').toLowerCase().trim();
-    const custPhone = (c.phone || '').replace(/\D/g, '');
+    const custId = String(c.id || '');
+    const custCode = String(c.customer_code || '').toLowerCase().trim();
+    const custName = String(c.name || '').toLowerCase().trim();
+    const custPhone = String(c.phone || '').replace(/\D/g, '');
 
-    const cleanMark = (str?: string) => (str || '').toLowerCase().replace(/^mark:\s*/i, '').trim();
+    const cleanMark = (str?: any) => String(str || '').toLowerCase().replace(/^mark:\s*/i, '').trim();
     const custMark = cleanMark(c.shipping_mark);
 
     return cartons.filter((ctn) => {
       if (!ctn) return false;
 
       // 1. Direct ID match
-      if (ctn.customer_id && ctn.customer_id === custId) return true;
+      if (ctn.customer_id && String(ctn.customer_id) === custId) return true;
 
       // 2. Customer Code match
-      const ctnCustCode = (ctn.customer_code || '').toLowerCase().trim();
+      const ctnCustCode = String(ctn.customer_code || '').toLowerCase().trim();
       if (custCode && ctnCustCode && ctnCustCode === custCode) return true;
 
       // 3. Customer Name match
-      const ctnCustName = (ctn.customer_name || '').toLowerCase().trim();
+      const ctnCustName = String(ctn.customer_name || '').toLowerCase().trim();
       if (custName && ctnCustName && ctnCustName === custName) return true;
 
       // 4. Shipping Mark & Tracking Substring matching
@@ -346,16 +346,17 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
 
   // Filter Customers
   const filteredCustomers = customers.filter((c) => {
-    if (statusFilter === 'due' && c.total_due <= 0) return false;
+    if (!c) return false;
+    if (statusFilter === 'due' && (c.total_due || 0) <= 0) return false;
     if (statusFilter === 'vip' && c.status !== 'vip') return false;
-    if (statusFilter === 'paid' && c.total_due > 0) return false;
+    if (statusFilter === 'paid' && (c.total_due || 0) > 0) return false;
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      const matchName = c.name.toLowerCase().includes(q);
-      const matchMark = (c.shipping_mark || '').toLowerCase().includes(q);
-      const matchPhone = (c.phone || '').toLowerCase().includes(q);
-      const matchCode = (c.customer_code || '').toLowerCase().includes(q);
+      const matchName = String(c.name || '').toLowerCase().includes(q);
+      const matchMark = String(c.shipping_mark || '').toLowerCase().includes(q);
+      const matchPhone = String(c.phone || '').toLowerCase().includes(q);
+      const matchCode = String(c.customer_code || '').toLowerCase().includes(q);
       if (!matchName && !matchMark && !matchPhone && !matchCode) return false;
     }
     return true;
@@ -378,13 +379,23 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
   // DEDICATED FULL-PAGE CUSTOMER PROFILE & LEDGER TRACKER VIEW
   // =========================================================================
   if (selectedCustomer) {
+    const custName = String(selectedCustomer.name || 'Customer');
+    const custMarkStr = String(selectedCustomer.shipping_mark || 'MAR-8801');
+    const custPhoneStr = String(selectedCustomer.phone || '');
+    const custEmailStr = String(selectedCustomer.email || '');
+    const custAddressStr = String(selectedCustomer.address || '');
+
     const customerCartons = getCustomerCartons(selectedCustomer);
-    const customerLedger = ledgerEntries.filter(
-      (ledg) => ledg.customer_id === selectedCustomer.id || ledg.customer_code === selectedCustomer.customer_code
+    const customerLedger = (ledgerEntries || []).filter(
+      (ledg) =>
+        ledg &&
+        (String(ledg.customer_id || '') === String(selectedCustomer.id || '') ||
+          (selectedCustomer.customer_code && String(ledg.customer_code || '') === String(selectedCustomer.customer_code)) ||
+          (selectedCustomer.shipping_mark && String(ledg.customer_code || '') === String(selectedCustomer.shipping_mark)))
     );
 
-    const totalWeightShipped = customerCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0);
-    const totalCbmShipped = customerCartons.reduce((sum, c) => sum + (c.cbm || 0), 0);
+    const totalWeightShipped = customerCartons.reduce((sum, c) => sum + (Number(c.gross_weight) || 0), 0);
+    const totalCbmShipped = customerCartons.reduce((sum, c) => sum + (Number(c.cbm) || 0), 0);
     const billedVal =
       selectedCustomer.total_billed && selectedCustomer.total_billed > 0
         ? selectedCustomer.total_billed
@@ -442,14 +453,14 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                 <div className={`w-14 h-14 rounded-none-none border flex items-center justify-center font-semibold text-lg shadow-2xs ${
                   isDark ? 'bg-teal-950/40 border-teal-800/60 text-teal-300' : 'bg-teal-50/80 border-teal-200/70 text-[#00897B]'
                 }`}>
-                  {selectedCustomer.name.charAt(0)}
+                  {custName.charAt(0).toUpperCase()}
                 </div>
 
                 <div className="space-y-1">
                   <div className="flex items-center space-x-2.5 flex-wrap gap-1.5">
-                    <h2 className={`text-base font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{selectedCustomer.name}</h2>
+                    <h2 className={`text-base font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{custName}</h2>
                     <span className="px-2.5 py-0.5 rounded-none-none text-xs font-mono font-medium bg-[#00897B]/10 text-[#00897B] border border-[#00897B]/20">
-                      🏷️ {selectedCustomer.shipping_mark || 'MAR-8801'}
+                      🏷️ {custMarkStr}
                     </span>
                     {selectedCustomer.status === 'vip' && (
                       <span className="px-2.5 py-0.5 rounded-none-none text-[11px] font-normal bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800/50">
@@ -458,9 +469,9 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                     )}
                   </div>
                   <div className="flex items-center space-x-4 text-xs text-slate-500 dark:text-slate-400 flex-wrap gap-y-1 font-normal">
-                    <span>📱 {selectedCustomer.phone}</span>
-                    {selectedCustomer.email && <span>✉️ {selectedCustomer.email}</span>}
-                    {selectedCustomer.address && <span>📍 {selectedCustomer.address}</span>}
+                    {custPhoneStr && <span>📱 {custPhoneStr}</span>}
+                    {custEmailStr && <span>✉️ {custEmailStr}</span>}
+                    {custAddressStr && <span>📍 {custAddressStr}</span>}
                   </div>
                 </div>
               </div>
