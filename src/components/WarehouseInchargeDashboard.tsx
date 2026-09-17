@@ -63,7 +63,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
   const isBn = language === 'bn';
   const { theme } = useTheme();
   const isDark = theme === 'dark';
-  const userWhId = currentUser.warehouse_id || 'wh-china';
+  const userWhId = currentUser.warehouse_id || resolveCanonicalWarehouseId(currentUser.warehouse_id, currentUser.warehouse_name);
   const canonicalMyWhId = resolveCanonicalWarehouseId(userWhId, currentUser.warehouse_name);
   const myWhId = canonicalMyWhId;
   const myWh = warehouses.find((w) => resolveCanonicalWarehouseId(w.id, w.name) === canonicalMyWhId) || warehouses.find((w) => w.id === myWhId);

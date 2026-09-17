@@ -43,44 +43,60 @@ export const formatWarehouseNameEn = (name?: string): string => {
 };
 
 export const resolveCanonicalWarehouseId = (whIdOrName?: string, nameOrCode?: string): string => {
-  if (!whIdOrName && !nameOrCode) return 'wh-china';
-  const str = `${whIdOrName || ''} ${nameOrCode || ''}`.toLowerCase().trim();
+  const cleanId = (whIdOrName || '').toLowerCase().trim();
+  const cleanName = (nameOrCode || '').toLowerCase().trim();
 
-  if (
-    str.includes('china') ||
-    str.includes('guangzhou') ||
-    str.includes('中国') ||
-    str.includes('can') ||
-    str.includes('cn') ||
-    str.includes('wh-china')
-  ) {
-    return 'wh-china';
-  }
+  // 1. Direct exact ID matches (highest priority)
+  if (cleanId === 'wh-bd' || cleanName === 'wh-bd') return 'wh-bd';
+  if (cleanId === 'wh-china' || cleanName === 'wh-china') return 'wh-china';
+  if (cleanId === 'wh-hk' || cleanName === 'wh-hk') return 'wh-hk';
+  if (cleanId === 'wh-jp' || cleanName === 'wh-jp') return 'wh-jp';
+  if (cleanId === 'wh-kr' || cleanName === 'wh-kr') return 'wh-kr';
 
+  const str = `${cleanId} ${cleanName}`;
+
+  // 2. Check Bangladesh / Destination Hub keywords (BEFORE China)
   if (
+    str.includes('wh-bd') ||
     str.includes('bangladesh') ||
     str.includes('dhaka') ||
     str.includes('ঢাকা') ||
     str.includes('destination') ||
-    str.includes('bd') ||
-    str.includes('wh-bd')
+    str.includes('bd hub') ||
+    str.includes('bd freight') ||
+    str.includes('bd')
   ) {
     return 'wh-bd';
   }
 
-  if (str.includes('hong kong') || str.includes('hkg') || str.includes('hk') || str.includes('wh-hk')) {
+  // 3. Check China / Origin Hub keywords
+  if (
+    str.includes('wh-china') ||
+    str.includes('china') ||
+    str.includes('guangzhou') ||
+    str.includes('中国') ||
+    str.includes('can hub') ||
+    str.includes('guangzhou hub')
+  ) {
+    return 'wh-china';
+  }
+
+  // 4. Check Hong Kong
+  if (str.includes('wh-hk') || str.includes('hong kong') || str.includes('hkg') || str.includes('hk')) {
     return 'wh-hk';
   }
 
-  if (str.includes('japan') || str.includes('jp') || str.includes('wh-jp')) {
+  // 5. Check Japan
+  if (str.includes('wh-jp') || str.includes('japan') || str.includes('jp')) {
     return 'wh-jp';
   }
 
-  if (str.includes('korea') || str.includes('kr') || str.includes('wh-kr')) {
+  // 6. Check Korea
+  if (str.includes('wh-kr') || str.includes('korea') || str.includes('kr')) {
     return 'wh-kr';
   }
 
-  return (whIdOrName || 'wh-china').trim();
+  return cleanId || 'wh-china';
 };
 
 // Reset DB helper for live testing - Clears all demo cartons & proposals completely
