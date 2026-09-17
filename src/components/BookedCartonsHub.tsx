@@ -520,8 +520,28 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                      allDbCustomersList.find((c) => c.shipping_mark && cleanKey(c.shipping_mark) === targetKey);
       }
 
-      if (!targetCust && currentCusts.length > 0) {
-        targetCust = currentCusts[0];
+      if (!targetCust) {
+        const fallbackName =
+          (mapSelectedCustomerId && mapSelectedCustomerId.trim() ? mapSelectedCustomerId.trim() : '') ||
+          (newCustMappingName && newCustMappingName.trim() ? newCustMappingName.trim() : '') ||
+          rawKey.replace(/^mark:\s*/i, '').trim();
+
+        if (fallbackName) {
+          targetCust = {
+            id: `cust-${Date.now()}`,
+            customer_code: `CUST-${Math.floor(1000 + Math.random() * 9000)}`,
+            name: fallbackName,
+            phone: newCustMappingPhone.trim() || '01700000000',
+            shipping_mark: rawKey.replace(/^mark:\s*/i, '').trim(),
+            address: 'Dhaka, Bangladesh',
+            total_billed: 0,
+            total_paid: 0,
+            total_due: 0,
+            rate_per_kg: finalRatePerKg,
+            created_at: new Date().toISOString(),
+          };
+          currentCusts = [targetCust, ...currentCusts];
+        }
       }
 
       if (!targetCust) {
@@ -551,6 +571,30 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       ((dbData.cartons as Carton[]) || []).forEach((c) => c && c.id && combinedCartonsMap.set(String(c.id), c));
 
       const currentCartons = Array.from(combinedCartonsMap.values());
+
+      // Identify target carton object to extract batch identifiers
+      const targetCartonObj = currentCartons.find((c) => {
+        const matchMark = cleanKey(c.shipping_mark);
+        const matchTrk = cleanKey(c.tracking_number);
+        const matchMasterTrk = cleanKey(c.master_tracking_number);
+        const matchGroup = cleanKey(c.master_group_id);
+        const matchCtnNo = cleanKey(c.ctn_no);
+        return (
+          matchMark === targetKey ||
+          matchTrk === targetKey ||
+          matchMasterTrk === targetKey ||
+          matchGroup === targetKey ||
+          matchCtnNo === targetKey ||
+          (matchMark && targetKey && (matchMark.includes(targetKey) || targetKey.includes(matchMark))) ||
+          (matchTrk && targetKey && (matchTrk.includes(targetKey) || targetKey.includes(matchTrk)))
+        );
+      });
+
+      const batchMark = targetCartonObj?.shipping_mark ? cleanKey(targetCartonObj.shipping_mark) : targetKey;
+      const batchTrk = targetCartonObj?.tracking_number ? cleanKey(targetCartonObj.tracking_number) : targetKey;
+      const batchMasterTrk = targetCartonObj?.master_tracking_number ? cleanKey(targetCartonObj.master_tracking_number) : '';
+      const batchGroup = targetCartonObj?.master_group_id ? cleanKey(targetCartonObj.master_group_id) : '';
+
       const updatedCartons = currentCartons.map((c) => {
         const matchMark = cleanKey(c.shipping_mark);
         const matchTrk = cleanKey(c.tracking_number);
@@ -564,8 +608,10 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
           matchMasterTrk === targetKey ||
           matchGroup === targetKey ||
           matchCtnNo === targetKey ||
-          (matchMark && targetKey && (matchMark.includes(targetKey) || targetKey.includes(matchMark))) ||
-          (matchTrk && targetKey && (matchTrk.includes(targetKey) || targetKey.includes(matchTrk)));
+          (batchMark && matchMark && (matchMark === batchMark || matchMark.includes(batchMark) || batchMark.includes(matchMark))) ||
+          (batchTrk && matchTrk && (matchTrk === batchTrk || matchTrk.includes(batchTrk) || batchTrk.includes(matchTrk))) ||
+          (batchMasterTrk && matchMasterTrk && matchMasterTrk === batchMasterTrk) ||
+          (batchGroup && matchGroup && matchGroup === batchGroup);
 
         if (isMatch) {
           return {
@@ -599,6 +645,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       });
 
       setLiveRealtimeCartons(finalCartonsToSet);
+      setSelectedCustomerFilter('all');
 
       logSystemAuditAction(
         currentUser,

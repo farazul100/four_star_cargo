@@ -207,9 +207,21 @@ export const SearchableCustomerSelect: React.FC<SearchableCustomerSelectProps> =
               );
             })
           ) : (
-            <div className="p-4 text-center text-xs text-slate-500 dark:text-slate-400">
-              <User className="w-5 h-5 mx-auto mb-1 text-slate-400 opacity-60" />
-              <span>{isBn ? 'কোন কাস্টমার পাওয়া যায়নি' : 'No matching customer found'}</span>
+            <div className="p-4 text-center text-xs text-slate-500 dark:text-slate-400 space-y-2">
+              <User className="w-5 h-5 mx-auto text-slate-400 opacity-60" />
+              <div>{isBn ? 'কোন কাস্টমার পাওয়া যায়নি' : 'No matching customer found'}</div>
+              {searchQuery.trim() && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    onSelectCustomer(searchQuery.trim());
+                    setIsOpen(false);
+                  }}
+                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg text-xs font-bold transition-all cursor-pointer shadow-xs inline-flex items-center space-x-1 mt-1"
+                >
+                  <span>{isBn ? `+ "${searchQuery.trim()}" কে কাস্টমার হিসেবে নির্বাচন করুন` : `+ Select "${searchQuery.trim()}" as Customer`}</span>
+                </button>
+              )}
             </div>
           )}
         </div>
