@@ -16,6 +16,7 @@ interface PublicTrackingProps {
 
 export const PublicTracking: React.FC<PublicTrackingProps> = ({
   cartons,
+  proposals = [],
   language,
 }) => {
   const { lang, setLang } = useTranslation();
@@ -56,20 +57,13 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
     setSearched(true);
   };
 
-  const getStatusStage = (status: Carton['status']) => {
-    switch (status) {
-      case 'booked':
-      case 'proposed':
-        return 1;
-      case 'in_transit':
-        return 2;
-      case 'received':
-        return 3;
-      case 'delivered':
-        return 4;
-      default:
-        return 1;
-    }
+  const getStatusStage = (carton: Carton) => {
+    const isArrivedBd = (carton.status as any) === 'arrived_bd' || (proposals || []).some(p => (p.carton_ids || []).includes(carton.id) && p.status === ('arrived_bd' as any));
+    if (carton.status === 'delivered') return 5;
+    if (carton.status === 'received') return 4;
+    if (isArrivedBd) return 3;
+    if (carton.status === 'in_transit') return 2;
+    return 1;
   };
 
   return (
@@ -193,7 +187,8 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                 {/* Shipment Location Breakdown Summary Box */}
                 {(() => {
                   const bookedCount = matchedCartons.filter((c) => c.status === 'booked' || c.status === 'proposed' || c.status === 'returned').length;
-                  const transitCount = matchedCartons.filter((c) => c.status === 'in_transit').length;
+                  const transitCount = matchedCartons.filter((c) => c.status === 'in_transit' && (c.status as any) !== 'arrived_bd' && !proposals.some(p => (p.carton_ids || []).includes(c.id) && p.status === ('arrived_bd' as any))).length;
+                  const arrivedBdCount = matchedCartons.filter((c) => (c.status as any) === 'arrived_bd' || proposals.some(p => (p.carton_ids || []).includes(c.id) && p.status === ('arrived_bd' as any) && c.status !== 'received' && c.status !== 'delivered')).length;
                   const receivedCount = matchedCartons.filter((c) => c.status === 'received').length;
                   const deliveredCount = matchedCartons.filter((c) => c.status === 'delivered').length;
 
@@ -223,8 +218,8 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                         </div>
                       </div>
 
-                      {/* 4 Location Breakdown Badges */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5">
+                      {/* 5 Location Breakdown Badges */}
+                      <div className="grid grid-cols-2 md:grid-cols-5 gap-3.5">
                         {/* 1. Guangzhou Hub (Booked) */}
                         <div className={`p-4 rounded-2xl border transition-all flex items-center space-x-3 ${
                           bookedCount > 0
@@ -267,7 +262,28 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                           </div>
                         </div>
 
-                        {/* 3. Dhaka Hub (Received) */}
+                        {/* 3. BD Airport Received */}
+                        <div className={`p-4 rounded-2xl border transition-all flex items-center space-x-3 ${
+                          arrivedBdCount > 0
+                            ? isDark ? 'bg-amber-500/20 border-amber-500/50 text-amber-300' : 'bg-amber-100 border-amber-400 text-amber-950 font-bold'
+                            : isDark ? 'bg-slate-800/40 border-slate-700 text-slate-400' : 'bg-slate-50 border-slate-200 text-slate-500'
+                        }`}>
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold shrink-0 ${
+                            arrivedBdCount > 0 ? 'bg-amber-500 text-slate-950 shadow-md font-extrabold' : 'bg-slate-700/40 text-slate-400'
+                          }`}>
+                            <Plane className="w-5 h-5 rotate-45" />
+                          </div>
+                          <div>
+                            <div className="text-[11px] font-bold uppercase tracking-wider opacity-80">
+                              {isBn ? 'বিডি এয়ারপোর্ট' : 'BD Airport'}
+                            </div>
+                            <div className="text-lg font-black font-mono">
+                              {arrivedBdCount} <span className="text-xs font-normal">{isBn ? 'টি' : 'CTNs'}</span>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* 4. Dhaka Hub (Received) */}
                         <div className={`p-4 rounded-2xl border transition-all flex items-center space-x-3 ${
                           receivedCount > 0
                             ? isDark ? 'bg-teal-500/10 border-teal-500/40 text-teal-300' : 'bg-teal-50 border-teal-300 text-teal-900'
@@ -288,7 +304,7 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                           </div>
                         </div>
 
-                        {/* 4. Delivered */}
+                        {/* 5. Delivered */}
                         <div className={`p-4 rounded-2xl border transition-all flex items-center space-x-3 ${
                           deliveredCount > 0
                             ? isDark ? 'bg-emerald-500/10 border-emerald-500/40 text-emerald-300' : 'bg-emerald-50 border-emerald-300 text-emerald-900'
@@ -315,7 +331,8 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
 
                 <div className="grid grid-cols-1 gap-6">
                   {matchedCartons.map((carton) => {
-                    const stage = getStatusStage(carton.status);
+                    const stage = getStatusStage(carton);
+                    const isArrivedBd = (carton.status as any) === 'arrived_bd' || proposals.some(p => (p.carton_ids || []).includes(carton.id) && p.status === ('arrived_bd' as any) && carton.status !== 'received' && carton.status !== 'delivered');
 
                     return (
                       <div
@@ -349,13 +366,19 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                                 ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40'
                                 : carton.status === 'booked'
                                 ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40'
+                                : isArrivedBd
+                                ? 'bg-amber-500/30 text-amber-300 border border-amber-500/60 shadow-md font-bold'
                                 : carton.status === 'in_transit'
                                 ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40'
                                 : carton.status === 'received'
                                 ? 'bg-[#00897B]/20 text-[#00897B] border border-[#00897B]/40'
                                 : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
                             }`}>
-                              {carton.status === 'returned' ? (isBn ? '🔄 ওয়্যারহাউজে রিটার্নড' : '🔄 Returned to Warehouse') : carton.status.replace('_', ' ')}
+                              {carton.status === 'returned'
+                                ? (isBn ? '🔄 ওয়্যারহাউজে রিটার্নড' : '🔄 Returned to Warehouse')
+                                : isArrivedBd
+                                ? (isBn ? '🛬 বিডি এয়ারপোর্টে ল্যান্ড করেছে' : '🛬 Arrived BD Airport')
+                                : carton.status.replace('_', ' ')}
                             </span>
                           </div>
                         </div>
@@ -377,83 +400,100 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                           </div>
                         )}
 
-                        {/* Full-Width 4-Stage Progress Timeline */}
+                        {/* Full-Width 5-Stage Progress Timeline */}
                         <div className="py-4">
-                          <div className="grid grid-cols-4 gap-2 relative">
+                          <div className="grid grid-cols-5 gap-2 relative">
                             {/* Connector Line */}
-                            <div className="absolute top-5 left-[12%] right-[12%] h-1.5 bg-slate-700/40 -z-0 rounded-full" />
+                            <div className="absolute top-5 left-[10%] right-[10%] h-1.5 bg-slate-700/40 -z-0 rounded-full" />
                             <div
-                              className="absolute top-5 left-[12%] h-1.5 bg-gradient-to-r from-[#00897B] to-[#1FB6A8] transition-all duration-500 -z-0 rounded-full"
-                              style={{ width: `${((stage - 1) / 3) * 76}%` }}
+                              className="absolute top-5 left-[10%] h-1.5 bg-gradient-to-r from-[#00897B] to-[#1FB6A8] transition-all duration-500 -z-0 rounded-full"
+                              style={{ width: `${((stage - 1) / 4) * 80}%` }}
                             />
 
                             {/* Stage 1: Booked */}
                             <div className="flex flex-col items-center text-center space-y-2 z-10">
                               <div
-                                className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
+                                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
                                   stage >= 1
                                     ? 'bg-[#00897B] text-white shadow-lg shadow-[#00897B]/40 ring-4 ring-[#00897B]/20'
                                     : isDark ? 'bg-[#080E17] text-slate-500 border border-slate-700' : 'bg-slate-100 text-slate-400 border border-slate-300'
                                 }`}
                               >
-                                <Box className="w-5 h-5" />
+                                <Box className="w-4 h-4" />
                               </div>
                               <div>
-                                <div className={`text-xs font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'বুকিং সম্পন্ন' : 'Booked'}</div>
-                                <div className="text-[10px] text-slate-400">Guangzhou Hub</div>
+                                <div className={`text-[11px] font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'বুকিং সম্পন্ন' : 'Booked'}</div>
+                                <div className="text-[9px] text-slate-400">Guangzhou Hub</div>
                               </div>
                             </div>
 
                             {/* Stage 2: Flight Transit */}
                             <div className="flex flex-col items-center text-center space-y-2 z-10">
                               <div
-                                className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
+                                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
                                   stage >= 2
                                     ? 'bg-[#00897B] text-white shadow-lg shadow-[#00897B]/40 ring-4 ring-[#00897B]/20'
                                     : isDark ? 'bg-[#080E17] text-slate-500 border border-slate-700' : 'bg-slate-100 text-slate-400 border border-slate-300'
                                 }`}
                               >
-                                <Plane className="w-5 h-5" />
+                                <Plane className="w-4 h-4" />
                               </div>
                               <div>
-                                <div className={`text-xs font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'ফ্লাইট ট্রানজিট' : 'In Transit'}</div>
+                                <div className={`text-[11px] font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'ফ্লাইট ট্রানজিট' : 'In Transit'}</div>
                                 {carton.flying_date && (
-                                  <div className="text-[10px] text-amber-400 font-mono">Flight: {carton.flying_date}</div>
+                                  <div className="text-[9px] text-amber-400 font-mono">Flight: {carton.flying_date}</div>
                                 )}
                               </div>
                             </div>
 
-                            {/* Stage 3: Arrived Hub */}
+                            {/* Stage 3: BD Airport */}
                             <div className="flex flex-col items-center text-center space-y-2 z-10">
                               <div
-                                className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
+                                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
                                   stage >= 3
+                                    ? 'bg-amber-500 text-slate-950 font-extrabold shadow-lg shadow-amber-500/40 ring-4 ring-amber-500/20'
+                                    : isDark ? 'bg-[#080E17] text-slate-500 border border-slate-700' : 'bg-slate-100 text-slate-400 border border-slate-300'
+                                }`}
+                              >
+                                <Plane className="w-4 h-4 rotate-45" />
+                              </div>
+                              <div>
+                                <div className={`text-[11px] font-bold ${isDark ? 'text-amber-300' : 'text-amber-900'}`}>{isBn ? 'বিডি এয়ারপোর্ট' : 'BD Airport'}</div>
+                                <div className="text-[9px] text-amber-500 font-medium">Customs Landing</div>
+                              </div>
+                            </div>
+
+                            {/* Stage 4: Arrived Hub */}
+                            <div className="flex flex-col items-center text-center space-y-2 z-10">
+                              <div
+                                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
+                                  stage >= 4
                                     ? 'bg-[#00897B] text-white shadow-lg shadow-[#00897B]/40 ring-4 ring-[#00897B]/20'
                                     : isDark ? 'bg-[#080E17] text-slate-500 border border-slate-700' : 'bg-slate-100 text-slate-400 border border-slate-300'
                                 }`}
                               >
-                                <MapPin className="w-5 h-5" />
+                                <MapPin className="w-4 h-4" />
                               </div>
                               <div>
-                                <div className={`text-xs font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'ঢাকা হাব চেক-ইন' : 'Arrived Hub'}</div>
-                                <div className="text-[10px] text-slate-400">Dhaka Central Hub</div>
+                                <div className={`text-[11px] font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'ঢাকা হাব চেক-ইন' : 'Arrived Hub'}</div>
+                                <div className="text-[9px] text-slate-400">Dhaka Central Hub</div>
                               </div>
                             </div>
 
-                            {/* Stage 4: Delivered */}
+                            {/* Stage 5: Delivered */}
                             <div className="flex flex-col items-center text-center space-y-2 z-10">
                               <div
-                                className={`w-11 h-11 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
-                                  stage >= 4
+                                className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-xs transition-all ${
+                                  stage >= 5
                                     ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/40 ring-4 ring-emerald-500/20'
                                     : isDark ? 'bg-[#080E17] text-slate-500 border border-slate-700' : 'bg-slate-100 text-slate-400 border border-slate-300'
                                 }`}
                               >
-                                <CheckCircle2 className="w-5 h-5" />
+                                <CheckCircle2 className="w-4 h-4" />
                               </div>
                               <div>
-                                <div className={`text-xs font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'ডেলিভার্ড' : 'Delivered'}</div>
-                                <div className="text-[10px] text-slate-400">Handed Over</div>
+                                <div className={`text-[11px] font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{isBn ? 'ডেলিভার্ড' : 'Delivered'}</div>
+                                <div className="text-[9px] text-slate-400">Handed Over</div>
                               </div>
                             </div>
                           </div>

@@ -18,6 +18,7 @@ export const PublicTrackingPage: React.FC = () => {
   return (
     <PublicTracking
       cartons={dbData.cartons}
+      proposals={dbData.proposals}
       language={lang}
       onBackToPortal={() => navigate('/')}
     />

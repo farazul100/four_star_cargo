@@ -62,7 +62,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
   const [searched, setSearched] = useState(false);
   const [groupedShipments, setGroupedShipments] = useState<GroupedTrackingShipment[]>([]);
   const [printPassShipment, setPrintPassShipment] = useState<GroupedTrackingShipment | null>(null);
-  const [locationFilter, setLocationFilter] = useState<'all' | 'china' | 'transit' | 'airport' | 'bd_hub' | 'delivered' | 'returned'>('all');
+  const [locationFilter, setLocationFilter] = useState<'all' | 'china' | 'transit' | 'bd_airport' | 'bd_hub' | 'delivered' | 'returned'>('all');
 
   // Read fresh DB items
   const dbData = getHostingerDbData();
@@ -140,6 +140,8 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
       if (matchingProp) {
         if (matchingProp.status === 'dispatched' || matchingProp.status === 'in_transit') {
           effectiveStatus = 'in_transit';
+        } else if ((matchingProp.status as any) === 'arrived_bd') {
+          effectiveStatus = 'arrived_bd' as any;
         } else if (matchingProp.status === 'received') {
           effectiveStatus = 'received';
         }
@@ -176,10 +178,12 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
         return 2;
       case 'in_transit':
         return 3;
-      case 'received':
+      case 'arrived_bd' as any:
         return 4;
-      case 'delivered':
+      case 'received':
         return 5;
+      case 'delivered':
+        return 6;
       default:
         return 1;
     }
@@ -248,7 +252,8 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
               // Location Breakdown
               const chinaStockCartons = shipment.cartons.filter((c) => c.status === 'booked' || c.status === 'proposed' || c.status === 'returned');
               const returnedCartons = shipment.cartons.filter((c) => c.status === 'returned');
-              const inTransitCartons = shipment.cartons.filter((c) => c.status === 'in_transit');
+              const inTransitCartons = shipment.cartons.filter((c) => c.status === 'in_transit' && (c.status as any) !== 'arrived_bd' && shipment.proposalObj?.status !== ('arrived_bd' as any));
+              const bdAirportCartons = shipment.cartons.filter((c) => (c.status as any) === 'arrived_bd' || (shipment.proposalObj?.status === ('arrived_bd' as any) && c.status !== 'received' && c.status !== 'delivered'));
               const bdHubCartons = shipment.cartons.filter((c) => c.status === 'received');
               const deliveredCartons = shipment.cartons.filter((c) => c.status === 'delivered');
 
@@ -256,7 +261,8 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
               const displayedCartons = shipment.cartons.filter((c) => {
                 if (locationFilter === 'china') return c.status === 'booked' || c.status === 'proposed' || c.status === 'returned';
                 if (locationFilter === 'returned') return c.status === 'returned';
-                if (locationFilter === 'transit') return c.status === 'in_transit';
+                if (locationFilter === 'transit') return c.status === 'in_transit' && (c.status as any) !== 'arrived_bd' && shipment.proposalObj?.status !== ('arrived_bd' as any);
+                if (locationFilter === 'bd_airport') return (c.status as any) === 'arrived_bd' || (shipment.proposalObj?.status === ('arrived_bd' as any) && c.status !== 'received' && c.status !== 'delivered');
                 if (locationFilter === 'bd_hub') return c.status === 'received';
                 if (locationFilter === 'delivered') return c.status === 'delivered';
                 return true;
@@ -329,7 +335,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                     </div>
 
                     <div className={`grid gap-3 text-xs font-mono ${
-                      returnedCartons.length > 0 ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-2 sm:grid-cols-4'
+                      returnedCartons.length > 0 ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-2 sm:grid-cols-5'
                     }`}>
                       {/* 1. China Warehouse */}
                       <div
@@ -400,7 +406,30 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                         </div>
                       </div>
 
-                      {/* 4. BD Hub Received */}
+                      {/* 4. BD Airport Received */}
+                      <div
+                        onClick={() => setLocationFilter('bd_airport')}
+                        className={`p-3 border rounded-xl cursor-pointer transition-all ${
+                          locationFilter === 'bd_airport' ? 'ring-2 ring-amber-500 font-bold' : ''
+                        } ${
+                          bdAirportCartons.length > 0
+                            ? isDark ? 'bg-amber-500/20 border-amber-500/50 text-amber-300' : 'bg-amber-100 border-amber-400 text-amber-950 font-bold'
+                            : isDark ? 'bg-[#1E293B] border-slate-700 text-slate-400 opacity-75' : 'bg-slate-50 border-slate-200 text-slate-400'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="text-[11px] font-bold">🛬 বিডি এয়ারপোর্ট</span>
+                          <Plane className="w-3.5 h-3.5 text-amber-500 rotate-45" />
+                        </div>
+                        <div className="mt-2">
+                          <span className="text-2xl font-bold font-mono">{bdAirportCartons.length}</span>
+                          <span className="text-[10px] block font-sans font-normal opacity-90 font-semibold">
+                            {isBn ? 'টি কার্টুন ল্যান্ড করেছে' : 'Cartons Arrived BD'}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* 5. BD Hub Received */}
                       <div
                         onClick={() => setLocationFilter('bd_hub')}
                         className={`p-3 border rounded-xl cursor-pointer transition-all ${
@@ -423,7 +452,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                         </div>
                       </div>
 
-                      {/* 5. Delivered */}
+                      {/* 6. Delivered */}
                       <div
                         onClick={() => setLocationFilter('delivered')}
                         className={`p-3 border rounded-xl cursor-pointer transition-all ${
@@ -512,6 +541,17 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                         </button>
                         <button
                           type="button"
+                          onClick={() => setLocationFilter('bd_airport')}
+                          className={`px-2.5 py-1 text-[11px] font-mono border transition-all cursor-pointer ${
+                            locationFilter === 'bd_airport'
+                              ? 'bg-amber-500 text-slate-950 border-amber-600 font-bold'
+                              : isDark ? 'bg-[#1E293B] text-amber-400 border-slate-700' : 'bg-amber-50 text-amber-900 border-amber-200'
+                          }`}
+                        >
+                          🛬 বিডি এয়ারপোর্ট ({bdAirportCartons.length})
+                        </button>
+                        <button
+                          type="button"
                           onClick={() => setLocationFilter('bd_hub')}
                           className={`px-2.5 py-1 text-[11px] font-mono border transition-all cursor-pointer ${
                             locationFilter === 'bd_hub'
@@ -569,6 +609,16 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                                     </span>
                                     <span className="text-[10px] text-amber-600 dark:text-amber-400 font-mono mt-0.5 font-bold">
                                       {ctn.returned_at ? new Date(ctn.returned_at).toLocaleDateString('en-GB') : 'Restocked'}
+                                    </span>
+                                  </div>
+                                ) : (ctn.status as any) === 'arrived_bd' || (shipment.proposalObj?.status === ('arrived_bd' as any) && ctn.status !== 'received' && ctn.status !== 'delivered') ? (
+                                  <div className="inline-flex flex-col items-center">
+                                    <span className="px-2 py-0.5 rounded-none text-[10px] font-bold bg-amber-500 text-slate-950 border border-amber-600 uppercase flex items-center space-x-1 shadow-xs">
+                                      <Plane className="w-3 h-3 inline mr-1 rotate-45" />
+                                      <span>{isBn ? '🛬 বিডি এয়ারপোর্টে ল্যান্ড করেছে' : '🛬 Arrived BD Airport'}</span>
+                                    </span>
+                                    <span className="text-[10px] text-amber-600 dark:text-amber-400 font-mono mt-0.5 font-bold">
+                                      Flight: {ctn.flight_number || shipment.flightNumber}
                                     </span>
                                   </div>
                                 ) : ctn.status === 'in_transit' ? (

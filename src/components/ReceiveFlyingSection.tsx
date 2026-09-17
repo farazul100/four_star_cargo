@@ -92,7 +92,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       if (cartonIds.includes(c.id) || (targetFlightNo && c.flight_number === targetFlightNo)) {
         return {
           ...c,
-          status: isBdWarehouseStaff ? ('received' as const) : ('in_transit' as const),
+          status: isBdWarehouseStaff ? ('received' as const) : ('arrived_bd' as any),
           current_warehouse_id: isBdWarehouseStaff ? 'wh-bd' : (c.current_warehouse_id || 'wh-china'),
           destination_warehouse_id: 'wh-bd',
         };
