@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Search, Package, Plane, CheckCircle2, Truck, Sun, Moon, Globe, ShieldCheck, MapPin, Box, ArrowRight, Zap, Sparkles } from 'lucide-react';
+import { Search, Package, Plane, CheckCircle2, Truck, Sun, Moon, Globe, ShieldCheck, MapPin, Box, ArrowRight, Zap, Sparkles, RotateCcw } from 'lucide-react';
 import { Carton, FlyingProposal, Language } from '../types';
 import { useTranslation } from '../hooks/useTranslation';
 import { useTheme } from '../context/ThemeContext';
@@ -345,7 +345,9 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
 
                           <div className="flex items-center space-x-2">
                             <span className={`px-4 py-1.5 rounded-full text-xs font-extrabold uppercase font-mono tracking-wider ${
-                              carton.status === 'booked'
+                              carton.status === 'returned'
+                                ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40'
+                                : carton.status === 'booked'
                                 ? 'bg-amber-500/20 text-amber-500 border border-amber-500/40'
                                 : carton.status === 'in_transit'
                                 ? 'bg-blue-500/20 text-blue-400 border border-blue-500/40'
@@ -353,10 +355,27 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                                 ? 'bg-[#00897B]/20 text-[#00897B] border border-[#00897B]/40'
                                 : 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
                             }`}>
-                              {carton.status.replace('_', ' ')}
+                              {carton.status === 'returned' ? (isBn ? '🔄 ওয়্যারহাউজে রিটার্নড' : '🔄 Returned to Warehouse') : carton.status.replace('_', ' ')}
                             </span>
                           </div>
                         </div>
+
+                        {/* Special Return Notice Banner */}
+                        {(carton.status === 'returned' || carton.returned_at) && (
+                          <div className="p-4 rounded-2xl bg-amber-500/10 border-2 border-amber-500/40 text-amber-900 dark:text-amber-200 flex items-start space-x-3 shadow-md">
+                            <RotateCcw className="w-6 h-6 text-amber-500 shrink-0 mt-0.5 animate-spin-slow" />
+                            <div>
+                              <h4 className="text-sm font-extrabold text-amber-600 dark:text-amber-400">
+                                {isBn ? '🔄 পার্সেল ওয়্যারহাউজে রিটার্ন করা হয়েছে (Parcel Returned Notice)' : '🔄 Parcel Returned to Origin Warehouse'}
+                              </h4>
+                              <p className="text-xs mt-1 text-slate-700 dark:text-slate-300 font-medium">
+                                {isBn
+                                  ? `পণ্যটি ফ্লাইট/ট্রানজিট থেকে ফেরত এনে ওয়্যারহাউজে পুনরায় স্টক করা হয়েছে। (তারিখ: ${carton.returned_at ? new Date(carton.returned_at).toLocaleString() : 'N/A'}${carton.returned_reason ? ` | কারণ: ${carton.returned_reason}` : ''})`
+                                  : `Parcel was returned from flight/transit back to origin warehouse stock on ${carton.returned_at ? new Date(carton.returned_at).toLocaleString() : 'N/A'}.${carton.returned_reason ? ` Reason: ${carton.returned_reason}` : ''}`}
+                              </p>
+                            </div>
+                          </div>
+                        )}
 
                         {/* Full-Width 4-Stage Progress Timeline */}
                         <div className="py-4">

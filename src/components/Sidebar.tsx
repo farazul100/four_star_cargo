@@ -22,6 +22,7 @@ import {
   Star,
   UserPlus,
   MessageSquare,
+  RotateCcw,
 } from 'lucide-react';
 import { User, Language, Theme } from '../types';
 import { getHostingerDbData, subscribeToDbUpdates } from '../lib/db';
@@ -185,6 +186,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               { id: 'booking_entry', label: isBn ? 'নতুন কার্টুন এন্ট্রি' : 'New Carton Booking', icon: PlusCircle },
               { id: 'inventory', label: isBn ? 'ইনভেন্টরি পণ্য' : 'Current Stock Items', icon: Package },
               { id: 'history', label: isBn ? 'রিসিভ ফ্লাইং' : 'Receive Flying', icon: Truck },
+              { id: 'return_parcel', label: isBn ? 'রিটার্ন পার্সেল' : 'Return Parcel', icon: RotateCcw },
             ],
           },
           {

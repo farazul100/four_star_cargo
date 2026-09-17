@@ -16,6 +16,7 @@ import {
   Sparkles,
   Building2,
   Filter,
+  RotateCcw,
 } from 'lucide-react';
 import { Carton, FlyingProposal, Language } from '../types';
 import { useTranslation } from '../hooks/useTranslation';
@@ -520,7 +521,17 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                               <td className="p-2.5 text-right font-medium text-emerald-600 dark:text-emerald-400">{ctn.gross_weight} kg</td>
                               <td className="p-2.5 text-right text-purple-600 dark:text-purple-400">{ctn.cbm} CBM</td>
                               <td className="p-2.5 text-center">
-                                {ctn.status === 'in_transit' ? (
+                                {ctn.status === 'returned' ? (
+                                  <div className="inline-flex flex-col items-center">
+                                    <span className="px-2 py-0.5 rounded-none text-[10px] font-bold bg-amber-600 text-white border border-amber-700 uppercase flex items-center space-x-1 shadow-xs">
+                                      <RotateCcw className="w-3 h-3 inline mr-1" />
+                                      <span>{isBn ? '🔄 ওয়্যারহাউজে রিটার্নড' : '🔄 Returned to Warehouse'}</span>
+                                    </span>
+                                    <span className="text-[10px] text-amber-600 dark:text-amber-400 font-mono mt-0.5 font-bold">
+                                      {ctn.returned_at ? new Date(ctn.returned_at).toLocaleDateString('en-GB') : 'Restocked'}
+                                    </span>
+                                  </div>
+                                ) : ctn.status === 'in_transit' ? (
                                   <div className="inline-flex flex-col items-center">
                                     <span className="px-2 py-0.5 rounded-none text-[10px] font-bold bg-blue-600 text-white border border-blue-700 uppercase flex items-center space-x-1 shadow-xs">
                                       <Plane className="w-3 h-3 inline mr-1" />

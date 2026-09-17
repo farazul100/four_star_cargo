@@ -32,6 +32,7 @@ import { ReceiveFlyingSection } from './ReceiveFlyingSection';
 import { DeliveredProductsSection } from './DeliveredProductsSection';
 import { WarehouseAnalyticsDashboard } from './WarehouseAnalyticsDashboard';
 import { BookedCartonsHub } from './BookedCartonsHub';
+import { ReturnParcelSection } from './ReturnParcelSection';
 import { ToastContainer, ToastMessage } from './Toast';
 import { saveHostingerDbData, saveHostingerDbMultiData, getHostingerDbData, logSystemAuditAction, subscribeToDbUpdates, formatWarehouseNameEn, resolveCanonicalWarehouseId } from '../lib/db';
 import { useTheme } from '../context/ThemeContext';
@@ -415,6 +416,19 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
         proposals={proposalHistory}
         currentUser={currentUser}
         language={language}
+      />
+    );
+  }
+
+  // TAB: RETURN PARCEL (রিটার্ন পার্সেল)
+  if (activeTab === 'return_parcel') {
+    return (
+      <ReturnParcelSection
+        cartons={cartons}
+        setCartons={setCartons}
+        currentUser={currentUser}
+        language={language}
+        warehouses={warehouses}
       />
     );
   }
