@@ -346,328 +346,377 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
       <div className="space-y-6 font-sans">
         <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
-        {/* Top Back Navigation Bar */}
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => setSelectedCustomer(null)}
-            className={`px-4 py-2 rounded-none-none text-xs font-normal border transition-all cursor-pointer flex items-center space-x-2 shadow-2xs ${
-              isDark
-                ? 'bg-[#1E293B] border-slate-700/80 text-slate-200 hover:bg-slate-800'
-                : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-            }`}
-          >
-            <ChevronRight className="w-4 h-4 rotate-180 text-[#00897B]" />
-            <span>{isBn ? '← কাস্টমার তালিকায় ফিরে যান' : '← Back to Customer List'}</span>
-          </button>
-
-          <div className="flex items-center space-x-2.5">
+        {/* =========================================================================
+            1. SCREEN VIEW ONLY (HIDDEN WHEN PRINTING)
+            ========================================================================= */}
+        <div className="print:hidden space-y-6">
+          {/* Top Back Navigation Bar */}
+          <div className="flex items-center justify-between">
             <button
-              onClick={() => setCustomerForPayment(selectedCustomer)}
-              className="px-4 py-2 rounded-none-none text-xs font-normal bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer flex items-center space-x-1.5 shadow-2xs"
-            >
-              <DollarSign className="w-4 h-4" />
-              <span>{isBn ? '💰 টাকা জমা নিন (Collect Payment)' : 'Record Payment'}</span>
-            </button>
-
-            <button
-              onClick={handlePrintReport}
-              className={`px-4 py-2 rounded-none-none text-xs font-normal border transition-all cursor-pointer flex items-center space-x-1.5 shadow-2xs ${
-                isDark ? 'bg-[#1E293B] border-slate-700/80 text-slate-300 hover:text-white' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+              onClick={() => setSelectedCustomer(null)}
+              className={`px-4 py-2 rounded-none-none text-xs font-normal border transition-all cursor-pointer flex items-center space-x-2 shadow-2xs ${
+                isDark
+                  ? 'bg-[#1E293B] border-slate-700/80 text-slate-200 hover:bg-slate-800'
+                  : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
               }`}
             >
-              <Printer className="w-4 h-4 text-[#00897B]" />
-              <span>{isBn ? '🖨️ স্টেটমেন্ট প্রিন্ট' : 'Print Statement'}</span>
+              <ChevronRight className="w-4 h-4 rotate-180 text-[#00897B]" />
+              <span>{isBn ? '← কাস্টমার তালিকায় ফিরে যান' : '← Back to Customer List'}</span>
             </button>
+
+            <div className="flex items-center space-x-2.5">
+              <button
+                onClick={() => setCustomerForPayment(selectedCustomer)}
+                className="px-4 py-2 rounded-none-none text-xs font-normal bg-emerald-600 hover:bg-emerald-700 text-white transition-all cursor-pointer flex items-center space-x-1.5 shadow-2xs"
+              >
+                <DollarSign className="w-4 h-4" />
+                <span>{isBn ? '💰 টাকা জমা নিন (Collect Payment)' : 'Record Payment'}</span>
+              </button>
+
+              <button
+                onClick={handlePrintReport}
+                className={`px-4 py-2 rounded-none-none text-xs font-normal border transition-all cursor-pointer flex items-center space-x-1.5 shadow-2xs ${
+                  isDark ? 'bg-[#1E293B] border-slate-700/80 text-slate-300 hover:text-white' : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
+                }`}
+              >
+                <Printer className="w-4 h-4 text-[#00897B]" />
+                <span>{isBn ? '🖨️ স্টেটমেন্ট প্রিন্ট' : 'Print Statement'}</span>
+              </button>
+            </div>
           </div>
-        </div>
 
-        {/* Customer Profile Header Banner */}
-        <div className={`p-6 rounded-none-none border space-y-6 shadow-2xs ${
-          isDark ? 'bg-[#1E293B] border-slate-700/80 text-white' : 'bg-white border-slate-200/80 text-slate-900'
-        }`}>
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center space-x-4">
-              <div className={`w-14 h-14 rounded-none-none border flex items-center justify-center font-semibold text-lg shadow-2xs ${
-                isDark ? 'bg-teal-950/40 border-teal-800/60 text-teal-300' : 'bg-teal-50/80 border-teal-200/70 text-[#00897B]'
-              }`}>
-                {selectedCustomer.name.charAt(0)}
-              </div>
+          {/* Customer Profile Header Banner */}
+          <div className={`p-6 rounded-none-none border space-y-6 shadow-2xs ${
+            isDark ? 'bg-[#1E293B] border-slate-700/80 text-white' : 'bg-white border-slate-200/80 text-slate-900'
+          }`}>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+              <div className="flex items-center space-x-4">
+                <div className={`w-14 h-14 rounded-none-none border flex items-center justify-center font-semibold text-lg shadow-2xs ${
+                  isDark ? 'bg-teal-950/40 border-teal-800/60 text-teal-300' : 'bg-teal-50/80 border-teal-200/70 text-[#00897B]'
+                }`}>
+                  {selectedCustomer.name.charAt(0)}
+                </div>
 
-              <div className="space-y-1">
-                <div className="flex items-center space-x-2.5 flex-wrap gap-1.5">
-                  <h2 className={`text-base font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{selectedCustomer.name}</h2>
-                  <span className="px-2.5 py-0.5 rounded-none-none text-xs font-mono font-medium bg-[#00897B]/10 text-[#00897B] border border-[#00897B]/20">
-                    🏷️ {selectedCustomer.shipping_mark || 'MAR-8801'}
-                  </span>
-                  {selectedCustomer.status === 'vip' && (
-                    <span className="px-2.5 py-0.5 rounded-none-none text-[11px] font-normal bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800/50">
-                      ⭐ VIP Client
+                <div className="space-y-1">
+                  <div className="flex items-center space-x-2.5 flex-wrap gap-1.5">
+                    <h2 className={`text-base font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{selectedCustomer.name}</h2>
+                    <span className="px-2.5 py-0.5 rounded-none-none text-xs font-mono font-medium bg-[#00897B]/10 text-[#00897B] border border-[#00897B]/20">
+                      🏷️ {selectedCustomer.shipping_mark || 'MAR-8801'}
                     </span>
-                  )}
-                </div>
-
-                <div className="flex items-center space-x-3 text-xs text-slate-500 font-normal flex-wrap gap-2 pt-0.5">
-                  <span className="flex items-center space-x-1 font-mono">
-                    <Phone className="w-3.5 h-3.5 text-[#00897B]" />
-                    <span>{selectedCustomer.phone}</span>
-                  </span>
-                  {selectedCustomer.company_name && (
-                    <>
-                      <span>•</span>
-                      <span className="flex items-center space-x-1">
-                        <Building2 className="w-3.5 h-3.5 text-slate-400" />
-                        <span>{selectedCustomer.company_name}</span>
+                    {selectedCustomer.status === 'vip' && (
+                      <span className="px-2.5 py-0.5 rounded-none-none text-[11px] font-normal bg-purple-50 text-purple-700 border border-purple-200 dark:bg-purple-950/40 dark:text-purple-300 dark:border-purple-800/50">
+                        ⭐ VIP Client
                       </span>
-                    </>
-                  )}
-                  <span>•</span>
-                  <span className="flex items-center space-x-1">
-                    <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                    <span>{selectedCustomer.address}</span>
-                  </span>
+                    )}
+                  </div>
+                  <div className="flex items-center space-x-4 text-xs text-slate-500 dark:text-slate-400 flex-wrap gap-y-1 font-normal">
+                    <span>📱 {selectedCustomer.phone}</span>
+                    {selectedCustomer.email && <span>✉️ {selectedCustomer.email}</span>}
+                    {selectedCustomer.address && <span>📍 {selectedCustomer.address}</span>}
+                  </div>
                 </div>
               </div>
+
+              {/* Quick Actions */}
+              <div className="flex items-center space-x-3">
+                <button
+                  onClick={() => setShowAddEntryModal(true)}
+                  className="px-3.5 py-2 rounded-none-none text-xs font-normal border border-[#00897B]/30 bg-[#00897B]/10 hover:bg-[#00897B]/20 text-[#00897B] transition-all cursor-pointer flex items-center space-x-1.5"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>{isBn ? '+ লেনদেন এন্ট্রি (Entry)' : '+ Ledger Entry'}</span>
+                </button>
+              </div>
             </div>
 
-            {/* Financial Dues Summary Cards */}
-            <div className={`p-4 rounded-none-none border grid grid-cols-3 gap-4 text-xs min-w-[320px] ${
-              isDark ? 'bg-[#1E293B] border-slate-700/80' : 'bg-slate-50/70 border-slate-200/70'
+            {/* 4 Key Financial Metrics */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-2">
+              <div className={`p-4 rounded-none-none border space-y-1 ${isDark ? 'bg-slate-800/60 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                <span className="text-[11px] font-normal text-slate-500">{isBn ? 'মোট চার্জ করা বিল' : 'Total Billed Freight'}</span>
+                <p className="text-base font-semibold font-mono text-slate-900 dark:text-white">৳{billedVal.toLocaleString()}</p>
+              </div>
+
+              <div className={`p-4 rounded-none-none border space-y-1 ${isDark ? 'bg-emerald-950/20 border-emerald-800/50' : 'bg-emerald-50/50 border-emerald-100'}`}>
+                <span className="text-[11px] font-normal text-emerald-700 dark:text-emerald-400">{isBn ? 'মোট প্রাপ্ত টাকা (জমা)' : 'Total Received'}</span>
+                <p className="text-base font-semibold font-mono text-emerald-700 dark:text-emerald-400">৳{(selectedCustomer.total_paid || 0).toLocaleString()}</p>
+              </div>
+
+              <div className={`p-4 rounded-none-none border space-y-1 ${
+                selectedCustomer.total_due > 0
+                  ? isDark ? 'bg-rose-950/20 border-rose-800/50' : 'bg-rose-50/50 border-rose-100'
+                  : isDark ? 'bg-slate-800/60 border-slate-700' : 'bg-slate-50 border-slate-200'
+              }`}>
+                <span className={`text-[11px] font-normal ${selectedCustomer.total_due > 0 ? 'text-rose-700 dark:text-rose-400' : 'text-slate-500'}`}>
+                  {isBn ? 'বর্তমান বকেয়া (বাকি)' : 'Net Outstanding Due'}
+                </span>
+                <p className={`text-base font-semibold font-mono ${selectedCustomer.total_due > 0 ? 'text-rose-700 dark:text-rose-400' : 'text-slate-900 dark:text-white'}`}>
+                  ৳{(selectedCustomer.total_due || 0).toLocaleString()}
+                </p>
+              </div>
+
+              <div className={`p-4 rounded-none-none border space-y-1 ${isDark ? 'bg-slate-800/60 border-slate-700' : 'bg-slate-50 border-slate-200'}`}>
+                <span className="text-[11px] font-normal text-slate-500">{isBn ? 'মোট চালান (কার্টুন / ওজন)' : 'Shipment Roster'}</span>
+                <p className="text-base font-semibold font-mono text-slate-900 dark:text-white">
+                  {customerCartons.length} <span className="text-xs font-normal text-slate-500">ctns ({totalWeightShipped.toFixed(1)} kg)</span>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Ledger History & Carton Roster Tabs */}
+          <div className="space-y-4">
+            {/* Financial Ledger Audit Table */}
+            <div className={`border rounded-none-none overflow-hidden shadow-2xs ${
+              isDark ? 'bg-[#1E293B] border-slate-700/80 text-white' : 'bg-white border-slate-200/80 text-slate-900'
             }`}>
-              <div>
-                <span className="text-[11px] text-slate-500 font-normal block">{isBn ? 'মোট বিল (Billed)' : 'Total Billed'}</span>
-                <span className="text-sm font-semibold text-slate-800 dark:text-white font-mono">৳{billedVal.toLocaleString()}</span>
+              <div className="p-4 border-b flex items-center justify-between border-slate-200/80 dark:border-slate-700/80">
+                <h3 className="text-xs font-semibold uppercase tracking-wider flex items-center space-x-2 text-[#00897B]">
+                  <Receipt className="w-4 h-4" />
+                  <span>{isBn ? 'লেনদেনের বিস্তারিত হিসেব (Financial Ledger Audit)' : 'Financial Ledger Transactions Audit'}</span>
+                </h3>
+                <span className="text-[11px] text-slate-500 font-normal">{customerLedger.length} {isBn ? 'টি এন্ট্রি' : 'records'}</span>
               </div>
-              <div>
-                <span className="text-[11px] text-emerald-600 font-normal block">{isBn ? 'আদায়কৃত (Paid)' : 'Total Paid'}</span>
-                <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-400 font-mono">৳{(selectedCustomer.total_paid || 0).toLocaleString()}</span>
-              </div>
-              <div>
-                <span className="text-[11px] text-rose-600 font-normal block">{isBn ? 'বাকি বকেয়া (Due)' : 'Current Due'}</span>
-                <span className="text-sm font-semibold text-rose-700 dark:text-rose-400 font-mono">৳{(selectedCustomer.total_due || 0).toLocaleString()}</span>
-              </div>
-            </div>
-          </div>
 
-          {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t dark:border-slate-700/80 text-xs font-normal">
-            <div className="space-y-0.5">
-              <span className="text-[11px] text-slate-400">{isBn ? 'মোট কার্টুন সংখ্যা:' : 'Total Cartons:'}</span>
-              <p className="font-semibold font-mono text-slate-700 dark:text-slate-200">{customerCartons.length} {isBn ? 'টি কার্টুন' : 'cartons'}</p>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-normal">
+                  <thead className={`uppercase text-[10px] tracking-wider border-b font-medium ${
+                    isDark ? 'bg-[#1E293B] text-slate-400 border-slate-700/80' : 'bg-slate-50/80 text-slate-500 border-slate-200/70'
+                  }`}>
+                    <tr>
+                      <th className="p-3">তারিখ (Date)</th>
+                      <th className="p-3">বিবরণ / রসিদ নং (Particulars / Ref)</th>
+                      <th className="p-3 text-right">চার্জ (Debit ৳)</th>
+                      <th className="p-3 text-right">জমা (Credit ৳)</th>
+                      <th className="p-3 text-right">জের (Balance ৳)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200/60 dark:divide-slate-700/60">
+                    {customerLedger.length === 0 ? (
+                      <tr>
+                        <td colSpan={5} className="p-6 text-center text-slate-400 text-xs">
+                          {isBn ? 'কোন লেনদেনের তথ্য পাওয়া যায়নি' : 'No financial transaction entries found.'}
+                        </td>
+                      </tr>
+                    ) : (
+                      customerLedger.map((ledg) => (
+                        <tr key={ledg.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                          <td className="p-3 font-mono text-[11px] text-slate-600 dark:text-slate-300">{ledg.date}</td>
+                          <td className="p-3">
+                            <p className="font-medium text-slate-800 dark:text-slate-200">{ledg.description}</p>
+                            {ledg.reference_no && <p className="text-[10px] text-slate-400 font-mono">Ref: {ledg.reference_no}</p>}
+                          </td>
+                          <td className="p-3 text-right font-mono font-medium text-slate-900 dark:text-white">
+                            {ledg.debit > 0 ? `৳${ledg.debit.toLocaleString()}` : '-'}
+                          </td>
+                          <td className="p-3 text-right font-mono font-semibold text-emerald-600 dark:text-emerald-400">
+                            {ledg.credit > 0 ? `৳${ledg.credit.toLocaleString()}` : '-'}
+                          </td>
+                          <td className={`p-3 text-right font-mono font-semibold ${
+                            ledg.balance > 0 ? 'text-rose-600 dark:text-rose-400' : 'text-slate-700 dark:text-slate-300'
+                          }`}>
+                            ৳{ledg.balance.toLocaleString()}
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
-            <div className="space-y-0.5">
-              <span className="text-[11px] text-slate-400">{isBn ? 'মোট ফ্রেইট ওজন (kg):' : 'Total Weight:'}</span>
-              <p className="font-semibold font-mono text-emerald-600 dark:text-emerald-400">{totalWeightShipped.toFixed(1)} kg</p>
-            </div>
-            <div className="space-y-0.5">
-              <span className="text-[11px] text-slate-400">{isBn ? 'মোট কার্গো ভলিউম (CBM):' : 'Total Volume:'}</span>
-              <p className="font-semibold font-mono text-blue-600 dark:text-blue-400">{totalCbmShipped.toFixed(2)} CBM</p>
-            </div>
-            <div className="space-y-0.5">
-              <span className="text-[11px] text-slate-400">{isBn ? 'প্রাইমারি মার্ক প্রিফিক্স:' : 'Master Mark Prefix:'}</span>
-              <p className="font-semibold font-mono text-[#00897B]">{selectedCustomer.shipping_mark || 'MAR-8801'}</p>
+
+            {/* Carton Roster Table */}
+            <div className={`border rounded-none-none overflow-hidden shadow-2xs ${
+              isDark ? 'bg-[#1E293B] border-slate-700/80 text-white' : 'bg-white border-slate-200/80 text-slate-900'
+            }`}>
+              <div className="p-4 border-b flex items-center justify-between border-slate-200/80 dark:border-slate-700/80">
+                <h3 className="text-xs font-semibold uppercase tracking-wider flex items-center space-x-2 text-[#00897B]">
+                  <Box className="w-4 h-4" />
+                  <span>{isBn ? 'কার্টুন ও শিপমেন্ট হিস্টোরি (Carton Roster History)' : 'Shipment & Carton Roster History'}</span>
+                </h3>
+                <span className="text-[11px] text-slate-500 font-normal">{customerCartons.length} {isBn ? 'টি কার্টুন' : 'cartons'}</span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-normal">
+                  <thead className={`uppercase text-[10px] tracking-wider border-b font-medium ${
+                    isDark ? 'bg-[#1E293B] text-slate-400 border-slate-700/80' : 'bg-slate-50/80 text-slate-500 border-slate-200/70'
+                  }`}>
+                    <tr>
+                      <th className="p-3">কার্টুন নং (Carton Code)</th>
+                      <th className="p-3">শিপিং মার্ক (Mark)</th>
+                      <th className="p-3">পণ্যের বিবরণ (Goods)</th>
+                      <th className="p-3 text-right">ওজন (Kg) / CBM</th>
+                      <th className="p-3 text-right">রেট / বিল (৳)</th>
+                      <th className="p-3 text-center">স্ট্যাটাস</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200/60 dark:divide-slate-700/60">
+                    {customerCartons.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="p-6 text-center text-slate-400 text-xs">
+                          {isBn ? 'এই কাস্টমারের কোন কার্টুন অ্যাসাইন বা এন্ট্রি করা নেই' : 'No cartons found for this customer shipping mark.'}
+                        </td>
+                      </tr>
+                    ) : (
+                      customerCartons.map((ctn) => (
+                        <tr key={ctn.id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
+                          <td className="p-3 font-mono font-medium text-slate-900 dark:text-white">{ctn.carton_code}</td>
+                          <td className="p-3 font-mono text-xs text-[#00897B] font-semibold">{ctn.shipping_mark}</td>
+                          <td className="p-3 text-slate-700 dark:text-slate-300">{ctn.product_name || ctn.remarks || 'General Cargo'}</td>
+                          <td className="p-3 text-right font-mono text-slate-700 dark:text-slate-300">
+                            {ctn.gross_weight ? `${ctn.gross_weight} kg` : ctn.cbm ? `${ctn.cbm} CBM` : '-'}
+                          </td>
+                          <td className="p-3 text-right font-mono font-medium text-slate-900 dark:text-white">
+                            ৳{(ctn.total_freight_bdt || 0).toLocaleString()}
+                          </td>
+                          <td className="p-3 text-center">
+                            <span className="px-2 py-0.5 text-[10px] uppercase tracking-wider font-semibold rounded-none-none bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
+                              {ctn.status || 'Received'}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Tab Navigation: Products Cartons History vs Financial Transactions Ledger */}
-        <div className="flex items-center space-x-2 border-b dark:border-slate-700/80 pb-2">
-          <button
-            onClick={() => setCustomerActiveTab('products')}
-            className={`px-4 py-2 rounded-none-none text-xs font-normal transition-all cursor-pointer flex items-center space-x-2 ${
-              customerActiveTab === 'products'
-                ? 'bg-[#00897B] text-white shadow-2xs'
-                : isDark
-                ? 'bg-[#1E293B] text-slate-400 hover:text-white'
-                : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
-            }`}
-          >
-            <Package className="w-4 h-4" />
-            <span>{isBn ? `📦 কাস্টমারের সব প্রোডাক্ট কার্টুন (${customerCartons.length})` : `Cartons & Product History (${customerCartons.length})`}</span>
-          </button>
+        {/* =========================================================================
+            2. OFFICIAL PRINTABLE A4 STATEMENT DOCUMENT (PRINT ONLY)
+            ========================================================================= */}
+        <div className="printable-document hidden print:block text-slate-900 font-sans p-4 bg-white">
+          {/* Header Banner */}
+          <div className="border-b-2 border-slate-900 pb-4 mb-4 flex justify-between items-start">
+            <div>
+              <h1 className="text-xl font-bold tracking-tight text-slate-900 uppercase">M/S FOUR STAR CARGO</h1>
+              <p className="text-[11px] text-slate-600 font-medium">Cargo Tracking, International Logistics & Financial Operations</p>
+              <p className="text-[10px] text-slate-500 mt-1">Guangzhou / HK Origin Hub & Dhaka Head Office | Tel: +880 1700-000000</p>
+            </div>
+            <div className="text-right">
+              <div className="inline-block bg-slate-900 text-white text-xs font-bold px-3 py-1 uppercase tracking-wider mb-1">
+                STATEMENT OF ACCOUNT
+              </div>
+              <p className="text-[10px] text-slate-600 font-mono">Date: {new Date().toLocaleDateString('en-GB')}</p>
+              <p className="text-[10px] text-slate-600 font-mono">Time: {new Date().toLocaleTimeString()}</p>
+            </div>
+          </div>
 
-          <button
-            onClick={() => setCustomerActiveTab('transactions')}
-            className={`px-4 py-2 rounded-none-none text-xs font-normal transition-all cursor-pointer flex items-center space-x-2 ${
-              customerActiveTab === 'transactions'
-                ? 'bg-[#00897B] text-white shadow-2xs'
-                : isDark
-                ? 'bg-[#1E293B] text-slate-400 hover:text-white'
-                : 'bg-white border border-slate-200 text-slate-700 hover:bg-slate-50'
-            }`}
-          >
-            <Receipt className="w-4 h-4" />
-            <span>{isBn ? `💰 পেমেন্ট ও লেনদেন ইতিহাস (${customerLedger.length})` : `Ledger Transactions (${customerLedger.length})`}</span>
-          </button>
+          {/* Customer & Summary Meta Box */}
+          <div className="grid grid-cols-2 gap-4 mb-4 border border-slate-300 p-3 bg-slate-50/50 text-xs">
+            <div>
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">CLIENT BILL TO:</p>
+              <h2 className="text-sm font-bold text-slate-900">{selectedCustomer.name}</h2>
+              <p className="text-xs font-mono font-semibold text-[#00897B]">Shipping Mark: {selectedCustomer.shipping_mark}</p>
+              <p className="text-xs font-mono text-slate-700">Mobile: {selectedCustomer.phone}</p>
+              {selectedCustomer.address && <p className="text-xs text-slate-600">Address: {selectedCustomer.address}</p>}
+            </div>
+
+            <div className="border-l border-slate-300 pl-4 space-y-1">
+              <p className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">FINANCIAL ACCOUNT SUMMARY:</p>
+              <div className="flex justify-between text-xs py-0.5 border-b border-slate-200">
+                <span>Total Freight Billed:</span>
+                <span className="font-mono font-semibold">৳{billedVal.toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-xs py-0.5 border-b border-slate-200">
+                <span>Total Payments Received:</span>
+                <span className="font-mono font-semibold text-emerald-700">৳{(selectedCustomer.total_paid || 0).toLocaleString()}</span>
+              </div>
+              <div className="flex justify-between text-xs font-bold py-1 text-slate-900">
+                <span>NET OUTSTANDING DUE:</span>
+                <span className="font-mono text-sm text-rose-700">৳{(selectedCustomer.total_due || 0).toLocaleString()}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Ledger Audit Table */}
+          <div className="mb-6">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2 border-b border-slate-400 pb-1">
+              1. FINANCIAL TRANSACTION AUDIT LEDGER
+            </h3>
+            <table className="w-full text-left text-xs border border-slate-300">
+              <thead className="bg-slate-100 text-slate-900 font-bold uppercase text-[10px] border-b border-slate-300">
+                <tr>
+                  <th className="p-2 border-r border-slate-300">Date</th>
+                  <th className="p-2 border-r border-slate-300">Particulars / Transaction Description</th>
+                  <th className="p-2 border-r border-slate-300 text-right">Debit (৳)</th>
+                  <th className="p-2 border-r border-slate-300 text-right">Credit (৳)</th>
+                  <th className="p-2 text-right">Balance (৳)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 text-[11px]">
+                {customerLedger.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="p-3 text-center text-slate-500 italic">No ledger entries recorded.</td>
+                  </tr>
+                ) : (
+                  customerLedger.map((ledg) => (
+                    <tr key={ledg.id}>
+                      <td className="p-2 border-r border-slate-200 font-mono text-[10px]">{ledg.date}</td>
+                      <td className="p-2 border-r border-slate-200">{ledg.description} {ledg.reference_no ? `(Ref: ${ledg.reference_no})` : ''}</td>
+                      <td className="p-2 border-r border-slate-200 text-right font-mono">{ledg.debit > 0 ? `৳${ledg.debit.toLocaleString()}` : '-'}</td>
+                      <td className="p-2 border-r border-slate-200 text-right font-mono font-semibold text-emerald-800">{ledg.credit > 0 ? `৳${ledg.credit.toLocaleString()}` : '-'}</td>
+                      <td className="p-2 text-right font-mono font-bold">৳{ledg.balance.toLocaleString()}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Carton Roster Table */}
+          <div className="mb-6">
+            <h3 className="text-xs font-bold uppercase tracking-wider text-slate-900 mb-2 border-b border-slate-400 pb-1">
+              2. CARGO SHIPMENT & CARTON ROSTER
+            </h3>
+            <table className="w-full text-left text-xs border border-slate-300">
+              <thead className="bg-slate-100 text-slate-900 font-bold uppercase text-[10px] border-b border-slate-300">
+                <tr>
+                  <th className="p-2 border-r border-slate-300">Carton Code</th>
+                  <th className="p-2 border-r border-slate-300">Shipping Mark</th>
+                  <th className="p-2 border-r border-slate-300">Goods Description</th>
+                  <th className="p-2 border-r border-slate-300 text-right">Weight/CBM</th>
+                  <th className="p-2 text-right">Billed Amount (৳)</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-200 text-[11px]">
+                {customerCartons.length === 0 ? (
+                  <tr>
+                    <td colSpan={5} className="p-3 text-center text-slate-500 italic">No cartons assigned to this shipping mark.</td>
+                  </tr>
+                ) : (
+                  customerCartons.map((ctn) => (
+                    <tr key={ctn.id}>
+                      <td className="p-2 border-r border-slate-200 font-mono font-medium">{ctn.carton_code}</td>
+                      <td className="p-2 border-r border-slate-200 font-mono font-bold text-[#00897B]">{ctn.shipping_mark}</td>
+                      <td className="p-2 border-r border-slate-200">{ctn.product_name || ctn.remarks || 'General Cargo'}</td>
+                      <td className="p-2 border-r border-slate-200 text-right font-mono">{ctn.gross_weight ? `${ctn.gross_weight} kg` : ctn.cbm ? `${ctn.cbm} CBM` : '-'}</td>
+                      <td className="p-2 text-right font-mono font-semibold">৳{(ctn.total_freight_bdt || 0).toLocaleString()}</td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Signatures & Approval Footer */}
+          <div className="pt-8 mt-6 border-t border-slate-300 grid grid-cols-3 gap-4 text-center text-xs">
+            <div>
+              <div className="border-t border-slate-800 pt-1 mt-8 font-semibold text-slate-900">PREPARED BY</div>
+              <p className="text-[10px] text-slate-500">Accounts Executive</p>
+            </div>
+            <div>
+              <div className="border-t border-slate-800 pt-1 mt-8 font-semibold text-slate-900">VERIFIED BY</div>
+              <p className="text-[10px] text-slate-500">Audit & Operations Manager</p>
+            </div>
+            <div>
+              <div className="border-t border-slate-800 pt-1 mt-8 font-semibold text-slate-900">CUSTOMER SIGNATURE</div>
+              <p className="text-[10px] text-slate-500">Received & Accepted</p>
+            </div>
+          </div>
         </div>
-
-        {/* TAB 1: PRODUCT CARTONS HISTORY */}
-        {customerActiveTab === 'products' && (
-          <div className={`border rounded-none-none overflow-hidden shadow-2xs ${
-            isDark ? 'bg-[#1E293B] border-slate-700/80 text-white' : 'bg-white border-slate-200/80 text-slate-900'
-          }`}>
-            <div className="p-4 border-b dark:border-slate-700/80 flex items-center justify-between">
-              <div>
-                <h3 className="text-xs font-semibold flex items-center space-x-2">
-                  <Package className="w-4 h-4 text-[#00897B]" />
-                  <span>{isBn ? 'এই কাস্টমারের মাধ্যমে আনানো সকল প্রোডাক্ট ও কার্টুন তালিকা' : 'All Products & Cartons Shipped by Customer'}</span>
-                </h3>
-                <p className="text-[11px] text-slate-500 mt-0.5 font-normal">
-                  {isBn ? 'প্রত্যেকটি কার্টুনের আলাদা নিজস্ব শিপিং মার্ক সহ লাইভ ইনভেন্টরি' : 'Individual carton shipping marks and live tracking'}
-                </p>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-normal">
-                <thead className={`uppercase text-[10px] tracking-wider border-b font-medium ${
-                  isDark ? 'bg-[#1E293B] text-slate-400 border-slate-700/80' : 'bg-slate-50/80 text-slate-500 border-slate-200/70'
-                }`}>
-                  <tr>
-                    <th className="p-3.5">WAREHOUSE CARTON NUMBER</th>
-                    <th className="p-3.5">কার্টুনের নিজস্ব শিপিং মার্ক</th>
-                    <th className="p-3.5">Product Details</th>
-                    <th className="p-3.5">Gross Weight</th>
-                    <th className="p-3.5">Volume (CBM)</th>
-                    <th className="p-3.5">Warehouse Hub</th>
-                    <th className="p-3.5 text-center">Status</th>
-                  </tr>
-                </thead>
-                <tbody className={`divide-y ${isDark ? 'divide-slate-800/80' : 'divide-slate-100'}`}>
-                  {customerCartons.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="p-10 text-center text-xs text-slate-400 font-normal">
-                        {isBn ? 'এই কাস্টমারের মার্কের বিপরীতে কোনো কার্টুন বুকিং পাওয়া যায়নি।' : 'No cartons found matching this shipping mark.'}
-                      </td>
-                    </tr>
-                  ) : (
-                    customerCartons.map((ctn) => (
-                      <tr key={ctn.id} className={isDark ? 'hover:bg-[#222224] transition-colors' : 'hover:bg-slate-50/60 transition-colors'}>
-                        <td className="p-3.5 font-mono font-medium text-[#00897B]">
-                          {ctn.ctn_no}
-                        </td>
-                        <td className="p-3.5">
-                          <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-none-none text-[11px] font-mono font-medium bg-[#00897B]/10 text-[#00897B] border border-[#00897B]/20">
-                            <Tag className="w-3 h-3" />
-                            <span>{ctn.shipping_mark || `${selectedCustomer.shipping_mark || 'MAR-8801'}/${ctn.ctn_no}`}</span>
-                          </span>
-                        </td>
-                        <td className="p-3.5">
-                          <p className="font-medium text-slate-800 dark:text-slate-200">{ctn.product_name_en}</p>
-                          {ctn.product_name_cn && <p className="text-[10px] text-slate-400">{ctn.product_name_cn}</p>}
-                        </td>
-                        <td className="p-3.5 font-mono text-emerald-700 dark:text-emerald-400">
-                          {ctn.gross_weight} kg
-                        </td>
-                        <td className="p-3.5 font-mono text-blue-600 dark:text-blue-400">
-                          {ctn.cbm} CBM
-                        </td>
-                        <td className="p-3.5">
-                          <span className="flex items-center space-x-1 text-slate-600 dark:text-slate-300">
-                            <Building2 className="w-3.5 h-3.5 text-slate-400" />
-                            <span>{ctn.current_warehouse_name || 'Guangzhou Hub'}</span>
-                          </span>
-                        </td>
-                        <td className="p-3.5 text-center">
-                          <span className={`px-2.5 py-0.5 rounded-none-none text-[10px] font-normal border ${
-                            ctn.status === 'delivered'
-                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200/60 dark:bg-emerald-950/40 dark:text-emerald-300'
-                              : ctn.status === 'in_transit'
-                              ? 'bg-blue-50 text-blue-800 border-blue-200/60 dark:bg-blue-950/40 dark:text-blue-300'
-                              : 'bg-slate-100 text-slate-900 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
-                          }`}>
-                            {ctn.status === 'delivered' ? '🟢 Delivered' : ctn.status === 'in_transit' ? '✈️ In Transit' : '📦 At Origin Hub'}
-                          </span>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
-
-        {/* TAB 2: FINANCIAL TRANSACTIONS LEDGER */}
-        {customerActiveTab === 'transactions' && (
-          <div className={`border rounded-none-none overflow-hidden shadow-2xs ${
-            isDark ? 'bg-[#1E293B] border-slate-700/80 text-white' : 'bg-white border-slate-200/80 text-slate-900'
-          }`}>
-            <div className="p-4 border-b dark:border-slate-700/80 flex items-center justify-between">
-              <div>
-                <h3 className="text-xs font-semibold flex items-center space-x-2">
-                  <Receipt className="w-4 h-4 text-emerald-600" />
-                  <span>{isBn ? 'কাস্টমারের পেমেন্ট জমার অডিট লেজার' : 'Financial Ledger Transactions Audit Trail'}</span>
-                </h3>
-                <p className="text-[11px] text-slate-500 mt-0.5 font-normal">
-                  {isBn ? 'সমস্ত ফ্রেইট চার্জ এবং পেমেন্ট জমার সঠিক হিসাবপত্র' : 'Complete audit of billed charges and payments received'}
-                </p>
-              </div>
-            </div>
-
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-normal">
-                <thead className={`uppercase text-[10px] tracking-wider border-b font-medium ${
-                  isDark ? 'bg-[#1E293B] text-slate-400 border-slate-700/80' : 'bg-slate-50/80 text-slate-500 border-slate-200/70'
-                }`}>
-                  <tr>
-                    <th className="p-3.5">Date & Time</th>
-                    <th className="p-3.5">Type</th>
-                    <th className="p-3.5">Details / Description</th>
-                    <th className="p-3.5">Payment Method</th>
-                    <th className="p-3.5 text-right">Charge (বিল)</th>
-                    <th className="p-3.5 text-right">Payment (জমা)</th>
-                    <th className="p-3.5 text-center">Officer</th>
-                  </tr>
-                </thead>
-                <tbody className={`divide-y ${isDark ? 'divide-slate-800/80' : 'divide-slate-100'}`}>
-                  {customerLedger.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="p-10 text-center text-xs text-slate-400 font-normal">
-                        {isBn ? 'এই কাস্টমারের কোনো লেজার ট্রানজেকশন রেকর্ড পাওয়া যায়নি।' : 'No transactions recorded for this customer.'}
-                      </td>
-                    </tr>
-                  ) : (
-                    customerLedger.map((entry) => (
-                      <tr key={entry.id} className={isDark ? 'hover:bg-[#222224] transition-colors' : 'hover:bg-slate-50/60 transition-colors'}>
-                        <td className="p-3.5 font-mono text-slate-400 text-[11px]">
-                          {new Date(entry.created_at).toLocaleString()}
-                        </td>
-                        <td className="p-3.5">
-                          <span className={`px-2 py-0.5 rounded-none-none text-[10px] font-normal border ${
-                            entry.type === 'payment'
-                              ? 'bg-emerald-50 text-emerald-800 border-emerald-200/60 dark:bg-emerald-950/40 dark:text-emerald-300'
-                              : 'bg-slate-100 text-slate-900 border-slate-300 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700'
-                          }`}>
-                            {entry.type === 'payment' ? '🟢 পেমেন্ট জমা' : '🧾 ফ্রেইট বিল'}
-                          </span>
-                        </td>
-                        <td className="p-3.5 text-xs text-slate-700 dark:text-slate-200">
-                          {formatInvoiceNoteToEnglish(entry.note)}
-                        </td>
-                        <td className="p-3.5 font-mono text-[11px]">
-                          {entry.payment_method ? (
-                            <span className="uppercase text-[#00897B] font-medium">{entry.payment_method} ({entry.reference_no || 'N/A'})</span>
-                          ) : (
-                            <span className="text-slate-400">System Auto</span>
-                          )}
-                        </td>
-                        <td className="p-3.5 text-right font-mono font-medium text-slate-900 dark:text-slate-100">
-                          {entry.type === 'charge' ? `৳${entry.amount.toLocaleString()}` : '-'}
-                        </td>
-                        <td className="p-3.5 text-right font-mono font-medium text-emerald-700 dark:text-emerald-400">
-                          {entry.type === 'payment' ? `৳${entry.amount.toLocaleString()}` : '-'}
-                        </td>
-                        <td className="p-3.5 text-center text-slate-500 text-[11px]">
-                          {entry.entered_by_name || 'System'}
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        )}
       </div>
     );
   }
