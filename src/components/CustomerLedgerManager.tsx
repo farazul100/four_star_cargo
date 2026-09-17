@@ -241,16 +241,58 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
     );
   };
 
-  // Helper to find cartons for a customer (by mark or code)
+  // Helper to find cartons for a customer (by customer_id, customer_code, shipping_mark, or phone)
   const getCustomerCartons = (c: Customer) => {
-    const custMarkUpper = (c.shipping_mark || '').toUpperCase();
-    const custCodeUpper = (c.customer_code || '').toUpperCase();
+    if (!c || !cartons || cartons.length === 0) return [];
+
+    const custId = c.id;
+    const custCode = (c.customer_code || '').toLowerCase().trim();
+    const custName = (c.name || '').toLowerCase().trim();
+    const custPhone = (c.phone || '').replace(/\D/g, '');
+
+    const cleanMark = (str?: string) => (str || '').toLowerCase().replace(/^mark:\s*/i, '').trim();
+    const custMark = cleanMark(c.shipping_mark);
+
     return cartons.filter((ctn) => {
-      const ctnMarkUpper = (ctn.shipping_mark || '').toUpperCase();
-      return (
-        (custMarkUpper && ctnMarkUpper.includes(custMarkUpper)) ||
-        (custCodeUpper && ctnMarkUpper.includes(custCodeUpper))
-      );
+      if (!ctn) return false;
+
+      // 1. Direct ID match
+      if (ctn.customer_id && ctn.customer_id === custId) return true;
+
+      // 2. Customer Code match
+      const ctnCustCode = (ctn.customer_code || '').toLowerCase().trim();
+      if (custCode && ctnCustCode && ctnCustCode === custCode) return true;
+
+      // 3. Customer Name match
+      const ctnCustName = (ctn.customer_name || '').toLowerCase().trim();
+      if (custName && ctnCustName && ctnCustName === custName) return true;
+
+      // 4. Shipping Mark & Tracking Substring matching
+      const cMark = cleanMark(ctn.shipping_mark);
+      const cTrk = cleanMark(ctn.tracking_number);
+      const cMaster = cleanMark(ctn.master_tracking_number);
+      const cGroup = cleanMark(ctn.master_group_id);
+
+      if (custMark) {
+        if (
+          cMark === custMark ||
+          (cMark && custMark && (cMark.includes(custMark) || custMark.includes(cMark))) ||
+          cTrk === custMark ||
+          cMaster === custMark ||
+          cGroup === custMark
+        ) {
+          return true;
+        }
+      }
+
+      // 5. Phone / Digits matching (e.g. RK-01904019315 matching 01904019315)
+      if (custPhone && custPhone.length >= 6) {
+        if (cMark.includes(custPhone) || cTrk.includes(custPhone) || cMaster.includes(custPhone)) {
+          return true;
+        }
+      }
+
+      return false;
     });
   };
 
