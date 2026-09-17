@@ -953,11 +953,42 @@ export const processServerDbUpdate = (serverDb: any) => {
         localStorage.setItem('fsc_vps_warehouses', serverStr);
       }
       if (key === DB_KEYS.CARTONS || key === 'fsc_vps_cartons' || key === 'cartons') {
-        localStorage.setItem(DB_KEYS.CARTONS, serverStr);
-        localStorage.setItem('fsc_vps_cartons', serverStr);
-        localStorage.setItem('cartons', serverStr);
+        let mergedCartons = Array.isArray(serverData) ? serverData : [];
+        try {
+          const localRawCartons = localStorage.getItem(DB_KEYS.CARTONS) || localStorage.getItem('fsc_vps_cartons');
+          if (localRawCartons) {
+            const localCartons: Carton[] = JSON.parse(localRawCartons);
+            const localMap = new Map<string, Carton>();
+            localCartons.forEach((lc) => lc && lc.id && localMap.set(String(lc.id), lc));
+
+            mergedCartons = mergedCartons.map((sc: Carton) => {
+              const lc = localMap.get(String(sc.id));
+              if (lc && lc.customer_id && (!sc.customer_id || sc.customer_name?.includes('Unassigned'))) {
+                return {
+                  ...sc,
+                  customer_id: lc.customer_id,
+                  customer_code: lc.customer_code,
+                  customer_name: lc.customer_name,
+                  rate_per_kg: lc.rate_per_kg || sc.rate_per_kg,
+                };
+              }
+              return sc;
+            });
+
+            localCartons.forEach((lc) => {
+              if (lc && lc.id && !mergedCartons.some((sc: Carton) => String(sc.id) === String(lc.id))) {
+                mergedCartons.push(lc);
+              }
+            });
+          }
+        } catch (e) {}
+
+        const finalServerStr = JSON.stringify(mergedCartons);
+        localStorage.setItem(DB_KEYS.CARTONS, finalServerStr);
+        localStorage.setItem('fsc_vps_cartons', finalServerStr);
+        localStorage.setItem('cartons', finalServerStr);
         if (typeof window !== 'undefined') {
-          window.__FSC_GLOBAL_CARTONS__ = Array.isArray(serverData) ? serverData : JSON.parse(serverStr);
+          window.__FSC_GLOBAL_CARTONS__ = mergedCartons;
         }
       }
       if (key === DB_KEYS.PROPOSALS || key === 'fsc_vps_proposals' || key === 'proposals') {
@@ -969,9 +1000,26 @@ export const processServerDbUpdate = (serverDb: any) => {
         }
       }
       if (key === DB_KEYS.CUSTOMERS || key === 'fsc_vps_customers' || key === 'customers') {
-        localStorage.setItem(DB_KEYS.CUSTOMERS, serverStr);
-        localStorage.setItem('fsc_vps_customers', serverStr);
-        localStorage.setItem('customers', serverStr);
+        let mergedCustomers = Array.isArray(serverData) ? serverData : [];
+        try {
+          const localRawCusts = localStorage.getItem(DB_KEYS.CUSTOMERS) || localStorage.getItem('fsc_vps_customers');
+          if (localRawCusts) {
+            const localCusts: Customer[] = JSON.parse(localRawCusts);
+            const custMap = new Map<string, Customer>();
+            mergedCustomers.forEach((sc: Customer) => sc && sc.id && custMap.set(String(sc.id), sc));
+            localCusts.forEach((lc: Customer) => {
+              if (lc && lc.id && !custMap.has(String(lc.id))) {
+                custMap.set(String(lc.id), lc);
+              }
+            });
+            mergedCustomers = Array.from(custMap.values());
+          }
+        } catch (e) {}
+
+        const finalCustStr = JSON.stringify(mergedCustomers);
+        localStorage.setItem(DB_KEYS.CUSTOMERS, finalCustStr);
+        localStorage.setItem('fsc_vps_customers', finalCustStr);
+        localStorage.setItem('customers', finalCustStr);
       }
       if (key === DB_KEYS.CRM_CUSTOMERS || key === 'fsc_vps_crm_customers' || key === 'crmCustomers' || key === 'crm_customers') {
         localStorage.setItem(DB_KEYS.CRM_CUSTOMERS, serverStr);
