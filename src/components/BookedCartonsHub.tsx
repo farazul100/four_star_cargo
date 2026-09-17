@@ -665,6 +665,12 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       setLiveRealtimeCartons(finalCartonsToSet);
       setSelectedCustomerFilter('all');
 
+      if (onUpdateCarton) {
+        finalCartonsToSet.forEach((c) => {
+          onUpdateCarton(c);
+        });
+      }
+
       logSystemAuditAction(
         currentUser,
         'MAP_CUSTOMER_TO_MARK',
@@ -709,7 +715,13 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   };
 
   React.useEffect(() => {
-    setLiveRealtimeCartons(cartons);
+    const dbData = getHostingerDbData();
+    const dbCartons = dbData.cartons || [];
+    if (dbCartons.length > 0) {
+      setLiveRealtimeCartons(dbCartons);
+    } else {
+      setLiveRealtimeCartons(cartons);
+    }
   }, [cartons]);
 
   React.useEffect(() => {
@@ -1706,7 +1718,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 const custCbm = groupCartons.reduce((sum, c) => sum + (c.cbm || 0), 0);
                 const trackingNos = Array.from(new Set(groupCartons.map((c) => c.tracking_number).filter(Boolean)));
                 const firstCarton = groupCartons[0];
-                const destName = firstCarton?.destination_warehouse_name || warehouses.find((w) => w.id === firstCarton?.destination_warehouse_id)?.name || 'Bangladesh Hub';
+                const mappedCarton = groupCartons.find((c) => c.customer_name && !c.customer_name.includes('Unassigned'));
+                const displayCarton = mappedCarton || firstCarton;
+                const destName = displayCarton?.destination_warehouse_name || warehouses.find((w) => w.id === displayCarton?.destination_warehouse_id)?.name || 'Bangladesh Hub';
 
                 return (
                   <div
@@ -1724,7 +1738,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                         <div>
                           <div className="text-xs font-mono text-blue-600 dark:text-blue-400 font-extrabold flex items-center space-x-1.5">
                             <span>
-                              {firstCarton?.tracking_number && mark === firstCarton.tracking_number
+                              {displayCarton?.tracking_number && mark === displayCarton.tracking_number
                                 ? `TRACKING: ${mark}`
                                 : `MARK: ${mark}`}
                             </span>
@@ -1742,10 +1756,10 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                           })()}
                           {canPerformCustomerMapping && (
                             <div className="mt-1 flex items-center space-x-1">
-                              {firstCarton?.customer_name && !firstCarton.customer_name.includes('Unassigned') ? (
+                              {displayCarton?.customer_name && !displayCarton.customer_name.includes('Unassigned') ? (
                                 <span className="px-2 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 flex items-center space-x-1 shadow-2xs">
                                   <UserCheck className="w-3 h-3" />
-                                  <span>{firstCarton.customer_name}</span>
+                                  <span>{displayCarton.customer_name}</span>
                                 </span>
                               ) : (
                                 <span className="px-2.5 py-1 rounded-full text-[11px] font-bold bg-amber-100 dark:bg-amber-950/80 text-[#78350F] dark:text-amber-200 border border-amber-300 dark:border-amber-700/80 flex items-center space-x-1 shadow-xs">
