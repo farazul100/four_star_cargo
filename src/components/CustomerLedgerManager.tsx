@@ -27,6 +27,7 @@ import {
   CheckCircle,
   Layers,
   Sparkles,
+  Box,
 } from 'lucide-react';
 import { Customer, LedgerEntry, Carton, Language, Theme } from '../types';
 import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSystemAuditAction, publishSystemNotification } from '../lib/db';
@@ -73,6 +74,7 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
   // Modals State
   const [showAddCustomerModal, setShowAddCustomerModal] = useState(false);
   const [customerForPayment, setCustomerForPayment] = useState<Customer | null>(null);
+  const [showAddEntryModal, setShowAddEntryModal] = useState(false);
 
   // Add Customer Form State
   const [newCustName, setNewCustName] = useState('');
@@ -86,6 +88,11 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
   const [payMethod, setPayMethod] = useState<'cash' | 'bkash' | 'nagad' | 'bank_wire' | 'check'>('bkash');
   const [payRefNo, setPayRefNo] = useState('');
   const [payNote, setPayNote] = useState('');
+
+  // Custom Ledger Entry Form State
+  const [entryType, setEntryType] = useState<'charge' | 'discount' | 'adjustment'>('charge');
+  const [entryAmount, setEntryAmount] = useState('');
+  const [entryDesc, setEntryDesc] = useState('');
 
   // Toast Helper
   const addToast = (type: 'success' | 'error' | 'info', title: string, message?: string) => {
@@ -239,6 +246,47 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
       isBn ? 'পেমেন্ট জমা সফল!' : 'Payment Received Successfully!',
       isBn ? `৳${amount.toLocaleString()} জমা হয়েছে (${customerForPayment.name})` : `৳${amount.toLocaleString()} credited.`
     );
+  };
+
+  const handleAddLedgerEntry = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedCustomer) return;
+    const amt = parseFloat(entryAmount);
+    if (isNaN(amt) || amt <= 0) {
+      addToast('error', isBn ? 'ত্রুটি' : 'Error', isBn ? 'সঠিক টাকার পরিমাণ দিন' : 'Please enter a valid amount');
+      return;
+    }
+
+    const newEntry: LedgerEntry = {
+      id: `LEDG-${Date.now()}`,
+      customer_id: selectedCustomer.id,
+      customer_name: selectedCustomer.name,
+      customer_code: selectedCustomer.customer_code || selectedCustomer.shipping_mark,
+      date: new Date().toISOString().split('T')[0],
+      description: entryDesc || (entryType === 'discount' ? 'Discount / Waiver' : 'Additional Charge / Fee'),
+      debit: entryType === 'charge' ? amt : 0,
+      credit: entryType === 'discount' || entryType === 'adjustment' ? amt : 0,
+      balance: 0,
+      reference_no: `ADJ-${Math.floor(1000 + Math.random() * 9000)}`,
+    };
+
+    const updatedEntries = [newEntry, ...ledgerEntries];
+    setLedgerEntries(updatedEntries);
+
+    saveHostingerDbData('fsc_vps_ledger', updatedEntries);
+    logSystemAuditAction('Super Admin', 'ADD_LEDGER_ENTRY', `Added ledger entry for ${selectedCustomer.name}: ৳${amt}`);
+
+    const recalculated = recalculateCustomerLedgerAndBilling(selectedCustomer.id, true);
+    if (recalculated && recalculated.updatedCustomers) {
+      setCustomers(recalculated.updatedCustomers);
+      const updatedSelected = recalculated.updatedCustomers.find((c) => c.id === selectedCustomer.id);
+      if (updatedSelected) setSelectedCustomer(updatedSelected);
+    }
+
+    setShowAddEntryModal(false);
+    setEntryAmount('');
+    setEntryDesc('');
+    addToast('success', isBn ? 'সফল' : 'Success', isBn ? 'এন্ট্রি সংরক্ষণ করা হয়েছে' : 'Ledger entry saved successfully');
   };
 
   // Helper to find cartons for a customer (by customer_id, customer_code, shipping_mark, or phone)
@@ -1305,6 +1353,101 @@ export const CustomerLedgerManager: React.FC<CustomerLedgerManagerProps> = ({
                 >
                   <CheckCircle className="w-4 h-4" />
                   <span>{isBn ? 'পেমেন্ট রিসিভ সম্পন্ন করুন' : 'Confirm Payment'}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 4. Add Ledger Entry Modal */}
+      {showAddEntryModal && selectedCustomer && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-xs">
+          <div className={`w-full max-w-md p-6 rounded-none-none border shadow-2xl space-y-5 ${
+            isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-white border-slate-200 text-slate-900'
+          }`}>
+            <div className="flex items-center justify-between pb-3 border-b border-slate-200/80 dark:border-slate-700/80">
+              <h3 className="text-sm font-semibold flex items-center space-x-2 text-[#00897B]">
+                <Plus className="w-4 h-4" />
+                <span>{isBn ? 'নতুন লেনদেন / এডজাস্টমেন্ট এন্ট্রি' : 'Add Custom Ledger Entry'}</span>
+              </h3>
+              <button
+                onClick={() => setShowAddEntryModal(false)}
+                className={`p-1 rounded-none-none transition-colors ${
+                  isDark ? 'text-slate-400 hover:text-white hover:bg-slate-800' : 'text-slate-400 hover:text-slate-800 hover:bg-slate-100'
+                }`}
+              >
+                <XCircle className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleAddLedgerEntry} className="space-y-4 text-xs font-normal">
+              <div>
+                <label className={`block text-[11px] font-normal mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                  {isBn ? 'এন্ট্রির ধরন (Entry Type) *' : 'Entry Type *'}
+                </label>
+                <select
+                  value={entryType}
+                  onChange={(e) => setEntryType(e.target.value as any)}
+                  className={`w-full border rounded-none-none py-2 px-3 outline-none cursor-pointer transition-all ${
+                    isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                  }`}
+                >
+                  <option value="charge">➕ অতিরিক্ত ফ্রেইট চার্জ / বিল (Debit Charge)</option>
+                  <option value="discount">➖ ডিসকাউন্ট / ওয়েভার (Credit Discount)</option>
+                  <option value="adjustment">🔄 ব্যালেন্স এডজাস্টমেন্ট (Credit Adjustment)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-normal mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                  {isBn ? 'টাকার পরিমাণ (৳) *' : 'Amount (৳) *'}
+                </label>
+                <input
+                  type="number"
+                  required
+                  min="1"
+                  value={entryAmount}
+                  onChange={(e) => setEntryAmount(e.target.value)}
+                  placeholder="e.g. 1500"
+                  className={`w-full border rounded-none-none py-2 px-3 outline-none font-mono transition-all ${
+                    isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <div>
+                <label className={`block text-[11px] font-normal mb-1 ${isDark ? 'text-slate-300' : 'text-slate-700'}`}>
+                  {isBn ? 'বিবরণ / নোট (Description)' : 'Description / Remarks'}
+                </label>
+                <input
+                  type="text"
+                  value={entryDesc}
+                  onChange={(e) => setEntryDesc(e.target.value)}
+                  placeholder={isBn ? 'যেমন: বিশেষ ডিসকাউন্ট প্রদান করা হয়েছে' : 'e.g. Special freight waiver'}
+                  className={`w-full border rounded-none-none py-2 px-3 outline-none transition-all ${
+                    isDark ? 'bg-[#1E293B] border-slate-700 text-white' : 'bg-slate-50 border-slate-200 text-slate-900'
+                  }`}
+                />
+              </div>
+
+              <div className={`flex justify-end space-x-3 pt-4 border-t ${isDark ? 'border-slate-700/80' : 'border-slate-100'}`}>
+                <button
+                  type="button"
+                  onClick={() => setShowAddEntryModal(false)}
+                  className={`px-4 py-2 rounded-none-none text-xs font-normal border transition-all cursor-pointer ${
+                    isDark ? 'bg-[#1E293B] border-slate-700 text-slate-300 hover:bg-slate-800' : 'bg-slate-100 hover:bg-slate-200 border-slate-200 text-slate-700'
+                  }`}
+                >
+                  {isBn ? 'বাতিল' : 'Cancel'}
+                </button>
+
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-none-none text-xs font-normal bg-[#00897B] hover:bg-[#00796B] text-white shadow-2xs hover:shadow transition-all cursor-pointer flex items-center space-x-1"
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  <span>{isBn ? 'এন্ট্রি সেভ করুন' : 'Save Entry'}</span>
                 </button>
               </div>
             </form>
