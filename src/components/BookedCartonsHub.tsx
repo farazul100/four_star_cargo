@@ -500,7 +500,28 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         };
         currentCusts = [targetCust, ...currentCusts];
       } else {
-        targetCust = currentCusts.find((c) => c.id === mapSelectedCustomerId);
+        targetCust = currentCusts.find(
+          (c) =>
+            c.id === mapSelectedCustomerId ||
+            c.customer_code === mapSelectedCustomerId ||
+            c.shipping_mark === mapSelectedCustomerId ||
+            (c.shipping_mark && cleanKey(c.shipping_mark) === cleanKey(mapSelectedCustomerId))
+        ) || allDbCustomersList.find(
+          (c) =>
+            c.id === mapSelectedCustomerId ||
+            c.customer_code === mapSelectedCustomerId ||
+            c.shipping_mark === mapSelectedCustomerId ||
+            (c.shipping_mark && cleanKey(c.shipping_mark) === cleanKey(mapSelectedCustomerId))
+        );
+      }
+
+      if (!targetCust && rawKey) {
+        targetCust = currentCusts.find((c) => c.shipping_mark && cleanKey(c.shipping_mark) === targetKey) ||
+                     allDbCustomersList.find((c) => c.shipping_mark && cleanKey(c.shipping_mark) === targetKey);
+      }
+
+      if (!targetCust && currentCusts.length > 0) {
+        targetCust = currentCusts[0];
       }
 
       if (!targetCust) {
@@ -543,11 +564,13 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         return c;
       });
 
-      // Synchronously update local cache first
+      // Synchronously update local cache and trigger storage events
       saveHostingerDbMultiData({
         fsc_vps_customers: updatedCusts,
         fsc_vps_cartons: updatedCartons,
       });
+      saveHostingerDbData('fsc_vps_customers', updatedCusts);
+      saveHostingerDbData('fsc_vps_cartons', updatedCartons);
 
       // Auto recalculate Customer Billing & Ledger entries across all customer accounts
       const recalculated = recalculateCustomerLedgerAndBilling();
@@ -574,8 +597,15 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         `অপারেশন টিম শিপিং মার্ক ${rawKey} এর সাথে কাস্টমার "${targetCust.name}" (পার কেজি রেট ৳${finalRatePerKg}) ট্যাগ এবং কাস্টমার লেজার আপডেট করেছেন`
       );
 
-      alert(isBn ? `কাস্টমার "${targetCust.name}" সফলভাবে ট্যাগ করা হয়েছে!` : `Customer "${targetCust.name}" mapped successfully!`);
+      // Reset modal state & form fields
       setMapCustomerModalMark(null);
+      setMapSelectedCustomerId('');
+      setMapShipmentCtnNoInput('');
+      setNewCustMappingName('');
+      setNewCustMappingPhone('');
+      setIsNewCustMapping(false);
+
+      alert(isBn ? `কাস্টমার "${targetCust.name}" সফলভাবে ট্যাগ করা হয়েছে!` : `Customer "${targetCust.name}" mapped successfully!`);
     } catch (err: any) {
       console.error("Error saving customer mapping:", err);
       alert(isBn ? `কাস্টমার ট্যাগিং সেভ করতে সমস্যা হয়েছে: ${err?.message || 'অজানা ত্রুটি'}` : `Error saving customer mapping: ${err?.message || 'Unknown error'}`);
@@ -2997,7 +3027,6 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
               </button>
               <button
                 type="submit"
-                onClick={handleSaveCustomerMapping}
                 className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs transition-all border border-emerald-500 cursor-pointer shadow-md"
               >
                 {isBn ? 'কাস্টমার ট্যাগিং কনফার্ম করুন' : 'Confirm Customer Mapping'}
