@@ -513,7 +513,6 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
           ? { ...c, rate_per_kg: finalRatePerKg }
           : c
       );
-      saveHostingerDbData('fsc_vps_customers', updatedCusts);
 
       const currentCartons = dbData.cartons || [];
       const updatedCartons = currentCartons.map((c) => {
@@ -544,10 +543,14 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         return c;
       });
 
-      saveHostingerDbData('fsc_vps_cartons', updatedCartons);
+      // Synchronously update local cache first
+      saveHostingerDbMultiData({
+        fsc_vps_customers: updatedCusts,
+        fsc_vps_cartons: updatedCartons,
+      });
 
-      // Auto recalculate Customer Billing & Ledger entries using BD Warehouse final weight & rate_per_kg
-      const recalculated = recalculateCustomerLedgerAndBilling(targetCust.id);
+      // Auto recalculate Customer Billing & Ledger entries across all customer accounts
+      const recalculated = recalculateCustomerLedgerAndBilling();
       const finalCartonsToSet = recalculated.cartons && recalculated.cartons.length > 0 ? recalculated.cartons : updatedCartons;
       setLiveRealtimeCartons(finalCartonsToSet);
 

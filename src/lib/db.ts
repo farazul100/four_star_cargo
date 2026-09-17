@@ -804,6 +804,12 @@ export const processServerDbUpdate = (serverDb: any) => {
   if (!serverDb || typeof serverDb !== 'object') return;
   const serverTs = Number(serverDb._updated_at || 0);
 
+  // Protection: If local user mutated the database in the last 15 seconds,
+  // do NOT let a stale background GET response overwrite local storage edits!
+  if (lastLocalMutationTime > 0 && Date.now() - lastLocalMutationTime < 15000) {
+    return;
+  }
+
   if (serverTs > 0 && serverTs <= lastKnownServerTs) {
     return;
   }

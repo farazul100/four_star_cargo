@@ -32,10 +32,6 @@ export const recalculateCustomerLedgerAndBilling = (targetCustomerId?: string) =
   const cartons: Carton[] = dbData.cartons || [];
   let ledgerEntries: LedgerEntry[] = dbData.ledgerEntries || [];
 
-  const targetCustomers = targetCustomerId
-    ? customers.filter((c) => c.id === targetCustomerId)
-    : customers;
-
   const updatedCartonsMap = new Map<string, Carton>();
   cartons.forEach((c) => updatedCartonsMap.set(c.id, { ...c }));
 
@@ -44,7 +40,8 @@ export const recalculateCustomerLedgerAndBilling = (targetCustomerId?: string) =
 
   const cleanMark = (str?: string) => (str || '').toLowerCase().replace(/^mark:\s*/i, '').trim();
 
-  targetCustomers.forEach((cust) => {
+  // Process all customers to ensure 100% balance consistency across accounts
+  customers.forEach((cust) => {
     const custId = cust.id;
     const custMark = cleanMark(cust.shipping_mark);
     const custCode = (cust.customer_code || '').toLowerCase().trim();
@@ -93,8 +90,23 @@ export const recalculateCustomerLedgerAndBilling = (targetCustomerId?: string) =
       if (finalWeight > 0 && totalCharge > 0) {
         customerTotalCartonCharges += totalCharge;
 
-        // Check if an existing ledger charge entry exists for this carton
         const ledgerRef = ctn.ctn_no || ctn.id;
+
+        // CRITICAL FIX: If this carton was previously mapped to an OLD customer,
+        // remove the old customer's ledger entry so money is subtracted from old customer!
+        ledgerEntries = ledgerEntries.filter((e) => {
+          if (
+            e.type === 'charge' &&
+            (e.reference_no === ledgerRef || (e.note && ctn.ctn_no && e.note.includes(ctn.ctn_no)))
+          ) {
+            if (e.customer_id !== custId) {
+              return false; // Remove old customer charge entry!
+            }
+          }
+          return true;
+        });
+
+        // Check if an existing ledger charge entry exists for this customer
         const existingEntryIdx = ledgerEntries.findIndex(
           (e) => e.customer_id === custId && e.type === 'charge' && (e.reference_no === ledgerRef || (e.note && e.note.includes(ctn.ctn_no)))
         );
@@ -141,7 +153,7 @@ export const recalculateCustomerLedgerAndBilling = (targetCustomerId?: string) =
       .filter((e) => e.customer_id === custId && e.type === 'charge')
       .reduce((sum, e) => sum + (e.amount || 0), 0);
 
-    const totalBilled = custLedgerChargesSum > 0 ? custLedgerChargesSum : customerTotalCartonCharges;
+    const totalBilled = custLedgerChargesSum;
     const totalDue = Math.max(0, totalBilled - custPaid);
 
     updatedCustomersMap.set(cust.id, {
@@ -150,6 +162,26 @@ export const recalculateCustomerLedgerAndBilling = (targetCustomerId?: string) =
       total_billed: Number(totalBilled.toFixed(2)),
       total_due: Number(totalDue.toFixed(2)),
     });
+  });
+
+  // Re-calculate totals for any customers who may have lost mapped cartons (subtracted money)
+  customers.forEach((cust) => {
+    if (!updatedCustomersMap.has(cust.id)) {
+      const custId = cust.id;
+      const custPaid = cust.total_paid || 0;
+      const custLedgerChargesSum = ledgerEntries
+        .filter((e) => e.customer_id === custId && e.type === 'charge')
+        .reduce((sum, e) => sum + (e.amount || 0), 0);
+
+      const totalBilled = custLedgerChargesSum;
+      const totalDue = Math.max(0, totalBilled - custPaid);
+
+      updatedCustomersMap.set(cust.id, {
+        ...cust,
+        total_billed: Number(totalBilled.toFixed(2)),
+        total_due: Number(totalDue.toFixed(2)),
+      });
+    }
   });
 
   const finalCustomers = Array.from(updatedCustomersMap.values());
