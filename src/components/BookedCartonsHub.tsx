@@ -2881,11 +2881,45 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                   onSelectCustomer={(id) => setMapSelectedCustomerId(id)}
                   getCustomerStats={(custCode) => {
                     const dbData = getHostingerDbData();
-                    const ledgers = dbData.ledgers || [];
-                    const custLedger = ledgers.find(
-                      (l: any) => l.customer_code === custCode || l.shipping_mark === custCode
+                    const custs: Customer[] = dbData.customers || allDbCustomersList || [];
+                    const ledgerEntriesList: LedgerEntry[] = dbData.ledgerEntries || [];
+
+                    const clean = (s?: string) => (s || '').toLowerCase().trim();
+                    const qCode = clean(custCode);
+
+                    const targetCust = custs.find(
+                      (c) => clean(c.customer_code) === qCode || clean(c.shipping_mark) === qCode || clean(c.id) === qCode
                     );
-                    return { currentDue: custLedger ? custLedger.due_amount || custLedger.total_due || 0 : 0 };
+
+                    if (targetCust) {
+                      const custLedgerEntries = ledgerEntriesList.filter(
+                        (l) => l.customer_id === targetCust.id || clean(l.customer_code) === qCode || clean(l.shipping_mark) === qCode
+                      );
+                      if (custLedgerEntries.length > 0) {
+                        const charges = custLedgerEntries.filter((l) => l.type === 'charge').reduce((sum, l) => sum + (l.amount || 0), 0);
+                        const payments = custLedgerEntries.filter((l) => l.type === 'payment').reduce((sum, l) => sum + (l.amount || 0), 0);
+                        return { currentDue: Math.max(0, charges - payments) };
+                      }
+                      if (typeof targetCust.total_due === 'number' && targetCust.total_due > 0) {
+                        return { currentDue: targetCust.total_due };
+                      }
+                    }
+
+                    const currentCartonsList: Carton[] = dbData.cartons || cartons || [];
+                    const mappedCartons = currentCartonsList.filter(
+                      (c) =>
+                        clean(c.customer_code) === qCode ||
+                        (targetCust && c.customer_id === targetCust.id) ||
+                        clean(c.shipping_mark) === qCode
+                    );
+
+                    const totalCharge = mappedCartons.reduce((sum, c) => {
+                      const weight = c.bd_calibrated_weight && c.bd_calibrated_weight > 0 ? c.bd_calibrated_weight : (c.gross_weight || 0);
+                      const rate = c.rate_per_kg || targetCust?.rate_per_kg || 750;
+                      return sum + (weight * rate);
+                    }, 0);
+
+                    return { currentDue: Number(totalCharge.toFixed(2)) };
                   }}
                   isDark={isDark}
                   isBn={isBn}
