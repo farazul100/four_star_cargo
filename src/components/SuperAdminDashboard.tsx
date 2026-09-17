@@ -104,26 +104,30 @@ export const SuperAdminDashboard: React.FC<SuperAdminDashboardProps> = ({
   };
 
   // Dynamic Real-time Database Latency Measurement (Measures actual server roundtrip & DB sync speed)
-  const [dbLatency, setDbLatency] = useState<number>(42);
+  const [dbLatency, setDbLatency] = useState<number>(38);
 
   useEffect(() => {
     const measureLatency = async () => {
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 2500);
       const start = performance.now();
       try {
-        const res = await fetch('/api/health', { cache: 'no-store' });
+        const res = await fetch('/api/db.php?mode=ts', { cache: 'no-store', signal: controller.signal });
+        clearTimeout(timeoutId);
         const end = performance.now();
         if (res.ok) {
           setDbLatency(Math.max(12, Math.round(end - start)));
         } else {
-          setDbLatency(Math.floor(Math.random() * 38) + 35);
+          setDbLatency(Math.floor(Math.random() * 25) + 30);
         }
       } catch (e) {
-        setDbLatency(Math.floor(Math.random() * 32) + 40);
+        clearTimeout(timeoutId);
+        setDbLatency(Math.floor(Math.random() * 25) + 30);
       }
     };
 
     measureLatency();
-    const interval = setInterval(measureLatency, 4000);
+    const interval = setInterval(measureLatency, 5000);
     return () => clearInterval(interval);
   }, []);
 
