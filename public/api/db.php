@@ -24,6 +24,7 @@ if (!file_exists($dbDir) && !@mkdir($dbDir, 0777, true)) {
     if (!file_exists($dbDir)) {
         @mkdir($dbDir, 0777, true);
     }
+}
 $dataFile = $dbDir . '/db.json';
 
 // Instant lightweight timestamp check for zero-overhead live sync
