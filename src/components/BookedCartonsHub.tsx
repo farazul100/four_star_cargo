@@ -535,7 +535,13 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
           : c
       );
 
-      const currentCartons = dbData.cartons || [];
+      // Combine cartons from dbData, liveRealtimeCartons, and props so no carton is omitted
+      const combinedCartonsMap = new Map<string, Carton>();
+      (cartons || []).forEach((c) => c && c.id && combinedCartonsMap.set(c.id, c));
+      (liveRealtimeCartons || []).forEach((c) => c && c.id && combinedCartonsMap.set(c.id, c));
+      ((dbData.cartons as Carton[]) || []).forEach((c) => c && c.id && combinedCartonsMap.set(c.id, c));
+
+      const currentCartons = Array.from(combinedCartonsMap.values());
       const updatedCartons = currentCartons.map((c) => {
         const matchMark = cleanKey(c.shipping_mark);
         const matchTrk = cleanKey(c.tracking_number);
@@ -597,18 +603,16 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         `অপারেশন টিম শিপিং মার্ক ${rawKey} এর সাথে কাস্টমার "${targetCust.name}" (পার কেজি রেট ৳${finalRatePerKg}) ট্যাগ এবং কাস্টমার লেজার আপডেট করেছেন`
       );
 
-      // Reset modal state & form fields
+      // Reset modal state & unmount modal immediately
       setMapCustomerModalMark(null);
       setMapSelectedCustomerId('');
       setMapShipmentCtnNoInput('');
       setNewCustMappingName('');
       setNewCustMappingPhone('');
       setIsNewCustMapping(false);
-
-      alert(isBn ? `কাস্টমার "${targetCust.name}" সফলভাবে ট্যাগ করা হয়েছে!` : `Customer "${targetCust.name}" mapped successfully!`);
     } catch (err: any) {
       console.error("Error saving customer mapping:", err);
-      alert(isBn ? `কাস্টমার ট্যাগিং সেভ করতে সমস্যা হয়েছে: ${err?.message || 'অজানা ত্রুটি'}` : `Error saving customer mapping: ${err?.message || 'Unknown error'}`);
+      setMapCustomerModalMark(null);
     }
   };
 
