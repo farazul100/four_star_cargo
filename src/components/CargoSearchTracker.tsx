@@ -328,7 +328,9 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-mono">
+                    <div className={`grid gap-3 text-xs font-mono ${
+                      returnedCartons.length > 0 ? 'grid-cols-2 sm:grid-cols-5' : 'grid-cols-2 sm:grid-cols-4'
+                    }`}>
                       {/* 1. China Warehouse */}
                       <div
                         onClick={() => setLocationFilter('china')}
@@ -352,7 +354,30 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                         </div>
                       </div>
 
-                      {/* 2. Flying In-Transit */}
+                      {/* 2. Returned Parcels (Shown if any returned) */}
+                      {returnedCartons.length > 0 && (
+                        <div
+                          onClick={() => setLocationFilter('returned')}
+                          className={`p-3 border rounded-none cursor-pointer transition-all ${
+                            locationFilter === 'returned' ? 'ring-2 ring-amber-600 font-bold' : ''
+                          } ${
+                            isDark ? 'bg-amber-500/20 border-amber-500/40 text-amber-300' : 'bg-amber-100 border-amber-400 text-amber-900'
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <span className="text-[11px] font-bold">🔄 রিটার্নড পার্সেল</span>
+                            <RotateCcw className="w-3.5 h-3.5 text-amber-600" />
+                          </div>
+                          <div className="mt-2">
+                            <span className="text-2xl font-bold font-mono">{returnedCartons.length}</span>
+                            <span className="text-[10px] block font-sans font-normal opacity-90 font-bold">
+                              {isBn ? 'টি স্টক রিটার্নড' : 'Returned Stock'}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* 3. Flying In-Transit */}
                       <div
                         onClick={() => setLocationFilter('transit')}
                         className={`p-3 border rounded-xl cursor-pointer transition-all ${
@@ -375,7 +400,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                         </div>
                       </div>
 
-                      {/* 3. BD Hub Received */}
+                      {/* 4. BD Hub Received */}
                       <div
                         onClick={() => setLocationFilter('bd_hub')}
                         className={`p-3 border rounded-xl cursor-pointer transition-all ${
@@ -398,7 +423,7 @@ export const CargoSearchTracker: React.FC<CargoSearchTrackerProps> = ({
                         </div>
                       </div>
 
-                      {/* 4. Delivered */}
+                      {/* 5. Delivered */}
                       <div
                         onClick={() => setLocationFilter('delivered')}
                         className={`p-3 border rounded-xl cursor-pointer transition-all ${
