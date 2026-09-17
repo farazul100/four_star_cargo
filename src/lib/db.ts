@@ -838,7 +838,7 @@ export const saveHostingerDbMultiData = (entries: Record<string, any>) => {
   let customerKeyPresent = false;
 
   Object.entries(entries).forEach(([key, data]) => {
-    if (key === DB_KEYS.CARTONS && Array.isArray(data)) {
+    if ((key === DB_KEYS.CARTONS || key === 'cartons' || key === 'fsc_vps_cartons') && Array.isArray(data)) {
       window.__FSC_GLOBAL_CARTONS__ = data;
     }
     if (key === DB_KEYS.PROPOSALS && Array.isArray(data)) {
@@ -857,14 +857,20 @@ export const saveHostingerDbMultiData = (entries: Record<string, any>) => {
         localStorage.setItem(DB_KEYS.WAREHOUSES, JSON.stringify(data));
         localStorage.setItem('warehouses', JSON.stringify(data));
       }
+      if (key === DB_KEYS.CARTONS || key === 'cartons' || key === 'fsc_vps_cartons') {
+        localStorage.setItem(DB_KEYS.CARTONS, JSON.stringify(data));
+        localStorage.setItem('fsc_vps_cartons', JSON.stringify(data));
+        localStorage.setItem('cartons', JSON.stringify(data));
+      }
       if (key === DB_KEYS.CUSTOMERS || key === 'customers' || key === 'fsc_vps_customers') {
         localStorage.setItem(DB_KEYS.CUSTOMERS, JSON.stringify(data));
         localStorage.setItem('fsc_vps_customers', JSON.stringify(data));
         localStorage.setItem('customers', JSON.stringify(data));
       }
-      if (key === DB_KEYS.LEDGER || key === 'fsc_vps_ledger_entries') {
+      if (key === DB_KEYS.LEDGER || key === 'fsc_vps_ledger_entries' || key === 'fsc_vps_ledger' || key === 'ledger') {
         localStorage.setItem('fsc_vps_ledger', JSON.stringify(data));
         localStorage.setItem('fsc_vps_ledger_entries', JSON.stringify(data));
+        localStorage.setItem('ledger', JSON.stringify(data));
       }
     } catch (e) {}
   });

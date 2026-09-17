@@ -549,14 +549,16 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         const matchGroup = cleanKey(c.master_group_id);
         const matchCtnNo = cleanKey(c.ctn_no);
 
-        if (
+        const isMatch =
           matchMark === targetKey ||
           matchTrk === targetKey ||
           matchMasterTrk === targetKey ||
           matchGroup === targetKey ||
           matchCtnNo === targetKey ||
-          (c.shipping_mark && cleanKey(c.shipping_mark) === targetKey)
-        ) {
+          (matchMark && targetKey && (matchMark.includes(targetKey) || targetKey.includes(matchMark))) ||
+          (matchTrk && targetKey && (matchTrk.includes(targetKey) || targetKey.includes(matchTrk)));
+
+        if (isMatch) {
           return {
             ...c,
             packaging_number: mapShipmentCtnNoInput.trim() || c.packaging_number || 'UNASSIGNED',
@@ -575,25 +577,18 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
         fsc_vps_customers: updatedCusts,
         fsc_vps_cartons: updatedCartons,
       });
-      saveHostingerDbData('fsc_vps_customers', updatedCusts);
-      saveHostingerDbData('fsc_vps_cartons', updatedCartons);
 
       // Auto recalculate Customer Billing & Ledger entries across all customer accounts
       const recalculated = recalculateCustomerLedgerAndBilling();
       const finalCartonsToSet = recalculated.cartons && recalculated.cartons.length > 0 ? recalculated.cartons : updatedCartons;
-      setLiveRealtimeCartons(finalCartonsToSet);
+      const finalCustomersToSet = recalculated.customers && recalculated.customers.length > 0 ? recalculated.customers : updatedCusts;
 
-      if (onUpdateCarton) {
-        finalCartonsToSet.forEach((c) => {
-          const matchMark = cleanKey(c.shipping_mark);
-          const matchTrk = cleanKey(c.tracking_number);
-          const matchMasterTrk = cleanKey(c.master_tracking_number);
-          const matchGroup = cleanKey(c.master_group_id);
-          if (matchMark === targetKey || matchTrk === targetKey || matchMasterTrk === targetKey || matchGroup === targetKey) {
-            onUpdateCarton(c);
-          }
-        });
-      }
+      saveHostingerDbMultiData({
+        fsc_vps_customers: finalCustomersToSet,
+        fsc_vps_cartons: finalCartonsToSet,
+      });
+
+      setLiveRealtimeCartons(finalCartonsToSet);
 
       logSystemAuditAction(
         currentUser,

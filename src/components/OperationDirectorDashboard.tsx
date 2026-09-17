@@ -720,7 +720,8 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
           currentUser={currentUser}
           language={language}
           onUpdateCarton={(updatedCarton) => {
-            const fresh = cartons.map((c) => (c.id === updatedCarton.id ? updatedCarton : c));
+            const current = getHostingerDbData().cartons || cartons;
+            const fresh = current.map((c) => (c.id === updatedCarton.id ? updatedCarton : c));
             setCartons(fresh);
             saveHostingerDbData('fsc_vps_cartons', fresh);
           }}
@@ -773,7 +774,8 @@ export const OperationDirectorDashboard: React.FC<OperationDirectorDashboardProp
           currentUser={currentUser}
           language={language}
           onUpdateCarton={(updatedCarton) => {
-            const updated = cartons.map((c) => (c.id === updatedCarton.id ? updatedCarton : c));
+            const current = getHostingerDbData().cartons || cartons;
+            const updated = current.map((c) => (c.id === updatedCarton.id ? updatedCarton : c));
             setCartons(updated);
             saveHostingerDbData('fsc_vps_cartons', updated);
           }}

@@ -726,8 +726,10 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
         currentUser={currentUser}
         language={language}
         onUpdateCarton={(updatedCarton) => {
-          setCartons((prev) => prev.map((c) => (c.id === updatedCarton.id ? updatedCarton : c)));
-          saveHostingerDbData('fsc_vps_cartons', cartons.map((c) => (c.id === updatedCarton.id ? updatedCarton : c)));
+          const current = getHostingerDbData().cartons || cartons;
+          const fresh = current.map((c) => (c.id === updatedCarton.id ? updatedCarton : c));
+          setCartons(fresh);
+          saveHostingerDbData('fsc_vps_cartons', fresh);
         }}
         onDeleteCarton={(cartonId) => {
           const fresh = cartons.filter((c) => c.id !== cartonId);
