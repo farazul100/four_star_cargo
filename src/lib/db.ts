@@ -428,8 +428,8 @@ export const getHostingerDbData = () => {
   // Auto-sync customer databases bidirectionally across main system and CRM tables
   syncCustomerDatabasesBidirectionally();
 
-  const customers = JSON.parse(localStorage.getItem(DB_KEYS.CUSTOMERS) || '[]') as Customer[];
-  const crmCustomers = JSON.parse(localStorage.getItem(DB_KEYS.CRM_CUSTOMERS) || '[]') as CrmCustomer[];
+  const customers = JSON.parse(localStorage.getItem(DB_KEYS.CUSTOMERS) || localStorage.getItem('fsc_vps_customers') || localStorage.getItem('customers') || '[]') as Customer[];
+  const crmCustomers = JSON.parse(localStorage.getItem(DB_KEYS.CRM_CUSTOMERS) || localStorage.getItem('fsc_vps_crm_customers') || localStorage.getItem('crmCustomers') || localStorage.getItem('crm_customers') || '[]') as CrmCustomer[];
 
   return {
     users: mergedUsers,
@@ -687,34 +687,45 @@ const pushFullDbToServer = (immediate: boolean = false) => {
       const customersPayload = JSON.parse(localStorage.getItem(DB_KEYS.CUSTOMERS) || localStorage.getItem('fsc_vps_customers') || localStorage.getItem('customers') || '[]');
       const ledgerPayload = JSON.parse(localStorage.getItem(DB_KEYS.LEDGER) || localStorage.getItem('fsc_vps_ledger') || localStorage.getItem('fsc_vps_ledger_entries') || localStorage.getItem('ledger') || '[]');
 
-      const fullDb: any = {
-        _updated_at: nowTs,
-        users: userPayload,
-        fsc_vps_users: userPayload,
-        warehouses: whPayload,
-        fsc_vps_warehouses: whPayload,
-        [DB_KEYS.CARTONS]: cartonsPayload,
-        cartons: cartonsPayload,
-        fsc_vps_cartons: cartonsPayload,
-        [DB_KEYS.PROPOSALS]: proposalsPayload,
-        proposals: proposalsPayload,
-        fsc_vps_proposals: proposalsPayload,
-        [DB_KEYS.CUSTOMERS]: customersPayload,
-        customers: customersPayload,
-        fsc_vps_customers: customersPayload,
-        [DB_KEYS.LEDGER]: ledgerPayload,
-        ledger: ledgerPayload,
-        fsc_vps_ledger: ledgerPayload,
-        fsc_vps_ledger_entries: ledgerPayload,
-        [DB_KEYS.AUDIT]: JSON.parse(localStorage.getItem(DB_KEYS.AUDIT) || '[]'),
-        [DB_KEYS.EXPENSES]: JSON.parse(localStorage.getItem(DB_KEYS.EXPENSES) || '[]'),
-        [DB_KEYS.CRM_CUSTOMERS]: JSON.parse(localStorage.getItem(DB_KEYS.CRM_CUSTOMERS) || '[]'),
-        [DB_KEYS.CONVERSATIONS]: JSON.parse(localStorage.getItem(DB_KEYS.CONVERSATIONS) || '[]'),
-        [DB_KEYS.MESSAGES]: JSON.parse(localStorage.getItem(DB_KEYS.MESSAGES) || '[]'),
-        [DB_KEYS.CALLS]: JSON.parse(localStorage.getItem(DB_KEYS.CALLS) || '[]'),
-        notifications: JSON.parse(localStorage.getItem('fsc_vps_notifications') || '[]'),
-        fsc_vps_notifications: JSON.parse(localStorage.getItem('fsc_vps_notifications') || '[]'),
-      };
+        const crmPayload = JSON.parse(
+          localStorage.getItem(DB_KEYS.CRM_CUSTOMERS) ||
+          localStorage.getItem('fsc_vps_crm_customers') ||
+          localStorage.getItem('crmCustomers') ||
+          localStorage.getItem('crm_customers') ||
+          '[]'
+        );
+
+        const fullDb: any = {
+          _updated_at: nowTs,
+          users: userPayload,
+          fsc_vps_users: userPayload,
+          warehouses: whPayload,
+          fsc_vps_warehouses: whPayload,
+          [DB_KEYS.CARTONS]: cartonsPayload,
+          cartons: cartonsPayload,
+          fsc_vps_cartons: cartonsPayload,
+          [DB_KEYS.PROPOSALS]: proposalsPayload,
+          proposals: proposalsPayload,
+          fsc_vps_proposals: proposalsPayload,
+          [DB_KEYS.CUSTOMERS]: customersPayload,
+          customers: customersPayload,
+          fsc_vps_customers: customersPayload,
+          [DB_KEYS.LEDGER]: ledgerPayload,
+          ledger: ledgerPayload,
+          fsc_vps_ledger: ledgerPayload,
+          fsc_vps_ledger_entries: ledgerPayload,
+          [DB_KEYS.AUDIT]: JSON.parse(localStorage.getItem(DB_KEYS.AUDIT) || '[]'),
+          [DB_KEYS.EXPENSES]: JSON.parse(localStorage.getItem(DB_KEYS.EXPENSES) || '[]'),
+          [DB_KEYS.CRM_CUSTOMERS]: crmPayload,
+          fsc_vps_crm_customers: crmPayload,
+          crm_customers: crmPayload,
+          crmCustomers: crmPayload,
+          [DB_KEYS.CONVERSATIONS]: JSON.parse(localStorage.getItem(DB_KEYS.CONVERSATIONS) || '[]'),
+          [DB_KEYS.MESSAGES]: JSON.parse(localStorage.getItem(DB_KEYS.MESSAGES) || '[]'),
+          [DB_KEYS.CALLS]: JSON.parse(localStorage.getItem(DB_KEYS.CALLS) || '[]'),
+          notifications: JSON.parse(localStorage.getItem('fsc_vps_notifications') || '[]'),
+          fsc_vps_notifications: JSON.parse(localStorage.getItem('fsc_vps_notifications') || '[]'),
+        };
 
       if (localApiKey) {
         fullDb.gemini_api_key = localApiKey;
@@ -751,12 +762,11 @@ const pushFullDbToServer = (immediate: boolean = false) => {
 export const saveHostingerDbData = (key: string, data: any) => {
   lastLocalMutationTime = Date.now();
 
-  // Clean deduplication by ID before saving
   if (key === DB_KEYS.CARTONS && Array.isArray(data)) {
     const cartonMap = new Map<string, Carton>();
-    data.forEach((item: Carton) => {
-      if (item && item.id) {
-        cartonMap.set(item.id, item);
+    data.forEach((c) => {
+      if (c && c.id) {
+        cartonMap.set(String(c.id).trim(), c);
       }
     });
     data = Array.from(cartonMap.values());
@@ -791,6 +801,12 @@ export const saveHostingerDbData = (key: string, data: any) => {
       localStorage.setItem('fsc_vps_customers', JSON.stringify(data));
       localStorage.setItem('customers', JSON.stringify(data));
     }
+    if (key === DB_KEYS.CRM_CUSTOMERS || key === 'fsc_vps_crm_customers' || key === 'crmCustomers' || key === 'crm_customers') {
+      localStorage.setItem(DB_KEYS.CRM_CUSTOMERS, JSON.stringify(data));
+      localStorage.setItem('fsc_vps_crm_customers', JSON.stringify(data));
+      localStorage.setItem('crmCustomers', JSON.stringify(data));
+      localStorage.setItem('crm_customers', JSON.stringify(data));
+    }
     // If saving ledger, update both key variants for 100% backward and forward compatibility
     if (key === DB_KEYS.LEDGER || key === 'fsc_vps_ledger_entries' || key === 'fsc_vps_ledger' || key === 'ledger') {
       localStorage.setItem('fsc_vps_ledger', JSON.stringify(data));
@@ -798,7 +814,7 @@ export const saveHostingerDbData = (key: string, data: any) => {
       localStorage.setItem('ledger', JSON.stringify(data));
     }
     // If saving CRM customers or main system customers, trigger immediate 2-way bidirectional sync
-    if (key === DB_KEYS.CRM_CUSTOMERS || key === DB_KEYS.CUSTOMERS || key === 'fsc_vps_customers' || key === 'customers') {
+    if (key === DB_KEYS.CRM_CUSTOMERS || key === DB_KEYS.CUSTOMERS || key === 'fsc_vps_customers' || key === 'customers' || key === 'fsc_vps_crm_customers' || key === 'crmCustomers' || key === 'crm_customers') {
       syncCustomerDatabasesBidirectionally();
     }
   } catch (e) {
@@ -929,6 +945,12 @@ export const processServerDbUpdate = (serverDb: any) => {
         localStorage.setItem(DB_KEYS.CUSTOMERS, serverStr);
         localStorage.setItem('fsc_vps_customers', serverStr);
         localStorage.setItem('customers', serverStr);
+      }
+      if (key === DB_KEYS.CRM_CUSTOMERS || key === 'fsc_vps_crm_customers' || key === 'crmCustomers' || key === 'crm_customers') {
+        localStorage.setItem(DB_KEYS.CRM_CUSTOMERS, serverStr);
+        localStorage.setItem('fsc_vps_crm_customers', serverStr);
+        localStorage.setItem('crmCustomers', serverStr);
+        localStorage.setItem('crm_customers', serverStr);
       }
       if (key === DB_KEYS.LEDGER || key === 'fsc_vps_ledger' || key === 'fsc_vps_ledger_entries') {
         localStorage.setItem('fsc_vps_ledger', serverStr);
