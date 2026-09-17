@@ -147,6 +147,7 @@ export function App() {
           <Route path="/warehouse/search" element={<WarehouseDashboardPage />} />
           <Route path="/warehouse/receive" element={<WarehouseDashboardPage />} />
           <Route path="/warehouse/deliveries" element={<WarehouseDashboardPage />} />
+          <Route path="/warehouse/return-parcel" element={<WarehouseDashboardPage />} />
           <Route path="/warehouse/notifications" element={<WarehouseDashboardPage />} />
           <Route path="/warehouse/*" element={<WarehouseDashboardPage />} />
         </Route>

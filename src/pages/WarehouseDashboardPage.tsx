@@ -18,6 +18,7 @@ export const WarehouseDashboardPage: React.FC = () => {
     if (path.includes('/notifications')) return 'notifications';
     if (path.includes('/booking')) return 'booking_entry';
     if (path.includes('/inventory')) return 'inventory';
+    if (path.includes('/return-parcel') || path.includes('/return_parcel')) return 'return_parcel';
     if (path.includes('/receive-incoming')) return 'receive_incoming';
     if (path.includes('/proposal-create')) return 'proposal_create';
     if (path.includes('/final-flying-list')) return 'final_flying_list';
@@ -50,6 +51,10 @@ export const WarehouseDashboardPage: React.FC = () => {
         break;
       case 'inventory':
         navigate('/warehouse/inventory');
+        break;
+      case 'return_parcel':
+      case 'return-parcel':
+        navigate('/warehouse/return-parcel');
         break;
       case 'receive_incoming':
         navigate('/warehouse/receive-incoming');
