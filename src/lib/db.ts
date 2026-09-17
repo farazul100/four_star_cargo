@@ -425,55 +425,11 @@ export const getHostingerDbData = () => {
     } catch {}
   }
 
-  let customers = JSON.parse(localStorage.getItem(DB_KEYS.CUSTOMERS) || '[]') as Customer[];
+  // Auto-sync customer databases bidirectionally across main system and CRM tables
+  syncCustomerDatabasesBidirectionally();
+
+  const customers = JSON.parse(localStorage.getItem(DB_KEYS.CUSTOMERS) || '[]') as Customer[];
   const crmCustomers = JSON.parse(localStorage.getItem(DB_KEYS.CRM_CUSTOMERS) || '[]') as CrmCustomer[];
-
-  // Auto-sync real CRM customers into main system customers database (fsc_vps_customers)
-  let customersUpdated = false;
-  if (Array.isArray(crmCustomers) && crmCustomers.length > 0) {
-    crmCustomers.forEach((crmCust) => {
-      if (!crmCust || !crmCust.id || /^crm-cust-10[1-9]$/.test(crmCust.id) || /^crm-cust-11[0-1]$/.test(crmCust.id)) {
-        return;
-      }
-      const cleanPhone = (crmCust.phone || '').replace(/\D/g, '');
-      const cleanName = (crmCust.name || '').trim().toLowerCase();
-
-      const exists = customers.some((c) => {
-        const existingPhone = (c.phone || '').replace(/\D/g, '');
-        const existingName = (c.name || '').trim().toLowerCase();
-        return (cleanPhone && existingPhone && cleanPhone === existingPhone) || (cleanName && existingName === cleanName);
-      });
-
-      if (!exists) {
-        const rawDigits = (crmCust.phone || '').replace(/\D/g, '');
-        const shortId = rawDigits.length >= 4 ? rawDigits.slice(-4) : Math.floor(1000 + Math.random() * 9000).toString();
-
-        const newMainCust: Customer = {
-          id: `cust-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-          customer_code: `CUST-${shortId}`,
-          shipping_mark: `MAR-${shortId}`,
-          name: crmCust.name,
-          phone: crmCust.phone,
-          company_name: crmCust.company_name || '',
-          address: crmCust.address || 'Dhaka, Bangladesh',
-          total_due: 0,
-          total_paid: 0,
-          total_billed: 0,
-          status: crmCust.followup_status === 'important_regular' ? 'vip' : 'active',
-          created_at: crmCust.created_at || new Date().toISOString(),
-        };
-
-        customers = [newMainCust, ...customers];
-        customersUpdated = true;
-      }
-    });
-
-    if (customersUpdated) {
-      try {
-        localStorage.setItem(DB_KEYS.CUSTOMERS, JSON.stringify(customers));
-      } catch (e) {}
-    }
-  }
 
   return {
     users: mergedUsers,
@@ -529,41 +485,73 @@ const dbBroadcastChannel =
 // Helper to sync state to server disk DB (/api/db) for 100% reliable cross-browser (Chrome <-> Edge) persistence
 let pushTimeout: any = null;
 
-// Standalone auto-sync of CRM customers into main system customers list (fsc_vps_customers)
-export const syncCrmCustomersToMainCustomers = () => {
+// Standalone 2-way bidirectional sync between Main Customers (fsc_vps_customers) and CRM Customers (fsc_vps_crm_customers)
+export const syncCustomerDatabasesBidirectionally = () => {
   try {
-    const rawCrm = localStorage.getItem(DB_KEYS.CRM_CUSTOMERS);
-    const crmList: CrmCustomer[] = rawCrm ? JSON.parse(rawCrm) : [];
-    if (!Array.isArray(crmList) || crmList.length === 0) return;
+    const rawCrm = localStorage.getItem(DB_KEYS.CRM_CUSTOMERS) || localStorage.getItem('crmCustomers') || '[]';
+    let crmList: CrmCustomer[] = [];
+    try { crmList = JSON.parse(rawCrm); } catch { crmList = []; }
+    if (!Array.isArray(crmList)) crmList = [];
 
-    const rawMain = localStorage.getItem(DB_KEYS.CUSTOMERS);
-    let mainList: Customer[] = rawMain ? JSON.parse(rawMain) : [];
-    let updated = false;
+    const rawMain = localStorage.getItem(DB_KEYS.CUSTOMERS) || localStorage.getItem('fsc_vps_customers') || localStorage.getItem('customers') || '[]';
+    let mainList: Customer[] = [];
+    try { mainList = JSON.parse(rawMain); } catch { mainList = []; }
+    if (!Array.isArray(mainList)) mainList = [];
 
+    let crmUpdated = false;
+    let mainUpdated = false;
+
+    const getCleanPhone = (p?: string) => (p || '').replace(/\D/g, '');
+    const getCleanName = (n?: string) => (n || '').trim().toLowerCase();
+    const getCleanMark = (m?: string) => (m || '').trim().toUpperCase();
+
+    // 1. Sync CRM -> Main Customers
     crmList.forEach((crmCust) => {
-      if (!crmCust || !crmCust.name || !crmCust.phone) return;
-      // Exclude legacy hardcoded demo IDs
+      if (!crmCust || (!crmCust.name && !crmCust.phone && !crmCust.shipping_mark)) return;
       if (/^crm-cust-10[1-9]$/.test(crmCust.id) || /^crm-cust-11[0-1]$/.test(crmCust.id)) return;
 
-      const cleanPhone = (crmCust.phone || '').replace(/\D/g, '');
-      const cleanName = (crmCust.name || '').trim().toLowerCase();
+      const cPhone = getCleanPhone(crmCust.phone);
+      const cName = getCleanName(crmCust.name);
+      const cMark = getCleanMark(crmCust.shipping_mark);
 
-      const exists = mainList.some((c) => {
-        const existingPhone = (c.phone || '').replace(/\D/g, '');
-        const existingName = (c.name || '').trim().toLowerCase();
-        return (cleanPhone && existingPhone && cleanPhone === existingPhone) || (cleanName && existingName === cleanName);
+      const existingIndex = mainList.findIndex((m) => {
+        const mPhone = getCleanPhone(m.phone);
+        const mName = getCleanName(m.name);
+        const mMark = getCleanMark(m.shipping_mark);
+        return (cPhone && mPhone && cPhone === mPhone) || 
+               (cMark && mMark && cMark === mMark) || 
+               (cName && mName && cName === mName);
       });
 
-      if (!exists) {
-        const rawDigits = (crmCust.phone || '').replace(/\D/g, '');
-        const shortId = rawDigits.length >= 4 ? rawDigits.slice(-4) : Math.floor(1000 + Math.random() * 9000).toString();
+      if (existingIndex >= 0) {
+        const existingMain = mainList[existingIndex];
+        let mainMutated = false;
+        const updatedMain = { ...existingMain };
 
+        if (!updatedMain.shipping_mark && crmCust.shipping_mark) {
+          updatedMain.shipping_mark = crmCust.shipping_mark;
+          mainMutated = true;
+        }
+        if (!updatedMain.phone && crmCust.phone) {
+          updatedMain.phone = crmCust.phone;
+          mainMutated = true;
+        }
+        if (!updatedMain.company_name && crmCust.company_name) {
+          updatedMain.company_name = crmCust.company_name;
+          mainMutated = true;
+        }
+        if (mainMutated) {
+          mainList[existingIndex] = updatedMain;
+          mainUpdated = true;
+        }
+      } else {
+        const rawDigits = cPhone.length >= 4 ? cPhone.slice(-4) : Math.floor(1000 + Math.random() * 9000).toString();
         const newMainCust: Customer = {
           id: `cust-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-          customer_code: `CUST-${shortId}`,
-          shipping_mark: `MAR-${shortId}`,
-          name: crmCust.name,
-          phone: crmCust.phone,
+          customer_code: crmCust.customer_custom_id || `CUST-${rawDigits}`,
+          shipping_mark: crmCust.shipping_mark || `MAR-${rawDigits}`,
+          name: crmCust.name || 'Unknown Customer',
+          phone: crmCust.phone || '',
           company_name: crmCust.company_name || '',
           address: crmCust.address || 'Dhaka, Bangladesh',
           total_due: 0,
@@ -572,18 +560,86 @@ export const syncCrmCustomersToMainCustomers = () => {
           status: crmCust.followup_status === 'important_regular' ? 'vip' : 'active',
           created_at: crmCust.created_at || new Date().toISOString(),
         };
-
         mainList = [newMainCust, ...mainList];
-        updated = true;
+        mainUpdated = true;
       }
     });
 
-    if (updated) {
+    // 2. Sync Main Customers -> CRM
+    mainList.forEach((mainCust) => {
+      if (!mainCust || (!mainCust.name && !mainCust.phone && !mainCust.shipping_mark)) return;
+
+      const mPhone = getCleanPhone(mainCust.phone);
+      const mName = getCleanName(mainCust.name);
+      const mMark = getCleanMark(mainCust.shipping_mark);
+
+      const existingIndex = crmList.findIndex((c) => {
+        const cPhone = getCleanPhone(c.phone);
+        const cName = getCleanName(c.name);
+        const cMark = getCleanMark(c.shipping_mark);
+        return (mPhone && cPhone && mPhone === cPhone) || 
+               (mMark && cMark && mMark === cMark) || 
+               (mName && cName && mName === cName);
+      });
+
+      if (existingIndex >= 0) {
+        const existingCrm = crmList[existingIndex];
+        let crmMutated = false;
+        const updatedCrm = { ...existingCrm };
+
+        if (!updatedCrm.shipping_mark && mainCust.shipping_mark) {
+          updatedCrm.shipping_mark = mainCust.shipping_mark;
+          crmMutated = true;
+        }
+        if (!updatedCrm.phone && mainCust.phone) {
+          updatedCrm.phone = mainCust.phone;
+          crmMutated = true;
+        }
+        if (!updatedCrm.company_name && mainCust.company_name) {
+          updatedCrm.company_name = mainCust.company_name;
+          crmMutated = true;
+        }
+        if (crmMutated) {
+          crmList[existingIndex] = updatedCrm;
+          crmUpdated = true;
+        }
+      } else {
+        const rawDigits = mPhone.length >= 4 ? mPhone.slice(-4) : Math.floor(1000 + Math.random() * 9000).toString();
+        const newCrmCust: CrmCustomer = {
+          id: `crm-cust-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
+          name: mainCust.name || 'Unknown Customer',
+          phone: mainCust.phone || '',
+          company_name: mainCust.company_name || '',
+          address: mainCust.address || 'Dhaka, Bangladesh',
+          shipping_mark: mainCust.shipping_mark || `MAR-${rawDigits}`,
+          country_category: 'CN_New',
+          followup_status: 'followup',
+          created_by: 'System / Customer Accounts',
+          created_at: mainCust.created_at || new Date().toISOString(),
+          date: (mainCust.created_at || new Date().toISOString()).split('T')[0],
+          is_handed_over: false,
+        };
+        crmList = [newCrmCust, ...crmList];
+        crmUpdated = true;
+      }
+    });
+
+    if (mainUpdated) {
       localStorage.setItem(DB_KEYS.CUSTOMERS, JSON.stringify(mainList));
+      localStorage.setItem('fsc_vps_customers', JSON.stringify(mainList));
+      localStorage.setItem('customers', JSON.stringify(mainList));
+    }
+
+    if (crmUpdated) {
+      localStorage.setItem(DB_KEYS.CRM_CUSTOMERS, JSON.stringify(crmList));
     }
   } catch (err) {
-    console.error('Error in syncCrmCustomersToMainCustomers:', err);
+    console.error('Error in syncCustomerDatabasesBidirectionally:', err);
   }
+};
+
+export const syncCrmCustomersToMainCustomers = () => {
+  syncCustomerDatabasesBidirectionally();
 };
 
 const getPrimaryServerEndpoint = () => {
@@ -741,9 +797,9 @@ export const saveHostingerDbData = (key: string, data: any) => {
       localStorage.setItem('fsc_vps_ledger_entries', JSON.stringify(data));
       localStorage.setItem('ledger', JSON.stringify(data));
     }
-    // If saving CRM customers, trigger immediate sync to main customers database
-    if (key === DB_KEYS.CRM_CUSTOMERS) {
-      syncCrmCustomersToMainCustomers();
+    // If saving CRM customers or main system customers, trigger immediate 2-way bidirectional sync
+    if (key === DB_KEYS.CRM_CUSTOMERS || key === DB_KEYS.CUSTOMERS || key === 'fsc_vps_customers' || key === 'customers') {
+      syncCustomerDatabasesBidirectionally();
     }
   } catch (e) {
     console.warn(`LocalStorage setItem warning for key "${key}":`, e);
@@ -763,12 +819,17 @@ export const saveHostingerDbData = (key: string, data: any) => {
 export const saveHostingerDbMultiData = (entries: Record<string, any>) => {
   lastLocalMutationTime = Date.now();
 
+  let customerKeyPresent = false;
+
   Object.entries(entries).forEach(([key, data]) => {
     if (key === DB_KEYS.CARTONS && Array.isArray(data)) {
       window.__FSC_GLOBAL_CARTONS__ = data;
     }
     if (key === DB_KEYS.PROPOSALS && Array.isArray(data)) {
       window.__FSC_GLOBAL_PROPOSALS__ = data;
+    }
+    if (key === DB_KEYS.CUSTOMERS || key === DB_KEYS.CRM_CUSTOMERS || key === 'fsc_vps_customers' || key === 'customers') {
+      customerKeyPresent = true;
     }
     try {
       localStorage.setItem(key, JSON.stringify(data));
@@ -780,12 +841,21 @@ export const saveHostingerDbMultiData = (entries: Record<string, any>) => {
         localStorage.setItem(DB_KEYS.WAREHOUSES, JSON.stringify(data));
         localStorage.setItem('warehouses', JSON.stringify(data));
       }
+      if (key === DB_KEYS.CUSTOMERS || key === 'customers' || key === 'fsc_vps_customers') {
+        localStorage.setItem(DB_KEYS.CUSTOMERS, JSON.stringify(data));
+        localStorage.setItem('fsc_vps_customers', JSON.stringify(data));
+        localStorage.setItem('customers', JSON.stringify(data));
+      }
       if (key === DB_KEYS.LEDGER || key === 'fsc_vps_ledger_entries') {
         localStorage.setItem('fsc_vps_ledger', JSON.stringify(data));
         localStorage.setItem('fsc_vps_ledger_entries', JSON.stringify(data));
       }
     } catch (e) {}
   });
+
+  if (customerKeyPresent) {
+    syncCustomerDatabasesBidirectionally();
+  }
 
   if (typeof window !== 'undefined') {
     Object.entries(entries).forEach(([key, data]) => {
