@@ -35,6 +35,7 @@ import { recalculateCustomerLedgerAndBilling, formatInvoiceNoteToEnglish } from 
 import { INITIAL_CUSTOMERS, INITIAL_LEDGER } from '../mockData';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
+import { printElement } from '../utils/printHelper';
 
 interface CustomerLedgerManagerProps {
   language: Language;
@@ -425,7 +426,11 @@ export const CustomerLedgerManagerContent: React.FC<CustomerLedgerManagerProps> 
 
   // Print Report Handler
   const handlePrintReport = () => {
-    window.print();
+    if (selectedCustomer) {
+      printElement('customer-printable-ledger-statement', `${selectedCustomer.name || 'Customer'} - Statement of Account`);
+    } else {
+      window.print();
+    }
   };
 
   const formatBdt = (val?: any) => {
@@ -743,13 +748,20 @@ export const CustomerLedgerManagerContent: React.FC<CustomerLedgerManagerProps> 
         {/* =========================================================================
             2. OFFICIAL PRINTABLE A4 STATEMENT DOCUMENT (PRINT ONLY)
             ========================================================================= */}
-        <div className="printable-document hidden print:block text-slate-900 font-sans p-4 bg-white">
+        <div id="customer-printable-ledger-statement" className="printable-document hidden print:block text-slate-900 font-sans p-4 bg-white w-full">
           {/* Header Banner */}
-          <div className="border-b-2 border-slate-900 pb-4 mb-4 flex justify-between items-start">
-            <div>
-              <h1 className="text-xl font-bold tracking-tight text-slate-900 uppercase">M/S FOUR STAR CARGO</h1>
-              <p className="text-[11px] text-slate-600 font-medium">Cargo Tracking, International Logistics & Financial Operations</p>
-              <p className="text-[10px] text-slate-500 mt-1">Guangzhou / HK Origin Hub & Dhaka Head Office | Tel: +880 1700-000000</p>
+          <div className="border-b-2 border-slate-900 pb-4 mb-4 flex justify-between items-center">
+            <div className="flex items-center space-x-3.5">
+              <img
+                src="/logo.png"
+                alt="Four Star Cargo Logo"
+                className="w-14 h-14 object-contain shrink-0"
+              />
+              <div>
+                <h1 className="text-xl font-bold tracking-tight text-slate-900 uppercase">M/S FOUR STAR CARGO</h1>
+                <p className="text-[11px] text-slate-600 font-medium">Cargo Tracking, International Logistics & Financial Operations</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">Guangzhou / HK Origin Hub & Dhaka Head Office | Tel: +880 1700-000000</p>
+              </div>
             </div>
             <div className="text-right">
               <div className="inline-block bg-slate-900 text-white text-xs font-bold px-3 py-1 uppercase tracking-wider mb-1">

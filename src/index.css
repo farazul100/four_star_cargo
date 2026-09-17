@@ -564,6 +564,11 @@ a:hover span {
    EXECUTIVE A4 PRINTABLE FINANCIAL STATEMENT STYLING
    ========================================================= */
 @media print {
+  @page {
+    size: A4 portrait;
+    margin: 6mm 8mm;
+  }
+
   /* Hide all dashboard UI navigation bars, sidebars, headers & non-print elements */
   aside,
   header,
@@ -580,6 +585,7 @@ a:hover span {
     background-color: #FFFFFF !important;
     color: #000000 !important;
     width: 100% !important;
+    max-width: 100% !important;
     height: auto !important;
     max-height: none !important;
     min-height: 0 !important;
@@ -589,6 +595,16 @@ a:hover span {
     position: static !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+  }
+
+  /* Reset layout constraints in print mode */
+  .max-w-7xl,
+  .max-w-4xl,
+  .max-w-5xl {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
   }
 
   #root, main, div {
