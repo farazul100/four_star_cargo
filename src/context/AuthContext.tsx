@@ -52,7 +52,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             return;
           }
 
-          if (match.password !== user.password || match.role !== user.role) {
+          if (
+            match.password !== user.password ||
+            match.role !== user.role ||
+            match.warehouse_id !== user.warehouse_id ||
+            match.warehouse_name !== user.warehouse_name
+          ) {
             setUser(match);
             localStorage.setItem('fsc_active_user', JSON.stringify(match));
             sessionStorage.setItem('fsc_active_user', JSON.stringify(match));

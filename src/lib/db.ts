@@ -347,7 +347,12 @@ export const getHostingerDbData = () => {
             const existingUserByEmail = Array.from(userMap.values()).find(
               (u) => (u.email || '').toLowerCase().trim() === (stf.email || '').toLowerCase().trim()
             );
-            if (!userMap.has(stfKey) && !existingUserByEmail && stf.email) {
+
+            if (existingUserByEmail) {
+              existingUserByEmail.role = 'warehouse_incharge';
+              existingUserByEmail.warehouse_id = wh.id;
+              existingUserByEmail.warehouse_name = wh.name;
+            } else if (!userMap.has(stfKey) && stf.email) {
               userMap.set(stfKey, {
                 id: stf.id || `usr-stf-${Date.now()}`,
                 name: stf.name,
