@@ -679,6 +679,7 @@ const pushFullDbToServer = (immediate: boolean = false) => {
 
       const nowTs = Date.now();
       lastLocalMutationTime = nowTs;
+      try { localStorage.setItem('fsc_db_updated_at', String(nowTs)); } catch {}
 
       const userPayload = JSON.parse(localStorage.getItem(DB_KEYS.USERS) || localStorage.getItem('users') || '[]');
       const whPayload = JSON.parse(localStorage.getItem(DB_KEYS.WAREHOUSES) || localStorage.getItem('warehouses') || '[]');
@@ -761,6 +762,7 @@ const pushFullDbToServer = (immediate: boolean = false) => {
 
 export const saveHostingerDbData = (key: string, data: any) => {
   lastLocalMutationTime = Date.now();
+  try { localStorage.setItem('fsc_db_updated_at', String(lastLocalMutationTime)); } catch {}
 
   if (key === DB_KEYS.CARTONS && Array.isArray(data)) {
     const cartonMap = new Map<string, Carton>();
@@ -834,6 +836,7 @@ export const saveHostingerDbData = (key: string, data: any) => {
 // Atomic Multi-Key Saver helper to update proposals and cartons together without race conditions
 export const saveHostingerDbMultiData = (entries: Record<string, any>) => {
   lastLocalMutationTime = Date.now();
+  try { localStorage.setItem('fsc_db_updated_at', String(lastLocalMutationTime)); } catch {}
 
   let customerKeyPresent = false;
 
@@ -896,9 +899,17 @@ export const processServerDbUpdate = (serverDb: any) => {
   if (!serverDb || typeof serverDb !== 'object') return;
   const serverTs = Number(serverDb._updated_at || 0);
 
-  // Protection: If local user mutated the database in the last 15 seconds,
-  // do NOT let a stale background GET response overwrite local storage edits!
-  if (lastLocalMutationTime > 0 && Date.now() - lastLocalMutationTime < 15000) {
+  const localUpdatedTs = Number(localStorage.getItem('fsc_db_updated_at') || lastLocalMutationTime || 0);
+
+  // Protection 1: If local user mutated DB in last 30 seconds, do not overwrite with server DB!
+  if (lastLocalMutationTime > 0 && Date.now() - lastLocalMutationTime < 30000) {
+    return;
+  }
+
+  // Protection 2: If local storage has a NEWER updated timestamp than the server DB,
+  // DO NOT let the stale server DB overwrite local storage! Push local DB to server instead!
+  if (localUpdatedTs > 0 && serverTs > 0 && localUpdatedTs > serverTs) {
+    pushFullDbToServer(true);
     return;
   }
 
