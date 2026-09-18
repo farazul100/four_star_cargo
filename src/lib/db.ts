@@ -834,6 +834,7 @@ export const saveHostingerDbData = (key: string, data: any) => {
   }
 
   // Instant local UI notification
+  notifyAllSubscribers();
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key, data } }));
     dbBroadcastChannel?.postMessage({ key, timestamp: Date.now() });
@@ -892,6 +893,7 @@ export const saveHostingerDbMultiData = (entries: Record<string, any>) => {
     syncCustomerDatabasesBidirectionally();
   }
 
+  notifyAllSubscribers();
   if (typeof window !== 'undefined') {
     Object.entries(entries).forEach(([key, data]) => {
       window.dispatchEvent(new CustomEvent('fsc_db_updated', { detail: { key, data } }));
@@ -907,12 +909,15 @@ let lastKnownServerTs = 0;
 
 export const processServerDbUpdate = (serverDb: any) => {
   if (!serverDb || typeof serverDb !== 'object') return;
-  const serverTs = Number(serverDb._updated_at || 0);
+  let serverTs = Number(serverDb._updated_at || 0);
+  if (serverTs > 0 && serverTs < 10000000000) {
+    serverTs *= 1000;
+  }
 
   const localUpdatedTs = Number(localStorage.getItem('fsc_db_updated_at') || lastLocalMutationTime || 0);
 
-  // Protection 1: If local user mutated DB in last 30 seconds, do not overwrite with server DB!
-  if (lastLocalMutationTime > 0 && Date.now() - lastLocalMutationTime < 30000) {
+  // Protection 1: If local user mutated DB in last 1.5 seconds and server is not newer, delay overwrite
+  if (lastLocalMutationTime > 0 && Date.now() - lastLocalMutationTime < 1500 && serverTs <= lastKnownServerTs) {
     return;
   }
 
@@ -1123,7 +1128,10 @@ const checkFastTimestamp = async () => {
     });
     if (res && res.ok) {
       const data = await res.json();
-      const serverTs = Number(data.timestamp || data._updated_at || 0);
+      let serverTs = Number(data.timestamp || data._updated_at || 0);
+      if (serverTs > 0 && serverTs < 10000000000) {
+        serverTs *= 1000;
+      }
       if (serverTs > 0 && serverTs > lastKnownServerTs) {
         await fetchServerDbAndSync();
         notifyAllSubscribers();
@@ -1159,7 +1167,7 @@ export const subscribeHostingerDbChanges = (callback: () => void) => {
       if (typeof document !== 'undefined' && document.visibilityState === 'visible') {
         await checkFastTimestamp();
       }
-    }, 4000);
+    }, 1200);
   }
 
   // Perform lightweight timestamp check on subscribe to see if full DB fetch is needed

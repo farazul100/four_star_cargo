@@ -29,8 +29,21 @@ $dataFile = $dbDir . '/db.json';
 
 // Instant lightweight timestamp check for zero-overhead live sync
 if (isset($_GET['mode']) && $_GET['mode'] === 'ts') {
-    $mtime = file_exists($dataFile) ? @filemtime($dataFile) : time();
-    echo json_encode(['timestamp' => $mtime, '_updated_at' => $mtime]);
+    $ts = 0;
+    if (file_exists($dataFile)) {
+        $raw = @file_get_contents($dataFile);
+        $json = json_decode($raw, true);
+        if (isset($json['_updated_at']) && is_numeric($json['_updated_at'])) {
+            $ts = (float)$json['_updated_at'];
+        }
+    }
+    if ($ts <= 0 && file_exists($dataFile)) {
+        $ts = (float)(@filemtime($dataFile) * 1000);
+    }
+    if ($ts <= 0) {
+        $ts = (float)(round(microtime(true) * 1000));
+    }
+    echo json_encode(['timestamp' => $ts, '_updated_at' => $ts]);
     exit();
 }
 

@@ -243,9 +243,10 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
   React.useEffect(() => {
     const syncLatestCartons = () => {
       const freshData = getHostingerDbData();
-      if (freshData.cartons && freshData.cartons.length > 0) {
-        setLiveRealtimeCartons(freshData.cartons);
-      } else if (cartons && cartons.length > 0) {
+      const freshCartons = freshData.cartons;
+      if (Array.isArray(freshCartons) && freshCartons.length >= 0) {
+        setLiveRealtimeCartons(freshCartons);
+      } else if (cartons) {
         setLiveRealtimeCartons(cartons);
       }
       if (freshData.customers) {
@@ -706,24 +707,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     }
   };
 
-  React.useEffect(() => {
-    const dbData = getHostingerDbData();
-    const dbCartons = dbData.cartons || [];
-    if (dbCartons.length > 0) {
-      setLiveRealtimeCartons(dbCartons);
-    } else {
-      setLiveRealtimeCartons(cartons);
-    }
-  }, [cartons]);
 
-  React.useEffect(() => {
-    return subscribeToDbUpdates(() => {
-      const dbData = getHostingerDbData();
-      if (dbData.cartons) {
-        setLiveRealtimeCartons(dbData.cartons);
-      }
-    });
-  }, []);
 
   // CARTON BATCH & SINGLE CARTON DELETION HANDLERS
   const handleDeleteSingleCarton = (cartonId: string) => {
