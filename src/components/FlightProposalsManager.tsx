@@ -72,9 +72,24 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
   const [activeModalProposal, setActiveModalProposal] = useState<FlyingProposal | null>(null);
   const [showAddCartonModal, setShowAddCartonModal] = useState<boolean>(false);
   const [selectedUnassignedCartonIds, setSelectedUnassignedCartonIds] = useState<string[]>([]);
+  const [selectedAttachedCartonIds, setSelectedAttachedCartonIds] = useState<string[]>([]);
+  const [activeColorPickerSide, setActiveColorPickerSide] = useState<'left' | 'right' | null>(null);
   const [addCartonSearch, setAddCartonSearch] = useState<string>('');
   const [attachedCartonSearch, setAttachedCartonSearch] = useState<string>('');
   const [printManifestProposal, setPrintManifestProposal] = useState<FlyingProposal | null>(null);
+
+  const ROW_COLOR_OPTIONS = [
+    { hex: '#FEF08A', name: 'Yellow' },
+    { hex: '#BBF7D0', name: 'Green' },
+    { hex: '#A5F3FC', name: 'Cyan' },
+    { hex: '#BFDBFE', name: 'Blue' },
+    { hex: '#FECACA', name: 'Red' },
+    { hex: '#E9D5FF', name: 'Purple' },
+    { hex: '#FED7AA', name: 'Orange' },
+    { hex: '#FBCFE8', name: 'Pink' },
+    { hex: '#D9F99D', name: 'Lime' },
+    { hex: '#E2E8F0', name: 'Gray' },
+  ];
 
   // Toast Helper
   const addToast = (type: 'success' | 'error' | 'info', title: string, message?: string) => {
@@ -82,6 +97,79 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
   };
   const dismissToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
+  };
+
+  // ACTION: MERGE CARTONS
+  const handleMergeSelectedCartons = (cartonIdsToMerge: string[]) => {
+    if (cartonIdsToMerge.length < 2) {
+      addToast('error', isBn ? 'মার্জ করতে অন্তত ২টি কার্টুন সিলেক্ট করুন' : 'Select at least 2 cartons to merge');
+      return;
+    }
+    const selectedCartons = cartons.filter((c) => cartonIdsToMerge.includes(c.id));
+    if (selectedCartons.length < 2) return;
+
+    const masterCarton = selectedCartons[0];
+    const groupId = masterCarton.master_group_id || `grp-prop-${masterCarton.ctn_no}-${Date.now()}`;
+    const targetCtnNo = masterCarton.ctn_no;
+    const targetPkgNo = masterCarton.packaging_number;
+
+    const updatedCartons = cartons.map((c) => {
+      if (cartonIdsToMerge.includes(c.id)) {
+        return {
+          ...c,
+          ctn_no: targetCtnNo,
+          packaging_number: targetPkgNo,
+          master_group_id: groupId,
+          is_merged: true,
+          updated_at: new Date().toISOString(),
+        };
+      }
+      return c;
+    });
+
+    syncAndSave(proposals, updatedCartons, `${selectedCartons.length} cartons merged into ${targetCtnNo}`);
+    addToast('success', isBn ? 'কার্টুন মার্জ করা হয়েছে' : 'Cartons Merged', isBn ? `${selectedCartons.length}টি কার্টুন ${targetCtnNo} নম্বরে মার্জ করা হয়েছে।` : `${selectedCartons.length} cartons merged.`);
+  };
+
+  // ACTION: UNMERGE CARTONS
+  const handleUnmergeSelectedCartons = (cartonIdsToUnmerge: string[]) => {
+    if (cartonIdsToUnmerge.length === 0) return;
+    let counter = 1;
+    const updatedCartons = cartons.map((c) => {
+      if (cartonIdsToUnmerge.includes(c.id)) {
+        const newCtnNo = `CTN-${counter < 10 ? '0' : ''}${counter++}`;
+        return {
+          ...c,
+          ctn_no: newCtnNo,
+          master_group_id: undefined,
+          is_merged: false,
+          updated_at: new Date().toISOString(),
+        };
+      }
+      return c;
+    });
+
+    syncAndSave(proposals, updatedCartons, `Unmerged ${cartonIdsToUnmerge.length} cartons`);
+    addToast('info', isBn ? 'কার্টুন আনমার্জ করা হয়েছে' : 'Cartons Unmerged', isBn ? `${cartonIdsToUnmerge.length}টি কার্টুন আনমার্জ করা হয়েছে।` : `${cartonIdsToUnmerge.length} cartons unmerged.`);
+  };
+
+  // ACTION: APPLY ROW COLOR
+  const handleApplyRowColorToCartons = (cartonIds: string[], colorHex: string | null) => {
+    if (cartonIds.length === 0) return;
+    const updatedCartons = cartons.map((c) => {
+      if (cartonIds.includes(c.id)) {
+        return {
+          ...c,
+          row_color: colorHex || undefined,
+          updated_at: new Date().toISOString(),
+        };
+      }
+      return c;
+    });
+
+    syncAndSave(proposals, updatedCartons, `Updated row color for ${cartonIds.length} cartons`);
+    setActiveColorPickerSide(null);
+    addToast('success', isBn ? 'কালার আপডেট করা হয়েছে' : 'Color Updated');
   };
 
   // Sync state from db.ts on mount and subscribe to real-time cross-tab updates
@@ -1416,9 +1504,12 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
 
         // Available unassigned stock cartons in origin warehouse
         const unassignedCartonsInWh = cartons.filter((c) => {
-          const cartonCanonicalWh = resolveCanonicalWarehouseId(c.current_warehouse_id || (c as any).origin_warehouse_id, c.current_warehouse_name || c.warehouse_name);
-          const isSameWh = cartonCanonicalWh === propCanonicalWh || (!c.current_warehouse_id && !activeModalProposal.warehouse_id);
-          const attachedIds = activeModalProposal.carton_ids || currentAttachedCartons.map(ac => ac.id);
+          const cartonCanonicalWh = resolveCanonicalWarehouseId(
+            c.current_warehouse_id || (c as any).origin_warehouse_id || (c as any).warehouse_id || 'wh-china',
+            c.current_warehouse_name || c.warehouse_name || 'Guangzhou Air Hub'
+          );
+          const isSameWh = !propCanonicalWh || propCanonicalWh === 'wh-china' || cartonCanonicalWh === propCanonicalWh || (!c.current_warehouse_id && !activeModalProposal.warehouse_id);
+          const attachedIds = activeModalProposal.carton_ids || currentAttachedCartons.map((ac) => ac.id);
           const isNotAttachedToThisProp = !attachedIds.includes(c.id);
           const isNotDispatched = c.status !== 'in_transit' && c.status !== 'delivered' && c.status !== 'dispatched';
 
@@ -1468,6 +1559,18 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
           );
         });
 
+        const allAttachedFilteredSelected = filteredAttachedPayloadPreview.length > 0 && filteredAttachedPayloadPreview.every((c) => selectedAttachedCartonIds.includes(c.id));
+
+        const toggleSelectAllAttached = () => {
+          if (allAttachedFilteredSelected) {
+            const filteredIds = new Set(filteredAttachedPayloadPreview.map((c) => c.id));
+            setSelectedAttachedCartonIds(selectedAttachedCartonIds.filter((id) => !filteredIds.has(id)));
+          } else {
+            const updated = Array.from(new Set([...selectedAttachedCartonIds, ...filteredAttachedPayloadPreview.map((c) => c.id)]));
+            setSelectedAttachedCartonIds(updated);
+          }
+        };
+
         return (
           <div className="fixed inset-0 z-50 bg-[#1E293B]/80 backdrop-blur-xs flex items-center justify-center p-2 sm:p-4 font-sans animate-backdrop-blur-fade">
             <div className={`w-full max-w-7xl max-h-[92vh] flex flex-col rounded-none border shadow-2xl overflow-hidden font-sans ${
@@ -1515,14 +1618,71 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                       <span className="text-[11px] font-mono text-slate-400 font-normal">({unassignedCartonsInWh.length})</span>
                     </h4>
 
-                    <button
-                      type="button"
-                      onClick={toggleSelectAllUnassigned}
-                      disabled={filteredUnassignedCartons.length === 0}
-                      className="py-1 px-3 rounded-none border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-normal text-xs transition-all cursor-pointer disabled:opacity-40"
-                    >
-                      {allFilteredSelected ? (isBn ? 'সব আনসিলেক্ট' : 'Deselect All') : (isBn ? 'সব সিলেক্ট করুন' : 'Select All')}
-                    </button>
+                    <div className="flex items-center space-x-1.5 flex-wrap gap-y-1">
+                      {selectedUnassignedCartonIds.length > 0 && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleMergeSelectedCartons(selectedUnassignedCartonIds)}
+                            disabled={selectedUnassignedCartonIds.length < 2}
+                            className="px-2 py-0.5 text-[11px] font-medium bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white rounded-none flex items-center space-x-1 cursor-pointer"
+                            title={isBn ? 'মার্জ করুন' : 'Merge cartons'}
+                          >
+                            <span>🔗 {isBn ? 'মার্জ' : 'Merge'} ({selectedUnassignedCartonIds.length})</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleUnmergeSelectedCartons(selectedUnassignedCartonIds)}
+                            className="px-2 py-0.5 text-[11px] font-medium bg-amber-600 hover:bg-amber-700 text-white rounded-none flex items-center space-x-1 cursor-pointer"
+                            title={isBn ? 'আনমার্জ করুন' : 'Unmerge cartons'}
+                          >
+                            <span>🔓 {isBn ? 'আনমার্জ' : 'Unmerge'}</span>
+                          </button>
+
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={() => setActiveColorPickerSide(activeColorPickerSide === 'left' ? null : 'left')}
+                              className="px-2 py-0.5 text-[11px] font-medium bg-slate-700 hover:bg-slate-800 text-white rounded-none flex items-center space-x-1 cursor-pointer"
+                            >
+                              <span>🎨 {isBn ? 'কালার' : 'Color'}</span>
+                            </button>
+
+                            {activeColorPickerSide === 'left' && (
+                              <div className="absolute left-0 top-full mt-1 p-2 bg-white dark:bg-[#1E293B] border border-slate-300 dark:border-slate-700 shadow-2xl z-30 grid grid-cols-5 gap-1.5 min-w-[170px]">
+                                {ROW_COLOR_OPTIONS.map((opt) => (
+                                  <button
+                                    key={opt.hex}
+                                    type="button"
+                                    onClick={() => handleApplyRowColorToCartons(selectedUnassignedCartonIds, opt.hex)}
+                                    style={{ backgroundColor: opt.hex }}
+                                    className="w-6 h-6 border border-slate-400 hover:scale-110 transition-transform cursor-pointer"
+                                    title={opt.name}
+                                  />
+                                ))}
+                                <button
+                                  type="button"
+                                  onClick={() => handleApplyRowColorToCartons(selectedUnassignedCartonIds, null)}
+                                  className="col-span-5 text-[10px] text-center p-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 cursor-pointer border border-slate-300 dark:border-slate-700"
+                                >
+                                  ❌ {isBn ? 'কালার রিসেট' : 'Reset Color'}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={toggleSelectAllUnassigned}
+                        disabled={filteredUnassignedCartons.length === 0}
+                        className="py-1 px-3 rounded-none border border-slate-300 dark:border-slate-700 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 font-normal text-xs transition-all cursor-pointer disabled:opacity-40"
+                      >
+                        {allFilteredSelected ? (isBn ? 'সব আনসিলেক্ট' : 'Deselect All') : (isBn ? 'সব সিলেক্ট করুন' : 'Select All')}
+                      </button>
+                    </div>
                   </div>
 
                   <div className="relative">
@@ -1538,13 +1698,13 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                     />
                   </div>
 
-                  <div className={`flex-1 overflow-x-auto overflow-y-auto max-h-[52vh] rounded-none border ${isDark ? "bg-[#1E293B] border-slate-700 text-slate-200" : "bg-white border-slate-200 text-slate-800"}`}>
-                    <table className="min-w-max w-full text-left text-xs font-light">
-                      <thead className={`uppercase text-[10px] tracking-wider border-b sticky top-0 z-10 ${
-                        isDark ? 'bg-[#1E293B] text-slate-300 border-slate-700 font-medium' : 'bg-slate-100 text-slate-700 border-slate-200 font-medium'
+                  <div className={`flex-1 overflow-x-auto overflow-y-auto max-h-[52vh] rounded-none border border-slate-300 dark:border-slate-700 ${isDark ? "bg-[#1E293B] text-slate-200" : "bg-white text-slate-800"}`}>
+                    <table className={`min-w-max w-full text-left text-xs border-collapse border border-slate-300 dark:border-slate-700 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      <thead className={`uppercase text-[10px] tracking-wider sticky top-0 z-10 ${
+                        isDark ? 'bg-[#1E293B] text-slate-300 font-medium' : 'bg-slate-100 text-slate-700 font-medium'
                       }`}>
                         <tr>
-                          <th className="p-2.5 w-8 text-center font-normal">
+                          <th className="p-2.5 w-8 text-center font-bold border border-slate-300 dark:border-slate-700">
                             <input
                               type="checkbox"
                               checked={allFilteredSelected}
@@ -1552,30 +1712,48 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                               className="w-3.5 h-3.5 rounded-none text-blue-600 border-slate-300 cursor-pointer accent-blue-600"
                             />
                           </th>
-                          <th className="p-2.5 w-8 text-center font-normal">SL</th>
-                          <th className="p-2.5 font-normal whitespace-nowrap">CTN NO</th>
-                          <th className="p-2.5 font-normal whitespace-nowrap">SHIPPING MARK</th>
-                          <th className="p-2.5 font-normal whitespace-nowrap">TRACKING NO</th>
-                          <th className="p-2.5 font-normal whitespace-nowrap">PRODUCT</th>
-                          <th className="p-2.5 text-center font-normal whitespace-nowrap">QTY / N.WT</th>
-                          <th className="p-2.5 text-center font-normal whitespace-nowrap">G.WEIGHT</th>
-                          <th className="p-2.5 text-center font-normal whitespace-nowrap">CBM</th>
-                          <th className="p-2.5 text-center font-normal whitespace-nowrap">PROOF</th>
+                          <th className="p-2.5 w-8 text-center font-bold border border-slate-300 dark:border-slate-700">SL</th>
+                          <th className="p-2.5 font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">CTN NO</th>
+                          <th className="p-2.5 font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">SHIPPING MARK</th>
+                          <th className="p-2.5 font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">TRACKING NO</th>
+                          <th className="p-2.5 font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">PRODUCT</th>
+                          <th className="p-2.5 text-center font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">QTY / N.WT</th>
+                          <th className="p-2.5 text-center font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">G.WEIGHT</th>
+                          <th className="p-2.5 text-center font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">CBM</th>
+                          <th className="p-2.5 text-center font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">PROOF</th>
                         </tr>
                       </thead>
-                      <tbody className={`divide-y ${isDark ? 'divide-slate-800 text-slate-300' : 'divide-slate-200 text-slate-700'}`}>
-                        {filteredUnassignedCartons.length === 0 ? (
-                          <tr>
-                            <td colSpan={10} className="p-6 text-center text-xs text-slate-400 font-light">
-                              {isBn ? 'যুক্ত করার মতো কোনো অন-হোল্ড কার্টুন পাওয়া যায়নি' : 'No available cartons found.'}
-                            </td>
-                          </tr>
-                        ) : (
-                          filteredUnassignedCartons.map((c, idx) => {
+                      <tbody className={isDark ? 'text-slate-300' : 'text-slate-700'}>
+                        {(() => {
+                          const sortedUnassigned = sortCartonsForTableDisplay(filteredUnassignedCartons);
+                          if (sortedUnassigned.length === 0) {
+                            return (
+                              <tr>
+                                <td colSpan={10} className="p-6 text-center text-xs text-slate-400 font-light border border-slate-300 dark:border-slate-700">
+                                  {isBn ? 'যুক্ত করার মতো কোনো অন-হোল্ড কার্টুন পাওয়া যায়নি' : 'No available cartons found.'}
+                                </td>
+                              </tr>
+                            );
+                          }
+
+                          return sortedUnassigned.map((c, idx) => {
+                            const spanInfo = getCartonRowSpanInfo(sortedUnassigned, idx);
+                            const slNum = getSlNumberForCartonRow(sortedUnassigned, idx);
                             const isChecked = selectedUnassignedCartonIds.includes(c.id);
+                            const displayMark = c.sub_shipping_mark || c.shipping_mark || 'N/A';
+
+                            const rowBgStyle: React.CSSProperties = c.row_color
+                              ? { backgroundColor: c.row_color, color: '#0F172A' }
+                              : isChecked
+                              ? { backgroundColor: isDark ? '#1E3A8A' : '#EFF6FF' }
+                              : spanInfo.isMerged
+                              ? { backgroundColor: isDark ? '#1E1B4B' : '#EEF2FF' }
+                              : {};
+
                             return (
                               <tr
                                 key={c.id}
+                                style={rowBgStyle}
                                 onClick={() => {
                                   if (isChecked) {
                                     setSelectedUnassignedCartonIds(selectedUnassignedCartonIds.filter((id) => id !== c.id));
@@ -1584,10 +1762,10 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                                   }
                                 }}
                                 className={`hover:bg-blue-50/40 dark:hover:bg-[#1E293B]/60 cursor-pointer transition-colors ${
-                                  isChecked ? (isDark ? 'bg-blue-950/30' : 'bg-blue-50/70') : ''
+                                  c.row_color ? 'font-semibold text-slate-900' : ''
                                 }`}
                               >
-                                <td className="p-2.5 text-center" onClick={(e) => e.stopPropagation()}>
+                                <td className="p-2.5 text-center border border-slate-300 dark:border-slate-700 align-middle" onClick={(e) => e.stopPropagation()}>
                                   <input
                                     type="checkbox"
                                     checked={isChecked}
@@ -1601,32 +1779,45 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                                     className="w-3.5 h-3.5 rounded-none text-blue-600 border-slate-300 cursor-pointer accent-blue-600"
                                   />
                                 </td>
-                                <td className="p-2.5 text-center font-mono text-slate-500 text-[11px]">{idx + 1}</td>
-                                <td className="p-2.5 font-mono whitespace-nowrap">
-                                  <span className="px-2 py-0.5 rounded-none bg-slate-100 dark:bg-[#1E293B] text-teal-700 dark:text-teal-400 font-mono text-[11px] font-medium border border-slate-300 dark:border-slate-700">
-                                    {c.ctn_no}
+                                {spanInfo.isFirst && (
+                                  <td
+                                    rowSpan={spanInfo.rowSpan}
+                                    style={rowBgStyle}
+                                    className="p-2.5 text-center font-mono font-extrabold text-slate-800 dark:text-slate-100 text-[11px] border border-slate-300 dark:border-slate-700 align-middle"
+                                  >
+                                    {slNum}
+                                  </td>
+                                )}
+                                <td style={rowBgStyle} className="p-2.5 font-mono whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
+                                  <span className="px-2 py-0.5 rounded-none bg-slate-100 dark:bg-[#1E293B] text-teal-700 dark:text-teal-400 font-mono text-[11px] font-bold border border-slate-300 dark:border-slate-700 inline-flex items-center space-x-1">
+                                    <span>{c.ctn_no}</span>
+                                    {c.is_merged && (
+                                      <span className="px-1 py-0.2 text-[9px] font-bold bg-indigo-600 text-white rounded">
+                                        🔗
+                                      </span>
+                                    )}
                                   </span>
                                 </td>
-                                <td className="p-2.5 font-mono font-semibold text-slate-800 dark:text-slate-200 text-[11px] whitespace-nowrap">
-                                  {c.shipping_mark || 'N/A'}
+                                <td style={rowBgStyle} className="p-2.5 font-mono font-semibold text-slate-800 dark:text-slate-200 text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
+                                  {displayMark}
                                 </td>
-                                <td className="p-2.5 font-mono text-slate-600 dark:text-slate-400 text-[11px] whitespace-nowrap">
+                                <td style={rowBgStyle} className="p-2.5 font-mono text-slate-600 dark:text-slate-400 text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
                                   {c.tracking_number}
                                 </td>
-                                <td className="p-2.5 font-normal text-slate-700 dark:text-slate-300 text-[11px]">
+                                <td style={rowBgStyle} className="p-2.5 font-normal text-slate-700 dark:text-slate-300 text-[11px] border border-slate-300 dark:border-slate-700 align-middle">
                                   <p className="font-medium text-slate-800 dark:text-slate-200">{c.product_name_en || 'Product'}</p>
                                   {c.product_name_cn && <p className="text-[10px] text-slate-400">{c.product_name_cn}</p>}
                                 </td>
-                                <td className="p-2.5 text-center font-mono text-slate-600 dark:text-slate-400 text-[11px] whitespace-nowrap">
+                                <td style={rowBgStyle} className="p-2.5 text-center font-mono text-slate-600 dark:text-slate-400 text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
                                   {c.quantity || 1} pcs | {c.net_weight || 0} kg
                                 </td>
-                                <td className="p-2.5 text-center font-mono font-bold text-emerald-600 dark:text-emerald-400 text-[11px] whitespace-nowrap">
+                                <td style={rowBgStyle} className="p-2.5 text-center font-mono font-bold text-emerald-600 dark:text-emerald-400 text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
                                   {c.gross_weight} kg
                                 </td>
-                                <td className="p-2.5 text-center font-mono font-medium text-purple-600 dark:text-purple-400 text-[11px] whitespace-nowrap">
+                                <td style={rowBgStyle} className="p-2.5 text-center font-mono font-medium text-purple-600 dark:text-purple-400 text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
                                   {c.cbm} CBM
                                 </td>
-                                <td className="p-2.5 text-center text-[11px] whitespace-nowrap">
+                                <td style={rowBgStyle} className="p-2.5 text-center text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
                                   {c.photo_url || (c.photo_proofs && c.photo_proofs.length > 0) ? (
                                     <span className="inline-flex items-center space-x-1 text-emerald-600 dark:text-emerald-400 font-medium">
                                       <span>📷 Photo</span>
@@ -1637,8 +1828,8 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                                 </td>
                               </tr>
                             );
-                          })
-                        )}
+                          });
+                        })()}
                       </tbody>
                     </table>
                   </div>
@@ -1646,14 +1837,71 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
 
                 {/* RIGHT PANEL (6 cols / 50% Width): Attached Proposal Payload Live Preview Table */}
                 <div className={`xl:col-span-6 flex flex-col min-h-0 p-3 sm:p-4 space-y-3 ${isDark ? "bg-[#1E293B]" : "bg-slate-50/70"}`}>
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-center justify-between gap-2">
                     <h4 className="text-xs font-semibold text-slate-900 dark:text-white flex items-center space-x-2">
                       <Plane className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                       <span>{isBn ? '২. প্রস্তাবনায় যুক্ত কার্টুন লাইভ প্রিভিউ' : '2. Attached Proposal Payload Preview'}</span>
+                      <span className="px-2 py-0.5 rounded-none text-[11px] font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20">
+                        {previewTotalCount} {isBn ? 'টি কার্টুন' : 'Cartons'}
+                      </span>
                     </h4>
-                    <span className="px-2 py-0.5 rounded-none text-[11px] font-mono bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-semibold border border-emerald-500/20">
-                      {previewTotalCount} {isBn ? 'টি কার্টুন' : 'Cartons'}
-                    </span>
+
+                    <div className="flex items-center space-x-1.5 flex-wrap gap-y-1">
+                      {selectedAttachedCartonIds.length > 0 && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleMergeSelectedCartons(selectedAttachedCartonIds)}
+                            disabled={selectedAttachedCartonIds.length < 2}
+                            className="px-2 py-0.5 text-[11px] font-medium bg-indigo-600 hover:bg-indigo-700 disabled:opacity-40 text-white rounded-none flex items-center space-x-1 cursor-pointer"
+                            title={isBn ? 'মার্জ করুন' : 'Merge cartons'}
+                          >
+                            <span>🔗 {isBn ? 'মার্জ' : 'Merge'} ({selectedAttachedCartonIds.length})</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleUnmergeSelectedCartons(selectedAttachedCartonIds)}
+                            className="px-2 py-0.5 text-[11px] font-medium bg-amber-600 hover:bg-amber-700 text-white rounded-none flex items-center space-x-1 cursor-pointer"
+                            title={isBn ? 'আনমার্জ করুন' : 'Unmerge cartons'}
+                          >
+                            <span>🔓 {isBn ? 'আনমার্জ' : 'Unmerge'}</span>
+                          </button>
+
+                          <div className="relative">
+                            <button
+                              type="button"
+                              onClick={() => setActiveColorPickerSide(activeColorPickerSide === 'right' ? null : 'right')}
+                              className="px-2 py-0.5 text-[11px] font-medium bg-slate-700 hover:bg-slate-800 text-white rounded-none flex items-center space-x-1 cursor-pointer"
+                            >
+                              <span>🎨 {isBn ? 'কালার' : 'Color'}</span>
+                            </button>
+
+                            {activeColorPickerSide === 'right' && (
+                              <div className="absolute right-0 top-full mt-1 p-2 bg-white dark:bg-[#1E293B] border border-slate-300 dark:border-slate-700 shadow-2xl z-30 grid grid-cols-5 gap-1.5 min-w-[170px]">
+                                {ROW_COLOR_OPTIONS.map((opt) => (
+                                  <button
+                                    key={opt.hex}
+                                    type="button"
+                                    onClick={() => handleApplyRowColorToCartons(selectedAttachedCartonIds, opt.hex)}
+                                    style={{ backgroundColor: opt.hex }}
+                                    className="w-6 h-6 border border-slate-400 hover:scale-110 transition-transform cursor-pointer"
+                                    title={opt.name}
+                                  />
+                                ))}
+                                <button
+                                  type="button"
+                                  onClick={() => handleApplyRowColorToCartons(selectedAttachedCartonIds, null)}
+                                  className="col-span-5 text-[10px] text-center p-1 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 cursor-pointer border border-slate-300 dark:border-slate-700"
+                                >
+                                  ❌ {isBn ? 'কালার রিসেট' : 'Reset Color'}
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </>
+                      )}
+                    </div>
                   </div>
 
                   {/* SYMMETRIC SEARCH INPUT MATCHING LEFT PANEL POSITION */}
@@ -1670,72 +1918,133 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                     />
                   </div>
 
-                  <div className={`flex-1 overflow-x-auto overflow-y-auto max-h-[52vh] rounded-none border ${isDark ? "bg-[#1E293B] border-slate-700 text-slate-200" : "bg-white border-slate-200 text-slate-800"}`}>
-                    <table className="min-w-max w-full text-left text-xs font-light">
-                      <thead className={`uppercase text-[10px] tracking-wider border-b sticky top-0 z-10 ${
-                        isDark ? 'bg-[#1E293B] text-slate-300 border-slate-700 font-medium' : 'bg-slate-100 text-slate-700 border-slate-200 font-medium'
+                  <div className={`flex-1 overflow-x-auto overflow-y-auto max-h-[52vh] rounded-none border border-slate-300 dark:border-slate-700 ${isDark ? "bg-[#1E293B] text-slate-200" : "bg-white text-slate-800"}`}>
+                    <table className={`min-w-max w-full text-left text-xs border-collapse border border-slate-300 dark:border-slate-700 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                      <thead className={`uppercase text-[10px] tracking-wider sticky top-0 z-10 ${
+                        isDark ? 'bg-[#1E293B] text-slate-300 font-medium' : 'bg-slate-100 text-slate-700 border-slate-200 font-medium'
                       }`}>
                         <tr>
-                          <th className="p-2.5 w-8 text-center font-normal">SL</th>
-                          <th className="p-2.5 font-normal whitespace-nowrap">CTN NO</th>
-                          <th className="p-2.5 font-normal whitespace-nowrap">SHIPPING MARK</th>
-                          <th className="p-2.5 font-normal whitespace-nowrap">TRACKING NO</th>
-                          <th className="p-2.5 font-normal whitespace-nowrap">PRODUCT</th>
-                          <th className="p-2.5 text-center font-normal whitespace-nowrap">QTY / N.WT</th>
-                          <th className="p-2.5 text-center font-normal whitespace-nowrap">G.WEIGHT</th>
-                          <th className="p-2.5 text-center font-normal whitespace-nowrap">CBM</th>
-                          <th className="p-2.5 text-center font-normal whitespace-nowrap">PROOF</th>
-                          <th className="p-2.5 text-right font-normal whitespace-nowrap">ACTION</th>
+                          <th className="p-2.5 w-8 text-center font-bold border border-slate-300 dark:border-slate-700">
+                            <input
+                              type="checkbox"
+                              checked={allAttachedFilteredSelected}
+                              onChange={toggleSelectAllAttached}
+                              className="w-3.5 h-3.5 rounded-none text-blue-600 border-slate-300 cursor-pointer accent-blue-600"
+                            />
+                          </th>
+                          <th className="p-2.5 w-8 text-center font-bold border border-slate-300 dark:border-slate-700">SL</th>
+                          <th className="p-2.5 font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">CTN NO</th>
+                          <th className="p-2.5 font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">SHIPPING MARK</th>
+                          <th className="p-2.5 font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">TRACKING NO</th>
+                          <th className="p-2.5 font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">PRODUCT</th>
+                          <th className="p-2.5 text-center font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">QTY / N.WT</th>
+                          <th className="p-2.5 text-center font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">G.WEIGHT</th>
+                          <th className="p-2.5 text-center font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">CBM</th>
+                          <th className="p-2.5 text-center font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">PROOF</th>
+                          <th className="p-2.5 text-right font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">ACTION</th>
                         </tr>
                       </thead>
-                      <tbody className={`divide-y ${isDark ? 'divide-slate-800 text-slate-300' : 'divide-slate-200 text-slate-700'}`}>
-                        {filteredAttachedPayloadPreview.length === 0 ? (
-                          <tr>
-                            <td colSpan={10} className="p-8 text-center text-xs text-slate-400 border border-dashed border-slate-300 dark:border-slate-700 rounded-none">
-                              {attachedCartonSearch
-                                ? (isBn ? 'খুঁজে পাওয়া যায়নি! অন্য কিওয়ার্ড দিয়ে টাইপ করুন।' : 'No attached cartons matching search query.')
-                                : (isBn ? 'এই প্রস্তাবনায় এখনো কোনো কার্টুন যুক্ত নেই।' : 'No cartons attached to this proposal yet.')}
-                            </td>
-                          </tr>
-                        ) : (
-                          filteredAttachedPayloadPreview.map((ctn, idx) => {
+                      <tbody className={isDark ? 'text-slate-300' : 'text-slate-700'}>
+                        {(() => {
+                          const sortedAttached = sortCartonsForTableDisplay(filteredAttachedPayloadPreview);
+                          if (sortedAttached.length === 0) {
+                            return (
+                              <tr>
+                                <td colSpan={11} className="p-8 text-center text-xs text-slate-400 border border-slate-300 dark:border-slate-700">
+                                  {attachedCartonSearch
+                                    ? (isBn ? 'খুঁজে পাওয়া যায়নি! অন্য কিওয়ার্ড দিয়ে টাইপ করুন।' : 'No attached cartons matching search query.')
+                                    : (isBn ? 'এই প্রস্তাবনায় এখনো কোনো কার্টুন যুক্ত নেই।' : 'No cartons attached to this proposal yet.')}
+                                </td>
+                              </tr>
+                            );
+                          }
+
+                          return sortedAttached.map((ctn, idx) => {
+                            const spanInfo = getCartonRowSpanInfo(sortedAttached, idx);
+                            const slNum = getSlNumberForCartonRow(sortedAttached, idx);
                             const isNewlySelected = selectedUnassignedCartonIds.includes(ctn.id);
+                            const isChecked = selectedAttachedCartonIds.includes(ctn.id);
+                            const displayMark = ctn.sub_shipping_mark || ctn.shipping_mark || 'N/A';
+
+                            const rowBgStyle: React.CSSProperties = ctn.row_color
+                              ? { backgroundColor: ctn.row_color, color: '#0F172A' }
+                              : isChecked || isNewlySelected
+                              ? { backgroundColor: isDark ? '#1E3A8A' : '#EFF6FF' }
+                              : spanInfo.isMerged
+                              ? { backgroundColor: isDark ? '#1E1B4B' : '#EEF2FF' }
+                              : {};
+
                             return (
                               <tr
                                 key={ctn.id}
-                                className={`hover:bg-slate-100/50 dark:hover:bg-[#1E293B]/60 transition-colors ${
-                                  isNewlySelected ? 'bg-blue-50/60 dark:bg-blue-950/30' : ''
+                                style={rowBgStyle}
+                                onClick={() => {
+                                  if (isChecked) {
+                                    setSelectedAttachedCartonIds(selectedAttachedCartonIds.filter((id) => id !== ctn.id));
+                                  } else {
+                                    setSelectedAttachedCartonIds([...selectedAttachedCartonIds, ctn.id]);
+                                  }
+                                }}
+                                className={`hover:bg-slate-100/50 dark:hover:bg-[#1E293B]/60 cursor-pointer transition-colors ${
+                                  ctn.row_color ? 'font-semibold text-slate-900' : ''
                                 }`}
                               >
-                                <td className="p-2.5 text-center font-mono text-slate-500 text-[11px]">{idx + 1}</td>
-                                <td className="p-2.5 font-mono whitespace-nowrap flex items-center space-x-1">
-                                  <span className="px-2 py-0.5 rounded-none bg-blue-50 dark:bg-[#1E293B] text-blue-700 dark:text-blue-400 font-mono text-[11px] font-medium border border-blue-300 dark:border-blue-700">
-                                    {ctn.ctn_no}
+                                <td className="p-2.5 text-center border border-slate-300 dark:border-slate-700 align-middle" onClick={(e) => e.stopPropagation()}>
+                                  <input
+                                    type="checkbox"
+                                    checked={isChecked}
+                                    onChange={() => {
+                                      if (isChecked) {
+                                        setSelectedAttachedCartonIds(selectedAttachedCartonIds.filter((id) => id !== ctn.id));
+                                      } else {
+                                        setSelectedAttachedCartonIds([...selectedAttachedCartonIds, ctn.id]);
+                                      }
+                                    }}
+                                    className="w-3.5 h-3.5 rounded-none text-blue-600 border-slate-300 cursor-pointer accent-blue-600"
+                                  />
+                                </td>
+                                {spanInfo.isFirst && (
+                                  <td
+                                    rowSpan={spanInfo.rowSpan}
+                                    style={rowBgStyle}
+                                    className="p-2.5 text-center font-mono font-extrabold text-slate-800 dark:text-slate-100 text-[11px] border border-slate-300 dark:border-slate-700 align-middle"
+                                  >
+                                    {slNum}
+                                  </td>
+                                )}
+                                <td style={rowBgStyle} className="p-2.5 font-mono whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
+                                  <span className="px-2 py-0.5 rounded-none bg-blue-50 dark:bg-[#1E293B] text-blue-700 dark:text-blue-400 font-mono text-[11px] font-bold border border-blue-300 dark:border-blue-700 inline-flex items-center space-x-1">
+                                    <span>{ctn.ctn_no}</span>
+                                    {ctn.is_merged && (
+                                      <span className="px-1 py-0.2 text-[9px] font-bold bg-indigo-600 text-white rounded">
+                                        🔗
+                                      </span>
+                                    )}
+                                    {isNewlySelected && (
+                                      <span className="px-1 py-0.2 rounded-none text-[8px] font-mono bg-blue-600 text-white ml-1">NEW</span>
+                                    )}
                                   </span>
-                                  {isNewlySelected && (
-                                    <span className="px-1 py-0.2 rounded-none text-[8px] font-mono bg-blue-600 text-white">NEW</span>
-                                  )}
                                 </td>
-                                <td className="p-2.5 font-mono font-semibold text-slate-800 dark:text-slate-200 text-[11px] whitespace-nowrap">
-                                  {ctn.shipping_mark || 'N/A'}
+                                <td style={rowBgStyle} className="p-2.5 font-mono font-semibold text-slate-800 dark:text-slate-200 text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
+                                  {displayMark}
                                 </td>
-                                <td className="p-2.5 font-mono text-slate-600 dark:text-slate-400 text-[11px] whitespace-nowrap">
+                                <td style={rowBgStyle} className="p-2.5 font-mono text-slate-600 dark:text-slate-400 text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
                                   {ctn.tracking_number}
                                 </td>
-                                <td className="p-2.5 font-normal text-slate-700 dark:text-slate-300 text-[11px]">
+                                <td style={rowBgStyle} className="p-2.5 font-normal text-slate-700 dark:text-slate-300 text-[11px] border border-slate-300 dark:border-slate-700 align-middle">
                                   <p className="font-medium text-slate-800 dark:text-slate-200">{ctn.product_name_en || 'Product'}</p>
                                   {ctn.product_name_cn && <p className="text-[10px] text-slate-400">{ctn.product_name_cn}</p>}
                                 </td>
-                                <td className="p-2.5 text-center font-mono text-slate-600 dark:text-slate-400 text-[11px] whitespace-nowrap">
+                                <td style={rowBgStyle} className="p-2.5 text-center font-mono text-slate-600 dark:text-slate-400 text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
                                   {ctn.quantity || 1} pcs | {ctn.net_weight || 0} kg
                                 </td>
-                                <td className="p-2.5 text-center font-mono font-bold text-emerald-600 dark:text-emerald-400 text-[11px] whitespace-nowrap">
+                                <td style={rowBgStyle} className="p-2.5 text-center font-mono font-bold text-emerald-600 dark:text-emerald-400 text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
                                   {ctn.gross_weight} kg
                                 </td>
-                                <td className="p-2.5 text-center font-mono font-medium text-purple-600 dark:text-purple-400 text-[11px] whitespace-nowrap">
+                                <td style={rowBgStyle} className="p-2.5 text-center font-mono font-medium text-purple-600 dark:text-purple-400 text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
                                   {ctn.cbm} CBM
                                 </td>
-                                <td className="p-2.5 text-center text-[11px] whitespace-nowrap">
+                                <td style={rowBgStyle} className="p-2.5 text-center text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
                                   {ctn.photo_url || (ctn.photo_proofs && ctn.photo_proofs.length > 0) ? (
                                     <span className="inline-flex items-center space-x-1 text-emerald-600 dark:text-emerald-400 font-medium">
                                       <span>📷 Photo</span>
@@ -1744,7 +2053,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                                     <span className="text-slate-400 font-light">No Photo</span>
                                   )}
                                 </td>
-                                <td className="p-2.5 text-right whitespace-nowrap">
+                                <td style={rowBgStyle} className="p-2.5 text-right whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle" onClick={(e) => e.stopPropagation()}>
                                   <button
                                     type="button"
                                     onClick={() => {
@@ -1762,8 +2071,8 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                                 </td>
                               </tr>
                             );
-                          })
-                        )}
+                          });
+                        })()}
                       </tbody>
                     </table>
                   </div>
