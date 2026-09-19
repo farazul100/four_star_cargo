@@ -65,17 +65,29 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
     return isReadyStatus && isMyDestinationOrWh;
   });
 
-  // Payment Type Filter Pill ('all' | 'with_pay' | 'without_pay')
+  // Payment Type Filter Pill ('all' | 'with_pay' | 'without_pay') & Search Query
   const [paymentFilter, setPaymentFilter] = useState<'all' | 'with_pay' | 'without_pay'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
 
   const filteredReadyCartons = readyCartons.filter((c) => {
+    const q = searchQuery.toLowerCase().trim();
+    const matchesSearch =
+      !q ||
+      (c.tracking_number || '').toLowerCase().includes(q) ||
+      (c.master_tracking_number || '').toLowerCase().includes(q) ||
+      (c.shipping_mark || '').toLowerCase().includes(q) ||
+      (c.ctn_no || '').toLowerCase().includes(q) ||
+      (c.product_name_en || '').toLowerCase().includes(q) ||
+      (c.product_name_cn || '').toLowerCase().includes(q) ||
+      (c.customer_name || '').toLowerCase().includes(q);
+
     const matchedCust = customersList.find(
       (cust) => cust.shipping_mark && c.shipping_mark && cust.shipping_mark.toLowerCase() === c.shipping_mark.toLowerCase()
     );
     const hasDue = matchedCust ? matchedCust.total_due > 0 : false;
-    if (paymentFilter === 'with_pay') return hasDue;
-    if (paymentFilter === 'without_pay') return !hasDue;
-    return true;
+    if (paymentFilter === 'with_pay') return matchesSearch && hasDue;
+    if (paymentFilter === 'without_pay') return matchesSearch && !hasDue;
+    return matchesSearch;
   });
 
   // Multi-select for Bulk Delivery
@@ -244,50 +256,78 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
       <div className={`p-4 rounded-xl border ${
         isDark ? 'bg-[#1E293B] border-slate-700' : 'bg-white border-slate-200/90 shadow-2xs'
       } flex flex-wrap items-center justify-between gap-3`}>
-        <div className="flex items-center space-x-2">
-          <span className={`text-xs font-extrabold ${isDark ? 'text-white' : 'text-slate-700'}`}>{isBn ? 'পেমেন্ট ধরন ফিল্টার:' : 'Filter Payment:'}</span>
-          <div className="flex items-center space-x-1.5">
-            <button
-              type="button"
-              onClick={() => setPaymentFilter('all')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold border cursor-pointer transition-all ${
-                paymentFilter === 'all'
-                  ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
-                  : isDark
-                  ? 'bg-slate-800 text-white border-slate-600 hover:bg-slate-700'
-                  : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="flex items-center space-x-2">
+            <span className={`text-xs font-extrabold ${isDark ? 'text-white' : 'text-slate-700'}`}>{isBn ? 'পেমেন্ট ধরন ফিল্টার:' : 'Filter Payment:'}</span>
+            <div className="flex items-center space-x-1.5">
+              <button
+                type="button"
+                onClick={() => setPaymentFilter('all')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold border cursor-pointer transition-all ${
+                  paymentFilter === 'all'
+                    ? 'bg-blue-600 text-white border-blue-500 shadow-sm'
+                    : isDark
+                    ? 'bg-slate-800 text-white border-slate-600 hover:bg-slate-700'
+                    : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+                }`}
+              >
+                📦 {isBn ? `সকল রিসিভড পণ্য (${readyCartons.length})` : `All Ready (${readyCartons.length})`}
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentFilter('with_pay')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold border cursor-pointer transition-all ${
+                  paymentFilter === 'with_pay'
+                    ? 'bg-amber-600 text-white border-amber-500 shadow-sm'
+                    : isDark
+                    ? 'bg-slate-800 text-white border-slate-600 hover:bg-slate-700'
+                    : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+                }`}
+              >
+                💰 {isBn ? 'With Pay (টাকা বাকি)' : 'With Pay (Due)'}
+              </button>
+              <button
+                type="button"
+                onClick={() => setPaymentFilter('without_pay')}
+                className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold border cursor-pointer transition-all ${
+                  paymentFilter === 'without_pay'
+                    ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm'
+                    : isDark
+                    ? 'bg-slate-800 text-white border-slate-600 hover:bg-slate-700'
+                    : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
+                }`}
+              >
+                ✅ {isBn ? 'Without Pay (পরিশোধিত)' : 'Without Pay (Paid)'}
+              </button>
+            </div>
+          </div>
+
+          {/* Search Box by Tracking No / Shipping Mark / CTN NO */}
+          <div className="relative min-w-[240px]">
+            <Search className={`w-3.5 h-3.5 absolute left-3 top-2.5 ${isDark ? 'text-slate-400' : 'text-slate-400'}`} />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder={isBn ? 'ট্র্যাকিং নম্বর বা শিপিং মার্ক দিয়ে খুঁজুন...' : 'Search tracking no, mark, ctn...'}
+              className={`w-full border rounded-lg py-1.5 pl-8 pr-7 text-xs font-medium outline-none transition-all ${
+                isDark
+                  ? 'bg-[#0B1622] border-slate-700 text-white placeholder-slate-400 focus:border-emerald-500'
+                  : 'bg-slate-50 border-slate-300 text-slate-900 placeholder-slate-400 focus:bg-white focus:border-emerald-600'
               }`}
-            >
-              📦 {isBn ? `সকল রিসিভড পণ্য (${readyCartons.length})` : `All Ready (${readyCartons.length})`}
-            </button>
-            <button
-              type="button"
-              onClick={() => setPaymentFilter('with_pay')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold border cursor-pointer transition-all ${
-                paymentFilter === 'with_pay'
-                  ? 'bg-amber-600 text-white border-amber-500 shadow-sm'
-                  : isDark
-                  ? 'bg-slate-800 text-white border-slate-600 hover:bg-slate-700'
-                  : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
-              }`}
-            >
-              💰 {isBn ? 'With Pay (টাকা বাকি)' : 'With Pay (Due)'}
-            </button>
-            <button
-              type="button"
-              onClick={() => setPaymentFilter('without_pay')}
-              className={`px-3.5 py-1.5 rounded-lg text-xs font-extrabold border cursor-pointer transition-all ${
-                paymentFilter === 'without_pay'
-                  ? 'bg-emerald-600 text-white border-emerald-500 shadow-sm'
-                  : isDark
-                  ? 'bg-slate-800 text-white border-slate-600 hover:bg-slate-700'
-                  : 'bg-slate-100 text-slate-700 border-slate-300 hover:bg-slate-200'
-              }`}
-            >
-              ✅ {isBn ? 'Without Pay (পরিশোধিত)' : 'Without Pay (Paid)'}
-            </button>
+            />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => setSearchQuery('')}
+                className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600 dark:hover:text-white"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
           </div>
         </div>
+
         <div className={`text-xs font-mono font-extrabold ${isDark ? 'text-sky-300' : 'text-slate-600'}`}>
           {filteredReadyCartons.length} {isBn ? 'টি কার্টুন প্রদর্শিত' : 'Cartons Displayed'}
         </div>
