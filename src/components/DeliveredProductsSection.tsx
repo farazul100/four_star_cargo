@@ -25,6 +25,7 @@ import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
 import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../lib/db';
 import { getPathaoApiSettings, createPathaoParcel } from '../lib/pathaoApi';
+import { sortCartonsForTableDisplay, getCartonRowSpanInfo } from './BookedCartonsHub';
 
 interface DeliveredProductsSectionProps {
   cartons?: Carton[];
@@ -517,128 +518,158 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
                   </td>
                 </tr>
               ) : (
-                filteredCartons.map((c) => {
-                  const itemOrigin = (c as any).origin_warehouse_id || c.current_warehouse_id;
-                  return (
-                    <tr key={c.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
-                      <td className="p-3.5 font-mono text-emerald-400 font-extrabold border-r border-b border-slate-200 dark:border-slate-700">
-                        {c.ctn_no}
-                      </td>
-                      <td className="p-3.5 font-normal border-r border-b border-slate-200 dark:border-slate-700">
-                        <div className={`font-extrabold text-xs ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.shipping_mark}</div>
-                        <div className={`text-[10px] font-mono mt-0.5 font-semibold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>{c.tracking_number}</div>
-                      </td>
-                      <td className="p-3.5 font-normal border-r border-b border-slate-200 dark:border-slate-700">
-                        <div className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.product_name_en}</div>
-                        <div className={`text-[10px] font-mono font-semibold ${isDark ? 'text-slate-200' : 'text-slate-500'}`}>{c.quantity || 1} Pcs</div>
-                      </td>
-                      <td className="p-3.5 font-normal border-r border-b border-slate-200 dark:border-slate-700">
-                        <span className="inline-flex items-center space-x-1.5 text-xs">
-                          <span className={`font-extrabold ${isDark ? 'text-white' : 'text-slate-900'}`}>{itemOrigin === 'wh-china' ? 'চীন গুয়াংজু' : 'অরিজিন হাব'}</span>
-                          <span className={`font-extrabold ${isDark ? 'text-slate-300' : 'text-slate-400'}`}>➔</span>
-                          <span className="font-extrabold text-emerald-400">🇧🇩 DAC</span>
-                        </span>
-                      </td>
-                      <td className={`p-3.5 text-center font-mono font-extrabold border-r border-b border-slate-200 dark:border-slate-700 ${
-                        isDark ? 'text-sky-300' : 'text-blue-800'
-                      }`}>
-                        {c.flight_number || 'US-03'}
-                      </td>
-                      <td className={`p-3.5 font-mono font-extrabold text-sm border-r border-b border-slate-200 dark:border-slate-700 ${
-                        isDark ? 'bg-emerald-500/10 text-emerald-300' : 'bg-emerald-100/60 text-emerald-900'
-                      }`}>
-                        <div className="flex items-center space-x-1 justify-center">
-                          <Scale className={`w-3.5 h-3.5 ${isDark ? 'text-emerald-400' : 'text-emerald-700'}`} />
-                          <span>{c.gross_weight} kg</span>
-                        </div>
-                      </td>
-                      <td className={`p-3.5 text-center font-mono font-extrabold border-r border-b border-slate-200 dark:border-slate-700 ${
-                        isDark ? 'text-white' : 'text-slate-900'
-                      }`}>
-                        {c.cbm || 0.15}
-                      </td>
-                      <td className="p-3.5 border-r border-b border-slate-200 dark:border-slate-700">
-                        {c.delivery_status === 'sent_to_pathao' ? (
-                          <div className="space-y-1">
-                            <span className={`inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-black shadow-2xs border ${
-                              isDark ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700' : 'bg-emerald-800 text-white border-emerald-900'
-                            }`}>
-                              <Bike className="w-3.5 h-3.5 text-white" />
-                              <span>পাঠাও কুরিয়ারে বুকড</span>
-                            </span>
-                            <div className={`text-[10px] font-mono font-extrabold ${isDark ? 'text-emerald-300' : 'text-emerald-800'}`}>
-                              ID: {c.pathao_consignment_id}
-                            </div>
-                            <div className={`text-[9px] font-mono font-bold ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>
-                              {c.payment_status === 'unpaid' ? `COD: ৳${c.cod_amount || 0}` : 'পরিশোধিত (Paid)'}
-                            </div>
-                          </div>
-                        ) : c.status === 'delivered' || c.delivery_status === 'delivered_manual' ? (
-                          <div className="space-y-1">
-                            <span className={`inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-black shadow-2xs border ${
-                              isDark ? 'bg-blue-950/80 text-blue-300 border-blue-700' : 'bg-blue-700 text-white border-blue-800'
-                            }`}>
-                              <Truck className="w-3.5 h-3.5 text-white" />
-                              <span>ম্যানুয়ালি বিলিকৃত (Delivered)</span>
-                            </span>
-                            <div className={`text-[9px] font-mono font-bold ${isDark ? 'text-slate-200' : 'text-slate-600'}`}>
-                              {c.payment_status === 'unpaid' ? `আদায়কৃত: ৳${c.cod_amount || 0}` : 'পরিশোধিত (Paid)'}
-                            </div>
-                          </div>
-                        ) : (
-                          <span className={`inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-black shadow-2xs border ${
-                            isDark ? 'bg-slate-800 text-slate-100 border-slate-700' : 'bg-slate-900 text-white border-slate-900'
-                          }`}>
-                            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
-                            <span>{isBn ? 'ওয়্যারহাউজে স্টক প্রস্তুত' : 'Ready in Warehouse'}</span>
-                          </span>
-                        )}
-                      </td>
-                      <td className="p-3.5 text-right border-b border-slate-200 dark:border-slate-700">
-                        <div className="flex items-center justify-end space-x-1.5 whitespace-nowrap">
-                          {c.delivery_status !== 'sent_to_pathao' && c.status !== 'delivered' && (
-                            <>
-                              {/* 1-Click Pathao Courier Booking Button */}
-                              <button
-                                type="button"
-                                onClick={() => handleOpenPathaoModal(c)}
-                                className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-extrabold transition-all border border-emerald-500 cursor-pointer flex items-center space-x-1 shadow-md"
-                                title={isBn ? 'পাঠাও কুরিয়ারে ১-ক্লিক বুকিং' : 'Book with Pathao Courier'}
-                              >
-                                <Bike className="w-3.5 h-3.5 text-white" />
-                                <span className="tracking-tight">{isBn ? 'পাঠাও কুরিয়ার' : 'Pathao'}</span>
-                              </button>
+                (() => {
+                  const sortedDisplayCartons = sortCartonsForTableDisplay(filteredCartons);
+                  return sortedDisplayCartons.map((c, idx) => {
+                    const spanInfo = getCartonRowSpanInfo(sortedDisplayCartons, idx);
+                    const itemOrigin = (c as any).origin_warehouse_id || c.current_warehouse_id;
 
-                              {/* Manual Delivery Button */}
-                              <button
-                                type="button"
-                                onClick={() => handleOpenManualModal(c)}
-                                className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-extrabold transition-all border border-blue-500 cursor-pointer flex items-center space-x-1 shadow-md"
-                                title={isBn ? 'ম্যানুয়াল কাস্টমার ডেলিভারি' : 'Manual Customer Delivery'}
-                              >
-                                <Truck className="w-3.5 h-3.5 text-white" />
-                                <span className="tracking-tight">{isBn ? 'ম্যানুয়াল ডেলিভারি' : 'Manual'}</span>
-                              </button>
-                            </>
-                          )}
+                    const rowBgStyle: React.CSSProperties = c.row_color
+                      ? { backgroundColor: c.row_color, color: '#0F172A' }
+                      : spanInfo.isMerged
+                      ? { backgroundColor: isDark ? '#1E1B4B' : '#EEF2FF' }
+                      : {};
 
-                          {/* Print Memo Button */}
-                          <button
-                            type="button"
-                            onClick={() => handlePrintSticker(c)}
-                            className={`px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition-all border cursor-pointer flex items-center space-x-1 ${
-                              isDark ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-600' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
-                            }`}
-                            title={isBn ? 'মেমো / স্টিকার প্রিন্ট' : 'Print Receipt Memo'}
+                    return (
+                      <tr
+                        key={c.id}
+                        style={rowBgStyle}
+                        className={`hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors ${
+                          c.row_color ? 'font-semibold text-slate-900' : ''
+                        }`}
+                      >
+                        {spanInfo.isFirst && (
+                          <td
+                            rowSpan={spanInfo.rowSpan}
+                            style={rowBgStyle}
+                            className="p-3.5 font-mono text-emerald-600 dark:text-emerald-400 font-extrabold border-r border-b border-slate-200 dark:border-slate-700 align-middle whitespace-nowrap"
                           >
-                            <Printer className="w-3.5 h-3.5 text-slate-300" />
-                            <span className="tracking-tight">{isBn ? 'মেমো' : 'Memo'}</span>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })
+                            <span className="px-2 py-0.5 rounded bg-slate-100 dark:bg-[#1E293B] text-teal-700 dark:text-teal-400 font-mono text-xs font-bold border border-slate-300 dark:border-slate-700 inline-flex items-center space-x-1">
+                              <span>{c.ctn_no}</span>
+                              {c.is_merged && (
+                                <span className="px-1 py-0.2 text-[9px] font-bold bg-indigo-600 text-white rounded">
+                                  🔗
+                                </span>
+                              )}
+                            </span>
+                          </td>
+                        )}
+                        <td style={rowBgStyle} className="p-3.5 font-normal border-r border-b border-slate-200 dark:border-slate-700">
+                          <div className={`font-extrabold text-xs ${c.row_color ? 'text-slate-900' : isDark ? 'text-white' : 'text-slate-900'}`}>{c.shipping_mark}</div>
+                          <div className={`text-[10px] font-mono mt-0.5 font-semibold ${c.row_color ? 'text-slate-700' : isDark ? 'text-slate-200' : 'text-slate-500'}`}>{c.tracking_number}</div>
+                        </td>
+                        <td style={rowBgStyle} className="p-3.5 font-normal border-r border-b border-slate-200 dark:border-slate-700">
+                          <div className={`font-extrabold ${c.row_color ? 'text-slate-900' : isDark ? 'text-white' : 'text-slate-900'}`}>{c.product_name_en}</div>
+                          <div className={`text-[10px] font-mono font-semibold ${c.row_color ? 'text-slate-700' : isDark ? 'text-slate-200' : 'text-slate-500'}`}>{c.quantity || 1} Pcs</div>
+                        </td>
+                        <td style={rowBgStyle} className="p-3.5 font-normal border-r border-b border-slate-200 dark:border-slate-700">
+                          <span className="inline-flex items-center space-x-1.5 text-xs">
+                            <span className={`font-extrabold ${c.row_color ? 'text-slate-900' : isDark ? 'text-white' : 'text-slate-900'}`}>{itemOrigin === 'wh-china' ? 'চীন গুয়াংজু' : 'অরিজিন হাব'}</span>
+                            <span className={`font-extrabold ${c.row_color ? 'text-slate-700' : isDark ? 'text-slate-300' : 'text-slate-400'}`}>➔</span>
+                            <span className="font-extrabold text-emerald-600 dark:text-emerald-400">🇧🇩 DAC</span>
+                          </span>
+                        </td>
+                        <td style={rowBgStyle} className={`p-3.5 text-center font-mono font-extrabold border-r border-b border-slate-200 dark:border-slate-700 ${
+                          c.row_color ? 'text-blue-900' : isDark ? 'text-sky-300' : 'text-blue-800'
+                        }`}>
+                          {c.flight_number || 'US-03'}
+                        </td>
+                        <td style={rowBgStyle} className={`p-3.5 font-mono font-extrabold text-sm border-r border-b border-slate-200 dark:border-slate-700 ${
+                          c.row_color ? 'text-emerald-950 font-bold' : isDark ? 'bg-emerald-500/10 text-emerald-300' : 'bg-emerald-100/60 text-emerald-900'
+                        }`}>
+                          <div className="flex items-center space-x-1 justify-center">
+                            <Scale className={`w-3.5 h-3.5 ${c.row_color ? 'text-emerald-900' : isDark ? 'text-emerald-400' : 'text-emerald-700'}`} />
+                            <span>{c.gross_weight} kg</span>
+                          </div>
+                        </td>
+                        <td style={rowBgStyle} className={`p-3.5 text-center font-mono font-extrabold border-r border-b border-slate-200 dark:border-slate-700 ${
+                          c.row_color ? 'text-slate-900' : isDark ? 'text-white' : 'text-slate-900'
+                        }`}>
+                          {c.cbm || 0.15}
+                        </td>
+                        <td style={rowBgStyle} className="p-3.5 border-r border-b border-slate-200 dark:border-slate-700">
+                          {c.delivery_status === 'sent_to_pathao' ? (
+                            <div className="space-y-1">
+                              <span className={`inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-black shadow-2xs border ${
+                                isDark ? 'bg-emerald-950/80 text-emerald-300 border-emerald-700' : 'bg-emerald-800 text-white border-emerald-900'
+                              }`}>
+                                <Bike className="w-3.5 h-3.5 text-white" />
+                                <span>পাঠাও কুরিয়ারে বুকড</span>
+                              </span>
+                              <div className={`text-[10px] font-mono font-extrabold ${c.row_color ? 'text-emerald-900' : isDark ? 'text-emerald-300' : 'text-emerald-800'}`}>
+                                ID: {c.pathao_consignment_id}
+                              </div>
+                              <div className={`text-[9px] font-mono font-bold ${c.row_color ? 'text-slate-800' : isDark ? 'text-slate-200' : 'text-slate-600'}`}>
+                                {c.payment_status === 'unpaid' ? `COD: ৳${c.cod_amount || 0}` : 'পরিশোধিত (Paid)'}
+                              </div>
+                            </div>
+                          ) : c.status === 'delivered' || c.delivery_status === 'delivered_manual' ? (
+                            <div className="space-y-1">
+                              <span className={`inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-black shadow-2xs border ${
+                                isDark ? 'bg-blue-950/80 text-blue-300 border-blue-700' : 'bg-blue-700 text-white border-blue-800'
+                              }`}>
+                                <Truck className="w-3.5 h-3.5 text-white" />
+                                <span>ম্যানুয়ালি বিলিকৃত (Delivered)</span>
+                              </span>
+                              <div className={`text-[9px] font-mono font-bold ${c.row_color ? 'text-slate-800' : isDark ? 'text-slate-200' : 'text-slate-600'}`}>
+                                {c.payment_status === 'unpaid' ? `আদায়কৃত: ৳${c.cod_amount || 0}` : 'পরিশোধিত (Paid)'}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className={`inline-flex items-center space-x-1 px-3 py-1.5 rounded-lg text-xs font-black shadow-2xs border ${
+                              isDark ? 'bg-slate-800 text-slate-100 border-slate-700' : 'bg-slate-900 text-white border-slate-900'
+                            }`}>
+                              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                              <span>{isBn ? 'ওয়্যারহাউজে স্টক প্রস্তুত' : 'Ready in Warehouse'}</span>
+                            </span>
+                          )}
+                        </td>
+                        <td style={rowBgStyle} className="p-3.5 text-right border-b border-slate-200 dark:border-slate-700">
+                          <div className="flex items-center justify-end space-x-1.5 whitespace-nowrap">
+                            {c.delivery_status !== 'sent_to_pathao' && c.status !== 'delivered' && (
+                              <>
+                                {/* 1-Click Pathao Courier Booking Button */}
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenPathaoModal(c)}
+                                  className="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-[11px] font-extrabold transition-all border border-emerald-500 cursor-pointer flex items-center space-x-1 shadow-md"
+                                  title={isBn ? 'পাঠাও কুরিয়ারে ১-ক্লিক বুকিং' : 'Book with Pathao Courier'}
+                                >
+                                  <Bike className="w-3.5 h-3.5 text-white" />
+                                  <span className="tracking-tight">{isBn ? 'পাঠাও কুরিয়ার' : 'Pathao'}</span>
+                                </button>
+
+                                {/* Manual Delivery Button */}
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenManualModal(c)}
+                                  className="px-2.5 py-1 rounded-lg bg-blue-600 hover:bg-blue-500 text-white text-[11px] font-extrabold transition-all border border-blue-500 cursor-pointer flex items-center space-x-1 shadow-md"
+                                  title={isBn ? 'ম্যানুয়াল কাস্টমার ডেলিভারি' : 'Manual Customer Delivery'}
+                                >
+                                  <Truck className="w-3.5 h-3.5 text-white" />
+                                  <span className="tracking-tight">{isBn ? 'ম্যানুয়াল ডেলিভারি' : 'Manual'}</span>
+                                </button>
+                              </>
+                            )}
+
+                            {/* Print Memo Button */}
+                            <button
+                              type="button"
+                              onClick={() => handlePrintSticker(c)}
+                              className={`px-2.5 py-1 rounded-lg text-[11px] font-extrabold transition-all border cursor-pointer flex items-center space-x-1 ${
+                                isDark ? 'bg-slate-800 hover:bg-slate-700 text-white border-slate-600' : 'bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-300'
+                              }`}
+                              title={isBn ? 'মেমো / স্টিকার প্রিন্ট' : 'Print Receipt Memo'}
+                            >
+                              <Printer className="w-3.5 h-3.5 text-slate-300" />
+                              <span className="tracking-tight">{isBn ? 'মেমো' : 'Memo'}</span>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  });
+                })()
               )}
             </tbody>
           </table>
