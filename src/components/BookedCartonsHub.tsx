@@ -2603,7 +2603,60 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                 )}
               </div>
 
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center space-x-2 flex-wrap gap-y-2">
+                {/* Row Color Palette Selector */}
+                <div className="flex items-center space-x-1.5 bg-white dark:bg-slate-800 px-2.5 py-1 rounded-lg border border-slate-200 dark:border-slate-700 shadow-2xs">
+                  <span className="text-[11px] font-bold text-slate-700 dark:text-slate-200 flex items-center space-x-1">
+                    <Palette className="w-3.5 h-3.5 text-amber-500" />
+                    <span className="hidden sm:inline">{isBn ? 'কালার:' : 'Color:'}</span>
+                  </span>
+                  <div className="flex items-center space-x-1 flex-wrap">
+                    {ROW_COLOR_OPTIONS.map((opt) => (
+                      <button
+                        key={`modal-opt-${opt.hex}`}
+                        type="button"
+                        onClick={() => {
+                          if (selectedHubCartonIds.length === 0) {
+                            alert(isBn ? 'অনুগ্রহ করে প্রথমে বামের টিক চিহ্ন দিয়ে অন্তত ১টি রো সিলেক্ট করুন।' : 'Please select at least one row checkbox first.');
+                            return;
+                          }
+                          handleApplyRowColor(selectedHubCartonIds, opt.hex);
+                        }}
+                        className="w-4 h-4 rounded-full border border-slate-400 hover:scale-125 transition-all cursor-pointer shadow-2xs"
+                        style={{ backgroundColor: opt.hex }}
+                        title={isBn ? `সিলেক্টকৃত ${selectedHubCartonIds.length}টি রো-এ ${opt.labelBn} কালার সেট করুন` : `Apply ${opt.name} color`}
+                      />
+                    ))}
+                    {/* Custom Color Input Picker */}
+                    <label
+                      className="relative w-4 h-4 rounded-full border border-slate-400 cursor-pointer overflow-hidden flex items-center justify-center bg-gradient-to-br from-red-400 via-green-400 to-blue-500 hover:scale-125 transition-transform shadow-2xs"
+                      title={isBn ? 'যেকোনো কাস্টম কালার নির্বাচন করুন' : 'Choose Custom Color'}
+                    >
+                      <input
+                        type="color"
+                        onChange={(e) => {
+                          if (selectedHubCartonIds.length === 0) {
+                            alert(isBn ? 'অনুগ্রহ করে প্রথমে বামের টিক চিহ্ন দিয়ে অন্তত ১টি রো সিলেক্ট করুন।' : 'Please select at least one row checkbox first.');
+                            return;
+                          }
+                          handleApplyRowColor(selectedHubCartonIds, e.target.value);
+                        }}
+                        className="opacity-0 absolute inset-0 w-full h-full cursor-pointer"
+                      />
+                    </label>
+                    {selectedHubCartonIds.length > 0 && (
+                      <button
+                        type="button"
+                        onClick={() => handleApplyRowColor(selectedHubCartonIds, null)}
+                        className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-red-600 hover:text-white transition-colors cursor-pointer border border-slate-300 dark:border-slate-600 ml-1"
+                        title={isBn ? 'কালার রিমুভ করুন' : 'Clear Color'}
+                      >
+                        ✕
+                      </button>
+                    )}
+                  </div>
+                </div>
+
                 <button
                   type="button"
                   onClick={() => handleBulkMergeInHub(activeCustomerCartons)}
@@ -2672,11 +2725,14 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                     return (
                       <tr
                         key={c.id}
+                        style={!isSelected && c.row_color ? { backgroundColor: c.row_color, color: '#0F172A' } : undefined}
                         className={`transition-colors duration-150 ${
                           isSelected
                             ? isDark
                               ? 'bg-[#00897B]/70 text-white font-extrabold border-l-4 border-l-[#26A69A]'
                               : 'bg-[#00897B]/20 text-slate-900 font-extrabold border-l-4 border-l-[#00897B]'
+                            : c.row_color
+                            ? 'font-bold'
                             : spanInfo.isMerged
                             ? isDark
                               ? 'bg-[#1E1B4B]/80 hover:bg-[#2E2A72] text-white'
@@ -2686,15 +2742,38 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                             : 'bg-white hover:bg-slate-50 text-slate-900'
                         }`}
                       >
-                        {/* Checkbox Column */}
-                        <td className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50">
-                          <input
-                            type="checkbox"
-                            checked={isSelected}
-                            onChange={() => handleToggleSelectCarton(c.id)}
-                            className="rounded border-slate-400 cursor-pointer accent-blue-600"
-                          />
-                        </td>
+                        {/* Checkbox Column (RowSpanned if Merged) */}
+                        {spanInfo.isFirst && (
+                          <td
+                            rowSpan={spanInfo.rowSpan}
+                            className="p-2.5 text-center align-middle border-r border-slate-200/60 dark:border-slate-700/50"
+                          >
+                            <input
+                              type="checkbox"
+                              checked={
+                                spanInfo.isMerged
+                                  ? activeCustomerCartons
+                                      .slice(idx, idx + spanInfo.rowSpan)
+                                      .every((item) => selectedHubCartonIds.includes(item.id))
+                                  : isSelected
+                              }
+                              onChange={() => {
+                                const groupItems = spanInfo.isMerged
+                                  ? activeCustomerCartons.slice(idx, idx + spanInfo.rowSpan)
+                                  : [c];
+                                const groupIds = groupItems.map((item) => item.id);
+                                const allSelected = groupIds.every((id) => selectedHubCartonIds.includes(id));
+
+                                if (allSelected) {
+                                  setSelectedHubCartonIds((prev) => prev.filter((id) => !groupIds.includes(id)));
+                                } else {
+                                  setSelectedHubCartonIds((prev) => Array.from(new Set([...prev, ...groupIds])));
+                                }
+                              }}
+                              className="rounded border-slate-400 cursor-pointer accent-blue-600"
+                            />
+                          </td>
+                        )}
 
                         {/* SL (RowSpanned if Merged) */}
                         {spanInfo.isFirst && (
