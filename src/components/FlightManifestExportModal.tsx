@@ -3,6 +3,7 @@ import { Printer, Download, FileSpreadsheet, X, Plane } from 'lucide-react';
 import { FlyingProposal, Carton, Language } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { getProposalDisplayCode } from '../lib/db';
+import { sortCartonsForTableDisplay, getCartonRowSpanInfo, getSlNumberForCartonRow } from './BookedCartonsHub';
 
 interface FlightManifestExportModalProps {
   proposal: FlyingProposal;
@@ -11,16 +12,40 @@ interface FlightManifestExportModalProps {
   onClose: () => void;
 }
 
+export const getProposalAttachedCartons = (proposal: FlyingProposal, cartons: Carton[]): Carton[] => {
+  if (proposal.carton_ids && proposal.carton_ids.length > 0) {
+    const attached = cartons.filter((c) => proposal.carton_ids?.includes(c.id));
+    if (attached.length > 0) return attached;
+  }
+  const flightNo = proposal.flight_number || proposal.flying_name;
+  if (flightNo) {
+    const attached = cartons.filter(
+      (c) => c.flight_number === flightNo || (c as any).proposal_id === proposal.id
+    );
+    if (attached.length > 0) return attached;
+  }
+  if (proposal.warehouse_id || proposal.warehouse_name) {
+    const matchedWh = cartons.filter(
+      (c) =>
+        (c.current_warehouse_id && c.current_warehouse_id === proposal.warehouse_id) ||
+        (c.warehouse_name && c.warehouse_name === proposal.warehouse_name) ||
+        ((c as any).origin_warehouse_id && (c as any).origin_warehouse_id === proposal.warehouse_id)
+    );
+    if (matchedWh.length > 0 && proposal.items_count) {
+      return matchedWh.slice(0, proposal.items_count);
+    }
+  }
+  return cartons.filter((c) => (proposal.carton_ids || []).includes(c.id));
+};
+
 export const exportProposalToExcel = (proposal: FlyingProposal, cartons: Carton[]) => {
   const flightDate = proposal.date || new Date().toISOString().split('T')[0];
   const lotNumber = getProposalDisplayCode(proposal);
   const awbNumber = proposal.awb_number || '';
   const hubName = proposal.warehouse_name || 'CHINA GUANGZHOU HUB';
 
-  const attachedCartons = cartons.filter(
-    (c) => (proposal.carton_ids || []).includes(c.id) || c.flight_number === proposal.flight_number
-  );
-  const listToExport = attachedCartons.length > 0 ? attachedCartons : cartons;
+  const attachedCartons = getProposalAttachedCartons(proposal, cartons);
+  const listToExport = sortCartonsForTableDisplay(attachedCartons);
 
   const totalWeight = proposal.total_weight || listToExport.reduce((sum, c) => sum + (c.gross_weight || 0), 0);
 
@@ -82,27 +107,34 @@ export const exportProposalToExcel = (proposal: FlyingProposal, cartons: Carton[
         <!-- DATA ROWS -->
         ${listToExport
           .map((c, i) => {
+            const spanInfo = getCartonRowSpanInfo(listToExport, i);
+            const slNum = getSlNumberForCartonRow(listToExport, i);
+
             const entryDate = c.created_at ? new Date(c.created_at).toISOString().slice(2, 10).replace(/-/g, ' ') : flightDate;
-            const shipCtnNo = c.packaging_number || c.master_group_id || `CTN-${c.ctn_no}`;
+            const shipCtnNo = c.packaging_number || c.master_group_id || (c.is_merged ? `MERGED-${c.ctn_no}` : `CTN-${c.ctn_no}`);
+            const displayMark = c.sub_shipping_mark || c.shipping_mark;
             const custMark = c.customer_name && !c.customer_name.includes('Unassigned') 
-              ? `${c.shipping_mark}<br/>${c.customer_name}` 
-              : c.shipping_mark;
+              ? `${displayMark}<br/>${c.customer_name}` 
+              : displayMark;
             const trackingNo = c.tracking_number || c.master_tracking_number || c.pathao_tracking_code || c.packaging_number || `TRK-${c.ctn_no}`;
 
+            const rowBg = c.row_color ? c.row_color : (spanInfo.isMerged ? '#EEF2FF' : '#FFFFFF');
+            const rowStyle = `background-color: ${rowBg};`;
+
             return `
-              <tr>
-                <td>${i + 1}</td>
-                <td>${entryDate}</td>
-                <td>${shipCtnNo}</td>
-                <td>${c.ctn_no}</td>
-                <td style="text-align: left;">${custMark}</td>
-                <td style="text-align: left;">${c.product_name_en}</td>
-                <td style="text-align: left;">${c.product_name_cn || ''}</td>
-                <td>${c.quantity || 1}</td>
-                <td>${(c.net_weight || c.gross_weight * 0.9).toFixed(1)}</td>
-                <td>${c.gross_weight.toFixed(1)}</td>
-                <td>${c.cbm.toFixed(2)}</td>
-                <td>${trackingNo}</td>
+              <tr style="${rowStyle}">
+                ${spanInfo.isFirst ? `<td rowspan="${spanInfo.rowSpan}" style="background-color: ${rowBg}; font-weight: bold; text-align: center; vertical-align: middle;">${slNum}</td>` : ''}
+                <td style="background-color: ${rowBg}; vertical-align: middle;">${entryDate}</td>
+                ${spanInfo.isFirst ? `<td rowspan="${spanInfo.rowSpan}" style="background-color: ${rowBg}; font-weight: bold; text-align: center; vertical-align: middle;">${shipCtnNo}</td>` : ''}
+                <td style="background-color: ${rowBg}; font-weight: bold; vertical-align: middle;">${c.ctn_no}</td>
+                <td style="text-align: left; background-color: ${rowBg}; vertical-align: middle;">${custMark}</td>
+                <td style="text-align: left; background-color: ${rowBg}; vertical-align: middle;">${c.product_name_en || ''}</td>
+                <td style="text-align: left; background-color: ${rowBg}; vertical-align: middle;">${c.product_name_cn || ''}</td>
+                <td style="background-color: ${rowBg}; vertical-align: middle;">${c.quantity || 1}</td>
+                <td style="background-color: ${rowBg}; vertical-align: middle;">${(c.net_weight || c.gross_weight * 0.9).toFixed(1)}</td>
+                <td style="background-color: ${rowBg}; font-weight: bold; vertical-align: middle;">${c.gross_weight.toFixed(1)}</td>
+                <td style="background-color: ${rowBg}; vertical-align: middle;">${c.cbm.toFixed(2)}</td>
+                <td style="background-color: ${rowBg}; font-family: monospace; vertical-align: middle;">${trackingNo}</td>
               </tr>
             `;
           })
@@ -153,10 +185,8 @@ export const FlightManifestExportModal: React.FC<FlightManifestExportModalProps>
   const awbNumber = proposal.awb_number || '';
   const hubName = proposal.warehouse_name || 'CHINA GUANGZHOU HUB';
 
-  const attachedCartons = cartons.filter(
-    (c) => (proposal.carton_ids || []).includes(c.id) || c.flight_number === proposal.flight_number
-  );
-  const listToExport = attachedCartons.length > 0 ? attachedCartons : cartons;
+  const attachedCartons = getProposalAttachedCartons(proposal, cartons);
+  const listToExport = sortCartonsForTableDisplay(attachedCartons);
 
   const totalWeight = proposal.total_weight || listToExport.reduce((sum, c) => sum + (c.gross_weight || 0), 0);
   const totalCbm = proposal.total_cbm || listToExport.reduce((sum, c) => sum + (c.cbm || 0), 0);
@@ -222,7 +252,7 @@ export const FlightManifestExportModal: React.FC<FlightManifestExportModalProps>
           </div>
         </div>
 
-        {/* PRINTABLE CONTENT BODY (MATCHES SCREENSHOT 2 TEMPLATE EXACTLY) */}
+        {/* PRINTABLE CONTENT BODY */}
         <div className="p-6 overflow-y-auto flex-1 bg-white text-black font-sans text-xs">
           <div className="max-w-4xl mx-auto border border-black shadow-sm overflow-hidden">
             {/* ROW 1: GOLDEN YELLOW HEADER (LOT NUMBER IS FLIGHT NUMBER) */}
@@ -268,32 +298,50 @@ export const FlightManifestExportModal: React.FC<FlightManifestExportModalProps>
                 </thead>
                 <tbody className="divide-y divide-black text-xs font-normal">
                   {listToExport.map((c, i) => {
+                    const spanInfo = getCartonRowSpanInfo(listToExport, i);
+                    const slNum = getSlNumberForCartonRow(listToExport, i);
+
                     const entryDate = c.created_at
                       ? new Date(c.created_at).toISOString().slice(2, 10).replace(/-/g, ' ')
                       : flightDate;
-                    const shipCtnNo = c.packaging_number || c.master_group_id || `CTN-${c.ctn_no}`;
+                    const shipCtnNo = c.packaging_number || c.master_group_id || (c.is_merged ? `MERGED-${c.ctn_no}` : `CTN-${c.ctn_no}`);
+                    const displayMark = c.sub_shipping_mark || c.shipping_mark;
                     const custMark =
                       c.customer_name && !c.customer_name.includes('Unassigned')
-                        ? `${c.shipping_mark}\n${c.customer_name}`
-                        : c.shipping_mark;
+                        ? `${displayMark}\n${c.customer_name}`
+                        : displayMark;
                     const trackingNo = c.tracking_number || c.master_tracking_number || c.pathao_tracking_code || c.packaging_number || `TRK-${c.ctn_no}`;
 
+                    const rowBgStyle: React.CSSProperties = c.row_color
+                      ? { backgroundColor: c.row_color, color: '#0F172A' }
+                      : spanInfo.isMerged
+                      ? { backgroundColor: '#EEF2FF' }
+                      : {};
+
                     return (
-                      <tr key={c.id} className="text-center">
-                        <td className="p-2 border border-black">{i + 1}</td>
-                        <td className="p-2 border border-black whitespace-nowrap">{entryDate}</td>
-                        <td className="p-2 border border-black whitespace-nowrap font-mono">{shipCtnNo}</td>
-                        <td className="p-2 border border-black whitespace-nowrap font-medium">{c.ctn_no}</td>
-                        <td className="p-2 border border-black text-left whitespace-pre-line font-medium text-blue-700">
+                      <tr key={c.id} style={rowBgStyle} className="text-center">
+                        {spanInfo.isFirst && (
+                          <td rowSpan={spanInfo.rowSpan} style={rowBgStyle} className="p-2 border border-black font-bold font-mono align-middle">
+                            {slNum}
+                          </td>
+                        )}
+                        <td style={rowBgStyle} className="p-2 border border-black whitespace-nowrap align-middle">{entryDate}</td>
+                        {spanInfo.isFirst && (
+                          <td rowSpan={spanInfo.rowSpan} style={rowBgStyle} className="p-2 border border-black whitespace-nowrap font-mono font-bold align-middle">
+                            {shipCtnNo}
+                          </td>
+                        )}
+                        <td style={rowBgStyle} className="p-2 border border-black whitespace-nowrap font-medium align-middle">{c.ctn_no}</td>
+                        <td style={rowBgStyle} className="p-2 border border-black text-left whitespace-pre-line font-medium text-blue-700 dark:text-blue-900 align-middle">
                           {custMark}
                         </td>
-                        <td className="p-2 border border-black text-left">{c.product_name_en}</td>
-                        <td className="p-2 border border-black text-left">{c.product_name_cn || '-'}</td>
-                        <td className="p-2 border border-black">{c.quantity || 1}</td>
-                        <td className="p-2 border border-black">{(c.net_weight || c.gross_weight * 0.9).toFixed(1)}</td>
-                        <td className="p-2 border border-black font-semibold">{c.gross_weight.toFixed(1)}</td>
-                        <td className="p-2 border border-black">{c.cbm.toFixed(2)}</td>
-                        <td className="p-2 border border-black font-mono text-[11px] font-semibold text-slate-800">{trackingNo}</td>
+                        <td style={rowBgStyle} className="p-2 border border-black text-left align-middle">{c.product_name_en}</td>
+                        <td style={rowBgStyle} className="p-2 border border-black text-left align-middle">{c.product_name_cn || '-'}</td>
+                        <td style={rowBgStyle} className="p-2 border border-black align-middle">{c.quantity || 1}</td>
+                        <td style={rowBgStyle} className="p-2 border border-black align-middle">{(c.net_weight || c.gross_weight * 0.9).toFixed(1)}</td>
+                        <td style={rowBgStyle} className="p-2 border border-black font-semibold align-middle">{c.gross_weight.toFixed(1)}</td>
+                        <td style={rowBgStyle} className="p-2 border border-black align-middle">{c.cbm.toFixed(2)}</td>
+                        <td style={rowBgStyle} className="p-2 border border-black font-mono text-[11px] font-semibold text-slate-800 align-middle">{trackingNo}</td>
                       </tr>
                     );
                   })}
@@ -318,3 +366,4 @@ export const FlightManifestExportModal: React.FC<FlightManifestExportModalProps>
     </div>
   );
 };
+
