@@ -28,6 +28,7 @@ import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSyste
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
 import { FlightManifestExportModal, exportProposalToExcel, exportProposalToCSV } from './FlightManifestExportModal';
+import { sortCartonsForTableDisplay, getCartonRowSpanInfo, getSlNumberForCartonRow } from './BookedCartonsHub';
 
 interface FlightProposalsManagerProps {
   language: Language;
@@ -1233,97 +1234,124 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
               )}
             </div>
 
-            <div className="overflow-x-auto border rounded-none">
-              <table className={`w-full text-left text-xs ${isDark ? 'text-white' : 'text-slate-900'}`}>
-                <thead className={`uppercase text-[10px] tracking-wider border-b ${
-                  isDark ? 'bg-[#1E293B] text-slate-400 border-slate-700' : 'bg-slate-100 text-slate-700 border-slate-200 font-medium'
+            <div className="overflow-x-auto border border-slate-300 dark:border-slate-700 rounded-none">
+              <table className={`w-full text-left text-xs border-collapse border border-slate-300 dark:border-slate-700 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                <thead className={`uppercase text-[10px] tracking-wider ${
+                  isDark ? 'bg-[#1E293B] text-slate-300 font-medium' : 'bg-slate-100 text-slate-700 font-medium'
                 }`}>
                   <tr>
-                    <th className="p-2.5 w-8 text-center font-normal">SL</th>
-                    <th className="p-2.5 font-normal whitespace-nowrap">CTN NO</th>
-                    <th className="p-2.5 font-normal whitespace-nowrap">SHIPPING MARK</th>
-                    <th className="p-2.5 font-normal whitespace-nowrap">TRACKING NO</th>
-                    <th className="p-2.5 font-normal whitespace-nowrap">PRODUCT</th>
-                    <th className="p-2.5 text-center font-normal whitespace-nowrap">QTY / N.WT</th>
-                    <th className="p-2.5 text-center font-normal whitespace-nowrap">G.WEIGHT</th>
-                    <th className="p-2.5 text-center font-normal whitespace-nowrap">CBM</th>
-                    <th className="p-2.5 text-center font-normal whitespace-nowrap">PROOF</th>
-                    <th className="p-2.5 text-right font-normal whitespace-nowrap">ACTION</th>
+                    <th className="p-2.5 w-8 text-center font-bold border border-slate-300 dark:border-slate-700">SL</th>
+                    <th className="p-2.5 font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">CTN NO</th>
+                    <th className="p-2.5 font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">SHIPPING MARK</th>
+                    <th className="p-2.5 font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">TRACKING NO</th>
+                    <th className="p-2.5 font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">PRODUCT</th>
+                    <th className="p-2.5 text-center font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">QTY / N.WT</th>
+                    <th className="p-2.5 text-center font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">G.WEIGHT</th>
+                    <th className="p-2.5 text-center font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">CBM</th>
+                    <th className="p-2.5 text-center font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">PROOF</th>
+                    <th className="p-2.5 text-right font-bold whitespace-nowrap border border-slate-300 dark:border-slate-700">ACTION</th>
                   </tr>
                 </thead>
-                <tbody className={`divide-y ${isDark ? 'divide-slate-800' : 'divide-slate-200'}`}>
-                  {getProposalCartons(activeModalProposal).length === 0 ? (
-                    <tr>
-                      <td colSpan={10} className="p-6 text-center text-xs font-normal text-slate-500">
-                        {isBn ? 'এই প্রস্তাবনায় কোনো কার্টুন যুক্ত নেই। "+ ইনভেন্টরি থেকে যোগ করুন" ক্লিক করুন।' : 'No cartons attached. Click Add Cartons to attach.'}
-                      </td>
-                    </tr>
-                  ) : (
-                    getProposalCartons(activeModalProposal).map((ctn, idx) => (
-                      <tr
-                        key={ctn.id}
-                        style={ctn.row_color ? { backgroundColor: isDark ? `${ctn.row_color}66` : ctn.row_color } : {}}
-                        className={isDark ? 'hover:bg-[#1E293B]/60' : 'hover:bg-slate-50'}
-                      >
-                        <td className="p-2.5 text-center font-mono text-slate-500 text-[11px]">{idx + 1}</td>
-                        <td className="p-2.5 font-mono whitespace-nowrap">
-                          <span className={`px-2 py-0.5 rounded-none font-mono text-[11px] font-medium border inline-flex items-center space-x-1 ${
-                            isDark ? 'bg-[#1E293B] text-teal-400 border-slate-700' : 'bg-slate-50 text-[#00897B] border-slate-300'
-                          }`}>
-                            <span>{ctn.ctn_no}</span>
-                            {ctn.is_merged && (
-                              <span className="px-1 py-0.2 text-[9px] font-bold bg-indigo-600 text-white rounded">
-                                🔗
-                              </span>
-                            )}
-                          </span>
-                        </td>
-                        <td className="p-2.5 font-mono font-semibold text-slate-800 dark:text-slate-200 text-[11px] whitespace-nowrap">
-                          {ctn.shipping_mark || 'N/A'}
-                        </td>
-                        <td className="p-2.5 font-mono text-slate-600 dark:text-slate-400 text-[11px] whitespace-nowrap">
-                          {ctn.tracking_number}
-                        </td>
-                        <td className="p-2.5 font-normal text-slate-700 dark:text-slate-300 text-[11px]">
-                          <p className="font-medium text-slate-800 dark:text-slate-200">{ctn.product_name_en || 'Product'}</p>
-                          {ctn.product_name_cn && <p className="text-[10px] text-slate-400">{ctn.product_name_cn}</p>}
-                        </td>
-                        <td className="p-2.5 text-center font-mono text-slate-600 dark:text-slate-400 text-[11px] whitespace-nowrap">
-                          {ctn.quantity || 1} pcs | {ctn.net_weight || 0} kg
-                        </td>
-                        <td className="p-2.5 text-center font-mono font-bold text-slate-900 dark:text-white text-[11px] whitespace-nowrap">
-                          {ctn.gross_weight} kg
-                        </td>
-                        <td className="p-2.5 text-center font-mono font-medium text-purple-700 dark:text-purple-400 text-[11px] whitespace-nowrap">
-                          {ctn.cbm} CBM
-                        </td>
-                        <td className="p-2.5 text-center text-[11px] whitespace-nowrap">
-                          {ctn.photo_url || (ctn.photo_proofs && ctn.photo_proofs.length > 0) ? (
-                            <span className="inline-flex items-center space-x-1 text-emerald-600 dark:text-emerald-400 font-medium">
-                              <span>📷 Photo</span>
-                            </span>
-                          ) : (
-                            <span className="text-slate-400 font-light">No Photo</span>
-                          )}
-                        </td>
-                        <td className="p-2.5 text-right whitespace-nowrap">
-                          {activeModalProposal.status !== 'dispatched' ? (
-                            <button
-                              type="button"
-                              onClick={() => handleRemoveCartonFromProposal(activeModalProposal.id, ctn.id)}
-                              className="px-2.5 py-1 rounded-none text-[11px] font-normal bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-all cursor-pointer inline-flex items-center space-x-1"
-                              title={isBn ? 'প্রস্তাবনা থেকে কার্টুন রিমুভ করুন' : 'Remove carton from proposal'}
+                <tbody className={isDark ? 'text-slate-200' : 'text-slate-900'}>
+                  {(() => {
+                    const rawList = getProposalCartons(activeModalProposal);
+                    const attachedCartonsList = sortCartonsForTableDisplay(rawList);
+
+                    if (attachedCartonsList.length === 0) {
+                      return (
+                        <tr>
+                          <td colSpan={10} className="p-6 text-center text-xs font-normal text-slate-500 border border-slate-300 dark:border-slate-700">
+                            {isBn ? 'এই প্রস্তাবনায় কোনো কার্টুন যুক্ত নেই। "+ ইনভেন্টরি থেকে যোগ করুন" ক্লিক করুন।' : 'No cartons attached. Click Add Cartons to attach.'}
+                          </td>
+                        </tr>
+                      );
+                    }
+
+                    return attachedCartonsList.map((ctn, idx) => {
+                      const spanInfo = getCartonRowSpanInfo(attachedCartonsList, idx);
+                      const slNum = getSlNumberForCartonRow(attachedCartonsList, idx);
+                      const displayMark = ctn.sub_shipping_mark || ctn.shipping_mark || 'N/A';
+
+                      const rowBgStyle: React.CSSProperties = ctn.row_color
+                        ? { backgroundColor: ctn.row_color, color: '#0F172A' }
+                        : spanInfo.isMerged
+                        ? { backgroundColor: isDark ? '#1E1B4B' : '#EEF2FF' }
+                        : {};
+
+                      return (
+                        <tr
+                          key={ctn.id}
+                          style={rowBgStyle}
+                          className={ctn.row_color ? 'font-semibold text-slate-900' : isDark ? 'hover:bg-[#1E293B]/60' : 'hover:bg-slate-50'}
+                        >
+                          {spanInfo.isFirst && (
+                            <td
+                              rowSpan={spanInfo.rowSpan}
+                              style={rowBgStyle}
+                              className="p-2.5 text-center font-mono font-extrabold text-slate-800 dark:text-slate-100 text-[11px] border border-slate-300 dark:border-slate-700 align-middle"
                             >
-                              <Trash2 className="w-3 h-3 text-rose-600" />
-                              <span>{isBn ? 'রিমুভ' : 'Remove'}</span>
-                            </button>
-                          ) : (
-                            <span className="text-[11px] font-normal text-slate-400">{isBn ? 'লকড' : 'Locked'}</span>
+                              {slNum}
+                            </td>
                           )}
-                        </td>
-                      </tr>
-                    ))
-                  )}
+                          <td style={rowBgStyle} className="p-2.5 font-mono whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
+                            <span className={`px-2 py-0.5 rounded-none font-mono text-[11px] font-bold border inline-flex items-center space-x-1 ${
+                              isDark ? 'bg-[#1E293B] text-teal-400 border-slate-700' : 'bg-slate-50 text-[#00897B] border-slate-300'
+                            }`}>
+                              <span>{ctn.ctn_no}</span>
+                              {ctn.is_merged && (
+                                <span className="px-1 py-0.2 text-[9px] font-bold bg-indigo-600 text-white rounded">
+                                  🔗
+                                </span>
+                              )}
+                            </span>
+                          </td>
+                          <td style={rowBgStyle} className="p-2.5 font-mono font-semibold text-slate-800 dark:text-slate-200 text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
+                            {displayMark}
+                          </td>
+                          <td style={rowBgStyle} className="p-2.5 font-mono text-slate-600 dark:text-slate-400 text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
+                            {ctn.tracking_number}
+                          </td>
+                          <td style={rowBgStyle} className="p-2.5 font-normal text-slate-700 dark:text-slate-300 text-[11px] border border-slate-300 dark:border-slate-700 align-middle">
+                            <p className="font-medium text-slate-800 dark:text-slate-200">{ctn.product_name_en || 'Product'}</p>
+                            {ctn.product_name_cn && <p className="text-[10px] text-slate-400">{ctn.product_name_cn}</p>}
+                          </td>
+                          <td style={rowBgStyle} className="p-2.5 text-center font-mono text-slate-600 dark:text-slate-400 text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
+                            {ctn.quantity || 1} pcs | {ctn.net_weight || 0} kg
+                          </td>
+                          <td style={rowBgStyle} className="p-2.5 text-center font-mono font-bold text-slate-900 dark:text-white text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
+                            {ctn.gross_weight} kg
+                          </td>
+                          <td style={rowBgStyle} className="p-2.5 text-center font-mono font-medium text-purple-700 dark:text-purple-400 text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
+                            {ctn.cbm} CBM
+                          </td>
+                          <td style={rowBgStyle} className="p-2.5 text-center text-[11px] whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
+                            {ctn.photo_url || (ctn.photo_proofs && ctn.photo_proofs.length > 0) ? (
+                              <span className="inline-flex items-center space-x-1 text-emerald-600 dark:text-emerald-400 font-medium">
+                                <span>📷 Photo</span>
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 font-light">No Photo</span>
+                            )}
+                          </td>
+                          <td style={rowBgStyle} className="p-2.5 text-right whitespace-nowrap border border-slate-300 dark:border-slate-700 align-middle">
+                            {activeModalProposal.status !== 'dispatched' ? (
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveCartonFromProposal(activeModalProposal.id, ctn.id)}
+                                className="px-2.5 py-1 rounded-none text-[11px] font-normal bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-all cursor-pointer inline-flex items-center space-x-1"
+                                title={isBn ? 'প্রস্তাবনা থেকে কার্টুন রিমুভ করুন' : 'Remove carton from proposal'}
+                              >
+                                <Trash2 className="w-3 h-3 text-rose-600" />
+                                <span>{isBn ? 'রিমুভ' : 'Remove'}</span>
+                              </button>
+                            ) : (
+                              <span className="text-[11px] font-normal text-slate-400">{isBn ? 'লকড' : 'Locked'}</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    });
+                  })()}
                 </tbody>
               </table>
             </div>
