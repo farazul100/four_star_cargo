@@ -47,6 +47,33 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
     } catch (e) {}
   };
 
+  // Auto-initialize conversation if guestName exists but convoId is missing or stale
+  useEffect(() => {
+    let activeId = convoId;
+    if (guestName && !activeId) {
+      activeId = `convo-public-${Date.now()}-${Math.floor(Math.random() * 8999 + 1000)}`;
+      localStorage.setItem('fsc_public_convo_id', activeId);
+      setConvoId(activeId);
+    }
+
+    if (activeId) {
+      const db = getHostingerDbData();
+      const currentConvos: ChatConversation[] = db.conversations || [];
+      if (!currentConvos.some((c) => c.id === activeId)) {
+        const newConvo: ChatConversation = {
+          id: activeId,
+          name: `💬 ${guestName || 'Customer'} ${guestPhone ? `(${guestPhone})` : ''}`,
+          type: 'customer_support',
+          participants: ['guest-user', 'all_staff'],
+          created_by: 'guest-user',
+          created_at: new Date().toISOString(),
+          last_message: 'Customer started support inquiry',
+        };
+        saveHostingerDbData('fsc_vps_conversations', [newConvo, ...currentConvos]);
+      }
+    }
+  }, [guestName, guestPhone, convoId]);
+
   // Sync and load messages for this customer's conversation ID
   useEffect(() => {
     if (!convoId) return;
@@ -123,13 +150,29 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
       created_at: new Date().toISOString(),
     };
 
-    saveHostingerDbData('fsc_vps_messages', [...(db.messages || []), welcomeMsg]);
+    const initialMsgs = [...(db.messages || []), welcomeMsg];
+    saveHostingerDbData('fsc_vps_messages', initialMsgs);
+    setMessages([welcomeMsg]);
   };
 
   // Handle Sending Message
   const handleSendMessage = (imageUrl?: string) => {
     if (!messageInput.trim() && !imageUrl) return;
-    if (!convoId) return;
+
+    let activeConvoId = convoId;
+    let currentName = guestName;
+
+    if (!currentName) {
+      currentName = 'Customer';
+      setGuestName(currentName);
+      localStorage.setItem('fsc_public_guest_name', currentName);
+    }
+
+    if (!activeConvoId) {
+      activeConvoId = `convo-public-${Date.now()}-${Math.floor(Math.random() * 8999 + 1000)}`;
+      localStorage.setItem('fsc_public_convo_id', activeConvoId);
+      setConvoId(activeConvoId);
+    }
 
     const db = getHostingerDbData();
     const currentMsgs: ChatMessage[] = db.messages || [];
@@ -137,12 +180,42 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
 
     const textContent = imageUrl ? '' : messageInput.trim();
 
+    // Ensure conversation exists in DB
+    let updatedConvos = [...currentConvos];
+    const existingConvo = updatedConvos.find((c) => c.id === activeConvoId);
+    if (!existingConvo) {
+      const newConvo: ChatConversation = {
+        id: activeConvoId,
+        name: `💬 ${currentName} ${guestPhone ? `(${guestPhone})` : ''}`,
+        type: 'customer_support',
+        participants: ['guest-user', 'all_staff'],
+        created_by: 'guest-user',
+        created_at: new Date().toISOString(),
+        last_message: textContent || '📷 Photo attachment',
+        last_message_at: new Date().toISOString(),
+      };
+      updatedConvos = [newConvo, ...updatedConvos];
+    } else {
+      updatedConvos = updatedConvos.map((c) => {
+        if (c.id === activeConvoId) {
+          return {
+            ...c,
+            last_message: textContent || '📷 Photo attachment',
+            last_message_at: new Date().toISOString(),
+            updated_at: new Date().toISOString(),
+          };
+        }
+        return c;
+      });
+    }
+    saveHostingerDbData('fsc_vps_conversations', updatedConvos);
+
     const newMsg: ChatMessage = {
       id: `msg-${Date.now()}-${Math.floor(Math.random() * 1000)}`,
-      conversation_id: convoId,
+      conversation_id: activeConvoId,
       sender_id: 'guest-user',
-      sender_name: guestName || 'Customer',
-      sender_role: 'crm_executive', // generic role signature for DB schema compatibility
+      sender_name: currentName,
+      sender_role: 'crm_executive',
       content: textContent,
       image_url: imageUrl,
       created_at: new Date().toISOString(),
@@ -151,25 +224,18 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
     const updatedMsgs = [...currentMsgs, newMsg];
     saveHostingerDbData('fsc_vps_messages', updatedMsgs);
 
-    // Update conversation last_message & last_message_at
-    const updatedConvos = currentConvos.map((c) => {
-      if (c.id === convoId) {
-        return {
-          ...c,
-          last_message: messageInput.trim() || '📷 Photo attachment',
-          last_message_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-      }
-      return c;
+    // Update local state immediately for instant real-time UI feedback
+    setMessages((prev) => {
+      const filtered = updatedMsgs
+        .filter((m) => m && m.conversation_id === activeConvoId)
+        .sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
+      return filtered;
     });
-
-    saveHostingerDbData('fsc_vps_conversations', updatedConvos);
 
     // Publish system notification for all staff members
     publishSystemNotification({
       title: isBn ? '💬 নতুন কাস্টমার সাপোর্ট চ্যাট' : '💬 New Customer Support Message',
-      message: isBn ? `গ্রাহক ${guestName || 'Customer'} বার্তা পাঠিয়েছেন: "${messageInput.trim() || '📷 ছবি'}"` : `Customer ${guestName || 'Customer'}: "${messageInput.trim() || '📷 Photo'}"`,
+      message: isBn ? `গ্রাহক ${currentName} বার্তা পাঠিয়েছেন: "${textContent || '📷 ছবি'}"` : `Customer ${currentName}: "${textContent || '📷 Photo'}"`,
       type: 'info',
       target_role: 'all',
       link: '/admin/chat',
