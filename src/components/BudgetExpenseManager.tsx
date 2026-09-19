@@ -175,9 +175,42 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
   const liveDbData = getHostingerDbData();
   const liveLedgerEntries: LedgerEntry[] = ledgerEntriesProp || liveDbData.ledgerEntries || [];
 
-  const totalCargoIncome = liveLedgerEntries
-    .filter((l) => l.type === 'charge')
-    .reduce((sum, entry) => sum + entry.amount, 0);
+  const filteredLedgerEntries = React.useMemo(() => {
+    return liveLedgerEntries.filter((l) => {
+      if (l.type !== 'charge') return false;
+      if (dateFilterType === 'all') return true;
+
+      const itemDateStr = (l.created_at || '').substring(0, 10);
+      const itemMonthStr = itemDateStr.substring(0, 7);
+      const itemYearStr = itemDateStr.substring(0, 4);
+
+      if (dateFilterType === 'single_date' && singleDate) {
+        return itemDateStr === singleDate;
+      } else if (dateFilterType === 'date_range') {
+        if (startDate && itemDateStr < startDate) return false;
+        if (endDate && itemDateStr > endDate) return false;
+        return true;
+      } else if (dateFilterType === 'single_month' && singleMonth) {
+        return itemMonthStr === singleMonth;
+      } else if (dateFilterType === 'month_range') {
+        if (startMonth && itemMonthStr < startMonth) return false;
+        if (endMonth && itemMonthStr > endMonth) return false;
+        return true;
+      } else if (dateFilterType === 'single_year' && singleYear) {
+        return itemYearStr === singleYear;
+      } else if (dateFilterType === 'year_range') {
+        if (startYear && itemYearStr < startYear) return false;
+        if (endYear && itemYearStr > endYear) return false;
+        return true;
+      }
+
+      return true;
+    });
+  }, [liveLedgerEntries, dateFilterType, singleDate, startDate, endDate, singleMonth, startMonth, endMonth, singleYear, startYear, endYear]);
+
+  const totalCargoIncome = dateFilterType === 'all'
+    ? liveLedgerEntries.filter((l) => l.type === 'charge').reduce((sum, entry) => sum + entry.amount, 0)
+    : filteredLedgerEntries.reduce((sum, entry) => sum + entry.amount, 0);
 
   // Filtered Expenses
   const filteredExpenses = expenses.filter((exp) => {
@@ -544,16 +577,21 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
         <div className={`p-5 rounded-none border space-y-4 shadow-sm ${
           isDark ? 'bg-[#1E293B] border-[#1E3247] text-white' : 'bg-white border-slate-200 text-slate-900'
         }`}>
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 dark:border-[#1E3247] pb-3">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-200 dark:border-[#1E3247] pb-3">
             <div className="flex items-center space-x-2">
               <BarChart3 className="w-4 h-4 text-[#00897B]" />
-              <h2 className="text-sm font-bold">Periodical Financial Statements</h2>
+              <h2 className="text-sm font-bold">{isBn ? 'পর্যায়ক্রমিক আর্থিক রিপোর্ট বিবরণী' : 'Periodical Financial Statements'}</h2>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="flex flex-wrap items-center gap-2">
               <div className={`flex rounded-none p-0.5 border ${isDark ? 'bg-[#0B1622] border-[#1E3247]' : 'bg-slate-100 border-slate-200'}`}>
                 <button
-                  onClick={() => setReportTab('daily')}
+                  onClick={() => {
+                    setReportTab('daily');
+                    if (singleDate) {
+                      setDateFilterType('single_date');
+                    }
+                  }}
                   className={`px-3 py-1 rounded-none text-xs font-light transition-all cursor-pointer ${
                     reportTab === 'daily'
                       ? 'bg-[#00897B] text-white shadow-xs'
@@ -562,10 +600,17 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                       : 'text-slate-700 hover:text-slate-900'
                   }`}
                 >
-                  Daily Report
+                  {isBn ? 'দৈনিক/নির্দিষ্ট তারিখ' : 'Daily Report'}
                 </button>
                 <button
-                  onClick={() => setReportTab('monthly')}
+                  onClick={() => {
+                    setReportTab('monthly');
+                    if (singleMonth) {
+                      setDateFilterType('single_month');
+                    } else {
+                      setDateFilterType('all');
+                    }
+                  }}
                   className={`px-3 py-1 rounded-none text-xs font-light transition-all cursor-pointer ${
                     reportTab === 'monthly'
                       ? 'bg-[#00897B] text-white shadow-xs'
@@ -574,10 +619,17 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                       : 'text-slate-700 hover:text-slate-900'
                   }`}
                 >
-                  Monthly Report
+                  {isBn ? 'মাসিক রিপোর্ট' : 'Monthly Report'}
                 </button>
                 <button
-                  onClick={() => setReportTab('yearly')}
+                  onClick={() => {
+                    setReportTab('yearly');
+                    if (singleYear) {
+                      setDateFilterType('single_year');
+                    } else {
+                      setDateFilterType('all');
+                    }
+                  }}
                   className={`px-3 py-1 rounded-none text-xs font-light transition-all cursor-pointer ${
                     reportTab === 'yearly'
                       ? 'bg-[#00897B] text-white shadow-xs'
@@ -586,8 +638,45 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                       : 'text-slate-700 hover:text-slate-900'
                   }`}
                 >
-                  Yearly Report
+                  {isBn ? 'বাৎসরিক রিপোর্ট' : 'Yearly Report'}
                 </button>
+              </div>
+
+              {/* Direct Specific Date Picker Selector inside Periodical Financial Statements card */}
+              <div className={`flex items-center space-x-1.5 px-2.5 py-1 rounded-none border text-xs ${
+                isDark ? 'bg-[#0B1622] border-[#1E3247] text-white' : 'bg-slate-50 border-slate-300 text-slate-900'
+              }`}>
+                <Calendar className="w-3.5 h-3.5 text-[#00897B]" />
+                <span className="text-[11px] font-medium hidden sm:inline">{isBn ? 'তারিখ:' : 'Date:'}</span>
+                <input
+                  type="date"
+                  value={singleDate}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setSingleDate(val);
+                    if (val) {
+                      setDateFilterType('single_date');
+                      setReportTab('daily');
+                    } else {
+                      setDateFilterType('all');
+                    }
+                  }}
+                  className={`bg-transparent outline-none text-xs font-mono cursor-pointer ${isDark ? 'text-white' : 'text-slate-900'}`}
+                  title={isBn ? 'নির্দিষ্ট তারিখ নির্বাচন করে রিপোর্ট বের করুন' : 'Select Specific Date to Generate Report'}
+                />
+                {singleDate && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSingleDate('');
+                      setDateFilterType('all');
+                    }}
+                    className="text-xs text-rose-500 hover:text-rose-700 font-bold ml-1 cursor-pointer"
+                    title={isBn ? 'তারিখ ফিল্টার ক্লিয়ার করুন' : 'Clear Date Filter'}
+                  >
+                    ✕
+                  </button>
+                )}
               </div>
 
               <button
@@ -595,10 +684,10 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                 className={`p-1.5 px-3 rounded-none border text-xs font-light flex items-center space-x-1.5 transition-all cursor-pointer ${
                   isDark ? 'bg-[#0B1622] border-[#1E3247] text-white hover:bg-[#1E3247]' : 'bg-white border-slate-300 text-slate-700 hover:bg-slate-50'
                 }`}
-                title="Print / Export Report"
+                title="Print / Export Report for Selected Period"
               >
                 <Printer className="w-3.5 h-3.5 opacity-80" />
-                <span className="hidden sm:inline font-light">Print</span>
+                <span className="hidden sm:inline font-light">{isBn ? 'প্রিন্ট করুন' : 'Print'}</span>
               </button>
             </div>
           </div>
@@ -619,50 +708,30 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                 </tr>
               </thead>
               <tbody className={`divide-y ${isDark ? 'divide-[#1E3247]' : 'divide-slate-200'}`}>
-                {reportTab === 'daily' && (
-                  <tr className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
-                    <td className={`p-3 font-normal ${isDark ? 'text-white' : 'text-slate-900'}`}>Today (August 2026)</td>
-                    <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400">৳{totalCargoIncome.toLocaleString()}</td>
-                    <td className="p-3 font-mono text-rose-500 dark:text-rose-400">৳{totalFilteredExpense.toLocaleString()}</td>
-                    <td className="p-3 font-mono font-bold text-teal-600 dark:text-teal-400">
-                      {netProfitOrLoss >= 0 ? '+' : ''}৳{netProfitOrLoss.toLocaleString()}
-                    </td>
-                    <td className="p-3 font-mono">{expenseRatio}%</td>
-                    <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">
-                      {netProfitOrLoss >= 0 ? `Surplus (Profit ${netMarginPercent}%)` : 'Deficit (Loss)'}
-                    </td>
-                  </tr>
-                )}
-
-                {reportTab === 'monthly' && (
-                  <tr className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
-                    <td className={`p-3 font-normal ${isDark ? 'text-white' : 'text-slate-900'}`}>August 2026 (Current Month)</td>
-                    <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400">৳{totalCargoIncome.toLocaleString()}</td>
-                    <td className="p-3 font-mono text-rose-500 dark:text-rose-400">৳{totalFilteredExpense.toLocaleString()}</td>
-                    <td className="p-3 font-mono font-bold text-teal-600 dark:text-teal-400">
-                      {netProfitOrLoss >= 0 ? '+' : ''}৳{netProfitOrLoss.toLocaleString()}
-                    </td>
-                    <td className="p-3 font-mono">{expenseRatio}%</td>
-                    <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">
-                      {netProfitOrLoss >= 0 ? `Surplus (Profit ${netMarginPercent}%)` : 'Deficit (Loss)'}
-                    </td>
-                  </tr>
-                )}
-
-                {reportTab === 'yearly' && (
-                  <tr className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
-                    <td className={`p-3 font-normal ${isDark ? 'text-white' : 'text-slate-900'}`}>YTD 2026 (Fiscal Year 2026)</td>
-                    <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400">৳{totalCargoIncome.toLocaleString()}</td>
-                    <td className="p-3 font-mono text-rose-500 dark:text-rose-400">৳{totalFilteredExpense.toLocaleString()}</td>
-                    <td className="p-3 font-mono font-bold text-teal-600 dark:text-teal-400">
-                      {netProfitOrLoss >= 0 ? '+' : ''}৳{netProfitOrLoss.toLocaleString()}
-                    </td>
-                    <td className="p-3 font-mono">{expenseRatio}%</td>
-                    <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">
-                      {netProfitOrLoss >= 0 ? `Annual Net Profit (${netMarginPercent}%)` : 'Deficit (Loss)'}
-                    </td>
-                  </tr>
-                )}
+                <tr className={`transition-colors ${isDark ? 'hover:bg-[#1E3247]/40' : 'hover:bg-slate-50'}`}>
+                  <td className={`p-3 font-normal ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                    {dateFilterType === 'single_date' && singleDate
+                      ? `Specific Date (${singleDate})`
+                      : dateFilterType === 'date_range' && startDate
+                      ? `Range (${startDate} to ${endDate || 'Present'})`
+                      : dateFilterType === 'single_month' && singleMonth
+                      ? `Month (${singleMonth})`
+                      : reportTab === 'daily'
+                      ? `Today (${new Date().toLocaleDateString('en-GB')})`
+                      : reportTab === 'monthly'
+                      ? 'Current Month'
+                      : 'Fiscal Year (YTD)'}
+                  </td>
+                  <td className="p-3 font-mono text-emerald-600 dark:text-emerald-400">৳{totalCargoIncome.toLocaleString()}</td>
+                  <td className="p-3 font-mono text-rose-500 dark:text-rose-400">৳{totalFilteredExpense.toLocaleString()}</td>
+                  <td className="p-3 font-mono font-bold text-teal-600 dark:text-teal-400">
+                    {netProfitOrLoss >= 0 ? '+' : ''}৳{netProfitOrLoss.toLocaleString()}
+                  </td>
+                  <td className="p-3 font-mono">{expenseRatio}%</td>
+                  <td className="p-3 text-right font-normal text-emerald-600 dark:text-emerald-400">
+                    {netProfitOrLoss >= 0 ? `Surplus (Profit ${netMarginPercent}%)` : 'Deficit (Loss)'}
+                  </td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -965,9 +1034,21 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
             <span className="inline-block px-2.5 py-1 bg-[#1E293B] text-white text-[10px] font-bold tracking-widest uppercase rounded-none">
               Official Document
             </span>
-            <p className="text-xs font-mono font-bold text-slate-900 mt-2">Ref: FSC-FIN-2026-0815</p>
+            <p className="text-xs font-mono font-bold text-slate-900 mt-2">Ref: FSC-FIN-{singleDate ? singleDate.replace(/-/g, '') : '2026'}</p>
             <p className="text-xs text-slate-700 mt-0.5">Issue Date: {new Date().toLocaleDateString('en-GB')}</p>
-            <p className="text-xs text-slate-700">Scope: {dateFilterType === 'all' ? 'All Time Financials' : dateFilterType}</p>
+            <p className="text-xs text-slate-700 font-medium">
+              Scope: {
+                dateFilterType === 'single_date' && singleDate
+                  ? `Specific Date Audit (${singleDate})`
+                  : dateFilterType === 'date_range' && startDate
+                  ? `Date Range (${startDate} to ${endDate || 'Present'})`
+                  : dateFilterType === 'single_month' && singleMonth
+                  ? `Specific Month Audit (${singleMonth})`
+                  : dateFilterType === 'single_year' && singleYear
+                  ? `Annual Year Audit (${singleYear})`
+                  : 'All Time Financial Statement'
+              }
+            </p>
           </div>
         </div>
 
