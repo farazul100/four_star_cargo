@@ -272,8 +272,13 @@ export const getHostingerDbData = () => {
 
   let proposals: FlyingProposal[] = [];
   try {
-    const rawProposals = localStorage.getItem(DB_KEYS.PROPOSALS);
+    const rawProposals =
+      localStorage.getItem(DB_KEYS.PROPOSALS) ||
+      localStorage.getItem('fsc_vps_proposals') ||
+      localStorage.getItem('proposals') ||
+      (typeof window !== 'undefined' ? JSON.stringify(window.__FSC_GLOBAL_PROPOSALS__ || []) : '[]');
     proposals = rawProposals ? JSON.parse(rawProposals) : [];
+    if (!Array.isArray(proposals)) proposals = [];
   } catch (e) {
     console.error('Error reading proposals from LocalStorage:', e);
   }
@@ -293,6 +298,8 @@ export const getHostingerDbData = () => {
       proposals = cleanProposals;
       try {
         localStorage.setItem(DB_KEYS.PROPOSALS, JSON.stringify(cleanProposals));
+        localStorage.setItem('fsc_vps_proposals', JSON.stringify(cleanProposals));
+        localStorage.setItem('proposals', JSON.stringify(cleanProposals));
       } catch {}
     }
   }
@@ -808,6 +815,14 @@ export const saveHostingerDbData = (key: string, data: any) => {
       localStorage.setItem('fsc_vps_cartons', JSON.stringify(data));
       localStorage.setItem('cartons', JSON.stringify(data));
     }
+    if (key === DB_KEYS.PROPOSALS || key === 'proposals' || key === 'fsc_vps_proposals') {
+      localStorage.setItem(DB_KEYS.PROPOSALS, JSON.stringify(data));
+      localStorage.setItem('fsc_vps_proposals', JSON.stringify(data));
+      localStorage.setItem('proposals', JSON.stringify(data));
+      if (typeof window !== 'undefined') {
+        window.__FSC_GLOBAL_PROPOSALS__ = data;
+      }
+    }
     if (key === DB_KEYS.CUSTOMERS || key === 'customers' || key === 'fsc_vps_customers') {
       localStorage.setItem(DB_KEYS.CUSTOMERS, JSON.stringify(data));
       localStorage.setItem('fsc_vps_customers', JSON.stringify(data));
@@ -855,7 +870,7 @@ export const saveHostingerDbMultiData = (entries: Record<string, any>) => {
     if ((key === DB_KEYS.CARTONS || key === 'cartons' || key === 'fsc_vps_cartons') && Array.isArray(data)) {
       window.__FSC_GLOBAL_CARTONS__ = data;
     }
-    if (key === DB_KEYS.PROPOSALS && Array.isArray(data)) {
+    if ((key === DB_KEYS.PROPOSALS || key === 'proposals' || key === 'fsc_vps_proposals') && Array.isArray(data)) {
       window.__FSC_GLOBAL_PROPOSALS__ = data;
     }
     if (key === DB_KEYS.CUSTOMERS || key === DB_KEYS.CRM_CUSTOMERS || key === 'fsc_vps_customers' || key === 'customers') {
@@ -875,6 +890,14 @@ export const saveHostingerDbMultiData = (entries: Record<string, any>) => {
         localStorage.setItem(DB_KEYS.CARTONS, JSON.stringify(data));
         localStorage.setItem('fsc_vps_cartons', JSON.stringify(data));
         localStorage.setItem('cartons', JSON.stringify(data));
+      }
+      if (key === DB_KEYS.PROPOSALS || key === 'proposals' || key === 'fsc_vps_proposals') {
+        localStorage.setItem(DB_KEYS.PROPOSALS, JSON.stringify(data));
+        localStorage.setItem('fsc_vps_proposals', JSON.stringify(data));
+        localStorage.setItem('proposals', JSON.stringify(data));
+        if (typeof window !== 'undefined') {
+          window.__FSC_GLOBAL_PROPOSALS__ = data;
+        }
       }
       if (key === DB_KEYS.CUSTOMERS || key === 'customers' || key === 'fsc_vps_customers') {
         localStorage.setItem(DB_KEYS.CUSTOMERS, JSON.stringify(data));
@@ -997,11 +1020,42 @@ export const processServerDbUpdate = (serverDb: any) => {
         }
       }
       if (key === DB_KEYS.PROPOSALS || key === 'fsc_vps_proposals' || key === 'proposals') {
-        localStorage.setItem(DB_KEYS.PROPOSALS, serverStr);
-        localStorage.setItem('fsc_vps_proposals', serverStr);
-        localStorage.setItem('proposals', serverStr);
+        let mergedProposals = Array.isArray(serverData) ? serverData : [];
+        try {
+          const localRawProps =
+            localStorage.getItem(DB_KEYS.PROPOSALS) ||
+            localStorage.getItem('fsc_vps_proposals') ||
+            localStorage.getItem('proposals');
+          if (localRawProps) {
+            const localProps: FlyingProposal[] = JSON.parse(localRawProps);
+            if (Array.isArray(localProps) && localProps.length > 0) {
+              const propMap = new Map<string, FlyingProposal>();
+              mergedProposals.forEach((sp: FlyingProposal) => sp && sp.id && propMap.set(String(sp.id), sp));
+              localProps.forEach((lp: FlyingProposal) => {
+                if (lp && lp.id) {
+                  const existing = propMap.get(String(lp.id));
+                  if (!existing) {
+                    propMap.set(String(lp.id), lp);
+                  } else {
+                    const spTime = existing.finalized_at ? new Date(existing.finalized_at).getTime() : 0;
+                    const lpTime = lp.finalized_at ? new Date(lp.finalized_at).getTime() : 0;
+                    if (lpTime >= spTime || (lp.status !== 'pending' && existing.status === 'pending')) {
+                      propMap.set(String(lp.id), lp);
+                    }
+                  }
+                }
+              });
+              mergedProposals = Array.from(propMap.values());
+            }
+          }
+        } catch (e) {}
+
+        const finalPropStr = JSON.stringify(mergedProposals);
+        localStorage.setItem(DB_KEYS.PROPOSALS, finalPropStr);
+        localStorage.setItem('fsc_vps_proposals', finalPropStr);
+        localStorage.setItem('proposals', finalPropStr);
         if (typeof window !== 'undefined') {
-          window.__FSC_GLOBAL_PROPOSALS__ = Array.isArray(serverData) ? serverData : JSON.parse(serverStr);
+          window.__FSC_GLOBAL_PROPOSALS__ = mergedProposals;
         }
       }
       if (key === DB_KEYS.CUSTOMERS || key === 'fsc_vps_customers' || key === 'customers') {
