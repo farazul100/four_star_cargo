@@ -153,7 +153,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
   });
 
   // Historical Proposals Filter
-  const historicalProposals = proposals.filter((p) => p.status === 'dispatched' || p.status === 'rejected' || p.status === 'approved');
+  const historicalProposals = proposals.filter((p) => p && (p.status === 'dispatched' || p.status === 'rejected' || p.status === 'approved' || p.status === 'completed' || p.status === 'delivered' || p.status === 'received' || p.status === 'archived' || !p.status));
   const filteredHistoricalProposals = historicalProposals.filter((prop) => {
     if (historyStatusFilter !== 'all' && prop.status !== historyStatusFilter) return false;
     if (warehouseFilter !== 'all' && prop.warehouse_id !== warehouseFilter) return false;

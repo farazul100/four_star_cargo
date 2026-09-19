@@ -304,6 +304,64 @@ export const getHostingerDbData = () => {
     }
   }
 
+  // Auto-recover proposals from flight cartons if proposals array is empty but flight cartons exist
+  if (Array.isArray(cartons) && cartons.length > 0 && (!proposals || proposals.length === 0)) {
+    const flightGroupMap = new Map<string, Carton[]>();
+    cartons.forEach((c) => {
+      if (c && (c.flight_number || c.status === 'proposed' || c.status === 'in_transit')) {
+        const flightKey = (c.flight_number || 'BS-206').trim();
+        const list = flightGroupMap.get(flightKey) || [];
+        list.push(c);
+        flightGroupMap.set(flightKey, list);
+      }
+    });
+
+    if (flightGroupMap.size > 0) {
+      const recoveredProposals: FlyingProposal[] = [];
+      let counter = 1;
+      flightGroupMap.forEach((flightCartons, flightName) => {
+        const firstCarton = flightCartons[0];
+        const totalW = flightCartons.reduce((sum, c) => sum + (c.gross_weight || 0), 0);
+        const totalC = flightCartons.reduce((sum, c) => sum + (c.cbm || 0), 0);
+        const ctnIds = flightCartons.map((c) => c.id);
+        const hasTransit = flightCartons.some((c) => c.status === 'in_transit' || c.status === 'delivered');
+
+        const recoveredProp: FlyingProposal = {
+          id: `prop-rec-${Date.now()}-${counter++}`,
+          proposal_code: `#LOT-${flightName.replace(/\s+/g, '')}-${100 + counter}`,
+          flying_name: flightName.startsWith('Flight') ? flightName : `Flight Batch ${flightName}`,
+          warehouse_id: firstCarton.current_warehouse_id || 'wh-china',
+          warehouse_name: firstCarton.current_warehouse_name || 'Guangzhou Air Hub',
+          destination_warehouse_id: firstCarton.destination_warehouse_id || 'wh-bd',
+          destination_warehouse_name: firstCarton.destination_warehouse_name || 'Dhaka Central Freight Hub',
+          proposed_by: 'usr-admin-master',
+          proposed_by_name: 'অপারেশনস টিম (Operations Team)',
+          date: firstCarton.created_at ? firstCarton.created_at.split('T')[0] : new Date().toISOString().split('T')[0],
+          status: hasTransit ? 'dispatched' : 'approved',
+          flight_number: flightName,
+          airline: 'US-Bangla Airlines',
+          carton_ids: ctnIds,
+          items_count: flightCartons.length,
+          total_weight: Math.round(totalW * 10) / 10,
+          total_cbm: Math.round(totalC * 100) / 100,
+        };
+        recoveredProposals.push(recoveredProp);
+      });
+
+      if (recoveredProposals.length > 0) {
+        proposals = recoveredProposals;
+        try {
+          localStorage.setItem(DB_KEYS.PROPOSALS, JSON.stringify(recoveredProposals));
+          localStorage.setItem('fsc_vps_proposals', JSON.stringify(recoveredProposals));
+          localStorage.setItem('proposals', JSON.stringify(recoveredProposals));
+          if (typeof window !== 'undefined') {
+            window.__FSC_GLOBAL_PROPOSALS__ = recoveredProposals;
+          }
+        } catch {}
+      }
+    }
+  }
+
   let rawUsers: User[] = [];
   try {
     const raw = localStorage.getItem(DB_KEYS.USERS);
