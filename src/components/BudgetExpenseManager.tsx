@@ -101,12 +101,26 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
   // Add Expense Modal State
   const [showAddModal, setShowAddModal] = useState(false);
   const [expTitle, setExpTitle] = useState('');
-  const [expCategory, setExpCategory] = useState<ExpenseItem['category']>('shipping');
+  const [expCategory, setExpCategory] = useState<string>('shipping');
+  const [isCustomCategory, setIsCustomCategory] = useState(false);
+  const [customCategoryInput, setCustomCategoryInput] = useState('');
   const [expAmount, setExpAmount] = useState('');
   const [expDate, setExpDate] = useState('2026-08-15');
   const [expPaymentMethod, setExpPaymentMethod] = useState<ExpenseItem['payment_method']>('bank_transfer');
   const [expVoucherNo, setExpVoucherNo] = useState('');
   const [expNotes, setExpNotes] = useState('');
+
+  // Collect any custom categories present in current expenses
+  const customCategoriesInUse = React.useMemo(() => {
+    const standardKeys = new Set(['shipping', 'daily_cost', 'warehouse_rent', 'salary', 'customs', 'packing_transport', 'utilities', 'other']);
+    const set = new Set<string>();
+    (expenses || []).forEach((e) => {
+      if (e && e.category && !standardKeys.has(e.category)) {
+        set.add(e.category);
+      }
+    });
+    return Array.from(set);
+  }, [expenses]);
 
   const handleCreateExpense = (e: React.FormEvent) => {
     e.preventDefault();
@@ -115,10 +129,14 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
       return;
     }
 
+    const finalCategory = (expCategory === 'custom' || isCustomCategory)
+      ? (customCategoryInput.trim() || (isBn ? 'অন্যান্য খরচ' : 'Other Administrative Expenses'))
+      : expCategory;
+
     const newExpense: ExpenseItem = {
       id: `exp-${Date.now()}`,
       title: expTitle,
-      category: expCategory,
+      category: finalCategory,
       amount: parseFloat(expAmount),
       date: expDate || '2026-08-15',
       payment_method: expPaymentMethod,
@@ -147,6 +165,9 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
     setExpAmount('');
     setExpVoucherNo('');
     setExpNotes('');
+    setExpCategory('shipping');
+    setIsCustomCategory(false);
+    setCustomCategoryInput('');
     setShowAddModal(false);
   };
 
@@ -204,15 +225,23 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
   const expenseRatio = totalCargoIncome > 0 ? ((totalFilteredExpense / totalCargoIncome) * 100).toFixed(1) : '0';
 
   // Category Breakdown Totals
-  const categoryTotals = {
-    shipping: filteredExpenses.filter((e) => e.category === 'shipping').reduce((s, e) => s + e.amount, 0),
-    warehouse_rent: filteredExpenses.filter((e) => e.category === 'warehouse_rent').reduce((s, e) => s + e.amount, 0),
-    salary: filteredExpenses.filter((e) => e.category === 'salary').reduce((s, e) => s + e.amount, 0),
-    customs: filteredExpenses.filter((e) => e.category === 'customs').reduce((s, e) => s + e.amount, 0),
-    packing_transport: filteredExpenses.filter((e) => e.category === 'packing_transport').reduce((s, e) => s + e.amount, 0),
-    utilities: filteredExpenses.filter((e) => e.category === 'utilities').reduce((s, e) => s + e.amount, 0),
-    other: filteredExpenses.filter((e) => e.category === 'other').reduce((s, e) => s + e.amount, 0),
-  };
+  const categoryTotals = React.useMemo(() => {
+    const map: Record<string, number> = {
+      shipping: 0,
+      daily_cost: 0,
+      warehouse_rent: 0,
+      salary: 0,
+      customs: 0,
+      packing_transport: 0,
+      utilities: 0,
+      other: 0,
+    };
+    filteredExpenses.forEach((e) => {
+      const catKey = e.category || 'other';
+      map[catKey] = (map[catKey] || 0) + e.amount;
+    });
+    return map;
+  }, [filteredExpenses]);
 
   const getCategoryLabel = (cat: ExpenseItem['category']) => {
     switch (cat) {
@@ -230,8 +259,10 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
         return isBn ? 'প্যাকিং ও লোকাল ট্রান্সপোর্ট' : 'Packing & Local Transport';
       case 'utilities':
         return isBn ? 'ইউটিলিটি (বিদ্যুৎ/ইন্টারনেট)' : 'Utilities & Bills';
-      default:
+      case 'other':
         return isBn ? 'অন্যান্য প্রশাসনিক খরচ' : 'Other Administrative Expenses';
+      default:
+        return cat;
     }
   };
 
@@ -380,11 +411,16 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
               >
                 <option value="all">{isBn ? 'সব খাতের খরচ (All Categories)' : 'All Expense Categories'}</option>
                 <option value="shipping">এয়ার ফ্রাইট ও শিপিং চার্জ</option>
+                <option value="daily_cost">ডেইলি কস্ট (Daily Cost)</option>
                 <option value="warehouse_rent">ওয়্যারহাউজ ভাড়া ও লিজ</option>
                 <option value="salary">স্টাফ বেতন ও ওভারটাইম</option>
                 <option value="customs">কাস্টমস শুল্ক ও ট্যাক্স</option>
                 <option value="packing_transport">প্যাকিং ও ট্রান্সপোর্ট</option>
                 <option value="utilities">ইউটিলিটি ও বিল</option>
+                <option value="other">অন্যান্য প্রশাসনিক খরচ</option>
+                {customCategoriesInUse.map((cat) => (
+                  <option key={`filter-${cat}`} value={cat}>📁 {cat}</option>
+                ))}
               </select>
             </div>
 
@@ -752,7 +788,15 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                     </label>
                     <select
                       value={expCategory}
-                      onChange={(e) => setExpCategory(e.target.value as ExpenseItem['category'])}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setExpCategory(val);
+                        if (val === 'custom') {
+                          setIsCustomCategory(true);
+                        } else {
+                          setIsCustomCategory(false);
+                        }
+                      }}
                       className={`w-full border rounded-xl p-3 text-xs outline-none transition-all font-medium ${
                         isDark ? 'bg-[#0B1622] border-[#1E3247] text-white focus:border-[#1FB6A8]' : 'bg-slate-50 border-slate-300 text-slate-900 focus:bg-white focus:border-[#00897B]'
                       }`}
@@ -765,7 +809,26 @@ export const BudgetExpenseManager: React.FC<BudgetExpenseManagerProps> = ({
                       <option value="packing_transport">🚚 Packing & Local Transport</option>
                       <option value="utilities">⚡ Utilities & Bills</option>
                       <option value="other">📦 Other Administrative Expenses</option>
+                      {customCategoriesInUse.map((cat) => (
+                        <option key={`opt-${cat}`} value={cat}>📁 {cat}</option>
+                      ))}
+                      <option value="custom">➕ + Add New Custom Category (+ নতুন ক্যাটাগরি লিখুন)</option>
                     </select>
+
+                    {(expCategory === 'custom' || isCustomCategory) && (
+                      <div className="mt-2">
+                        <input
+                          type="text"
+                          required
+                          value={customCategoryInput}
+                          onChange={(e) => setCustomCategoryInput(e.target.value)}
+                          placeholder={isBn ? 'নতুন খরচের ক্যাটাগরির নাম লিখুন (যেমন: অফিস ডেকোরেশন)' : 'Type new category name (e.g. Office Decoration)'}
+                          className={`w-full border rounded-xl p-3 text-xs outline-none transition-all font-medium ${
+                            isDark ? 'bg-[#0B1622] border-[#1FB6A8] text-white focus:ring-2 focus:ring-[#1FB6A8]/20' : 'bg-white border-[#00897B] text-slate-900 focus:ring-2 focus:ring-[#00897B]/20'
+                          }`}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   <div>
