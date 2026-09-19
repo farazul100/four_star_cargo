@@ -61,7 +61,7 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
 
   // Shipment Ctn NO Batch Generator States for Operation Director
   const [shipmentCtnPrefix, setShipmentCtnPrefix] = useState<string>('ABDUL-');
-  const [shipmentCtnStartNum, setShipmentCtnStartNum] = useState<number>(50);
+  const [shipmentCtnStartNum, setShipmentCtnStartNum] = useState<string>('50');
 
   const handleBatchAssignShipmentCtnNo = () => {
     if (selectedCartonIds.length === 0) {
@@ -74,12 +74,17 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
     }
 
     const prefix = shipmentCtnPrefix.trim();
-    const startNum = Number(shipmentCtnStartNum) || 1;
+    const rawStartStr = String(shipmentCtnStartNum || '1').trim();
+    const parsedNum = parseInt(rawStartStr, 10);
+    const startNum = isNaN(parsedNum) ? 1 : parsedNum;
+    const padLength = rawStartStr.length;
 
     const updatedCartons = cartons.map((c) => {
       if (!selectedCartonIds.includes(c.id)) return c;
       const index = selectedCartonIds.indexOf(c.id);
-      const newPkgNo = `${prefix}${startNum + index}`;
+      const currentNum = startNum + index;
+      const formattedNum = String(currentNum).padStart(padLength, '0');
+      const newPkgNo = `${prefix}${formattedNum}`;
       return {
         ...c,
         packaging_number: newPkgNo,
@@ -90,12 +95,15 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
     saveHostingerDbMultiData({ fsc_vps_cartons: updatedCartons });
     setCartons(updatedCartons);
 
+    const startFormatted = String(startNum).padStart(padLength, '0');
+    const endFormatted = String(startNum + selectedCartonIds.length - 1).padStart(padLength, '0');
+
     addToast(
       'success',
       isBn ? 'শিপমেন্ট কার্টুন নম্বর সফলভাবে জেনারেট হয়েছে!' : 'Shipment Ctn NO. Generated!',
       isBn
-        ? `সিলেক্ট করা ${selectedCartonIds.length}টি কার্টুনে ${prefix}${startNum} থেকে ${prefix}${startNum + selectedCartonIds.length - 1} সেট করা হয়েছে।`
-        : `Assigned ${prefix}${startNum} to ${selectedCartonIds.length} cartons.`
+        ? `সিলেক্ট করা ${selectedCartonIds.length}টি কার্টুনে ${prefix}${startFormatted} থেকে ${prefix}${endFormatted} সেট করা হয়েছে।`
+        : `Assigned ${prefix}${startFormatted} to ${selectedCartonIds.length} cartons.`
     );
   };
 
@@ -699,10 +707,9 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                 className="w-28 px-3 py-1.5 rounded-lg border-2 border-slate-300 bg-white text-slate-900 font-mono font-extrabold text-xs outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20"
               />
               <input
-                type="number"
-                min={1}
+                type="text"
                 value={shipmentCtnStartNum}
-                onChange={(e) => setShipmentCtnStartNum(parseInt(e.target.value) || 1)}
+                onChange={(e) => setShipmentCtnStartNum(e.target.value)}
                 placeholder="50"
                 title={isBn ? 'শুরু নম্বর' : 'Start number'}
                 className="w-20 px-3 py-1.5 rounded-lg border-2 border-slate-300 bg-white text-slate-900 font-mono font-extrabold text-xs text-center outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20"
