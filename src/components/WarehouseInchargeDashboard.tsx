@@ -721,7 +721,7 @@ export const WarehouseInchargeDashboard: React.FC<WarehouseInchargeDashboardProp
       <ToastContainer toasts={toasts} onDismiss={dismissToast} />
 
       <BookedCartonsHub
-        cartons={myCartons}
+        cartons={cartons}
         warehouses={warehouses}
         currentUser={currentUser}
         language={language}

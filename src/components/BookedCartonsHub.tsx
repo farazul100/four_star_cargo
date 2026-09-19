@@ -943,6 +943,9 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
     if (isWarehouseIncharge) {
       const canonicalMyWhId = resolveCanonicalWarehouseId(currentUser?.warehouse_id || myWhId, currentUser?.warehouse_name);
       return liveRealtimeCartons.filter((c) => {
+        if (!c.current_warehouse_id && !c.current_warehouse_name && !(c as any).origin_warehouse_id && !c.warehouse_name) {
+          return canonicalMyWhId === 'wh-china' || canonicalMyWhId === 'all';
+        }
         const cCur = resolveCanonicalWarehouseId(c.current_warehouse_id, c.current_warehouse_name);
         const cOrig = resolveCanonicalWarehouseId((c as any).origin_warehouse_id || (c as any).warehouse_id, c.warehouse_name);
         const cDest = resolveCanonicalWarehouseId(c.destination_warehouse_id, c.destination_warehouse_name);
@@ -1058,6 +1061,10 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       const cDestName = (c.destination_warehouse_name || '').toLowerCase();
       const cOrigName = (c.warehouse_name || '').toLowerCase();
 
+      if (!cCurId && !cDestId && !cOrigId && !cCurName && !cDestName && !cOrigName) {
+        return targetWhId === 'wh-china' || targetWhId === 'all';
+      }
+
       return (
         cCurId === targetWhId.toLowerCase() ||
         cDestId === targetWhId.toLowerCase() ||
@@ -1099,7 +1106,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
       selectedStatus === 'all'
         ? true
         : selectedStatus === 'booked'
-        ? (c.status === 'booked' || c.status === 'received' || (c.status as any) === 'arrived_bd' || (c.status as any) === 'in_warehouse')
+        ? (!c.status || c.status === 'booked' || c.status === 'received' || (c.status as any) === 'arrived_bd' || (c.status as any) === 'in_warehouse')
         : c.status === selectedStatus;
 
     // Destination Country / Hub Filter Logic
