@@ -61,7 +61,7 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
 
   // Shipment Ctn NO Batch Generator States for Operation Director
   const [shipmentCtnPrefix, setShipmentCtnPrefix] = useState<string>('ABDUL-');
-  const [shipmentCtnStartNum, setShipmentCtnStartNum] = useState<string>('50');
+  const [shipmentCtnStartNum, setShipmentCtnStartNum] = useState<string>('1');
 
   const handleBatchAssignShipmentCtnNo = () => {
     if (selectedCartonIds.length === 0) {
@@ -74,10 +74,12 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
     }
 
     const prefix = shipmentCtnPrefix.trim();
-    const rawStartStr = String(shipmentCtnStartNum || '1').trim();
+    const rawStartStr = (shipmentCtnStartNum !== undefined && shipmentCtnStartNum !== null && shipmentCtnStartNum.trim() !== '')
+      ? shipmentCtnStartNum.trim()
+      : '1';
     const parsedNum = parseInt(rawStartStr, 10);
-    const startNum = isNaN(parsedNum) ? 1 : parsedNum;
-    const padLength = rawStartStr.length;
+    const startNum = isNaN(parsedNum) ? 0 : Math.max(0, parsedNum);
+    const padLength = rawStartStr.length || 1;
 
     const updatedCartons = cartons.map((c) => {
       if (!selectedCartonIds.includes(c.id)) return c;
@@ -708,10 +710,11 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
               />
               <input
                 type="text"
+                inputMode="numeric"
                 value={shipmentCtnStartNum}
                 onChange={(e) => setShipmentCtnStartNum(e.target.value)}
-                placeholder="50"
-                title={isBn ? 'শুরু নম্বর' : 'Start number'}
+                placeholder="1"
+                title={isBn ? 'শুরু নম্বর (যেমন: 1, 0, 01, 001)' : 'Start number (e.g. 1, 0, 01, 001)'}
                 className="w-20 px-3 py-1.5 rounded-lg border-2 border-slate-300 bg-white text-slate-900 font-mono font-extrabold text-xs text-center outline-none focus:border-emerald-600 focus:ring-2 focus:ring-emerald-500/20"
               />
               <button
