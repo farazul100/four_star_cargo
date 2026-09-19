@@ -76,13 +76,24 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
 
   // Sync and load messages for this customer's conversation ID
   useEffect(() => {
-    if (!convoId) return;
-
     const loadConvoMessages = () => {
+      const activeId = convoId || localStorage.getItem('fsc_public_convo_id') || '';
+      if (!activeId) return;
+
       const db = getHostingerDbData();
-      const allMsgs: ChatMessage[] = db.messages || [];
+      const rawMsgs = localStorage.getItem('fsc_vps_messages') || localStorage.getItem('messages');
+      let allMsgs: ChatMessage[] = db.messages || [];
+      if (rawMsgs) {
+        try {
+          const parsed = JSON.parse(rawMsgs);
+          if (Array.isArray(parsed) && parsed.length >= allMsgs.length) {
+            allMsgs = parsed;
+          }
+        } catch {}
+      }
+
       const filtered = allMsgs
-        .filter((m) => m && m.conversation_id === convoId)
+        .filter((m) => m && m.conversation_id === activeId)
         .sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
 
       setMessages((prevMsgs) => {
@@ -159,8 +170,8 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
   const handleSendMessage = (imageUrl?: string) => {
     if (!messageInput.trim() && !imageUrl) return;
 
-    let activeConvoId = convoId;
-    let currentName = guestName;
+    let activeConvoId = convoId || localStorage.getItem('fsc_public_convo_id') || '';
+    let currentName = guestName || localStorage.getItem('fsc_public_guest_name') || '';
 
     if (!currentName) {
       currentName = 'Customer';
@@ -175,7 +186,16 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
     }
 
     const db = getHostingerDbData();
-    const currentMsgs: ChatMessage[] = db.messages || [];
+    const rawMsgs = localStorage.getItem('fsc_vps_messages') || localStorage.getItem('messages');
+    let currentMsgs: ChatMessage[] = db.messages || [];
+    if (rawMsgs) {
+      try {
+        const parsed = JSON.parse(rawMsgs);
+        if (Array.isArray(parsed) && parsed.length >= currentMsgs.length) {
+          currentMsgs = parsed;
+        }
+      } catch {}
+    }
     const currentConvos: ChatConversation[] = db.conversations || [];
 
     const textContent = imageUrl ? '' : messageInput.trim();
@@ -221,16 +241,15 @@ export const PublicCustomerChatWidget: React.FC<PublicCustomerChatWidgetProps> =
       created_at: new Date().toISOString(),
     };
 
-    const updatedMsgs = [...currentMsgs, newMsg];
+    const existingIds = new Set(currentMsgs.map((m) => m.id));
+    const updatedMsgs = existingIds.has(newMsg.id) ? currentMsgs : [...currentMsgs, newMsg];
     saveHostingerDbData('fsc_vps_messages', updatedMsgs);
 
     // Update local state immediately for instant real-time UI feedback
-    setMessages((prev) => {
-      const filtered = updatedMsgs
-        .filter((m) => m && m.conversation_id === activeConvoId)
-        .sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
-      return filtered;
-    });
+    const filtered = updatedMsgs
+      .filter((m) => m && m.conversation_id === activeConvoId)
+      .sort((a, b) => new Date(a.created_at || 0).getTime() - new Date(b.created_at || 0).getTime());
+    setMessages(filtered);
 
     // Publish system notification for all staff members
     publishSystemNotification({
