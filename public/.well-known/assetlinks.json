@@ -3,6 +3,9 @@
   "target": {
     "namespace": "android_app",
     "package_name": "com.fourstarcargo.customerapp",
-    "sha256_cert_fingerprints": ["61:6F:FC:E5:04:81:F9:8D:C5:02:2C:21:7C:CF:6F:67:21:49:9B:A3:73:CF:71:AC:CF:32:AC:74:F4:4A:35:F0"]
+    "sha256_cert_fingerprints": [
+      "45:0C:02:0B:0A:16:3A:B5:13:FD:9A:DD:13:42:E6:26:41:24:0B:75:A9:F6:BE:85:DB:E2:27:BF:EE:A7:E7:DC",
+      "61:6F:FC:E5:04:81:F9:8D:C5:02:2C:21:7C:CF:6F:67:21:49:9B:A3:73:CF:71:AC:CF:32:AC:74:F4:4A:35:F0"
+    ]
   }
 }]
