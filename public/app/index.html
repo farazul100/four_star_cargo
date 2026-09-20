@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+  <title>M/S Four Star Cargo — Customer App</title>
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#00C2BB" />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#E6F9F8',
+              100: '#CCF3F1',
+              400: '#00C2BB',
+              500: '#00A896',
+              600: '#00897B',
+              700: '#00695C',
+              dark: '#0F2D52',
+              navy: '#1F2937',
+              accent: '#0077B6',
+              bgLight: '#F7FAFC'
+            }
+          },
+          fontFamily: {
+            poppins: ['Poppins', 'sans-serif'],
+            sans: ['Inter', 'sans-serif']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #0F172A;
+      color: #1F2937;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+      overflow-x: hidden;
+    }
+    .mobile-container {
+      max-width: 430px;
+      height: 100vh;
+      height: 100dvh;
+      margin: 0 auto;
+      background-color: #F7FAFC;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+    .teal-gradient-bg {
+      background: linear-gradient(135deg, #00C2BB 0%, #00897B 100%);
+    }
+    .blue-teal-bg {
+      background: linear-gradient(135deg, #0F2D52 0%, #00897B 100%);
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .hide-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .app-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      background-color: #F7FAFC;
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(15px);
+      transition: opacity 0.25s ease, transform 0.25s ease;
+    }
+    .app-screen.active {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateX(0);
+      z-index: 20;
+    }
+    @keyframes progress {
+      0% { width: 0%; }
+      50% { width: 60%; }
+      100% { width: 100%; }
+    }
+    .animate-progress {
+      animation: progress 2s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body>
+
+<div class="mobile-container relative">
+
+  <!-- ================= 1. SPLASH SCREEN ================= -->
+  <div id="screen-splash" class="app-screen active teal-gradient-bg justify-between items-center text-center p-8 text-white">
+    <div class="my-auto space-y-6 flex flex-col items-center">
+      <div class="w-32 h-32 rounded-3xl bg-white/10 backdrop-blur-md border-2 border-white/30 flex items-center justify-center p-4 shadow-2xl animate-pulse">
+        <svg viewBox="0 0 100 100" class="w-full h-full text-white fill-current">
+          <path d="M50 5 L61 35 L95 35 L68 55 L78 88 L50 68 L22 88 L32 55 L5 35 L39 35 Z" fill="#00C2BB" stroke="#ffffff" stroke-width="3" />
+          <circle cx="50" cy="50" r="42" fill="none" stroke="#ffffff" stroke-width="4" stroke-dasharray="8 4" />
+          <path d="M25 50 Q50 20 75 50 Q50 80 25 50 Z" fill="none" stroke="#ffffff" stroke-width="3" />
+        </svg>
+      </div>
+      <div>
+        <h1 class="text-2xl font-bold tracking-wider font-poppins text-white drop-shadow-md">M/S FOUR STAR CARGO</h1>
+        <p class="text-xs text-teal-100 font-medium tracking-wide mt-1">Door To Door Cargo Service</p>
+      </div>
+    </div>
+
+    <div class="w-full max-w-xs mb-10 space-y-3">
+      <div class="w-full h-1.5 bg-white/20 rounded-full overflow-hidden">
+        <div class="h-full bg-white rounded-full animate-progress"></div>
+      </div>
+      <p class="text-[11px] text-teal-100 tracking-wider">Loading...</p>
+    </div>
+  </div>
+
+  <!-- ================= 2. LOGIN SCREEN (CUSTOMER ID ONLY) ================= -->
+  <div id="screen-login" class="app-screen bg-white justify-between p-6">
+    <div class="my-auto space-y-8 w-full max-w-sm mx-auto">
+      <div class="text-center space-y-3">
+        <div class="w-24 h-24 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center mx-auto p-3 shadow-md">
+          <svg viewBox="0 0 100 100" class="w-full h-full">
+            <path d="M50 5 L61 35 L95 35 L68 55 L78 88 L50 68 L22 88 L32 55 L5 35 L39 35 Z" fill="#00C2BB" stroke="#00897B" stroke-width="2" />
+            <circle cx="50" cy="50" r="42" fill="none" stroke="#00C2BB" stroke-width="4" stroke-dasharray="6 3" />
+          </svg>
+        </div>
+        <h2 class="text-xl font-bold text-slate-800 font-poppins">M/S FOUR STAR CARGO</h2>
+        <p class="text-sm font-semibold text-teal-600">Welcome Back!</p>
+        <p class="text-xs text-slate-500">আপনার পার্সেল ও শিপমেন্ট ট্র্যাক করতে কাস্টমার আইডি প্রদান করুন</p>
+      </div>
+
+      <form id="form-login" onsubmit="handleLoginSubmit(event)" class="space-y-5">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1.5">কাস্টমার আইডি / শিপিং মার্ক *</label>
+          <div class="relative">
+            <input 
+              type="text" 
+              id="input-customer-id"
+              required 
+              placeholder="e.g. FS-CUST-001, MAR-102 или CTN-01"
+              class="w-full bg-slate-50 border border-slate-300 focus:border-teal-500 focus:bg-white rounded-xl py-3.5 pl-11 pr-4 text-xs font-semibold text-slate-800 placeholder-slate-400 outline-none transition-all shadow-sm"
+            />
+            <i data-lucide="user" class="w-4 h-4 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2"></i>
+          </div>
+          <p class="text-[10px] text-slate-400 mt-1.5">আপনার চার স্টার কার্গোর শিপিং মার্ক বা কাস্টমার আইডি লিখুন (একবার দিলেই স্থায়ীভাবে সেভ থাকবে)</p>
+        </div>
+
+        <button 
+          type="submit" 
+          class="w-full py-3.5 bg-gradient-to-r from-[#00C2BB] to-[#00897B] hover:from-[#00A896] hover:to-[#00695C] text-white font-bold text-xs rounded-xl shadow-lg shadow-teal-500/30 transition-all flex items-center justify-center space-x-2 cursor-pointer"
+        >
+          <span>অ্যাপে প্রবেশ করুন (Login)</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </button>
+      </form>
+    </div>
+
+    <div class="text-center text-[11px] text-slate-400 py-2">
+      Official Customer App &copy; M/S Four Star Cargo
+    </div>
+  </div>
+
+  <!-- ================= 3. MAIN DASHBOARD SCREEN (WITH BOTTOM NAV) ================= -->
+  <div id="screen-dashboard" class="app-screen flex-col bg-[#F7FAFC]">
+    
+    <div class="bg-gradient-to-r from-[#0F2D52] to-[#00897B] text-white p-5 pt-8 rounded-b-3xl shadow-lg shrink-0">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 rounded-full bg-white/10 border border-white/20 p-1 flex items-center justify-center font-bold text-sm text-teal-200 shadow-inner">
+            <i data-lucide="user" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h2 class="text-xs text-teal-200 font-medium flex items-center space-x-1">
+              <span>Hello, <span id="dash-user-name">Rakib Hasan</span> 👋</span>
+            </h2>
+            <p class="text-xs font-bold tracking-wide">Welcome to Four Star Cargo</p>
+          </div>
+        </div>
+        <button onclick="switchTab('notifications')" class="p-2 bg-white/10 hover:bg-white/20 rounded-full relative cursor-pointer">
+          <i data-lucide="bell" class="w-5 h-5 text-white"></i>
+          <span class="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full animate-ping"></span>
+          <span class="absolute top-1 right-1 w-2 h-2 bg-rose-500 rounded-full"></span>
+        </button>
+      </div>
+
+      <div class="mt-5 p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-between shadow-inner">
+        <div>
+          <span class="text-[10px] text-teal-100 uppercase tracking-widest block font-semibold">Active Shipments</span>
+          <span id="dash-active-count" class="text-2xl font-bold font-poppins text-white">02</span>
+          <span class="text-[11px] text-teal-200 block">Active Cargo Shipments in Transit</span>
+        </div>
+        <div class="w-12 h-12 rounded-2xl bg-teal-400/20 flex items-center justify-center text-teal-200 border border-teal-300/30">
+          <i data-lucide="ship" class="w-6 h-6"></i>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-5 space-y-6 hide-scrollbar pb-24">
+      
+      <div>
+        <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3">Quick Services</h3>
+        <div class="grid grid-cols-2 gap-3">
+          <button onclick="switchTab('notices')" class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center space-y-2 group cursor-pointer">
+            <div class="w-11 h-11 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <i data-lucide="file-text" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="text-xs font-bold text-slate-800 block">Notice</span>
+              <span class="text-[10px] text-slate-400">View Latest Notice</span>
+            </div>
+          </button>
+
+          <button onclick="openShipmentTracker()" class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center space-y-2 group cursor-pointer">
+            <div class="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <i data-lucide="search" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="text-xs font-bold text-slate-800 block">Track Package</span>
+              <span class="text-[10px] text-slate-400">Real-time Location</span>
+            </div>
+          </button>
+
+          <button onclick="openLiveSupport()" class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center space-y-2 group cursor-pointer">
+            <div class="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <i data-lucide="headphones" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="text-xs font-bold text-slate-800 block">Live Support</span>
+              <span class="text-[10px] text-slate-400">Call & Chat Help</span>
+            </div>
+          </button>
+
+          <button onclick="openDueLedger()" class="p-4 bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex flex-col items-center text-center space-y-2 group cursor-pointer">
+            <div class="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+              <i data-lucide="wallet" class="w-5 h-5"></i>
+            </div>
+            <div>
+              <span class="text-xs font-bold text-slate-800 block">Due Ledger</span>
+              <span class="text-[10px] text-slate-400">View Bills & Due</span>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-xs font-bold text-slate-700 uppercase tracking-wider">Recent Shipments</h3>
+          <button onclick="openShipmentTracker()" class="text-[11px] font-bold text-teal-600 hover:underline">View All</button>
+        </div>
+
+        <div id="dash-recent-shipments-list" class="space-y-3"></div>
+      </div>
+
+    </div>
+
+    <!-- BOTTOM NAVIGATION -->
+    <div class="absolute bottom-0 left-0 right-0 h-16 bg-white border-t border-slate-200 flex items-center justify-around px-4 shadow-xl z-30">
+      <button id="nav-btn-home" onclick="switchTab('home')" class="flex flex-col items-center space-y-1 text-teal-600 cursor-pointer">
+        <i data-lucide="home" class="w-5 h-5"></i>
+        <span class="text-[10px] font-bold">Home</span>
+      </button>
+
+      <button id="nav-btn-notices" onclick="switchTab('notices')" class="flex flex-col items-center space-y-1 text-slate-400 hover:text-teal-600 cursor-pointer">
+        <i data-lucide="bell" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium">Notices</span>
+      </button>
+
+      <button id="nav-btn-profile" onclick="switchTab('profile')" class="flex flex-col items-center space-y-1 text-slate-400 hover:text-teal-600 cursor-pointer">
+        <i data-lucide="user" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium">Profile</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= 4. TRACK SHIPMENT SCREEN ================= -->
+  <div id="screen-track" class="app-screen bg-white flex-col">
+    <div class="p-4 bg-gradient-to-r from-[#0F2D52] to-[#00897B] text-white flex items-center justify-between shrink-0 shadow-md">
+      <div class="flex items-center space-x-3">
+        <button onclick="switchTab('home')" class="p-1 rounded-full hover:bg-white/10"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
+        <h3 class="text-sm font-bold">Track Your Shipment</h3>
+      </div>
+      <button onclick="toggleWebViewMode()" id="btn-webview-toggle" class="text-[10px] bg-white/20 hover:bg-white/30 px-2.5 py-1 rounded-full text-white font-medium">
+        🌐 Full Web Portal
+      </button>
+    </div>
+
+    <div class="p-4 bg-slate-50 border-b border-slate-200 shrink-0 space-y-3">
+      <div class="relative">
+        <input 
+          type="text" 
+          id="input-track-search"
+          placeholder="e.g. FS-2026-001, CTN-01, EXP-994801"
+          class="w-full bg-white border border-slate-300 focus:border-teal-500 rounded-xl py-3 pl-10 pr-24 text-xs font-semibold text-slate-800 outline-none shadow-sm"
+        />
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+        <button onclick="handleTrackSearch()" class="absolute right-1.5 top-1.5 bottom-1.5 px-3 bg-[#00C2BB] hover:bg-[#00897B] text-white font-bold text-xs rounded-lg transition-colors">
+          Search
+        </button>
+      </div>
+    </div>
+
+    <div id="track-native-container" class="flex-1 overflow-y-auto p-4 space-y-4 hide-scrollbar"></div>
+
+    <div id="track-webview-container" class="flex-1 hidden">
+      <iframe src="https://four.kee2mart.com/track" class="w-full h-full border-none"></iframe>
+    </div>
+  </div>
+
+  <!-- ================= 5. LIVE SUPPORT SCREEN ================= -->
+  <div id="screen-support" class="app-screen bg-slate-50 flex-col">
+    <div class="p-4 bg-gradient-to-r from-[#0F2D52] to-[#00897B] text-white flex items-center space-x-3 shrink-0">
+      <button onclick="switchTab('home')" class="p-1 rounded-full hover:bg-white/10"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
+      <h3 class="text-sm font-bold">Live Support & Helpdesk</h3>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-5 space-y-6 text-center hide-scrollbar">
+      <div class="w-20 h-20 rounded-full bg-teal-100 text-teal-600 flex items-center justify-center mx-auto shadow-inner">
+        <i data-lucide="headphones" class="w-10 h-10"></i>
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-slate-800">Need Help?</h3>
+        <p class="text-xs text-slate-500 mt-1">We're here to assist you 24/7 with your shipments.</p>
+      </div>
+
+      <div class="space-y-3 pt-2">
+        <a href="tel:+8801819445566" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center space-x-2">
+          <i data-lucide="phone" class="w-4 h-4"></i>
+          <span>Call Support (+880 1819-445566)</span>
+        </a>
+
+        <a href="sms:+8801819445566" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center space-x-2">
+          <i data-lucide="message-square" class="w-4 h-4"></i>
+          <span>SMS Support</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 6. DUE LEDGER SCREEN ================= -->
+  <div id="screen-ledger" class="app-screen bg-slate-50 flex-col">
+    <div class="p-4 bg-gradient-to-r from-[#0F2D52] to-[#00897B] text-white flex items-center space-x-3 shrink-0">
+      <button onclick="switchTab('home')" class="p-1 rounded-full hover:bg-white/10"><i data-lucide="arrow-left" class="w-5 h-5"></i></button>
+      <h3 class="text-sm font-bold">Due Ledger & Payments</h3>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-4 space-y-4 hide-scrollbar">
+      <div class="grid grid-cols-3 gap-2">
+        <div class="bg-white p-3 rounded-2xl border border-slate-200 text-center shadow-sm">
+          <span class="text-[9px] text-slate-400 font-semibold uppercase block">Total Bill</span>
+          <span id="ledger-total-bill" class="text-xs font-bold text-slate-800 font-mono">৳ 25,000</span>
+        </div>
+
+        <div class="bg-emerald-50 border border-emerald-200 p-3 rounded-2xl text-center shadow-sm">
+          <span class="text-[9px] text-emerald-600 font-semibold uppercase block">Paid Amount</span>
+          <span id="ledger-paid-amount" class="text-xs font-bold text-emerald-700 font-mono">৳ 18,000</span>
+        </div>
+
+        <div class="bg-rose-50 border border-rose-200 p-3 rounded-2xl text-center shadow-sm">
+          <span class="text-[9px] text-rose-600 font-semibold uppercase block">Due Amount</span>
+          <span id="ledger-due-amount" class="text-xs font-bold text-rose-700 font-mono">৳ 7,000</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= 7. NOTICES SCREEN ================= -->
+  <div id="screen-notices" class="app-screen bg-slate-50 flex-col">
+    <div class="p-4 bg-gradient-to-r from-[#0F2D52] to-[#00897B] text-white flex items-center justify-between shrink-0 shadow-md">
+      <h3 class="text-sm font-bold">Official Notices</h3>
+      <button onclick="switchTab('home')" class="text-xs text-teal-200 font-medium">Done</button>
+    </div>
+
+    <div id="notices-list-container" class="flex-1 overflow-y-auto p-4 space-y-3 hide-scrollbar pb-20"></div>
+  </div>
+
+  <!-- ================= 8. PROFILE SCREEN ================= -->
+  <div id="screen-profile" class="app-screen bg-slate-50 flex-col">
+    <div class="p-4 bg-gradient-to-r from-[#0F2D52] to-[#00897B] text-white flex items-center justify-between shrink-0 shadow-md">
+      <h3 class="text-sm font-bold">My Profile</h3>
+    </div>
+
+    <div class="flex-1 overflow-y-auto p-5 space-y-5 hide-scrollbar pb-24">
+      <div class="bg-white p-5 rounded-2xl border border-slate-200 text-center shadow-sm space-y-2">
+        <div class="w-16 h-16 rounded-full bg-teal-100 text-teal-600 border-2 border-teal-400 flex items-center justify-center mx-auto shadow-inner">
+          <i data-lucide="user" class="w-8 h-8"></i>
+        </div>
+        <h3 id="profile-user-name" class="text-sm font-bold text-slate-800">Rakib Hasan</h3>
+        <p id="profile-user-phone" class="text-xs text-slate-500">+880 1700000000</p>
+        <span id="profile-user-id" class="inline-block px-3 py-1 bg-slate-100 text-slate-600 font-mono text-[10px] font-bold rounded-full">
+          ID: FS-CUST-001
+        </span>
+      </div>
+
+      <div class="bg-white rounded-2xl border border-slate-200 divide-y divide-slate-100 shadow-sm overflow-hidden text-xs">
+        <button onclick="confirmLogout()" class="w-full p-4 flex items-center justify-between hover:bg-rose-50 text-rose-600 font-bold">
+          <div class="flex items-center space-x-3">
+            <i data-lucide="log-out" class="w-4 h-4 text-rose-500"></i>
+            <span>Logout</span>
+          </div>
+          <i data-lucide="chevron-right" class="w-4 h-4 text-rose-400"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  const STATE = {
+    customerId: localStorage.getItem('fsc_app_customer_id') || '',
+    activeTab: 'home',
+    shipments: [
+      { id: 'FS-2026-001', route: 'China ➔ Bangladesh', status: 'IN TRANSIT', date: '12 Sep 2026' },
+      { id: 'FS-2026-002', route: 'South Korea ➔ Bangladesh', status: 'PROCESSING', date: '10 Sep 2026' }
+    ],
+    notices: [
+      { id: 1, title: 'Important Notice', date: '09 September 2026', body: 'Shipment Schedule Update: Air cargo flight dispatched today.' }
+    ]
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    lucide.createIcons();
+    setTimeout(() => {
+      if (STATE.customerId) {
+        showScreen('screen-dashboard');
+        renderDashboardData();
+      } else {
+        showScreen('screen-login');
+      }
+    }, 1800);
+  });
+
+  function showScreen(screenId) {
+    document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
+    const target = document.getElementById(screenId);
+    if (target) target.classList.add('active');
+  }
+
+  function handleLoginSubmit(e) {
+    e.preventDefault();
+    const idInput = document.getElementById('input-customer-id').value.trim();
+    if (!idInput) return;
+
+    STATE.customerId = idInput;
+    localStorage.setItem('fsc_app_customer_id', idInput);
+
+    showScreen('screen-dashboard');
+    renderDashboardData();
+  }
+
+  function renderDashboardData() {
+    const id = STATE.customerId || 'FS-CUST-001';
+    document.getElementById('dash-user-name').innerText = id;
+    document.getElementById('profile-user-id').innerText = 'ID: ' + id;
+    document.getElementById('profile-user-name').innerText = 'Customer (' + id + ')';
+
+    const container = document.getElementById('dash-recent-shipments-list');
+    container.innerHTML = STATE.shipments.map(s => `
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+        <div>
+          <span class="text-xs font-bold font-mono text-slate-800">${s.id}</span>
+          <p class="text-[11px] text-slate-500">${s.route}</p>
+        </div>
+        <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-bold rounded-full">${s.status}</span>
+      </div>
+    `).join('');
+
+    const noticesContainer = document.getElementById('notices-list-container');
+    noticesContainer.innerHTML = STATE.notices.map(n => `
+      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-teal-600">${n.title}</span>
+          <span class="text-[10px] text-slate-400 font-mono">${n.date}</span>
+        </div>
+        <p class="text-xs text-slate-600">${n.body}</p>
+      </div>
+    `).join('');
+
+    lucide.createIcons();
+  }
+
+  function switchTab(tab) {
+    STATE.activeTab = tab;
+    if (tab === 'home') showScreen('screen-dashboard');
+    if (tab === 'notices') showScreen('screen-notices');
+    if (tab === 'profile') showScreen('screen-profile');
+  }
+
+  function openShipmentTracker() {
+    showScreen('screen-track');
+  }
+
+  function openLiveSupport() {
+    showScreen('screen-support');
+  }
+
+  function openDueLedger() {
+    showScreen('screen-ledger');
+  }
+
+  function toggleWebViewMode() {
+    const native = document.getElementById('track-native-container');
+    const webview = document.getElementById('track-webview-container');
+    const btn = document.getElementById('btn-webview-toggle');
+
+    if (webview.classList.contains('hidden')) {
+      webview.classList.remove('hidden');
+      native.classList.add('hidden');
+      btn.innerText = '📱 App View';
+    } else {
+      webview.classList.add('hidden');
+      native.classList.remove('hidden');
+      btn.innerText = '🌐 Full Web Portal';
+    }
+  }
+
+  function confirmLogout() {
+    if (confirm('Are you sure you want to logout?')) {
+      localStorage.removeItem('fsc_app_customer_id');
+      STATE.customerId = '';
+      showScreen('screen-login');
+    }
+  }
+</script>
+
+</body>
+</html>

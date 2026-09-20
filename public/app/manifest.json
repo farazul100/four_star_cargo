@@ -1,0 +1,16 @@
+{
+  "short_name": "FourStarCargo",
+  "name": "M/S Four Star Cargo — Customer App",
+  "icons": [
+    {
+      "src": "../logo.png",
+      "type": "image/png",
+      "sizes": "192x192"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#0F2D52",
+  "theme_color": "#00C2BB",
+  "display": "standalone",
+  "orientation": "portrait"
+}
