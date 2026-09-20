@@ -3,14 +3,16 @@
   "name": "M/S Four Star Cargo — Customer App",
   "icons": [
     {
-      "src": "../logo.png",
+      "src": "https://four.kee2mart.com/logo.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": "./index.html",
+  "start_url": "/app/index.html",
   "background_color": "#0F2D52",
-  "theme_color": "#00C2BB",
+  "theme_color": "#0F2D52",
   "display": "standalone",
+  "display_override": ["standalone", "fullscreen"],
   "orientation": "portrait"
 }

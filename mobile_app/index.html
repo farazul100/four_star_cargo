@@ -460,7 +460,6 @@
     let foundPhone = '';
 
     try {
-      // 1. Check local customers DB
       const custs = JSON.parse(localStorage.getItem('fsc_vps_customers') || localStorage.getItem('customers') || '[]');
       const crmCusts = JSON.parse(localStorage.getItem('fsc_vps_crm_customers') || '[]');
       
@@ -487,7 +486,6 @@
     } catch (e) {}
 
     if (!foundName) {
-      // Default formatting if exact name not in local DB
       foundName = 'কাস্টমার (' + cleanId + ')';
       foundPhone = '+880 1819-445566';
     }
