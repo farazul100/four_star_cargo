@@ -441,19 +441,57 @@
     lucide.createIcons();
     setTimeout(() => {
       if (STATE.customerId) {
-        showScreen('screen-dashboard');
+        showScreen('screen-dashboard', false);
         resolveCustomerData(STATE.customerId);
       } else {
-        showScreen('screen-login');
+        showScreen('screen-login', false);
       }
     }, 1200);
   });
 
-  function showScreen(screenId) {
+  function showScreen(screenId, pushHistory = true) {
+    const currentActive = document.querySelector('.app-screen.active');
+    const currentId = currentActive ? currentActive.id : '';
+
     document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
     const target = document.getElementById(screenId);
     if (target) target.classList.add('active');
+
+    STATE.activeScreen = screenId;
+
+    if (pushHistory && screenId !== currentId) {
+      if (screenId !== 'screen-dashboard' && screenId !== 'screen-login' && screenId !== 'screen-splash') {
+        history.pushState({ screenId }, '', '#' + screenId);
+      } else if (screenId === 'screen-dashboard') {
+        history.pushState({ screenId: 'screen-dashboard' }, '', '#dashboard');
+      }
+    }
   }
+
+  // Handle Hardware Back Button & Browser Back Swipe
+  window.addEventListener('popstate', (event) => {
+    const currentActive = document.querySelector('.app-screen.active');
+    const currentId = currentActive ? currentActive.id : '';
+
+    if (currentId && currentId !== 'screen-dashboard' && currentId !== 'screen-login' && currentId !== 'screen-splash') {
+      showScreen('screen-dashboard', false);
+      updateNavHighlight('home');
+    }
+  });
+
+  // Handle Native Cordova / App Back Button Event
+  document.addEventListener('deviceready', () => {
+    document.addEventListener('backbutton', (e) => {
+      const currentActive = document.querySelector('.app-screen.active');
+      const currentId = currentActive ? currentActive.id : '';
+
+      if (currentId && currentId !== 'screen-dashboard' && currentId !== 'screen-login' && currentId !== 'screen-splash') {
+        e.preventDefault();
+        showScreen('screen-dashboard', false);
+        updateNavHighlight('home');
+      }
+    }, false);
+  }, false);
 
   async function fetchLiveDbData() {
     try {
@@ -721,9 +759,23 @@
 
   function switchTab(tab) {
     STATE.activeTab = tab;
+    updateNavHighlight(tab);
     if (tab === 'home') showScreen('screen-dashboard');
     if (tab === 'notices') showScreen('screen-notices');
     if (tab === 'profile') showScreen('screen-profile');
+  }
+
+  function updateNavHighlight(tab) {
+    ['home', 'notices', 'profile'].forEach(t => {
+      const btn = document.getElementById('nav-btn-' + t);
+      if (btn) {
+        if (t === tab) {
+          btn.className = 'flex flex-col items-center space-y-1 text-teal-600 cursor-pointer';
+        } else {
+          btn.className = 'flex flex-col items-center space-y-1 text-slate-400 hover:text-teal-600 cursor-pointer';
+        }
+      }
+    });
   }
 
   function openShipmentTracker() {
