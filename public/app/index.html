@@ -427,19 +427,14 @@
     customerName: localStorage.getItem('fsc_app_customer_name') || '',
     customerPhone: localStorage.getItem('fsc_app_customer_phone') || '',
     activeTab: 'home',
-    shipments: [
-      { id: 'FS-2026-001', route: 'China ➔ Bangladesh', status: 'IN TRANSIT', date: '12 Sep 2026' },
-      { id: 'FS-2026-002', route: 'South Korea ➔ Bangladesh', status: 'PROCESSING', date: '10 Sep 2026' }
-    ],
+    totalBilled: 0,
+    totalPaid: 0,
+    totalDue: 0,
+    shipments: [],
     notices: [
       { id: 1, title: 'Important Notice', date: '09 September 2026', body: 'Shipment Schedule Update: Air cargo flight dispatched today.' }
     ],
-    ledger: [
-      { id: 'PAY-20260909-001', date: '09 Sep 2026, 02:30 PM', ref: 'CTN-01 Guangzhou Freight Charges', method: 'bKash / Bank', amount: '৳ ৫,০০০', type: 'Payment Received', status: 'PAID' },
-      { id: 'PAY-20260901-004', date: '01 Sep 2026, 11:15 AM', ref: 'CTN-02 Air Freight Shipment', method: 'Cash Deposit', amount: '৳ ৮,০০০', type: 'Payment Received', status: 'PAID' },
-      { id: 'PAY-20260820-008', date: '20 Aug 2026, 04:00 PM', ref: 'Partial Advance Shipment Payment', method: 'Bank Transfer', amount: '৳ ৩,০০০', type: 'Payment Received', status: 'PAID' },
-      { id: 'PAY-20260810-012', date: '10 Aug 2026, 01:20 PM', ref: 'Initial Customs Clearance Charge', method: 'Nagad Online', amount: '৳ ২,০০০', type: 'Payment Received', status: 'PAID' }
-    ]
+    ledger: []
   };
 
   document.addEventListener('DOMContentLoaded', () => {
@@ -451,7 +446,7 @@
       } else {
         showScreen('screen-login');
       }
-    }, 1800);
+    }, 1200);
   });
 
   function showScreen(screenId) {
@@ -460,46 +455,152 @@
     if (target) target.classList.add('active');
   }
 
-  function resolveCustomerData(idInput) {
-    let cleanId = idInput.trim();
-    let foundName = '';
-    let foundPhone = '';
+  async function fetchLiveDbData() {
+    try {
+      const res = await fetch('https://four.kee2mart.com/api/db.php?ts=' + Date.now());
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data === 'object') {
+          if (Array.isArray(data.fsc_vps_customers || data.customers)) {
+            localStorage.setItem('fsc_vps_customers', JSON.stringify(data.fsc_vps_customers || data.customers));
+          }
+          if (Array.isArray(data.fsc_vps_crm_customers || data.crm_customers)) {
+            localStorage.setItem('fsc_vps_crm_customers', JSON.stringify(data.fsc_vps_crm_customers || data.crm_customers));
+          }
+          if (Array.isArray(data.fsc_vps_ledger || data.ledgerEntries || data.ledger)) {
+            localStorage.setItem('fsc_vps_ledger', JSON.stringify(data.fsc_vps_ledger || data.ledgerEntries || data.ledger));
+          }
+          if (Array.isArray(data.fsc_vps_cartons || data.cartons)) {
+            localStorage.setItem('fsc_vps_cartons', JSON.stringify(data.fsc_vps_cartons || data.cartons));
+          }
+        }
+      }
+    } catch (e) {
+      console.log('Using local/cached storage:', e);
+    }
+  }
+
+  function formatMoney(num) {
+    const val = Number(num || 0);
+    return '৳ ' + val.toLocaleString('bn-BD');
+  }
+
+  async function resolveCustomerData(idInput) {
+    await fetchLiveDbData();
+
+    let cleanId = (idInput || '').trim().toLowerCase();
+    if (!cleanId) return;
+
+    let matchedCust = null;
+    let custs = [];
+    let crmCusts = [];
+    let ledgerList = [];
+    let cartonList = [];
 
     try {
-      const custs = JSON.parse(localStorage.getItem('fsc_vps_customers') || localStorage.getItem('customers') || '[]');
-      const crmCusts = JSON.parse(localStorage.getItem('fsc_vps_crm_customers') || '[]');
-      
-      const matched = custs.find(c => c && (
-        (c.customer_code && c.customer_code.toLowerCase() === cleanId.toLowerCase()) ||
-        (c.shipping_mark && c.shipping_mark.toLowerCase() === cleanId.toLowerCase()) ||
-        (c.phone && c.phone.includes(cleanId)) ||
-        (c.id && c.id.toLowerCase() === cleanId.toLowerCase())
-      ));
-
-      const matchedCrm = crmCusts.find(c => c && (
-        (c.shipping_mark && c.shipping_mark.toLowerCase() === cleanId.toLowerCase()) ||
-        (c.name && c.name.toLowerCase().includes(cleanId.toLowerCase())) ||
-        (c.phone && c.phone.includes(cleanId))
-      ));
-
-      if (matched) {
-        foundName = matched.name || matched.company_name;
-        foundPhone = matched.phone;
-      } else if (matchedCrm) {
-        foundName = matchedCrm.name;
-        foundPhone = matchedCrm.phone;
-      }
+      custs = JSON.parse(localStorage.getItem('fsc_vps_customers') || localStorage.getItem('customers') || '[]');
+      crmCusts = JSON.parse(localStorage.getItem('fsc_vps_crm_customers') || '[]');
+      ledgerList = JSON.parse(localStorage.getItem('fsc_vps_ledger') || localStorage.getItem('ledgerEntries') || '[]');
+      cartonList = JSON.parse(localStorage.getItem('fsc_vps_cartons') || localStorage.getItem('cartons') || '[]');
     } catch (e) {}
 
-    if (!foundName) {
-      foundName = 'Jobayer Islam';
-      foundPhone = '+880 1819-445566';
+    matchedCust = custs.find(c => c && (
+      (c.shipping_mark && c.shipping_mark.toLowerCase() === cleanId) ||
+      (c.customer_code && c.customer_code.toLowerCase() === cleanId) ||
+      (c.phone && c.phone.toLowerCase().includes(cleanId)) ||
+      (c.id && c.id.toLowerCase() === cleanId) ||
+      (c.name && c.name.toLowerCase().includes(cleanId))
+    ));
+
+    if (!matchedCust) {
+      const crmMatch = crmCusts.find(c => c && (
+        (c.shipping_mark && c.shipping_mark.toLowerCase() === cleanId) ||
+        (c.phone && c.phone.toLowerCase().includes(cleanId)) ||
+        (c.name && c.name.toLowerCase().includes(cleanId))
+      ));
+      if (crmMatch) {
+        matchedCust = {
+          id: crmMatch.id || 'crm-' + cleanId,
+          customer_code: crmMatch.shipping_mark || cleanId,
+          shipping_mark: crmMatch.shipping_mark || cleanId,
+          name: crmMatch.name,
+          phone: crmMatch.phone,
+          total_billed: 0,
+          total_paid: 0,
+          total_due: 0
+        };
+      }
     }
 
-    STATE.customerName = foundName;
-    STATE.customerPhone = foundPhone;
-    localStorage.setItem('fsc_app_customer_name', foundName);
-    localStorage.setItem('fsc_app_customer_phone', foundPhone);
+    if (matchedCust) {
+      STATE.customerName = matchedCust.name || matchedCust.company_name || 'Customer';
+      STATE.customerPhone = matchedCust.phone || '';
+      STATE.customerId = matchedCust.shipping_mark || matchedCust.customer_code || matchedCust.id || idInput;
+    } else {
+      STATE.customerName = 'Jobayer Islam';
+      STATE.customerPhone = '+880 1735-274781';
+      STATE.customerId = idInput;
+    }
+
+    localStorage.setItem('fsc_app_customer_id', STATE.customerId);
+    localStorage.setItem('fsc_app_customer_name', STATE.customerName);
+    localStorage.setItem('fsc_app_customer_phone', STATE.customerPhone);
+
+    const custMark = (matchedCust?.shipping_mark || cleanId).toLowerCase();
+    const custId = (matchedCust?.id || '').toLowerCase();
+    const custCode = (matchedCust?.customer_code || '').toLowerCase();
+
+    const filteredLedger = ledgerList.filter(e => {
+      if (!e) return false;
+      const eCustId = (e.customer_id || '').toLowerCase();
+      const eMark = (e.shipping_mark || '').toLowerCase();
+      const eCode = (e.customer_code || '').toLowerCase();
+      const eName = (e.customer_name || '').toLowerCase();
+
+      return (
+        (custId && eCustId === custId) ||
+        (custMark && (eMark === custMark || eMark.includes(custMark) || custMark.includes(eMark))) ||
+        (custCode && eCode === custCode) ||
+        (STATE.customerName && eName && eName.includes(STATE.customerName.toLowerCase()))
+      );
+    });
+
+    let billedSum = 0;
+    let paidSum = 0;
+
+    filteredLedger.forEach(e => {
+      const amt = Number(e.amount) || 0;
+      if (e.type === 'charge') billedSum += amt;
+      else if (e.type === 'payment') paidSum += amt;
+      else if (e.type === 'refund') paidSum -= amt;
+    });
+
+    if (filteredLedger.length === 0 && matchedCust) {
+      billedSum = matchedCust.total_billed || 0;
+      paidSum = matchedCust.total_paid || 0;
+    }
+
+    const dueSum = Math.max(0, billedSum - paidSum);
+
+    STATE.totalBilled = billedSum;
+    STATE.totalPaid = paidSum;
+    STATE.totalDue = dueSum;
+    STATE.ledger = filteredLedger;
+
+    const filteredCartons = cartonList.filter(c => {
+      if (!c) return false;
+      const cMark = (c.shipping_mark || '').toLowerCase();
+      const cCode = (c.customer_code || '').toLowerCase();
+      const cCustId = (c.customer_id || '').toLowerCase();
+
+      return (
+        (custId && cCustId === custId) ||
+        (custMark && (cMark === cMark || cMark.includes(cMark) || cMark.includes(cMark))) ||
+        (custCode && cCode === cCode)
+      );
+    });
+
+    STATE.shipments = filteredCartons;
 
     renderDashboardData();
     renderLedgerData();
@@ -518,26 +619,36 @@
   }
 
   function renderDashboardData() {
-    const id = STATE.customerId || '7660039';
+    const id = STATE.customerId || '7560039';
     const name = STATE.customerName || 'Jobayer Islam';
-    const phone = STATE.customerPhone || '+880 1819-445566';
+    const phone = STATE.customerPhone || '+880 1735-274781';
 
     document.getElementById('dash-user-name').innerText = name;
     document.getElementById('dash-user-sub').innerText = 'ID: ' + id;
     document.getElementById('profile-user-id').innerText = 'ID: ' + id;
     document.getElementById('profile-user-name').innerText = name;
     document.getElementById('profile-user-phone').innerText = phone;
+    document.getElementById('dash-active-count').innerText = String(STATE.shipments.length).padStart(2, '0');
 
     const container = document.getElementById('dash-recent-shipments-list');
-    container.innerHTML = STATE.shipments.map(s => `
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-        <div>
-          <span class="text-xs font-bold font-mono text-slate-800">${s.id}</span>
-          <p class="text-[11px] text-slate-500">${s.route}</p>
+    if (STATE.shipments.length === 0) {
+      container.innerHTML = `
+        <div class="bg-white p-5 rounded-2xl border border-slate-200 text-center space-y-1 shadow-sm">
+          <p class="text-xs font-bold text-slate-600">কোন সক্রিয় শিপমেন্ট পাওয়া যায়নি</p>
+          <p class="text-[11px] text-slate-400">No cartons found for this customer shipping mark.</p>
         </div>
-        <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-bold rounded-full">${s.status}</span>
-      </div>
-    `).join('');
+      `;
+    } else {
+      container.innerHTML = STATE.shipments.map(s => `
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
+          <div>
+            <span class="text-xs font-bold font-mono text-slate-800">${s.ctn_no || s.id}</span>
+            <p class="text-[11px] text-slate-500">${s.product_name_en || 'Air Cargo Freight'} (${s.gross_weight || 0} KG)</p>
+          </div>
+          <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-bold rounded-full uppercase">${s.status || 'IN TRANSIT'}</span>
+        </div>
+      `).join('');
+    }
 
     const noticesContainer = document.getElementById('notices-list-container');
     noticesContainer.innerHTML = STATE.notices.map(n => `
@@ -554,35 +665,51 @@
   }
 
   function renderLedgerData() {
+    document.getElementById('ledger-total-bill').innerText = formatMoney(STATE.totalBilled);
+    document.getElementById('ledger-paid-amount').innerText = formatMoney(STATE.totalPaid);
+    document.getElementById('ledger-due-amount').innerText = formatMoney(STATE.totalDue);
+
     const container = document.getElementById('ledger-history-list');
     if (!container) return;
 
-    container.innerHTML = STATE.ledger.map(item => `
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span class="text-xs font-bold text-slate-800 font-mono">${item.id}</span>
+    if (STATE.ledger.length === 0) {
+      container.innerHTML = `
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center space-y-2 shadow-sm">
+          <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+            <i data-lucide="receipt" class="w-6 h-6"></i>
           </div>
-          <span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-bold rounded-full uppercase">${item.status}</span>
+          <h4 class="text-xs font-bold text-slate-700">কোন আর্থিক লেনদেনের হিসেব পাওয়া যায়নি</h4>
+          <p class="text-[11px] text-slate-400">No financial transaction entries found for this shipping mark.</p>
         </div>
+      `;
+    } else {
+      container.innerHTML = STATE.ledger.map(item => `
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="w-2 h-2 rounded-full ${item.type === 'charge' ? 'bg-amber-500' : 'bg-emerald-500'}"></span>
+              <span class="text-xs font-bold text-slate-800 font-mono">${item.id || item.reference_no || 'PAY-REF'}</span>
+            </div>
+            <span class="px-2.5 py-0.5 ${item.type === 'charge' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'} text-[9px] font-bold rounded-full uppercase">${item.type === 'charge' ? 'CHARGE (বিল)' : 'PAID (জমা)'}</span>
+          </div>
 
-        <div class="text-xs text-slate-600 space-y-1 pt-1 border-t border-slate-100">
-          <div class="flex justify-between">
-            <span class="text-slate-400">Description:</span>
-            <span class="font-medium text-slate-700">${item.ref}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-slate-400">Method & Date:</span>
-            <span class="text-[11px] font-mono text-slate-500">${item.method} (${item.date})</span>
-          </div>
-          <div class="flex justify-between pt-1 font-bold">
-            <span class="text-slate-700">Amount Paid:</span>
-            <span class="text-emerald-600 font-mono text-xs">${item.amount}</span>
+          <div class="text-xs text-slate-600 space-y-1 pt-1 border-t border-slate-100">
+            <div class="flex justify-between">
+              <span class="text-slate-400">Description:</span>
+              <span class="font-medium text-slate-700 text-right">${item.note || item.reference_no || 'Freight Charge'}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Method & Date:</span>
+              <span class="text-[11px] font-mono text-slate-500">${item.payment_method || 'System'} (${new Date(item.created_at || Date.now()).toLocaleDateString('en-GB')})</span>
+            </div>
+            <div class="flex justify-between pt-1 font-bold">
+              <span class="text-slate-700">Amount:</span>
+              <span class="${item.type === 'charge' ? 'text-amber-600' : 'text-emerald-600'} font-mono text-xs">${formatMoney(item.amount)}</span>
+            </div>
           </div>
         </div>
-      </div>
-    `).join('');
+      `).join('');
+    }
 
     lucide.createIcons();
   }
