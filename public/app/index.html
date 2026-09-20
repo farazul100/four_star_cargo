@@ -546,23 +546,24 @@
     localStorage.setItem('fsc_app_customer_name', STATE.customerName);
     localStorage.setItem('fsc_app_customer_phone', STATE.customerPhone);
 
-    const custMark = (matchedCust?.shipping_mark || cleanId).toLowerCase();
-    const custId = (matchedCust?.id || '').toLowerCase();
-    const custCode = (matchedCust?.customer_code || '').toLowerCase();
+    const custMarkClean = (matchedCust?.shipping_mark || cleanId).toLowerCase().trim();
+    const custIdClean = (matchedCust?.id || '').toLowerCase().trim();
+    const custCodeClean = (matchedCust?.customer_code || '').toLowerCase().trim();
+    const custPhoneClean = (matchedCust?.phone || '').replace(/\D/g, '');
 
     const filteredLedger = ledgerList.filter(e => {
       if (!e) return false;
-      const eCustId = (e.customer_id || '').toLowerCase();
-      const eMark = (e.shipping_mark || '').toLowerCase();
-      const eCode = (e.customer_code || '').toLowerCase();
-      const eName = (e.customer_name || '').toLowerCase();
+      const eCustId = (e.customer_id || '').toLowerCase().trim();
+      const eMark = (e.shipping_mark || '').toLowerCase().trim();
+      const eCode = (e.customer_code || '').toLowerCase().trim();
+      const eName = (e.customer_name || '').toLowerCase().trim();
 
-      return (
-        (custId && eCustId === custId) ||
-        (custMark && (eMark === custMark || eMark.includes(custMark) || custMark.includes(eMark))) ||
-        (custCode && eCode === custCode) ||
-        (STATE.customerName && eName && eName.includes(STATE.customerName.toLowerCase()))
-      );
+      if (custIdClean && eCustId && eCustId === custIdClean) return true;
+      if (custMarkClean && eMark && (eMark === custMarkClean || eMark.includes(custMarkClean) || custMarkClean.includes(eMark))) return true;
+      if (custCodeClean && eCode && (eCode === custCodeClean || eCode.includes(custCodeClean) || custCodeClean.includes(eCode))) return true;
+      if (cleanId && (eMark.includes(cleanId) || eCode.includes(cleanId))) return true;
+
+      return false;
     });
 
     let billedSum = 0;
@@ -589,15 +590,19 @@
 
     const filteredCartons = cartonList.filter(c => {
       if (!c) return false;
-      const cMark = (c.shipping_mark || '').toLowerCase();
-      const cCode = (c.customer_code || '').toLowerCase();
-      const cCustId = (c.customer_id || '').toLowerCase();
+      const cMark = (c.shipping_mark || '').toLowerCase().trim();
+      const cCode = (c.customer_code || '').toLowerCase().trim();
+      const cCustId = (c.customer_id || '').toLowerCase().trim();
+      const cPhone = (c.recipient_phone || '').replace(/\D/g, '');
+      const cTrk = (c.tracking_number || '').toLowerCase().trim();
 
-      return (
-        (custId && cCustId === custId) ||
-        (custMark && (cMark === cMark || cMark.includes(cMark) || cMark.includes(cMark))) ||
-        (custCode && cCode === cCode)
-      );
+      if (custIdClean && cCustId && cCustId === custIdClean) return true;
+      if (custMarkClean && cMark && (cMark === custMarkClean || cMark.includes(custMarkClean) || custMarkClean.includes(cMark))) return true;
+      if (custCodeClean && cCode && (cCode === custCodeClean || cCode.includes(custCodeClean) || custCodeClean.includes(cCode))) return true;
+      if (cleanId && (cMark.includes(cleanId) || cCode.includes(cleanId) || cTrk.includes(cleanId))) return true;
+      if (custPhoneClean && cPhone && custPhoneClean.length >= 6 && cPhone.includes(custPhoneClean)) return true;
+
+      return false;
     });
 
     STATE.shipments = filteredCartons;
