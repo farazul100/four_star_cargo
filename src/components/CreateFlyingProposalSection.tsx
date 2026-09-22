@@ -182,7 +182,7 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
   const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
 
   // Toggle single or range carton selection (range selection occurs ONLY when Shift key is pressed)
-  const handleToggleSelect = (id: string, index: number, e?: React.MouseEvent | React.ChangeEvent) => {
+  const handleToggleSelect = (id: string, index: number, e?: React.MouseEvent<any> | React.ChangeEvent<any>) => {
     if (e) e.stopPropagation();
 
     const isShiftPressed = Boolean(
@@ -191,19 +191,44 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
       (window.event as any)?.shiftKey
     );
 
+    const sortedCartonsList = sortCartonsForTableDisplay(filteredCartons);
+
     if (isShiftPressed && lastSelectedIndex !== null && lastSelectedIndex !== index) {
       const start = Math.min(lastSelectedIndex, index);
       const end = Math.max(lastSelectedIndex, index);
-      const rangeIds = filteredCartons.slice(start, end + 1).map((c) => c.id);
+      const rangeCartons = sortedCartonsList.slice(start, end + 1);
+      const rangeIds = rangeCartons.flatMap((cItem) => {
+        const groupKey = (cItem.master_group_id || (cItem.is_merged && cItem.ctn_no ? cItem.ctn_no.trim().toUpperCase() : null));
+        return groupKey
+          ? sortedCartonsList.filter((item) => (item.master_group_id || (item.is_merged && item.ctn_no ? item.ctn_no.trim().toUpperCase() : null)) === groupKey).map((item) => item.id)
+          : [cItem.id];
+      });
+
+      const isTargetSelected = selectedCartonIds.includes(id);
 
       setSelectedCartonIds((prev) => {
-        const nextSet = new Set([...prev, ...rangeIds]);
-        return Array.from(nextSet);
+        if (isTargetSelected) {
+          return prev.filter((x) => !rangeIds.includes(x));
+        } else {
+          return Array.from(new Set([...prev, ...rangeIds]));
+        }
       });
     } else {
-      setSelectedCartonIds((prev) =>
-        prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-      );
+      const targetCarton = sortedCartonsList[index] || filteredCartons.find((item) => item.id === id);
+      const groupKey = targetCarton ? (targetCarton.master_group_id || (targetCarton.is_merged && targetCarton.ctn_no ? targetCarton.ctn_no.trim().toUpperCase() : null)) : null;
+      const groupCartonIds = groupKey
+        ? sortedCartonsList.filter((item) => (item.master_group_id || (item.is_merged && item.ctn_no ? item.ctn_no.trim().toUpperCase() : null)) === groupKey).map((item) => item.id)
+        : [id];
+
+      const isGroupAllSelected = groupCartonIds.length > 0 && groupCartonIds.every((gId) => selectedCartonIds.includes(gId));
+
+      setSelectedCartonIds((prev) => {
+        if (isGroupAllSelected) {
+          return prev.filter((x) => !groupCartonIds.includes(x));
+        } else {
+          return Array.from(new Set([...prev, ...groupCartonIds]));
+        }
+      });
     }
 
     setLastSelectedIndex(index);
@@ -823,26 +848,17 @@ export const CreateFlyingProposalSection: React.FC<CreateFlyingProposalSectionPr
                             : [c.id];
                           const isGroupAllSelected = groupCartonIds.length > 0 && groupCartonIds.every((id) => selectedCartonIds.includes(id));
 
-                          const handleToggleSelectGroup = (e: React.MouseEvent) => {
-                            e.stopPropagation();
-                            if (isGroupAllSelected) {
-                              setSelectedCartonIds((prev) => prev.filter((id) => !groupCartonIds.includes(id)));
-                            } else {
-                              setSelectedCartonIds((prev) => Array.from(new Set([...prev, ...groupCartonIds])));
-                            }
-                          };
-
                           return (
                             <td
                               rowSpan={spanInfo.rowSpan}
                               style={rowBgStyle}
                               className="p-2.5 text-center border-r border-slate-200/60 dark:border-slate-700/50 align-middle"
-                              onClick={handleToggleSelectGroup}
+                              onClick={(e) => handleToggleSelect(c.id, index, e)}
                             >
                               <input
                                 type="checkbox"
                                 checked={isGroupAllSelected}
-                                onClick={handleToggleSelectGroup}
+                                onClick={(e) => handleToggleSelect(c.id, index, e)}
                                 onChange={() => {}}
                                 className="rounded border-slate-300 cursor-pointer accent-blue-600 w-4 h-4"
                               />
