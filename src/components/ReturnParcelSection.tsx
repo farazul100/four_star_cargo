@@ -97,8 +97,10 @@ export const ReturnParcelSection: React.FC<ReturnParcelSectionProps> = ({
     return c.status === 'received' || c.status === 'delivered' || c.current_warehouse_id === 'wh-bd';
   };
 
-  // Toggle selection for a single carton
-  const handleToggleSelect = (carton: Carton) => {
+  const [lastSelectedIndex, setLastSelectedIndex] = useState<number | null>(null);
+
+  // Toggle selection for a single carton (with Shift+Click range selection support)
+  const handleToggleSelect = (carton: Carton, index?: number, e?: React.MouseEvent<any> | React.ChangeEvent<any>) => {
     if (isBdReceivedCarton(carton)) {
       addToast(
         'error',
@@ -119,9 +121,34 @@ export const ReturnParcelSection: React.FC<ReturnParcelSectionProps> = ({
       return;
     }
 
-    setSelectedCartonIds((prev) =>
-      prev.includes(carton.id) ? prev.filter((id) => id !== carton.id) : [...prev, carton.id]
+    const isShift = Boolean(
+      (e as any)?.shiftKey ||
+      (e as any)?.nativeEvent?.shiftKey ||
+      (window.event as any)?.shiftKey
     );
+
+    if (isShift && lastSelectedIndex !== null && index !== undefined) {
+      const start = Math.min(lastSelectedIndex, index);
+      const end = Math.max(lastSelectedIndex, index);
+      const rangeCartons = returnableCartons.slice(start, end + 1).filter((c) => !isBdReceivedCarton(c) && c.status !== 'returned');
+      const rangeIds = rangeCartons.map((c) => c.id);
+      const isTargetSelected = selectedCartonIds.includes(carton.id);
+
+      setSelectedCartonIds((prev) => {
+        if (isTargetSelected) {
+          return prev.filter((id) => !rangeIds.includes(id));
+        } else {
+          return Array.from(new Set([...prev, ...rangeIds]));
+        }
+      });
+    } else {
+      setSelectedCartonIds((prev) =>
+        prev.includes(carton.id) ? prev.filter((id) => id !== carton.id) : [...prev, carton.id]
+      );
+      if (index !== undefined) {
+        setLastSelectedIndex(index);
+      }
+    }
   };
 
   // Toggle select all eligible cartons
@@ -440,7 +467,8 @@ export const ReturnParcelSection: React.FC<ReturnParcelSectionProps> = ({
                           type="checkbox"
                           disabled={isBdReceived || isReturned}
                           checked={isSelected}
-                          onChange={() => handleToggleSelect(c)}
+                          onClick={(e) => handleToggleSelect(c, idx, e)}
+                          onChange={() => {}}
                           className={`rounded border-slate-400 accent-amber-500 ${
                             isBdReceived || isReturned ? 'cursor-not-allowed opacity-40' : 'cursor-pointer'
                           }`}

@@ -792,11 +792,39 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
     );
   };
 
-  // Toggle selection for bulk merge
-  const handleToggleSelectRow = (rowId: string) => {
-    setSelectedRowIds((prev) =>
-      prev.includes(rowId) ? prev.filter((id) => id !== rowId) : [...prev, rowId]
+  // Selected Rows State & Shift+Click Range Selection
+  const [lastSelectedRowIndex, setLastSelectedRowIndex] = useState<number | null>(null);
+
+  // Toggle selection for bulk merge (with Shift+Click range selection support)
+  const handleToggleSelectRow = (rowId: string, index?: number, event?: React.MouseEvent<any> | React.ChangeEvent<any>) => {
+    const isShift = Boolean(
+      (event as any)?.shiftKey ||
+      (event as any)?.nativeEvent?.shiftKey ||
+      (window.event as any)?.shiftKey
     );
+
+    if (isShift && lastSelectedRowIndex !== null && index !== undefined) {
+      const start = Math.min(lastSelectedRowIndex, index);
+      const end = Math.max(lastSelectedRowIndex, index);
+      const rangeRows = previewRows.slice(start, end + 1);
+      const rangeIds = rangeRows.map((r) => r.id);
+      const isTargetSelected = selectedRowIds.includes(rowId);
+
+      setSelectedRowIds((prev) => {
+        if (isTargetSelected) {
+          return prev.filter((id) => !rangeIds.includes(id));
+        } else {
+          return Array.from(new Set([...prev, ...rangeIds]));
+        }
+      });
+    } else {
+      setSelectedRowIds((prev) =>
+        prev.includes(rowId) ? prev.filter((id) => id !== rowId) : [...prev, rowId]
+      );
+      if (index !== undefined) {
+        setLastSelectedRowIndex(index);
+      }
+    }
   };
 
   // Toggle select all (additive multi-search selection)
@@ -1632,7 +1660,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                             <input
                               type="checkbox"
                               checked={selectedRowIds.includes(r.id)}
-                              onChange={() => handleToggleSelectRow(r.id)}
+                              onClick={(e) => handleToggleSelectRow(r.id, idx, e)}
+                              onChange={() => {}}
                               className="rounded text-blue-600 focus:ring-blue-500 cursor-pointer"
                             />
                             <span className="text-slate-500 text-[11px] font-bold">{idx + 1}</span>

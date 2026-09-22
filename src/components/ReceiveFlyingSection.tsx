@@ -251,6 +251,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
   // Flight Carton Scan & Receive Modal state
   const [selectedFlightForCartonReceive, setSelectedFlightForCartonReceive] = useState<any | null>(null);
   const [selectedCartonIdsInModal, setSelectedCartonIdsInModal] = useState<string[]>([]);
+  const [lastSelectedReceiveIndex, setLastSelectedReceiveIndex] = useState<number | null>(null);
 
   // Print Manifest & Physical Receiving Sheet with Blank Live Weight Column for Pen Handwriting
   const handlePrintReceivingManifest = (flight: any, flightCartons: Carton[]) => {

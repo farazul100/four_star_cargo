@@ -73,6 +73,8 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
   const [showAddCartonModal, setShowAddCartonModal] = useState<boolean>(false);
   const [selectedUnassignedCartonIds, setSelectedUnassignedCartonIds] = useState<string[]>([]);
   const [selectedAttachedCartonIds, setSelectedAttachedCartonIds] = useState<string[]>([]);
+  const [lastSelectedUnassignedIndex, setLastSelectedUnassignedIndex] = useState<number | null>(null);
+  const [lastSelectedAttachedIndex, setLastSelectedAttachedIndex] = useState<number | null>(null);
   const [activeColorPickerSide, setActiveColorPickerSide] = useState<'left' | 'right' | null>(null);
   const [addCartonSearch, setAddCartonSearch] = useState<string>('');
   const [attachedCartonSearch, setAttachedCartonSearch] = useState<string>('');
@@ -1751,12 +1753,41 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                             const isGroupChecked = groupCartonIds.every((id) => selectedUnassignedCartonIds.includes(id));
                             const isAnyInGroupChecked = groupCartonIds.some((id) => selectedUnassignedCartonIds.includes(id));
 
-                            const toggleGroupSelection = () => {
-                              if (isGroupChecked) {
-                                setSelectedUnassignedCartonIds(selectedUnassignedCartonIds.filter((id) => !groupCartonIds.includes(id)));
+                            const toggleGroupSelection = (e?: React.MouseEvent) => {
+                              if (e) e.stopPropagation();
+                              const isShift = Boolean(
+                                (e as any)?.shiftKey ||
+                                (e as any)?.nativeEvent?.shiftKey ||
+                                (window.event as any)?.shiftKey
+                              );
+
+                              if (isShift && lastSelectedUnassignedIndex !== null) {
+                                const start = Math.min(lastSelectedUnassignedIndex, idx);
+                                const end = Math.max(lastSelectedUnassignedIndex, idx);
+                                const rangeItems = sortedUnassigned.slice(start, end + 1);
+                                const rangeGroupIds = rangeItems.flatMap((item) => {
+                                  const gCartons = spanInfo.isMerged
+                                    ? sortedUnassigned.filter((gItem) => (
+                                        (gItem.master_group_id && item.master_group_id && gItem.master_group_id === item.master_group_id) ||
+                                        gItem.ctn_no === item.ctn_no
+                                      ))
+                                    : [item];
+                                  return gCartons.map((gItem) => gItem.id);
+                                });
+
+                                if (isGroupChecked) {
+                                  setSelectedUnassignedCartonIds((prev) => prev.filter((id) => !rangeGroupIds.includes(id)));
+                                } else {
+                                  setSelectedUnassignedCartonIds((prev) => Array.from(new Set([...prev, ...rangeGroupIds])));
+                                }
                               } else {
-                                setSelectedUnassignedCartonIds(Array.from(new Set([...selectedUnassignedCartonIds, ...groupCartonIds])));
+                                if (isGroupChecked) {
+                                  setSelectedUnassignedCartonIds((prev) => prev.filter((id) => !groupCartonIds.includes(id)));
+                                } else {
+                                  setSelectedUnassignedCartonIds((prev) => Array.from(new Set([...prev, ...groupCartonIds])));
+                                }
                               }
+                              setLastSelectedUnassignedIndex(idx);
                             };
 
                             const rowBgStyle: React.CSSProperties = c.row_color
@@ -1771,7 +1802,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                               <tr
                                 key={c.id}
                                 style={rowBgStyle}
-                                onClick={toggleGroupSelection}
+                                onClick={(e) => toggleGroupSelection(e)}
                                 className={`hover:bg-blue-50/40 dark:hover:bg-[#1E293B]/60 cursor-pointer transition-colors ${
                                   c.row_color ? 'font-semibold text-slate-900' : ''
                                 }`}
@@ -1783,13 +1814,17 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                                     className="p-2.5 text-center border border-slate-300 dark:border-slate-700 align-middle"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      toggleGroupSelection();
+                                      toggleGroupSelection(e);
                                     }}
                                   >
                                     <input
                                       type="checkbox"
                                       checked={isGroupChecked}
-                                      onChange={toggleGroupSelection}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleGroupSelection(e);
+                                      }}
+                                      onChange={() => {}}
                                       className="w-3.5 h-3.5 rounded-none text-blue-600 border-slate-300 cursor-pointer accent-blue-600"
                                     />
                                   </td>
@@ -1990,12 +2025,41 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                             const isGroupChecked = groupCartonIds.every((id) => selectedAttachedCartonIds.includes(id));
                             const isAnyInGroupChecked = groupCartonIds.some((id) => selectedAttachedCartonIds.includes(id));
 
-                            const toggleGroupSelection = () => {
-                              if (isGroupChecked) {
-                                setSelectedAttachedCartonIds(selectedAttachedCartonIds.filter((id) => !groupCartonIds.includes(id)));
+                            const toggleGroupSelection = (e?: React.MouseEvent) => {
+                              if (e) e.stopPropagation();
+                              const isShift = Boolean(
+                                (e as any)?.shiftKey ||
+                                (e as any)?.nativeEvent?.shiftKey ||
+                                (window.event as any)?.shiftKey
+                              );
+
+                              if (isShift && lastSelectedAttachedIndex !== null) {
+                                const start = Math.min(lastSelectedAttachedIndex, idx);
+                                const end = Math.max(lastSelectedAttachedIndex, idx);
+                                const rangeItems = filteredAttachedPayloadPreview.slice(start, end + 1);
+                                const rangeGroupIds = rangeItems.flatMap((item) => {
+                                  const gCartons = spanInfo.isMerged
+                                    ? filteredAttachedPayloadPreview.filter((gItem) => (
+                                        (gItem.master_group_id && item.master_group_id && gItem.master_group_id === item.master_group_id) ||
+                                        gItem.ctn_no === item.ctn_no
+                                      ))
+                                    : [item];
+                                  return gCartons.map((gItem) => gItem.id);
+                                });
+
+                                if (isGroupChecked) {
+                                  setSelectedAttachedCartonIds((prev) => prev.filter((id) => !rangeGroupIds.includes(id)));
+                                } else {
+                                  setSelectedAttachedCartonIds((prev) => Array.from(new Set([...prev, ...rangeGroupIds])));
+                                }
                               } else {
-                                setSelectedAttachedCartonIds(Array.from(new Set([...selectedAttachedCartonIds, ...groupCartonIds])));
+                                if (isGroupChecked) {
+                                  setSelectedAttachedCartonIds((prev) => prev.filter((id) => !groupCartonIds.includes(id)));
+                                } else {
+                                  setSelectedAttachedCartonIds((prev) => Array.from(new Set([...prev, ...groupCartonIds])));
+                                }
                               }
+                              setLastSelectedAttachedIndex(idx);
                             };
 
                             const rowBgStyle: React.CSSProperties = ctn.row_color
@@ -2010,7 +2074,7 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                               <tr
                                 key={ctn.id}
                                 style={rowBgStyle}
-                                onClick={toggleGroupSelection}
+                                onClick={(e) => toggleGroupSelection(e)}
                                 className={`hover:bg-slate-100/50 dark:hover:bg-[#1E293B]/60 cursor-pointer transition-colors ${
                                   ctn.row_color ? 'font-semibold text-slate-900' : ''
                                 }`}
@@ -2022,13 +2086,17 @@ export const FlightProposalsManager: React.FC<FlightProposalsManagerProps> = ({
                                     className="p-2.5 text-center border border-slate-300 dark:border-slate-700 align-middle"
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      toggleGroupSelection();
+                                      toggleGroupSelection(e);
                                     }}
                                   >
                                     <input
                                       type="checkbox"
                                       checked={isGroupChecked}
-                                      onChange={toggleGroupSelection}
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        toggleGroupSelection(e);
+                                      }}
+                                      onChange={() => {}}
                                       className="w-3.5 h-3.5 rounded-none text-blue-600 border-slate-300 cursor-pointer accent-blue-600"
                                     />
                                   </td>

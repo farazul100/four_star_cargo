@@ -2103,11 +2103,32 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
 
                         const handleToggleSelectGroup = (e: React.MouseEvent) => {
                           e.stopPropagation();
-                          if (isGroupAllSelected) {
-                            setSelectedHubCartonIds((prev) => prev.filter((id) => !groupCartonIds.includes(id)));
+                          const isShift = Boolean(e.shiftKey || (e.nativeEvent as any)?.shiftKey);
+
+                          if (isShift && lastSelectedCartonIndex !== null) {
+                            const start = Math.min(lastSelectedCartonIndex, idx);
+                            const end = Math.max(lastSelectedCartonIndex, idx);
+                            const rangeItems = sortedFilteredCartons.slice(start, end + 1);
+                            const rangeGroupIds = rangeItems.flatMap((item) => {
+                              const gKey = getCartonGroupKey(item);
+                              return gKey
+                                ? sortedFilteredCartons.filter((gItem) => getCartonGroupKey(gItem) === gKey).map((gItem) => gItem.id)
+                                : [item.id];
+                            });
+
+                            if (isGroupAllSelected) {
+                              setSelectedHubCartonIds((prev) => prev.filter((id) => !rangeGroupIds.includes(id)));
+                            } else {
+                              setSelectedHubCartonIds((prev) => Array.from(new Set([...prev, ...rangeGroupIds])));
+                            }
                           } else {
-                            setSelectedHubCartonIds((prev) => Array.from(new Set([...prev, ...groupCartonIds])));
+                            if (isGroupAllSelected) {
+                              setSelectedHubCartonIds((prev) => prev.filter((id) => !groupCartonIds.includes(id)));
+                            } else {
+                              setSelectedHubCartonIds((prev) => Array.from(new Set([...prev, ...groupCartonIds])));
+                            }
                           }
+                          setLastSelectedCartonIndex(idx);
                         };
 
                         return (
@@ -2767,19 +2788,35 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                                       .every((item) => selectedHubCartonIds.includes(item.id))
                                   : isSelected
                               }
-                              onChange={() => {
+                              onClick={(e) => {
+                                const isShift = Boolean(e.shiftKey || (e.nativeEvent as any)?.shiftKey);
                                 const groupItems = spanInfo.isMerged
                                   ? activeCustomerCartons.slice(idx, idx + spanInfo.rowSpan)
                                   : [c];
                                 const groupIds = groupItems.map((item) => item.id);
                                 const allSelected = groupIds.every((id) => selectedHubCartonIds.includes(id));
 
-                                if (allSelected) {
-                                  setSelectedHubCartonIds((prev) => prev.filter((id) => !groupIds.includes(id)));
+                                if (isShift && lastSelectedCartonIndex !== null) {
+                                  const start = Math.min(lastSelectedCartonIndex, idx);
+                                  const end = Math.max(lastSelectedCartonIndex, idx);
+                                  const rangeItems = activeCustomerCartons.slice(start, end + 1);
+                                  const rangeIds = rangeItems.map((item) => item.id);
+
+                                  if (allSelected) {
+                                    setSelectedHubCartonIds((prev) => prev.filter((id) => !rangeIds.includes(id)));
+                                  } else {
+                                    setSelectedHubCartonIds((prev) => Array.from(new Set([...prev, ...rangeIds])));
+                                  }
                                 } else {
-                                  setSelectedHubCartonIds((prev) => Array.from(new Set([...prev, ...groupIds])));
+                                  if (allSelected) {
+                                    setSelectedHubCartonIds((prev) => prev.filter((id) => !groupIds.includes(id)));
+                                  } else {
+                                    setSelectedHubCartonIds((prev) => Array.from(new Set([...prev, ...groupIds])));
+                                  }
                                 }
+                                setLastSelectedCartonIndex(idx);
                               }}
+                              onChange={() => {}}
                               className="rounded border-slate-400 cursor-pointer accent-blue-600"
                             />
                           </td>
