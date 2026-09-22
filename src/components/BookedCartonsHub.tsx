@@ -2065,8 +2065,11 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                   const slNum = getSlNumberForCartonRow(sortedFilteredCartons, idx);
                   const isSelected = selectedHubCartonIds.includes(c.id);
 
-                  const rowBgStyle = c.row_color ? {
-                    backgroundColor: c.row_color,
+                  const isCopyItem = Boolean(c.is_copy || c.authenticity_type === 'copy');
+                  const effectiveRowColor = c.row_color || (isCopyItem ? '#FEF08A' : undefined);
+
+                  const rowBgStyle = effectiveRowColor ? {
+                    backgroundColor: effectiveRowColor,
                     color: '#0F172A',
                   } : undefined;
 
@@ -2075,7 +2078,7 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       key={c.id}
                       style={rowBgStyle}
                       className={`transition-colors duration-150 ${
-                        c.row_color
+                        effectiveRowColor
                           ? 'font-bold text-slate-900'
                           : isSelected
                           ? isDark
@@ -2209,7 +2212,14 @@ export const BookedCartonsHub: React.FC<BookedCartonsHubProps> = ({
                       </td>
 
                       <td style={rowBgStyle} className="p-3 border-r border-slate-200/60 dark:border-slate-700/50">
-                        <div className={`font-extrabold text-xs leading-snug truncate ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.product_name_en}</div>
+                        <div className={`font-extrabold text-xs leading-snug truncate flex items-center space-x-1 ${isDark ? 'text-white' : 'text-slate-900'}`}>
+                          <span>{c.product_name_en}</span>
+                          {(c.is_copy || c.authenticity_type === 'copy') && (
+                            <span className="px-1.5 py-0.5 text-[9px] bg-amber-400 text-amber-950 font-black rounded border border-amber-600 shrink-0">
+                              ⚠️ COPY
+                            </span>
+                          )}
+                        </div>
                         {c.product_name_cn && (
                           <div className={`text-[10px] font-medium truncate mt-0.5 ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>{c.product_name_cn}</div>
                         )}

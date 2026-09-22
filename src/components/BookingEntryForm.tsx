@@ -40,6 +40,8 @@ interface BatchCartonRow {
   shipping_mark: string;
   product_name_en: string;
   product_name_cn: string;
+  authenticity_type?: 'non_copy' | 'copy';
+  is_copy?: boolean;
   quantity: number;
   net_weight: number;
   gross_weight: number;
@@ -57,6 +59,7 @@ interface ProductLineItem {
   id: string;
   product_name_en: string;
   product_name_cn: string;
+  authenticity_type?: 'non_copy' | 'copy';
   carton_count: number | '';
   qty_per_carton: number | '';
   net_weight: number | '';
@@ -114,6 +117,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
       id: 'prod-init-1',
       product_name_en: '',
       product_name_cn: '',
+      authenticity_type: 'non_copy',
       carton_count: '',
       qty_per_carton: '',
       net_weight: '',
@@ -134,6 +138,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         id: `prod-${Date.now()}-${prev.length + 1}`,
         product_name_en: '',
         product_name_cn: '',
+        authenticity_type: 'non_copy',
         carton_count: '',
         qty_per_carton: prev[0]?.qty_per_carton || '',
         net_weight: prev[0]?.net_weight || '',
@@ -329,6 +334,8 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
           shipping_mark: rowShippingMark,
           product_name_en: prodEn,
           product_name_cn: prodCn,
+          authenticity_type: pItem.authenticity_type || 'non_copy',
+          is_copy: pItem.authenticity_type === 'copy',
           quantity: qtyVal,
           net_weight: rowNet,
           gross_weight: rowGross,
@@ -894,6 +901,9 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
         master_tracking_number: masterTrackingNumber.trim(),
         product_name_en: r.product_name_en,
         product_name_cn: r.product_name_cn.trim() || r.product_name_en.trim(),
+        authenticity_type: r.authenticity_type || (r.is_copy ? 'copy' : 'non_copy'),
+        is_copy: r.authenticity_type === 'copy' || Boolean(r.is_copy),
+        row_color: (r.authenticity_type === 'copy' || r.is_copy) ? '#FEF08A' : undefined,
         quantity: r.quantity || 1,
         net_weight: r.net_weight || Math.round((r.gross_weight * 0.9) * 10) / 10,
         gross_weight: r.gross_weight || 1,
@@ -1155,14 +1165,27 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                        {/* DYNAMIC PRODUCT LINES */}
           <div className="space-y-6">
             {productLines.map((prod, idx) => (
-              <div key={prod.id} className="p-6 rounded-2xl border-2 border-slate-200 bg-white shadow-sm space-y-5 relative transition-all hover:border-slate-300">
+              <div
+                key={prod.id}
+                className={`p-6 rounded-2xl border-2 shadow-sm space-y-5 relative transition-all ${
+                  prod.authenticity_type === 'copy'
+                    ? 'bg-amber-100/80 border-amber-400 shadow-md ring-2 ring-amber-400/60'
+                    : 'bg-white border-slate-200 hover:border-slate-300'
+                }`}
+              >
                 {/* Header bar for product line */}
-                <div className="flex items-center justify-between pb-3 border-b border-slate-200">
+                <div className="flex items-center justify-between pb-3 border-b border-slate-200/80">
                   <span className="text-sm font-extrabold text-slate-900 flex items-center space-x-2.5">
                     <span className="w-7 h-7 rounded-full bg-slate-900 text-white text-xs flex items-center justify-center font-mono font-black shadow-xs">
                       {idx + 1}
                     </span>
                     <span className="text-base font-black text-slate-900">{isBn ? `প্রোডাক্ট আইটেম #${idx + 1}` : `Product Item #${idx + 1}`}</span>
+                    {prod.authenticity_type === 'copy' && (
+                      <span className="px-3 py-1 bg-amber-400 text-amber-950 font-black text-xs rounded-xl border border-amber-500 shadow-xs flex items-center space-x-1 animate-pulse">
+                        <AlertTriangle className="w-3.5 h-3.5 text-amber-950" />
+                        <span>⚠️ {isBn ? 'কপি প্রোডাক্ট (COPY ITEM)' : 'COPY ITEM'}</span>
+                      </span>
+                    )}
                   </span>
 
                   {productLines.length > 1 && (
@@ -1178,10 +1201,10 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                   )}
                 </div>
 
-                {/* ROW 1: Product English Name, Chinese Name & Multi-Country Transit Route Selector */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5">
+                {/* ROW 1: Product English Name, Chinese Name, Copy / Non Copy Dropdown & Multi-Country Transit Route Selector */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-4">
                   {/* Product EN */}
-                  <div className="lg:col-span-4">
+                  <div className="lg:col-span-3">
                     <label className="block text-sm font-extrabold text-slate-900 mb-2 flex items-center">
                       {isBn ? 'ইংরেজি পণ্য নাম' : 'Product English Name'} <span className="text-[#EE5D50] font-bold ml-1">*</span>
                     </label>
@@ -1190,12 +1213,12 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.product_name_en}
                       onChange={(e) => handleProductLineChange(prod.id, 'product_name_en', e.target.value)}
                       placeholder="e.g. Men T-Shirt / Cotton Jeans"
-                      className="w-full px-4.5 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm md:text-base font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                     />
                   </div>
 
                   {/* Product Native / Local Language */}
-                  <div className="lg:col-span-3">
+                  <div className="lg:col-span-2">
                     <label className="block text-sm font-extrabold text-slate-900 mb-2">
                       {isBn ? 'পণ্য (আপনার ভাষা)' : 'Product (Your Language)'}
                     </label>
@@ -1204,66 +1227,85 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       value={prod.product_name_cn}
                       onChange={(e) => handleProductLineChange(prod.id, 'product_name_cn', e.target.value)}
                       placeholder="e.g. 男士棉质T恤"
-                      className="w-full px-4.5 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm md:text-base font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
+                      className="w-full px-4 py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-sm font-bold placeholder:text-slate-400 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none shadow-2xs"
                     />
                   </div>
 
+                  {/* PRODUCT AUTHENTICITY / COPY VS NON COPY DROPDOWN */}
+                  <div className="lg:col-span-3">
+                    <label className="block text-sm font-extrabold text-slate-900 mb-2 flex items-center">
+                      {isBn ? 'ক্যাটাগরি (Copy / Non Copy)' : 'Category (Authenticity)'} <span className="text-[#EE5D50] font-bold ml-1">*</span>
+                    </label>
+                    <select
+                      value={prod.authenticity_type || 'non_copy'}
+                      onChange={(e) => handleProductLineChange(prod.id, 'authenticity_type', e.target.value)}
+                      className={`w-full px-4 py-3 rounded-xl border-2 text-sm font-extrabold outline-none cursor-pointer shadow-2xs transition-all ${
+                        prod.authenticity_type === 'copy'
+                          ? 'bg-amber-300 border-amber-500 text-amber-950 font-black focus:ring-4 focus:ring-amber-500/20'
+                          : 'bg-white border-slate-300 text-slate-900 focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15'
+                      }`}
+                    >
+                      <option value="non_copy">Non Copy (অরিজিনাল / নরমাল)</option>
+                      <option value="copy">⚠️ Copy (কপি প্রোডাক্ট)</option>
+                    </select>
+                  </div>
+
                   {/* Multi-Country Transit Route (Origin ➔ Transit (Optional) ➔ Destination) */}
-                  <div className="lg:col-span-5">
+                  <div className="lg:col-span-4">
                     <label className="block text-sm font-extrabold text-slate-900 mb-2 flex items-center justify-between">
-                      <span>{isBn ? 'শিপিং রুট (অরিজিন ➔ ট্রানজিট ➔ গন্তব্য)' : 'Route (Origin ➔ Transit ➔ Destination)'}</span>
+                      <span>{isBn ? 'শিপিং রুট (অরিজিন ➔ গন্তব্য)' : 'Route (Origin ➔ Destination)'}</span>
                       <span className="text-xs font-mono text-[#059669] font-black">
-                        {prod.transit_wh_id ? '🌐 ট্রানজিট শিপমেন্ট' : '✈️ সরাসরি (Direct)'}
+                        {prod.transit_wh_id ? '🌐 ট্রানজিট' : '✈️ সরাসরি'}
                       </span>
                     </label>
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center space-x-1.5">
                       {/* ORIGIN HUB */}
                       <select
                         value={prod.origin_wh_id || myWhId || 'wh-china'}
                         onChange={(e) => handleProductLineChange(prod.id, 'origin_wh_id', e.target.value)}
-                        className="w-1/3 px-3 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-xs md:text-sm font-extrabold font-mono focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none cursor-pointer shadow-2xs"
+                        className="w-1/3 px-2 py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-xs font-extrabold font-mono focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none cursor-pointer shadow-2xs"
                         title={isBn ? 'অরিজিন ওয়্যারহাউজ (Origin Hub)' : 'Origin Hub'}
                       >
                         {warehouses.map((w) => (
                           <option key={w.id} value={w.id}>
-                            {w.name} ({w.code})
+                            {w.code || w.name.split(' ')[0]}
                           </option>
                         ))}
                       </select>
 
-                      <span className="text-slate-500 font-black text-sm shrink-0">➔</span>
+                      <span className="text-slate-500 font-black text-xs shrink-0">➔</span>
 
                       {/* TRANSIT / VIA HUB (OPTIONAL) */}
                       <select
                         value={prod.transit_wh_id || ''}
                         onChange={(e) => handleProductLineChange(prod.id, 'transit_wh_id', e.target.value)}
-                        className={`w-1/3 px-3 py-3.5 rounded-xl border-2 text-xs md:text-sm font-extrabold font-mono focus:ring-4 outline-none cursor-pointer shadow-2xs ${
+                        className={`w-1/3 px-2 py-3 rounded-xl border-2 text-xs font-extrabold font-mono focus:ring-4 outline-none cursor-pointer shadow-2xs ${
                           prod.transit_wh_id
                             ? 'border-indigo-400 bg-indigo-50 text-indigo-950 focus:border-indigo-600 focus:ring-indigo-500/20'
                             : 'border-slate-300 bg-white text-slate-700 focus:border-[#059669] focus:ring-[#059669]/15'
                         }`}
                         title={isBn ? 'ট্রানজিট/ভায়া হাব (যদি একাধিক দেশে ট্রানজিট হয়)' : 'Transit/Via Hub (Optional)'}
                       >
-                        <option value="">{isBn ? '🚫 কোনো ট্রানজিট নেই (Direct)' : '🚫 Direct (No Transit)'}</option>
+                        <option value="">{isBn ? '🚫 Direct' : '🚫 Direct'}</option>
                         {warehouses.map((w) => (
                           <option key={w.id} value={w.id}>
-                            ভায়া: {w.name} ({w.code})
+                            ভায়া: {w.code || w.name.split(' ')[0]}
                           </option>
                         ))}
                       </select>
 
-                      <span className="text-slate-500 font-black text-sm shrink-0">➔</span>
+                      <span className="text-slate-500 font-black text-xs shrink-0">➔</span>
 
                       {/* DESTINATION HUB */}
                       <select
                         value={prod.destination_wh_id || destWhId || 'wh-bd'}
                         onChange={(e) => handleProductLineChange(prod.id, 'destination_wh_id', e.target.value)}
-                        className="w-1/3 px-3 py-3.5 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-xs md:text-sm font-extrabold font-mono focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none cursor-pointer shadow-2xs"
+                        className="w-1/3 px-2 py-3 rounded-xl border-2 border-slate-300 bg-white text-slate-900 text-xs font-extrabold font-mono focus:border-[#059669] focus:ring-4 focus:ring-[#059669]/15 outline-none cursor-pointer shadow-2xs"
                         title={isBn ? 'গন্তব্য ওয়্যারহাউজ (Destination Hub)' : 'Destination Hub'}
                       >
                         {warehouses.map((w) => (
                           <option key={w.id} value={w.id}>
-                            {w.name} ({w.code})
+                            {w.code || w.name.split(' ')[0]}
                           </option>
                         ))}
                       </select>
@@ -1556,12 +1598,15 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
               <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
                 {previewRows.map((r, idx) => {
                   const spanInfo = getRowSpanInfo(idx);
+                  const isCopyRow = r.authenticity_type === 'copy' || Boolean(r.is_copy);
 
                   return (
                     <tr
                       key={r.id}
                       className={`transition-colors ${
-                        r.is_merged
+                        isCopyRow
+                          ? 'bg-amber-100 dark:bg-amber-950/80 text-amber-950 dark:text-amber-100 font-bold border-b-2 border-amber-300 dark:border-amber-700'
+                          : r.is_merged
                           ? isDark
                             ? 'bg-indigo-950/20 hover:bg-indigo-950/30'
                             : 'bg-indigo-50/40 hover:bg-indigo-50/70'
@@ -1569,6 +1614,7 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                           ? 'hover:bg-slate-800/50'
                           : 'hover:bg-slate-50/80'
                       }`}
+                      style={isCopyRow ? { backgroundColor: isDark ? '#451a03' : '#FEF08A', color: '#0F172A' } : undefined}
                     >
                       {/* SL & Checkbox (RowSpanned if Merged) */}
                       {spanInfo.isFirst && (
@@ -1654,22 +1700,29 @@ export const BookingEntryForm: React.FC<BookingEntryFormProps> = ({
                       {/* Product Name (EN & CN) */}
                       <td className="p-1.5 border border-slate-200 dark:border-slate-700 overflow-hidden align-middle">
                         <div className="space-y-1">
-                          <input
-                            type="text"
-                            value={r.product_name_en}
-                            onChange={(e) => handleRowUpdate(r.id, 'product_name_en', e.target.value)}
-                            placeholder="Product English Name"
-                            className={`w-full bg-transparent border-0 border-b border-slate-200/60 dark:border-slate-700 outline-none text-xs font-normal px-1 py-0.5 focus:bg-blue-500/10 truncate ${
-                              isDark ? 'text-white' : 'text-slate-900'
-                            }`}
-                          />
+                          <div className="flex items-center space-x-1">
+                            <input
+                              type="text"
+                              value={r.product_name_en}
+                              onChange={(e) => handleRowUpdate(r.id, 'product_name_en', e.target.value)}
+                              placeholder="Product English Name"
+                              className={`w-full bg-transparent border-0 border-b border-slate-200/60 dark:border-slate-700 outline-none text-xs font-semibold px-1 py-0.5 focus:bg-blue-500/10 truncate ${
+                                isCopyRow ? 'text-amber-950 font-black' : isDark ? 'text-white' : 'text-slate-900'
+                              }`}
+                            />
+                            {isCopyRow && (
+                              <span className="px-1.5 py-0.5 text-[9px] bg-amber-400 text-amber-950 font-black rounded border border-amber-600 shrink-0">
+                                ⚠️ COPY
+                              </span>
+                            )}
+                          </div>
                           <input
                             type="text"
                             value={r.product_name_cn}
                             onChange={(e) => handleRowUpdate(r.id, 'product_name_cn', e.target.value)}
                             placeholder="中文品名"
                             className={`w-full bg-transparent border-0 outline-none text-xs font-normal px-1 py-0.5 focus:bg-blue-500/10 truncate ${
-                              isDark ? 'text-slate-400' : 'text-slate-600'
+                              isCopyRow ? 'text-amber-900 font-bold' : isDark ? 'text-slate-400' : 'text-slate-600'
                             }`}
                           />
                         </div>

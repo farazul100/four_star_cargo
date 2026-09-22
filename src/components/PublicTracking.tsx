@@ -354,11 +354,17 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                     const stage = getStatusStage(carton);
                     const isArrivedBd = (carton.status as any) === 'arrived_bd' || proposals.some(p => (p.carton_ids || []).includes(carton.id) && p.status === ('arrived_bd' as any) && carton.status !== 'received' && carton.status !== 'delivered');
 
+                    const isCopyCarton = Boolean(carton.is_copy || carton.authenticity_type === 'copy' || carton.row_color === '#FEF08A');
+
                     return (
                       <div
                         key={carton.id}
                         className={`w-full rounded-3xl p-6 sm:p-8 border-2 shadow-xl space-y-8 transition-all ${
-                          isDark
+                          isCopyCarton
+                            ? isDark
+                              ? 'bg-amber-950/40 border-amber-400 text-white shadow-amber-950/20'
+                              : 'bg-amber-50/90 border-amber-400 text-slate-900 shadow-amber-100'
+                            : isDark
                             ? 'bg-[#0E1726] border-slate-700 text-white'
                             : 'bg-white border-slate-200 text-slate-900 shadow-slate-200/60'
                         }`}
@@ -373,6 +379,11 @@ export const PublicTracking: React.FC<PublicTrackingProps> = ({
                               <span className="px-3 py-1 bg-[#00897B]/10 text-[#00897B] dark:text-[#26a69a] border border-[#00897B]/30 text-xs font-mono font-bold rounded-full">
                                 {carton.shipping_mark}
                               </span>
+                              {isCopyCarton && (
+                                <span className="px-3 py-1 bg-amber-400 text-amber-950 font-black text-xs rounded-full border border-amber-600 shadow-xs flex items-center space-x-1 animate-pulse">
+                                  <span>⚠️ COPY ITEM</span>
+                                </span>
+                              )}
                             </div>
                             <p className="text-xs text-slate-400 font-mono">
                               Master Tracking: <strong className={isDark ? 'text-white' : 'text-slate-900'}>{carton.master_tracking_number || carton.tracking_number}</strong>

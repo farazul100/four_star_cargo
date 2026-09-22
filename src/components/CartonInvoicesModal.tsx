@@ -452,16 +452,33 @@ export const CartonInvoicesModal: React.FC<CartonInvoicesModalProps> = ({
                           </tr>
                         </thead>
                         <tbody>
-                          <tr className="bg-white text-slate-900 font-medium text-[10.5px]">
-                            <td className="border border-slate-300 p-1 font-bold" style={{ borderColor: '#CBD5E1' }}>{ctn.product_name_en}</td>
-                            <td className="border border-slate-300 p-1 font-mono" style={{ borderColor: '#CBD5E1' }}>{ctn.product_name_cn || '-'}</td>
-                            <td className="border border-slate-300 p-1 text-center font-mono font-bold" style={{ borderColor: '#CBD5E1' }}>{ctn.quantity}</td>
-                            <td className="border border-slate-300 p-1 text-center font-mono" style={{ borderColor: '#CBD5E1' }}>{ctn.net_weight} kg</td>
-                            <td className="border border-slate-300 p-1 text-center font-mono font-extrabold text-[#00897B]" style={{ borderColor: '#CBD5E1', color: '#00897B' }}>
-                              {ctn.gross_weight} kg
-                            </td>
-                            <td className="border border-slate-300 p-1 text-center font-mono" style={{ borderColor: '#CBD5E1' }}>{ctn.cbm} m³</td>
-                          </tr>
+                          {(() => {
+                            const isCopyItem = Boolean(ctn.is_copy || ctn.authenticity_type === 'copy' || ctn.row_color === '#FEF08A');
+                            return (
+                              <tr
+                                className={`font-medium text-[10.5px] ${isCopyItem ? 'bg-amber-200 text-amber-950 font-bold' : 'bg-white text-slate-900'}`}
+                                style={isCopyItem ? { backgroundColor: '#FEF08A', color: '#0F172A' } : undefined}
+                              >
+                                <td className="border border-slate-300 p-1 font-bold" style={{ borderColor: '#CBD5E1' }}>
+                                  <div className="flex items-center space-x-1">
+                                    <span>{ctn.product_name_en}</span>
+                                    {isCopyItem && (
+                                      <span className="px-1.5 py-0.5 text-[8px] bg-amber-400 text-amber-950 font-black rounded border border-amber-600 shrink-0">
+                                        ⚠️ COPY ITEM
+                                      </span>
+                                    )}
+                                  </div>
+                                </td>
+                                <td className="border border-slate-300 p-1 font-mono" style={{ borderColor: '#CBD5E1' }}>{ctn.product_name_cn || '-'}</td>
+                                <td className="border border-slate-300 p-1 text-center font-mono font-bold" style={{ borderColor: '#CBD5E1' }}>{ctn.quantity}</td>
+                                <td className="border border-slate-300 p-1 text-center font-mono" style={{ borderColor: '#CBD5E1' }}>{ctn.net_weight} kg</td>
+                                <td className="border border-slate-300 p-1 text-center font-mono font-extrabold text-[#00897B]" style={{ borderColor: '#CBD5E1', color: isCopyItem ? '#000000' : '#00897B' }}>
+                                  {ctn.gross_weight} kg
+                                </td>
+                                <td className="border border-slate-300 p-1 text-center font-mono" style={{ borderColor: '#CBD5E1' }}>{ctn.cbm} m³</td>
+                              </tr>
+                            );
+                          })()}
                         </tbody>
                       </table>
                     </div>

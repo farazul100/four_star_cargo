@@ -84,6 +84,8 @@ export interface Carton {
   master_tracking_number?: string; // Same Master Tracking ID across batch
   product_name_en: string;
   product_name_cn?: string;
+  authenticity_type?: 'non_copy' | 'copy'; // 'non_copy' (Original/Normal) vs 'copy' (Copy product)
+  is_copy?: boolean; // Flag indicating if product item is a copy product (triggers yellow highlight)
   quantity: number;
   net_weight: number; // kg
   gross_weight: number; // kg
