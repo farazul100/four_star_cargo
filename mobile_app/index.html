@@ -5,10 +5,14 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
   <title>M/S Four Star Cargo — Customer App</title>
 
-  <!-- Fullscreen Standalone App Meta Tags (Removes Top Browser Address Bar) -->
+  <!-- Fullscreen Standalone App Meta Tags (Removes Top Black Browser Header) -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="full-screen" content="yes" />
+  <meta name="browsermode" content="application" />
+  <meta name="x5-fullscreen" content="true" />
+  <meta name="x5-page-mode" content="app" />
   <meta name="theme-color" content="#0F2D52" />
   <link rel="manifest" href="./manifest.json" />
 
@@ -207,11 +211,27 @@
       <div class="mt-5 p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 flex items-center justify-between shadow-inner">
         <div>
           <span class="text-[10px] text-teal-100 uppercase tracking-widest block font-semibold">Active Shipments</span>
-          <span id="dash-active-count" class="text-2xl font-bold font-poppins text-white">02</span>
-          <span class="text-[11px] text-teal-200 block">সক্রিয় শিপমেন্ট রিয়েল-টাইমে রিসিভড</span>
+          <span id="dash-active-count" class="text-2xl font-bold font-poppins text-white">00</span>
+          <span class="text-[11px] text-teal-200 block">সক্রিয় শিপমেন্ট রিয়েল-টাইম লোকেশন সামারি</span>
         </div>
         <div class="w-12 h-12 rounded-2xl bg-teal-400/20 flex items-center justify-center text-teal-200 border border-teal-300/30">
           <i data-lucide="ship" class="w-6 h-6"></i>
+        </div>
+      </div>
+
+      <!-- Location Breakdown Summary Bar -->
+      <div id="dash-location-summary-chips" class="mt-3 grid grid-cols-3 gap-2 text-center text-[10px]">
+        <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl border border-white/10">
+          <span class="text-teal-200 block text-[9px]">🇨🇳 ওয়্যারহাউজে</span>
+          <span id="summary-cnt-origin" class="font-bold text-white text-xs">0</span>
+        </div>
+        <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl border border-white/10">
+          <span class="text-teal-200 block text-[9px]">✈️ বিমানে ট্রানজিটে</span>
+          <span id="summary-cnt-transit" class="font-bold text-white text-xs">0</span>
+        </div>
+        <div class="bg-white/10 backdrop-blur-sm p-2 rounded-xl border border-white/10">
+          <span class="text-teal-200 block text-[9px]">🇧🇩 ঢাকায় পৌঁছেছে</span>
+          <span id="summary-cnt-bd" class="font-bold text-white text-xs">0</span>
         </div>
       </div>
     </div>
@@ -324,14 +344,14 @@
       </div>
 
       <div class="space-y-3 pt-2">
-        <a href="tel:+8801819445566" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center space-x-2">
+        <a href="tel:01790243232" class="w-full py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center space-x-2">
           <i data-lucide="phone" class="w-4 h-4"></i>
-          <span>Call Support (+880 1819-445566)</span>
+          <span>Call Support (01790-243232)</span>
         </a>
 
-        <a href="sms:+8801819445566" class="w-full py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center space-x-2">
-          <i data-lucide="message-square" class="w-4 h-4"></i>
-          <span>SMS Support</span>
+        <a href="https://wa.me/8801790243232?text=Assalamu%20Alaikum,%20I%20need%20help%20with%20my%20shipment" target="_blank" class="w-full py-3.5 bg-[#25D366] hover:bg-[#128C7E] text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center space-x-2">
+          <i data-lucide="message-circle" class="w-4 h-4"></i>
+          <span>WhatsApp Chat Support (01790-243232)</span>
         </a>
       </div>
     </div>
@@ -427,79 +447,223 @@
     customerName: localStorage.getItem('fsc_app_customer_name') || '',
     customerPhone: localStorage.getItem('fsc_app_customer_phone') || '',
     activeTab: 'home',
-    shipments: [
-      { id: 'FS-2026-001', route: 'China ➔ Bangladesh', status: 'IN TRANSIT', date: '12 Sep 2026' },
-      { id: 'FS-2026-002', route: 'South Korea ➔ Bangladesh', status: 'PROCESSING', date: '10 Sep 2026' }
-    ],
+    totalBilled: 0,
+    totalPaid: 0,
+    totalDue: 0,
+    shipments: [],
     notices: [
       { id: 1, title: 'Important Notice', date: '09 September 2026', body: 'Shipment Schedule Update: Air cargo flight dispatched today.' }
     ],
-    ledger: [
-      { id: 'PAY-20260909-001', date: '09 Sep 2026, 02:30 PM', ref: 'CTN-01 Guangzhou Freight Charges', method: 'bKash / Bank', amount: '৳ ৫,০০০', type: 'Payment Received', status: 'PAID' },
-      { id: 'PAY-20260901-004', date: '01 Sep 2026, 11:15 AM', ref: 'CTN-02 Air Freight Shipment', method: 'Cash Deposit', amount: '৳ ৮,০০০', type: 'Payment Received', status: 'PAID' },
-      { id: 'PAY-20260820-008', date: '20 Aug 2026, 04:00 PM', ref: 'Partial Advance Shipment Payment', method: 'Bank Transfer', amount: '৳ ৩,০০০', type: 'Payment Received', status: 'PAID' },
-      { id: 'PAY-20260810-012', date: '10 Aug 2026, 01:20 PM', ref: 'Initial Customs Clearance Charge', method: 'Nagad Online', amount: '৳ ২,০০০', type: 'Payment Received', status: 'PAID' }
-    ]
+    ledger: []
   };
 
   document.addEventListener('DOMContentLoaded', () => {
     lucide.createIcons();
     setTimeout(() => {
       if (STATE.customerId) {
-        showScreen('screen-dashboard');
+        showScreen('screen-dashboard', false);
         resolveCustomerData(STATE.customerId);
       } else {
-        showScreen('screen-login');
+        showScreen('screen-login', false);
       }
-    }, 1800);
+    }, 1200);
   });
 
-  function showScreen(screenId) {
+  function showScreen(screenId, pushHistory = true) {
+    const currentActive = document.querySelector('.app-screen.active');
+    const currentId = currentActive ? currentActive.id : '';
+
     document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
     const target = document.getElementById(screenId);
     if (target) target.classList.add('active');
+
+    STATE.activeScreen = screenId;
+
+    if (pushHistory && screenId !== currentId) {
+      if (screenId !== 'screen-dashboard' && screenId !== 'screen-login' && screenId !== 'screen-splash') {
+        history.pushState({ screenId }, '', '#' + screenId);
+      } else if (screenId === 'screen-dashboard') {
+        history.pushState({ screenId: 'screen-dashboard' }, '', '#dashboard');
+      }
+    }
   }
 
-  function resolveCustomerData(idInput) {
-    let cleanId = idInput.trim();
-    let foundName = '';
-    let foundPhone = '';
+  // Handle Hardware Back Button & Browser Back Swipe
+  window.addEventListener('popstate', (event) => {
+    const currentActive = document.querySelector('.app-screen.active');
+    const currentId = currentActive ? currentActive.id : '';
+
+    if (currentId && currentId !== 'screen-dashboard' && currentId !== 'screen-login' && currentId !== 'screen-splash') {
+      showScreen('screen-dashboard', false);
+      updateNavHighlight('home');
+    }
+  });
+
+  // Handle Native Cordova / App Back Button Event
+  document.addEventListener('deviceready', () => {
+    document.addEventListener('backbutton', (e) => {
+      const currentActive = document.querySelector('.app-screen.active');
+      const currentId = currentActive ? currentActive.id : '';
+
+      if (currentId && currentId !== 'screen-dashboard' && currentId !== 'screen-login' && currentId !== 'screen-splash') {
+        e.preventDefault();
+        showScreen('screen-dashboard', false);
+        updateNavHighlight('home');
+      }
+    }, false);
+  }, false);
+
+  async function fetchLiveDbData() {
+    try {
+      const res = await fetch('https://four.kee2mart.com/api/db.php?ts=' + Date.now());
+      if (res.ok) {
+        const data = await res.json();
+        if (data && typeof data === 'object') {
+          if (Array.isArray(data.fsc_vps_customers || data.customers)) {
+            localStorage.setItem('fsc_vps_customers', JSON.stringify(data.fsc_vps_customers || data.customers));
+          }
+          if (Array.isArray(data.fsc_vps_crm_customers || data.crm_customers)) {
+            localStorage.setItem('fsc_vps_crm_customers', JSON.stringify(data.fsc_vps_crm_customers || data.crm_customers));
+          }
+          if (Array.isArray(data.fsc_vps_ledger || data.ledgerEntries || data.ledger)) {
+            localStorage.setItem('fsc_vps_ledger', JSON.stringify(data.fsc_vps_ledger || data.ledgerEntries || data.ledger));
+          }
+          if (Array.isArray(data.fsc_vps_cartons || data.cartons)) {
+            localStorage.setItem('fsc_vps_cartons', JSON.stringify(data.fsc_vps_cartons || data.cartons));
+          }
+        }
+      }
+    } catch (e) {
+      console.log('Using local/cached storage:', e);
+    }
+  }
+
+  function formatMoney(num) {
+    const val = Number(num || 0);
+    return '৳ ' + val.toLocaleString('bn-BD');
+  }
+
+  async function resolveCustomerData(idInput) {
+    await fetchLiveDbData();
+
+    let cleanId = (idInput || '').trim().toLowerCase();
+    if (!cleanId) return;
+
+    let matchedCust = null;
+    let custs = [];
+    let crmCusts = [];
+    let ledgerList = [];
+    let cartonList = [];
 
     try {
-      const custs = JSON.parse(localStorage.getItem('fsc_vps_customers') || localStorage.getItem('customers') || '[]');
-      const crmCusts = JSON.parse(localStorage.getItem('fsc_vps_crm_customers') || '[]');
-      
-      const matched = custs.find(c => c && (
-        (c.customer_code && c.customer_code.toLowerCase() === cleanId.toLowerCase()) ||
-        (c.shipping_mark && c.shipping_mark.toLowerCase() === cleanId.toLowerCase()) ||
-        (c.phone && c.phone.includes(cleanId)) ||
-        (c.id && c.id.toLowerCase() === cleanId.toLowerCase())
-      ));
-
-      const matchedCrm = crmCusts.find(c => c && (
-        (c.shipping_mark && c.shipping_mark.toLowerCase() === cleanId.toLowerCase()) ||
-        (c.name && c.name.toLowerCase().includes(cleanId.toLowerCase())) ||
-        (c.phone && c.phone.includes(cleanId))
-      ));
-
-      if (matched) {
-        foundName = matched.name || matched.company_name;
-        foundPhone = matched.phone;
-      } else if (matchedCrm) {
-        foundName = matchedCrm.name;
-        foundPhone = matchedCrm.phone;
-      }
+      custs = JSON.parse(localStorage.getItem('fsc_vps_customers') || localStorage.getItem('customers') || '[]');
+      crmCusts = JSON.parse(localStorage.getItem('fsc_vps_crm_customers') || '[]');
+      ledgerList = JSON.parse(localStorage.getItem('fsc_vps_ledger') || localStorage.getItem('ledgerEntries') || '[]');
+      cartonList = JSON.parse(localStorage.getItem('fsc_vps_cartons') || localStorage.getItem('cartons') || '[]');
     } catch (e) {}
 
-    if (!foundName) {
-      foundName = 'Jobayer Islam';
-      foundPhone = '+880 1819-445566';
+    matchedCust = custs.find(c => c && (
+      (c.shipping_mark && c.shipping_mark.toLowerCase() === cleanId) ||
+      (c.customer_code && c.customer_code.toLowerCase() === cleanId) ||
+      (c.phone && c.phone.toLowerCase().includes(cleanId)) ||
+      (c.id && c.id.toLowerCase() === cleanId) ||
+      (c.name && c.name.toLowerCase().includes(cleanId))
+    ));
+
+    if (!matchedCust) {
+      const crmMatch = crmCusts.find(c => c && (
+        (c.shipping_mark && c.shipping_mark.toLowerCase() === cleanId) ||
+        (c.phone && c.phone.toLowerCase().includes(cleanId)) ||
+        (c.name && c.name.toLowerCase().includes(cleanId))
+      ));
+      if (crmMatch) {
+        matchedCust = {
+          id: crmMatch.id || 'crm-' + cleanId,
+          customer_code: crmMatch.shipping_mark || cleanId,
+          shipping_mark: crmMatch.shipping_mark || cleanId,
+          name: crmMatch.name,
+          phone: crmMatch.phone,
+          total_billed: 0,
+          total_paid: 0,
+          total_due: 0
+        };
+      }
     }
 
-    STATE.customerName = foundName;
-    STATE.customerPhone = foundPhone;
-    localStorage.setItem('fsc_app_customer_name', foundName);
-    localStorage.setItem('fsc_app_customer_phone', foundPhone);
+    if (matchedCust) {
+      STATE.customerName = matchedCust.name || matchedCust.company_name || 'Customer';
+      STATE.customerPhone = matchedCust.phone || '';
+      STATE.customerId = matchedCust.shipping_mark || matchedCust.customer_code || matchedCust.id || idInput;
+    } else {
+      STATE.customerName = 'Jobayer Islam';
+      STATE.customerPhone = '+880 1735-274781';
+      STATE.customerId = idInput;
+    }
+
+    localStorage.setItem('fsc_app_customer_id', STATE.customerId);
+    localStorage.setItem('fsc_app_customer_name', STATE.customerName);
+    localStorage.setItem('fsc_app_customer_phone', STATE.customerPhone);
+
+    const custMarkClean = (matchedCust?.shipping_mark || cleanId).toLowerCase().trim();
+    const custIdClean = (matchedCust?.id || '').toLowerCase().trim();
+    const custCodeClean = (matchedCust?.customer_code || '').toLowerCase().trim();
+    const custPhoneClean = (matchedCust?.phone || '').replace(/\D/g, '');
+
+    const filteredLedger = ledgerList.filter(e => {
+      if (!e) return false;
+      const eCustId = (e.customer_id || '').toLowerCase().trim();
+      const eMark = (e.shipping_mark || '').toLowerCase().trim();
+      const eCode = (e.customer_code || '').toLowerCase().trim();
+      const eName = (e.customer_name || '').toLowerCase().trim();
+
+      if (custIdClean && eCustId && eCustId === custIdClean) return true;
+      if (custMarkClean && eMark && (eMark === custMarkClean || eMark.includes(custMarkClean) || custMarkClean.includes(eMark))) return true;
+      if (custCodeClean && eCode && (eCode === custCodeClean || eCode.includes(custCodeClean) || custCodeClean.includes(eCode))) return true;
+      if (cleanId && (eMark.includes(cleanId) || eCode.includes(cleanId))) return true;
+
+      return false;
+    });
+
+    let billedSum = 0;
+    let paidSum = 0;
+
+    filteredLedger.forEach(e => {
+      const amt = Number(e.amount) || 0;
+      if (e.type === 'charge') billedSum += amt;
+      else if (e.type === 'payment') paidSum += amt;
+      else if (e.type === 'refund') paidSum -= amt;
+    });
+
+    if (filteredLedger.length === 0 && matchedCust) {
+      billedSum = matchedCust.total_billed || 0;
+      paidSum = matchedCust.total_paid || 0;
+    }
+
+    const dueSum = Math.max(0, billedSum - paidSum);
+
+    STATE.totalBilled = billedSum;
+    STATE.totalPaid = paidSum;
+    STATE.totalDue = dueSum;
+    STATE.ledger = filteredLedger;
+
+    const filteredCartons = cartonList.filter(c => {
+      if (!c) return false;
+      const cMark = (c.shipping_mark || '').toLowerCase().trim();
+      const cCode = (c.customer_code || '').toLowerCase().trim();
+      const cCustId = (c.customer_id || '').toLowerCase().trim();
+      const cPhone = (c.recipient_phone || '').replace(/\D/g, '');
+      const cTrk = (c.tracking_number || '').toLowerCase().trim();
+
+      if (custIdClean && cCustId && cCustId === custIdClean) return true;
+      if (custMarkClean && cMark && (cMark === custMarkClean || cMark.includes(custMarkClean) || custMarkClean.includes(cMark))) return true;
+      if (custCodeClean && cCode && (cCode === custCodeClean || cCode.includes(custCodeClean) || custCodeClean.includes(cCode))) return true;
+      if (cleanId && (cMark.includes(cleanId) || cCode.includes(cleanId) || cTrk.includes(cleanId))) return true;
+      if (custPhoneClean && cPhone && custPhoneClean.length >= 6 && cPhone.includes(custPhoneClean)) return true;
+
+      return false;
+    });
+
+    STATE.shipments = filteredCartons;
 
     renderDashboardData();
     renderLedgerData();
@@ -517,81 +681,235 @@
     showScreen('screen-dashboard');
   }
 
+  function getShipmentStatusDetails(s) {
+    const status = (s.status || 'booked').toLowerCase();
+    const whId = (s.current_warehouse_id || '').toLowerCase();
+
+    if (status === 'delivered') {
+      return {
+        step: 4,
+        percent: 100,
+        badgeBg: 'bg-emerald-100 text-emerald-800 border-emerald-300',
+        statusText: 'ডেলিভার্ড',
+        locationText: '🚚 আপনার ঠিকানায় সফলভাবে ডেলিভারি সম্পন্ন',
+        icon: 'check-circle-2',
+        stepColor: 'bg-emerald-500'
+      };
+    }
+
+    if (status === 'received' || whId === 'wh-bd' || whId.includes('bd') || whId.includes('dhaka')) {
+      return {
+        step: 3,
+        percent: 85,
+        badgeBg: 'bg-teal-100 text-teal-800 border-teal-300',
+        statusText: 'ঢাকায় রিসিভড',
+        locationText: '🇧🇩 ঢাকা সেন্ট্রাল ওয়্যারহাউজ (Tejgaon Hub)',
+        icon: 'map-pin',
+        stepColor: 'bg-teal-500'
+      };
+    }
+
+    if (status === 'in_transit' || status === 'proposed' || s.flying_date || s.flight_number) {
+      return {
+        step: 2,
+        percent: 60,
+        badgeBg: 'bg-sky-100 text-sky-800 border-sky-300',
+        statusText: 'বিমানে ট্রানজিটে',
+        locationText: '✈️ এয়ার কার্গো ফ্লাইটে ট্রানজিটে আছে',
+        icon: 'plane',
+        stepColor: 'bg-sky-500'
+      };
+    }
+
+    return {
+      step: 1,
+      percent: 25,
+      badgeBg: 'bg-amber-100 text-amber-800 border-amber-300',
+      statusText: 'চায়না ওয়্যারহাউজ',
+      locationText: '🇨🇳 বুকিং সম্পন্ন, গুয়াংজু হাবে প্রসেসিং চলছে',
+      icon: 'box',
+      stepColor: 'bg-amber-500'
+    };
+  }
+
   function renderDashboardData() {
-    const id = STATE.customerId || '7660039';
+    const id = STATE.customerId || '7560039';
     const name = STATE.customerName || 'Jobayer Islam';
-    const phone = STATE.customerPhone || '+880 1819-445566';
+    const phone = STATE.customerPhone || '+880 1735-274781';
 
     document.getElementById('dash-user-name').innerText = name;
     document.getElementById('dash-user-sub').innerText = 'ID: ' + id;
     document.getElementById('profile-user-id').innerText = 'ID: ' + id;
     document.getElementById('profile-user-name').innerText = name;
     document.getElementById('profile-user-phone').innerText = phone;
+    document.getElementById('dash-active-count').innerText = String(STATE.shipments.length).padStart(2, '0');
+
+    let originCount = 0;
+    let transitCount = 0;
+    let bdCount = 0;
+
+    STATE.shipments.forEach(s => {
+      const st = (s.status || 'booked').toLowerCase();
+      const wh = (s.current_warehouse_id || '').toLowerCase();
+
+      if (st === 'received' || wh === 'wh-bd' || wh.includes('bd')) {
+        bdCount++;
+      } else if (st === 'in_transit' || st === 'proposed' || s.flying_date || s.flight_number) {
+        transitCount++;
+      } else {
+        originCount++;
+      }
+    });
+
+    const elOrigin = document.getElementById('summary-cnt-origin');
+    const elTransit = document.getElementById('summary-cnt-transit');
+    const elBd = document.getElementById('summary-cnt-bd');
+
+    if (elOrigin) elOrigin.innerText = originCount;
+    if (elTransit) elTransit.innerText = transitCount;
+    if (elBd) elBd.innerText = bdCount;
 
     const container = document.getElementById('dash-recent-shipments-list');
-    container.innerHTML = STATE.shipments.map(s => `
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex items-center justify-between">
-        <div>
-          <span class="text-xs font-bold font-mono text-slate-800">${s.id}</span>
-          <p class="text-[11px] text-slate-500">${s.route}</p>
+    if (!container) return;
+
+    if (STATE.shipments.length === 0) {
+      container.innerHTML = `
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center space-y-2 shadow-sm">
+          <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+            <i data-lucide="package-search" class="w-6 h-6"></i>
+          </div>
+          <h4 class="text-xs font-bold text-slate-700">কোন সক্রিয় শিপমেন্ট পাওয়া যায়নি</h4>
+          <p class="text-[11px] text-slate-400">No active cartons found for this customer shipping mark.</p>
         </div>
-        <span class="px-2 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-bold rounded-full">${s.status}</span>
-      </div>
-    `).join('');
+      `;
+    } else {
+      container.innerHTML = STATE.shipments.map(s => {
+        const info = getShipmentStatusDetails(s);
+        return `
+          <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-2.5">
+              <div>
+                <span class="text-xs font-bold font-mono text-slate-800 block">${s.ctn_no || s.id}</span>
+                <span class="text-[11px] text-slate-500 font-medium">${s.product_name_en || 'Air Cargo Freight'} • <span class="font-bold text-slate-700">${s.bd_calibrated_weight || s.gross_weight || 0} KG</span></span>
+              </div>
+              <span class="px-2.5 py-1 ${info.badgeBg} text-[10px] font-bold rounded-full border flex items-center space-x-1">
+                <span>${info.statusText}</span>
+              </span>
+            </div>
+
+            <!-- Location & Progress Step Bar -->
+            <div class="space-y-1.5 pt-0.5">
+              <div class="flex items-center justify-between text-[11px] font-semibold text-slate-700">
+                <span class="flex items-center space-x-1.5">
+                  <i data-lucide="${info.icon}" class="w-3.5 h-3.5 text-teal-600"></i>
+                  <span>অবস্থান: ${info.locationText}</span>
+                </span>
+                <span class="text-teal-600 font-mono font-bold text-xs">${info.percent}%</span>
+              </div>
+
+              <!-- Visual Progress Track Bar -->
+              <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden flex">
+                <div class="h-full ${info.stepColor} rounded-full transition-all duration-500" style="width: ${info.percent}%"></div>
+              </div>
+
+              <!-- Journey Milestones -->
+              <div class="grid grid-cols-4 text-[9px] text-slate-400 font-medium pt-0.5 text-center">
+                <span class="${info.step >= 1 ? 'text-teal-700 font-bold' : ''}">🇨🇳 চায়না</span>
+                <span class="${info.step >= 2 ? 'text-sky-700 font-bold' : ''}">✈️ বিমানে</span>
+                <span class="${info.step >= 3 ? 'text-teal-700 font-bold' : ''}">🇧🇩 ঢাকায়</span>
+                <span class="${info.step >= 4 ? 'text-emerald-700 font-bold' : ''}">🚚 ডেলিভারি</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
 
     const noticesContainer = document.getElementById('notices-list-container');
-    noticesContainer.innerHTML = STATE.notices.map(n => `
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-        <div class="flex items-center justify-between">
-          <span class="text-xs font-bold text-teal-600">${n.title}</span>
-          <span class="text-[10px] text-slate-400 font-mono">${n.date}</span>
+    if (noticesContainer) {
+      noticesContainer.innerHTML = STATE.notices.map(n => `
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-teal-600">${n.title}</span>
+            <span class="text-[10px] text-slate-400 font-mono">${n.date}</span>
+          </div>
+          <p class="text-xs text-slate-600">${n.body}</p>
         </div>
-        <p class="text-xs text-slate-600">${n.body}</p>
-      </div>
-    `).join('');
+      `).join('');
+    }
 
     lucide.createIcons();
   }
 
   function renderLedgerData() {
+    document.getElementById('ledger-total-bill').innerText = formatMoney(STATE.totalBilled);
+    document.getElementById('ledger-paid-amount').innerText = formatMoney(STATE.totalPaid);
+    document.getElementById('ledger-due-amount').innerText = formatMoney(STATE.totalDue);
+
     const container = document.getElementById('ledger-history-list');
     if (!container) return;
 
-    container.innerHTML = STATE.ledger.map(item => `
-      <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center space-x-2">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span class="text-xs font-bold text-slate-800 font-mono">${item.id}</span>
+    if (STATE.ledger.length === 0) {
+      container.innerHTML = `
+        <div class="bg-white p-6 rounded-2xl border border-slate-200 text-center space-y-2 shadow-sm">
+          <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto">
+            <i data-lucide="receipt" class="w-6 h-6"></i>
           </div>
-          <span class="px-2.5 py-0.5 bg-emerald-100 text-emerald-700 text-[9px] font-bold rounded-full uppercase">${item.status}</span>
+          <h4 class="text-xs font-bold text-slate-700">কোন আর্থিক লেনদেনের হিসেব পাওয়া যায়নি</h4>
+          <p class="text-[11px] text-slate-400">No financial transaction entries found for this shipping mark.</p>
         </div>
+      `;
+    } else {
+      container.innerHTML = STATE.ledger.map(item => `
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+              <span class="w-2 h-2 rounded-full ${item.type === 'charge' ? 'bg-amber-500' : 'bg-emerald-500'}"></span>
+              <span class="text-xs font-bold text-slate-800 font-mono">${item.id || item.reference_no || 'PAY-REF'}</span>
+            </div>
+            <span class="px-2.5 py-0.5 ${item.type === 'charge' ? 'bg-amber-100 text-amber-700' : 'bg-emerald-100 text-emerald-700'} text-[9px] font-bold rounded-full uppercase">${item.type === 'charge' ? 'CHARGE (বিল)' : 'PAID (জমা)'}</span>
+          </div>
 
-        <div class="text-xs text-slate-600 space-y-1 pt-1 border-t border-slate-100">
-          <div class="flex justify-between">
-            <span class="text-slate-400">Description:</span>
-            <span class="font-medium text-slate-700">${item.ref}</span>
-          </div>
-          <div class="flex justify-between">
-            <span class="text-slate-400">Method & Date:</span>
-            <span class="text-[11px] font-mono text-slate-500">${item.method} (${item.date})</span>
-          </div>
-          <div class="flex justify-between pt-1 font-bold">
-            <span class="text-slate-700">Amount Paid:</span>
-            <span class="text-emerald-600 font-mono text-xs">${item.amount}</span>
+          <div class="text-xs text-slate-600 space-y-1 pt-1 border-t border-slate-100">
+            <div class="flex justify-between">
+              <span class="text-slate-400">Description:</span>
+              <span class="font-medium text-slate-700 text-right">${item.note || item.reference_no || 'Freight Charge'}</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-slate-400">Method & Date:</span>
+              <span class="text-[11px] font-mono text-slate-500">${item.payment_method || 'System'} (${new Date(item.created_at || Date.now()).toLocaleDateString('en-GB')})</span>
+            </div>
+            <div class="flex justify-between pt-1 font-bold">
+              <span class="text-slate-700">Amount:</span>
+              <span class="${item.type === 'charge' ? 'text-amber-600' : 'text-emerald-600'} font-mono text-xs">${formatMoney(item.amount)}</span>
+            </div>
           </div>
         </div>
-      </div>
-    `).join('');
+      `).join('');
+    }
 
     lucide.createIcons();
   }
 
   function switchTab(tab) {
     STATE.activeTab = tab;
+    updateNavHighlight(tab);
     if (tab === 'home') showScreen('screen-dashboard');
     if (tab === 'notices') showScreen('screen-notices');
     if (tab === 'profile') showScreen('screen-profile');
+  }
+
+  function updateNavHighlight(tab) {
+    ['home', 'notices', 'profile'].forEach(t => {
+      const btn = document.getElementById('nav-btn-' + t);
+      if (btn) {
+        if (t === tab) {
+          btn.className = 'flex flex-col items-center space-y-1 text-teal-600 cursor-pointer';
+        } else {
+          btn.className = 'flex flex-col items-center space-y-1 text-slate-400 hover:text-teal-600 cursor-pointer';
+        }
+      }
+    });
   }
 
   function openShipmentTracker() {
