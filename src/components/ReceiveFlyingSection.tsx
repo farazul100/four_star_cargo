@@ -1127,12 +1127,23 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                         {flightCartons.map((c) => {
                           const isCartonReceived = c.status === 'received' || c.current_warehouse_id === 'wh-bd' || c.status === 'delivered';
                           const isChecked = selectedCartonIdsInModal.includes(c.id);
+                          const isCopyCarton = Boolean(c.is_copy || c.authenticity_type === 'copy' || c.row_color === '#FEF08A');
+                          const effectiveRowColor = c.row_color || (isCopyCarton ? '#FEF08A' : undefined);
+
+                          const rowBgStyle: React.CSSProperties = effectiveRowColor ? {
+                            backgroundColor: isDark ? (effectiveRowColor === '#FEF08A' ? '#451a03' : `${effectiveRowColor}66`) : effectiveRowColor,
+                            color: '#0F172A',
+                          } : {};
 
                           return (
                             <tr
                               key={c.id}
-                              style={c.row_color ? { backgroundColor: isDark ? `${c.row_color}66` : c.row_color } : {}}
-                              className="bg-white dark:bg-[#1E293B] hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
+                              style={rowBgStyle}
+                              className={`transition-colors ${
+                                isCopyCarton
+                                  ? 'font-bold text-slate-900 border-b border-amber-300'
+                                  : 'bg-white dark:bg-[#1E293B] hover:bg-slate-50 dark:hover:bg-slate-800/60'
+                              }`}
                             >
                               <td className="p-2.5">
                                 {!isCartonReceived && (
@@ -1148,7 +1159,7 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                                   />
                                 )}
                               </td>
-                              <td className={`p-2.5 font-extrabold font-mono ${isDark ? 'text-white' : 'text-slate-900'} flex items-center space-x-1.5`}>
+                              <td className={`p-2.5 font-extrabold font-mono ${isCopyCarton ? 'text-amber-950 font-black' : isDark ? 'text-white' : 'text-slate-900'} flex items-center space-x-1.5`}>
                                 <span>{c.ctn_no}</span>
                                 {c.is_merged && (
                                   <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-800 dark:bg-indigo-900/60 dark:text-indigo-300 border border-indigo-300 dark:border-indigo-700">
@@ -1156,13 +1167,20 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
                                   </span>
                                 )}
                               </td>
-                              <td className="p-2.5 font-mono font-extrabold text-emerald-700 dark:text-emerald-300">{c.packaging_number || '-'}</td>
-                              <td className="p-2.5 font-extrabold text-blue-700 dark:text-sky-300">{c.shipping_mark}</td>
-                              <td className={`p-2.5 font-mono font-bold ${isDark ? 'text-slate-200' : 'text-slate-700'}`}>{c.tracking_number}</td>
+                              <td className={`p-2.5 font-mono font-extrabold ${isCopyCarton ? 'text-emerald-950 font-black' : 'text-emerald-700 dark:text-emerald-300'}`}>{c.packaging_number || '-'}</td>
+                              <td className={`p-2.5 font-extrabold ${isCopyCarton ? 'text-blue-950 font-black' : 'text-blue-700 dark:text-sky-300'}`}>{c.shipping_mark}</td>
+                              <td className={`p-2.5 font-mono font-bold ${isCopyCarton ? 'text-slate-900 font-bold' : isDark ? 'text-slate-200' : 'text-slate-700'}`}>{c.tracking_number}</td>
                               <td className="p-2.5 font-normal">
-                                <div className={`font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{c.product_name_en}</div>
+                                <div className={`font-bold flex items-center space-x-1 ${isCopyCarton ? 'text-amber-950 font-black' : isDark ? 'text-white' : 'text-slate-900'}`}>
+                                  <span>{c.product_name_en}</span>
+                                  {isCopyCarton && (
+                                    <span className="px-1.5 py-0.5 text-[9px] bg-amber-400 text-amber-950 font-black rounded border border-amber-600 shrink-0">
+                                      ⚠️ COPY
+                                    </span>
+                                  )}
+                                </div>
                                 {c.product_name_cn && (
-                                  <div className={`text-[10px] font-medium ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>{c.product_name_cn}</div>
+                                  <div className={`text-[10px] font-medium ${isCopyCarton ? 'text-amber-900 font-bold' : isDark ? 'text-slate-300' : 'text-slate-500'}`}>{c.product_name_cn}</div>
                                 )}
                               </td>
                               <td className="p-2.5 font-mono text-purple-700 dark:text-purple-300 font-extrabold">
