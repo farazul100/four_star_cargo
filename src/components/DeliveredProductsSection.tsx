@@ -23,7 +23,7 @@ import {
 import { Carton, FlyingProposal, User, Language, LedgerEntry } from '../types';
 import { useTheme } from '../context/ThemeContext';
 import { ToastContainer, ToastMessage } from './Toast';
-import { getHostingerDbData, saveHostingerDbData, logSystemAuditAction } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSystemAuditAction } from '../lib/db';
 import { getPathaoApiSettings, createPathaoParcel } from '../lib/pathaoApi';
 import { sortCartonsForTableDisplay, getCartonRowSpanInfo } from './BookedCartonsHub';
 
@@ -48,6 +48,24 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
 
   const dbData = getHostingerDbData();
   const [cartonsState, setCartonsState] = useState<Carton[]>(() => initialCartons && initialCartons.length > 0 ? initialCartons : dbData.cartons || []);
+  
+  React.useEffect(() => {
+    if (initialCartons && initialCartons.length > 0) {
+      setCartonsState(initialCartons);
+    } else {
+      const freshDb = getHostingerDbData();
+      setCartonsState(freshDb.cartons || []);
+    }
+
+    const unsubscribe = subscribeToDbUpdates(() => {
+      const freshDb = getHostingerDbData();
+      if (freshDb.cartons && freshDb.cartons.length > 0) {
+        setCartonsState(freshDb.cartons);
+      }
+    });
+    return () => unsubscribe();
+  }, [initialCartons]);
+
   const allCartons: Carton[] = cartonsState.length > 0 ? cartonsState : dbData.cartons || [];
 
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -266,26 +284,25 @@ export const DeliveredProductsSection: React.FC<DeliveredProductsSectionProps> =
   const isSuperAdmin = currentUser?.role === 'super_admin';
   const isBdHub = userWhId === 'wh-bd' || userWh?.is_final_destination;
 
-  // Filter cartons strictly by assigned warehouse (Symmetrical Destination & Physical Warehouse Rule)
+  // Filter cartons for Delivered Products section
   const deliveredCartons = allCartons.filter((c) => {
+    const isDeliveredOrReceivedStatus =
+      c.status === 'received' ||
+      c.status === 'delivered' ||
+      (c.status as any) === 'arrived_bd';
+
     if (isSuperAdmin) {
-      // Super Admin sees all received/delivered cartons globally
-      return c.status === 'received' || c.status === 'delivered';
+      return isDeliveredOrReceivedStatus;
     }
 
-    // STRICT DESTINATION & PHYSICAL LOCATION MATCH:
-    // A carton ONLY belongs to a warehouse's Delivered Products page if:
-    // 1) THIS warehouse is the DESTINATION hub of the carton (e.g. c.destination_warehouse_id === userWhId)
-    // 2) OR the carton is physically currently located at this warehouse (c.current_warehouse_id === userWhId)
-    // AND its status is 'received' or 'delivered'!
     const isDestinationOrLocalWh =
       c.destination_warehouse_id === userWhId ||
       c.current_warehouse_id === userWhId ||
+      c.destination_warehouse_id === 'wh-bd' ||
+      c.current_warehouse_id === 'wh-bd' ||
       (userWh && c.destination_warehouse_name === userWh.name);
 
-    const isDeliveredOrReceivedStatus = c.status === 'received' || c.status === 'delivered';
-
-    return isDestinationOrLocalWh && isDeliveredOrReceivedStatus;
+    return isDeliveredOrReceivedStatus && (isDestinationOrLocalWh || isDeliveredOrReceivedStatus);
   });
 
   // Apply search & origin filter

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Truck,
   CheckCircle2,
@@ -16,7 +16,7 @@ import { Carton, Customer, LedgerEntry, User, Language, AuditLog } from '../type
 import { ToastContainer, ToastMessage } from './Toast';
 import { INITIAL_CUSTOMERS } from '../mockData';
 import { useTheme } from '../context/ThemeContext';
-import { saveHostingerDbData, logSystemAuditAction } from '../lib/db';
+import { getHostingerDbData, saveHostingerDbData, subscribeToDbUpdates, logSystemAuditAction } from '../lib/db';
 import { SearchableCustomerSelect } from './SearchableCustomerSelect';
 
 interface DeliveriesManagementProps {
@@ -51,18 +51,38 @@ export const DeliveriesManagement: React.FC<DeliveriesManagementProps> = ({
   // Customers State (with inline quick-add support)
   const [customersList, setCustomersList] = useState<Customer[]>(INITIAL_CUSTOMERS);
 
-  // Cartons ready for delivery at warehouse (Scoped strictly by destination warehouse ID)
+  // Synchronize cartons with DB updates in real time
+  useEffect(() => {
+    const freshDb = getHostingerDbData();
+    if (freshDb.cartons && freshDb.cartons.length > 0) {
+      setCartons(freshDb.cartons);
+    }
+    const unsubscribe = subscribeToDbUpdates(() => {
+      const db = getHostingerDbData();
+      if (db.cartons && db.cartons.length > 0) {
+        setCartons(db.cartons);
+      }
+    });
+    return () => unsubscribe();
+  }, [setCartons]);
+
+  // Cartons ready for delivery at warehouse
   const userWhId = currentUser?.warehouse_id || 'wh-bd';
-  const isSuperAdmin = currentUser?.role === 'super_admin';
 
   const readyCartons = cartons.filter((c) => {
-    const isReadyStatus = c.status === 'received' || (c.current_warehouse_id === userWhId && c.status !== 'delivered' && c.status !== 'in_transit' && c.status !== 'booked');
+    if (c.status === 'delivered') return false;
 
-    if (isSuperAdmin) return isReadyStatus;
+    // Carton is ready if received/arrived_bd or physically at BD/destination warehouse
+    const isReceivedOrArrived = c.status === 'received' || (c.status as any) === 'arrived_bd';
+    const isLocalReady =
+      (c.current_warehouse_id === userWhId ||
+        c.current_warehouse_id === 'wh-bd' ||
+        c.destination_warehouse_id === userWhId ||
+        c.destination_warehouse_id === 'wh-bd') &&
+      c.status !== 'in_transit' &&
+      c.status !== 'booked';
 
-    // Strict destination / current location match:
-    const isMyDestinationOrWh = c.destination_warehouse_id === userWhId || c.current_warehouse_id === userWhId;
-    return isReadyStatus && isMyDestinationOrWh;
+    return isReceivedOrArrived || isLocalReady;
   });
 
   // Payment Type Filter Pill ('all' | 'with_pay' | 'without_pay') & Search Query
