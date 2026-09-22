@@ -260,33 +260,41 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
       const totalCbm = flightCartons.reduce((sum, c) => sum + (Number(c.cbm) || 0), 0);
 
       const rowsHtml = flightCartons
-        .map((c, idx) => `
-          <tr>
-            <td style="text-align: center; font-weight: bold; color: #000; border: 1.5px solid #000; padding: 6px;">${idx + 1}</td>
-            <td style="font-family: monospace; font-weight: 900; color: #000; border: 1.5px solid #000; padding: 6px;">${c.ctn_no}</td>
-            <td style="font-family: monospace; font-weight: 900; color: #000; border: 1.5px solid #000; padding: 6px;">${c.packaging_number || '-'}</td>
-            <td style="font-family: monospace; font-weight: 900; color: #000; border: 1.5px solid #000; padding: 6px;">${c.shipping_mark}</td>
-            <td style="font-family: monospace; font-weight: bold; color: #000; border: 1.5px solid #000; padding: 6px;">${c.tracking_number}</td>
-            <td style="color: #000; border: 1.5px solid #000; padding: 6px;">
-              <div style="font-weight: 900; color: #000;">${c.product_name_en}</div>
+        .map((c, idx) => {
+          const isCopy = Boolean(c.is_copy || c.authenticity_type === 'copy' || c.row_color === '#FEF08A');
+          const rowBgColor = c.row_color ? c.row_color : (isCopy ? '#FEF08A' : '#ffffff');
+
+          return `
+          <tr style="background-color: ${rowBgColor} !important;">
+            <td style="text-align: center; font-weight: bold; color: #000; border: 1.5px solid #000; padding: 6px; background-color: ${rowBgColor} !important;">${idx + 1}</td>
+            <td style="font-family: monospace; font-weight: 900; color: #000; border: 1.5px solid #000; padding: 6px; background-color: ${rowBgColor} !important;">${c.ctn_no}</td>
+            <td style="font-family: monospace; font-weight: 900; color: #000; border: 1.5px solid #000; padding: 6px; background-color: ${rowBgColor} !important;">${c.packaging_number || '-'}</td>
+            <td style="font-family: monospace; font-weight: 900; color: #000; border: 1.5px solid #000; padding: 6px; background-color: ${rowBgColor} !important;">${c.shipping_mark}</td>
+            <td style="font-family: monospace; font-weight: bold; color: #000; border: 1.5px solid #000; padding: 6px; background-color: ${rowBgColor} !important;">${c.tracking_number}</td>
+            <td style="color: #000; border: 1.5px solid #000; padding: 6px; background-color: ${rowBgColor} !important;">
+              <div style="font-weight: 900; color: #000;">
+                ${c.product_name_en}
+                ${isCopy ? '<span style="background: #f59e0b; color: #78350f; font-size: 8.5px; font-weight: 900; padding: 1px 4px; border-radius: 3px; border: 1px solid #b45309; margin-left: 4px; display: inline-block;">⚠️ COPY</span>' : ''}
+              </div>
               ${c.product_name_cn ? `<div style="font-size: 10px; color: #222; font-weight: bold;">${c.product_name_cn}</div>` : ''}
             </td>
-            <td style="text-align: center; font-family: monospace; color: #000; border: 1.5px solid #000; padding: 6px;">
+            <td style="text-align: center; font-family: monospace; color: #000; border: 1.5px solid #000; padding: 6px; background-color: ${rowBgColor} !important;">
               <div><b style="color: #000;">${c.quantity || 1} Pcs</b></div>
               <div style="font-size: 10px; color: #111; font-weight: bold;">${c.cbm || 0.15} CBM</div>
             </td>
-            <td style="text-align: center; font-family: monospace; font-weight: 900; color: #000; font-size: 13px; border: 1.5px solid #000; padding: 6px;">
+            <td style="text-align: center; font-family: monospace; font-weight: 900; color: #000; font-size: 13px; border: 1.5px solid #000; padding: 6px; background-color: ${rowBgColor} !important;">
               ${c.bd_calibrated_weight !== undefined ? c.bd_calibrated_weight : (c.gross_weight || '0')} KG
             </td>
             <!-- NEW BLANK LIVE WEIGHT COLUMN FOR PEN HANDWRITING -->
-            <td style="text-align: center; border: 1.5px solid #000; padding: 6px; background-color: #ffffff;">
+            <td style="text-align: center; border: 1.5px solid #000; padding: 6px; background-color: ${rowBgColor} !important;">
               <div style="border: 2px solid #000; height: 32px; width: 85px; margin: 0 auto; background: #ffffff; border-radius: 4px;"></div>
             </td>
-            <td style="text-align: center; font-size: 11px; font-weight: 900; color: #000; border: 1.5px solid #000; padding: 6px;">
+            <td style="text-align: center; font-size: 11px; font-weight: 900; color: #000; border: 1.5px solid #000; padding: 6px; background-color: ${rowBgColor} !important;">
               ${c.status === 'received' || c.current_warehouse_id === 'wh-bd' ? 'RECEIVED' : 'IN-TRANSIT'}
             </td>
           </tr>
-        `)
+        `;
+        })
         .join('');
 
       const htmlContent = `
@@ -296,6 +304,11 @@ export const ReceiveFlyingSection: React.FC<ReceiveFlyingSectionProps> = ({
             <title>Flight Receiving Manifest - ${flight.flying_name || flight.flight_number}</title>
             <style>
               @page { size: A4 portrait; margin: 8mm; }
+              * {
+                -webkit-print-color-adjust: exact !important;
+                print-color-adjust: exact !important;
+                color-adjust: exact !important;
+              }
               body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; padding: 10px; color: #000000; background: #fff; font-size: 11px; }
               .header-table { width: 100%; border-bottom: 2px solid #000; padding-bottom: 8px; margin-bottom: 12px; }
               .company-title { font-size: 22px; font-weight: 900; letter-spacing: 1px; color: #000000; text-transform: uppercase; }
